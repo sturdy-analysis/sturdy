@@ -20,7 +20,7 @@ trait ValInt extends Val[Int] {
 object SignEnum extends Enumeration {
   type Sign = Value
   val Neg, Zero, Pos, Top: Sign = Value
-  implicit object Join extends JoinVal[Sign] {
+  implicit object Join extends Join[Sign] {
     override def apply(a1: Sign, a2: Sign): Sign = {
       if (a1 == a2) a1
       else Top
@@ -28,7 +28,7 @@ object SignEnum extends Enumeration {
   }
 }
 trait ValSign extends Val[Sign] with JoinComputation {
-  override type TValJoin[A] = JoinVal[A]
+  override type TValJoin[A] = Join[A]
   override def int(i: Int): Sign = if (i < 0) Neg else if (i == 0) Zero else Pos
   override def add(v1: Sign, v2: Sign): Sign = (v1, v2) match {
     case (Zero, _) => v2

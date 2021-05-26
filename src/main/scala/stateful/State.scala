@@ -12,9 +12,9 @@ trait StateImpl[V] extends State[V] {
     current = c
 }
 trait StateAbs[V] extends StateImpl[V] with JoinComputation {
-  val currentValJoin: JoinVal[V]
+  val currentValJoin: Join[V]
 
-  override def join[A](f: => A, g: => A)(implicit j: JoinVal[A]): A = {
+  override def join[A](f: => A, g: => A)(implicit j: Join[A]): A = {
     val snapshot = current
     var newCurrents: List[V] = List()
 

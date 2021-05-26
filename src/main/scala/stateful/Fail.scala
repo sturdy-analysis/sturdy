@@ -31,6 +31,6 @@ trait FailAbs extends Fail with JoinComputation {
   override def fail(msg: String): Nothing =
     throw FailAbs.Failure(Set(msg))
 
-  override def join[A](f: => A, g: => A)(implicit j: JoinVal[A]): A =
+  override def join[A](f: => A, g: => A)(implicit j: Join[A]): A =
     super.join(logFailures(f), logFailures(g))
 }
