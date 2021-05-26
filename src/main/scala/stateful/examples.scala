@@ -1,7 +1,7 @@
 package stateful
 
 import stateful.JoinUnit.joinUnit
-import stateful.SignEnum.Neg
+import stateful.SignEnum.{Neg, Pos, Top}
 
 object examples extends App {
   def tick[V](c: Val[V] with State[V]): Unit = {
@@ -34,15 +34,27 @@ object examples extends App {
       fail("Found negative count"),
       els = ())
   }
-  println(Concrete.run(checkPos(_)(joinUnit), -1, -5))
+  println(Concrete.run(checkPos(_)(), -1, -5))
   println(Abstract.run(checkPos(_)(joinUnit), Neg, Neg))
+  println()
+
+  def checkPosMut[V](c: Val[V] with State[V] with Fail)(implicit j: c.TValJoin[V]): V = {
+    import c._
+    ifNeg(getCount,
+      {setCount(int(10)); fail("Found negative count")},
+      els = getCount)
+  }
+  println(Concrete.run(checkPosMut(_)(), -1, -5))
+  println(Abstract.run(checkPosMut(_)(SignEnum.Join), Neg, Neg))
+  println(Abstract.run(checkPosMut(_)(SignEnum.Join), Neg, Pos))
+  println(Abstract.run(checkPosMut(_)(SignEnum.Join), Neg, Top))
   println()
 
   def reset[V](c: Val[V] with State[V]): Unit = {
     import c._
     setCount(int(0))
   }
-  def ensurePos[V](c: Val[V] with State[V])(implicit j: c.TValJoin[V]): Unit = {
+  def ensurePos[V](c: Val[V] with State[V])(implicit j: c.TValJoin[V]): V = {
     import c._
     val count = getCount
     ifNeg(count,

@@ -17,8 +17,7 @@ trait ReadImpl[V] extends Read[V] {
   }
 }
 
-trait ReadAbs[V] extends ReadImpl[V] with JoinComputation {
+trait ReadAbs[V] extends ReadImpl[V] with JoinComputation
   // fall through to super.join because `localValue` cannot be changed by f or g non-locally
   //  override def join[A](f: => A, g: => A)(implicit j: JoinVal[A]): A =
   //    super.join(f, g)
-}

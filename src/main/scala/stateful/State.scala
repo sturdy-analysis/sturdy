@@ -26,8 +26,7 @@ trait StateAbs[V] extends StateImpl[V] with JoinComputation {
     }
 
     val a = super.join(track(f), track(g))
-    if (newCurrents.nonEmpty)
-      current = newCurrents.reduce(currentValJoin)
+    current = newCurrents.reduce(currentValJoin)
     a
   }
 }

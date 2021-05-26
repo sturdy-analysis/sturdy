@@ -1,40 +1,36 @@
 package stateful
 
+object Fail {
+  trait Failure extends Throwable
+}
 trait Fail {
-  def fail(msg: String): Unit
+  @throws[Fail.Failure]
+  def fail(msg: String): Nothing
 }
 
 object FailConc {
-  case class Failure(msg: String) extends Exception(msg)
+  case class Failure(msg: String) extends Fail.Failure
 }
 trait FailConc extends Fail {
-  override def fail(msg: String): Unit =
+  override def fail(msg: String): Nothing =
     throw FailConc.Failure(msg)
 }
 
 object FailAbs {
-  case class Failure(msgs: Set[String]) extends Exception(msgs.toString)
+  case class Failure(msgs: Set[String]) extends Fail.Failure
 }
 trait FailAbs extends Fail with JoinComputation {
   var failures: Set[String] = Set()
 
-  override def fail(msg: String): Unit =
+  private def logFailures[A](fun: => A): A = try fun catch {
+    case fail@FailAbs.Failure(msgs) =>
+      failures ++= msgs
+      throw fail
+  }
+
+  override def fail(msg: String): Nothing =
     throw FailAbs.Failure(Set(msg))
 
-  override def join[A](f: => A, g: => A)(implicit j: JoinVal[A]): A = {
-    def track(fun: => A): A = try fun catch {
-      case FailAbs.Failure(msgs) =>
-        failures ++= msgs
-        j.bottom
-    }
-
-    val a = super.join(track(f), track(g))
-    if (j.isBottom(a)) {
-      val fail = FailAbs.Failure(failures)
-      failures = Set()
-      throw fail
-    } else {
-      a
-    }
-  }
+  override def join[A](f: => A, g: => A)(implicit j: JoinVal[A]): A =
+    super.join(logFailures(f), logFailures(g))
 }

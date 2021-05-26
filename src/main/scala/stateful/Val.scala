@@ -1,6 +1,6 @@
 package stateful
 
-import stateful.SignEnum.{Bot, Zero, Sign, Top, Neg, Pos}
+import stateful.SignEnum.{Zero, Sign, Top, Neg, Pos}
 
 trait Val[V] {
   type TValJoin[A]
@@ -19,24 +19,18 @@ trait ValInt extends Val[Int] {
 
 object SignEnum extends Enumeration {
   type Sign = Value
-  val Bot, Neg, Zero, Pos, Top: Sign = Value
+  val Neg, Zero, Pos, Top: Sign = Value
   implicit object Join extends JoinVal[Sign] {
     override def apply(a1: Sign, a2: Sign): Sign = {
-      if (a1 == Bot) a2
-      else if (a2 == Bot) a1
-      else if (a1 == a2) a1
+      if (a1 == a2) a1
       else Top
     }
-
-    override def bottom: Sign = Bot
   }
 }
 trait ValSign extends Val[Sign] with JoinComputation {
   override type TValJoin[A] = JoinVal[A]
   override def int(i: Int): Sign = if (i < 0) Neg else if (i == 0) Zero else Pos
   override def add(v1: Sign, v2: Sign): Sign = (v1, v2) match {
-    case (Bot, _) => Bot
-    case (_, Bot) => Bot
     case (Zero, _) => v2
     case (_, Zero) => v1
     case (Neg, Neg) => Neg
@@ -44,7 +38,6 @@ trait ValSign extends Val[Sign] with JoinComputation {
     case _ => Top
   }
   override def ifNeg[A](v: Sign, thn: => A, els: => A)(implicit j: TValJoin[A]): A = v match {
-    case Bot => j.bottom
     case Neg => thn
     case Zero => els
     case Pos => els
