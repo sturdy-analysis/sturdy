@@ -5,5 +5,7 @@ trait Fix[Dom, Codom] {
 }
 
 trait FixImpl[Dom, Codom] extends Fix[Dom, Codom] {
-  override def fix(f: (Dom => Codom) => Dom => Codom): Dom => Codom = f(fix(f))
+  override def fix(f: (Dom => Codom) => Dom => Codom): Dom => Codom = {
+    f(dom => fix(f)(dom))
+  }
 }

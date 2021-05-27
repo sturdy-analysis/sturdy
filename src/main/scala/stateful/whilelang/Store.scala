@@ -14,6 +14,7 @@ trait StoreImpl[Addr, V] extends Store[Addr, V] {
   var store: Map[Addr, V] = Map()
 
   override type StoreJoin[_] = Unit
+
   override def read[A](x: Addr, found: V => A, notFound: => A)(implicit j: Unit): A =
     store.get(x).map(found).getOrElse(notFound)
 
