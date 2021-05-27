@@ -4,14 +4,12 @@ import stateful.whilelang.ValImpl.Value
 import sturdy.lang.whilee.Syntax._
 
 trait Interpreter[V, Addr] {
-  type Computation =
-    Val[V]
-      with Environment[String, Addr]
-      with Store[Addr, V]
-      with Alloc[Addr]
-      with Fail
-      with Fix[Statement, Unit]
-  val impl: Computation
+  val impl: Val[V]
+    with Environment[String, Addr]
+    with Store[Addr, V]
+    with Alloc[Addr]
+    with Fail
+    with Fix[Statement, Unit]
   import impl._
 
   implicit val envJoin: impl.EnvironmentJoin[Addr]
@@ -56,7 +54,9 @@ trait Interpreter[V, Addr] {
           Block(List(body, s)) <@@ s.label,
           Block(Nil) <@@ s.label)
         <@@ s.label)
-      case Block(body) => body.foldLeft(())((_,s) => rec(s))
+      case Block(body) => scoped {
+        body.foldLeft(())((_,s) => rec(s))
+      }
     })
   }
 }
