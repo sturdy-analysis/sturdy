@@ -1,6 +1,7 @@
 package stateful.whilelang
 
-import stateful.whilelang.ValImpl.Value
+import stateful.{JoinUnit, Abstract}
+import sturdy.common.Label
 import sturdy.lang.whilee.Syntax._
 
 trait Interpreter[V, Addr] {
@@ -40,9 +41,9 @@ trait Interpreter[V, Addr] {
 
   lazy val run: Statement => Unit = {
     fix(rec => {
-      case Assign(x, e) =>
+      case s@Assign(x, e) =>
         val addr = lookupOrElse(x, {
-          val a = alloc
+          val a = alloc(s.label)
           bind(x, a)
           a
         })
@@ -54,18 +55,18 @@ trait Interpreter[V, Addr] {
           Block(List(body, s)) <@@ s.label,
           Block(Nil) <@@ s.label)
         <@@ s.label)
-      case Block(body) => scoped {
+      case Block(body) => /* scoped */ {
         body.foldLeft(())((_,s) => rec(s))
       }
     })
   }
 }
 
-class Concrete extends Interpreter[Value, Int] {
+class Concrete extends Interpreter[ValImpl.Value, Int] {
   override val impl =
     new ValImpl
       with EnvironmentImpl[String, Int]
-      with StoreImpl[Int, Value]
+      with StoreImpl[Int, ValImpl.Value]
       with AllocImpl
       with FailImpl
       with FixImpl[Statement, Unit]
@@ -74,18 +75,36 @@ class Concrete extends Interpreter[Value, Int] {
   override implicit val valJoinUnit: impl.ValJoin[Unit] = ()
 }
 
+class Interval extends Interpreter[ValAbs.Value, Label] {
+  override val impl =
+    new ValAbs
+      with EnvironmentImpl[String, Label]
+      with StoreImpl[Label, ValAbs.Value]
+      with AllocAbs
+      with FailImpl
+      with FixImpl[Statement, Unit]
+  override implicit val envJoin: impl.EnvironmentJoin[Int] = ()
+  override implicit val storeJoin: impl.StoreJoin[ValAbs.Value] = ()
+  override implicit val valJoinUnit: impl.ValJoin[Unit] = JoinUnit
+}
+
 object ex extends App {
   val p = Block(List(
     Assign("x", NumLit(5)),
     Assign("y", NumLit(1)),
-    While(Not(Eq(Var("x"), NumLit(0))), Block(List(
+    If(Not(Eq(Var("x"), NumLit(0))), Block(List(
       Assign("x", Sub(Var("x"), NumLit(1))),
       Assign("y", Mul(Var("y"), NumLit(2)))
-    )))
+    )), Block(List()))
   ))
 
   val interpreter = new Concrete()
   interpreter.run(p)
   println(interpreter.impl.env)
   println(interpreter.impl.store)
+
+  val analysis = new Interval()
+  analysis.run(p)
+  println(analysis.impl.env)
+  println(analysis.impl.store)
 }
