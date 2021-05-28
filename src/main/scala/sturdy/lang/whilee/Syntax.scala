@@ -16,6 +16,7 @@ object Syntax {
   case class Mul(e1: Expr, e2: Expr) extends Expr
   case class Div(e1: Expr, e2: Expr) extends Expr
   case class Eq(e1: Expr, e2: Expr) extends Expr
+  case class Lt(e1: Expr, e2: Expr) extends Expr
 
   sealed trait Statement extends Labeled
   case class Assign(s: String, e: Expr) extends Statement

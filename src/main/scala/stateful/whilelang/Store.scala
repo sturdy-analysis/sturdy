@@ -1,5 +1,8 @@
 package stateful.whilelang
 
+import stateful.{JoinComputation, Join}
+
+
 trait Store[Addr, V] {
   type StoreJoin[A]
 
@@ -19,4 +22,43 @@ trait StoreImpl[Addr, V] extends Store[Addr, V] {
     store.get(x).map(found).getOrElse(notFound)
 
   override def write(x: Addr, v: V): Unit = store = store + (x -> v)
+}
+
+trait StoreAbs[Addr, V] extends Store[Addr, V] with JoinComputation {
+  type St = Map[Addr, (Boolean,V)]
+
+  // true = must, false = may
+  var store: St = Map()
+
+  override type StoreJoin[A] = Join[A]
+  override def read[A](x: Addr, found: V => A, notFound: => A)(implicit j: StoreJoin[A]): A =
+    store.get(x) match {
+      case None => notFound
+      case Some((true, v)) => found(v)
+      case Some((false, v)) => join(found(v), notFound)
+    }
+  override def write(x: Addr, v: V): Unit = store = store + (x -> (true, v))
+
+  val storeJoinVal: Join[V]
+  def joinStores(st1: St, st2: St): St =
+    st2.foldLeft(st1){ case (st, (addr, (b2, v2))) => st1.get(addr) match {
+      case None => st.updated(addr, (false, v2))
+      case Some((b1, v1)) =>  st.updated(addr, (b1 && b2, storeJoinVal.join(v1, v2)))
+    }}
+
+  override def join[A](f: => A, g: => A)(implicit j: Join[A]): A = {
+    val snapshot = store
+    var newStores: List[St] = List()
+
+    def track(fun: => A): A = {
+      store = snapshot
+      val a = fun
+      newStores = store :: newStores
+      a
+    }
+
+    val a = super.join(track(f), track(g))
+    store = newStores.reduce(joinStores)
+    a
+  }
 }

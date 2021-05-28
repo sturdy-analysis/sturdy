@@ -1,8 +1,12 @@
 package sturdy.common
 
 sealed trait Label
-case class IntLabel(i: Int) extends Label
-case class SynLabel(from: Label) extends Label
+case class IntLabel(i: Int) extends Label {
+  override def toString: String = s"L$i"
+}
+case class SynLabel(from: Label) extends Label {
+  override def toString: String = s"$from$$"
+}
 
 object Labeled {
   private var _next = 0
