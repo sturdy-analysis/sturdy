@@ -40,11 +40,19 @@ trait StoreAbs[Addr, V] extends Store[Addr, V] with JoinComputation {
   override def write(x: Addr, v: V): Unit = store = store + (x -> (true, v))
 
   val storeJoinVal: Join[V]
-  def joinStores(st1: St, st2: St): St =
-    st2.foldLeft(st1){ case (st, (addr, (b2, v2))) => st1.get(addr) match {
-      case None => st.updated(addr, (false, v2))
-      case Some((b1, v1)) =>  st.updated(addr, (b1 && b2, storeJoinVal.join(v1, v2)))
-    }}
+  def joinStores(st1: St, st2: St): St = {
+    var joined: St = Map()
+    for ((a1, (b1, v1)) <- st1)
+      if (st2.contains(a1)) {
+        val (b2, v2) = st1(a1)
+        joined += a1 -> (b1 && b2, storeJoinVal.join(v1, v2))
+      } else {
+        joined += a1 -> (false, v1)
+      }
+    for ((a2, (_, v2)) <- st2 if !st1.contains(a2))
+      joined += a2 -> (false, v2)
+    joined
+  }
 
   override def join[A](f: => A, g: => A)(implicit j: Join[A]): A = {
     val snapshot = store
