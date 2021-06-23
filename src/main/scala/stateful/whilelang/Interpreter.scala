@@ -1,6 +1,6 @@
 package stateful.whilelang
 
-import stateful.{JoinUnit, Abstract, Join}
+import stateful.{JoinUnit, Join}
 import sturdy.common.Label
 import sturdy.lang.whilee.Syntax._
 
@@ -14,14 +14,17 @@ trait Interpreter[V, Addr] {
     with Fix[Statement, Unit]
   import impl._
 
-  implicit val envJoin: impl.EnvironmentJoin[Addr]
+  implicit val envJoinV: impl.EnvironmentJoin[V]
+  implicit val envJoinUnit: impl.EnvironmentJoin[Unit]
   implicit val storeJoin: impl.StoreJoin[V]
   implicit val valJoinUnit: impl.ValJoin[Unit]
 
   def eval(e: Expr): V = e match {
     case Var(x) =>
-      val addr = lookupOrElse(x, fail(s"Unbound variable $x"))
-      readOrElse(addr, fail(s"Unbound address $addr for variable $x"))
+      lookupAndThen(x, fail(s"Unbound variable $x")) { addr =>
+        readOrElse(addr, fail(s"Unbound address $addr for variable $x"))
+      }
+
     case BoolLit(b) => boolLit(b, e.label)
     case And(e1, e2) => and(eval(e1), eval(e2), e.label)
     case Or(e1, e2) => eval(
@@ -45,20 +48,22 @@ trait Interpreter[V, Addr] {
   lazy val run: Statement => Unit = {
     fix(rec => {
       case s@Assign(x, e) =>
-        val addr = lookupOrElse(x, {
-          val a = alloc(s.label)
-          bind(x, a)
-          a
-        })
-        val v = eval(e)
-        write(addr, v)
+        lookupAndThen(x, {
+          val addr = alloc(s.label)
+          bind(x, addr)
+          addr
+        }) { addr => {
+          val v = eval(e)
+          write(addr, v)
+        }
+        }
       case If(cond, thn, els) => if_(eval(cond), rec(thn), rec(els))
       case s@While(cond, body) => rec(
         If(cond,
           Block(List(body, s)) <@@ s.label,
           Block(Nil) <@@ s.label)
         <@@ s.label)
-      case Block(body) => scoped {
+      case Block(body) => {
         body.foldLeft(())((_,s) => rec(s))
       }
     })
@@ -74,7 +79,8 @@ class Concrete extends Interpreter[ValImpl.Value, Int] {
       with AllocImpl
       with FailImpl
       with FixImpl[Statement, Unit]
-  override implicit val envJoin: impl.EnvironmentJoin[Int] = ()
+  override implicit val envJoinV: impl.EnvironmentJoin[Int] = ()
+  override implicit val envJoinUnit: impl.EnvironmentJoin[Unit] = ()
   override implicit val storeJoin: impl.StoreJoin[ValImpl.Value] = ()
   override implicit val valJoinUnit: impl.ValJoin[Unit] = ()
 }
@@ -83,19 +89,44 @@ class Interval extends Interpreter[ValAbs.Value, Label] {
   override val impl =
     new ValAbs
       with RandomAbs
-      with EnvironmentImpl[String, Label]
+      with EnvironmentAbs[String, Label]
       with StoreAbs[Label, ValAbs.Value]
       with AllocAbs
       with FailAbs
       with FixImpl[Statement, Unit] {
       override val storeJoinVal: Join[ValAbs.Value] = ValAbs.Join
     }
-  override implicit val envJoin: impl.EnvironmentJoin[Int] = ()
+  override implicit val envJoinV: impl.EnvironmentJoin[ValAbs.Value] = ValAbs.Join
+  override implicit val envJoinUnit: impl.EnvironmentJoin[Unit] = JoinUnit
   override implicit val storeJoin: impl.StoreJoin[ValAbs.Value] = ValAbs.Join
   override implicit val valJoinUnit: impl.ValJoin[Unit] = JoinUnit
 }
 
-object ex extends App {
+object ex1 extends App {
+  val p = Block(List(
+    Assign("x", RandomNum()),
+    Assign("y", RandomNum()),
+    If(Lt(Var("x"), NumLit(0.5)),
+      Block(List(
+        Assign("y", NumLit(1))
+      )),
+      Block(List(
+        Assign("y", NumLit(2))
+      )))
+  ))
+
+  val interpreter = new Concrete()
+  interpreter.run(p)
+  println(interpreter.impl.env)
+  println(interpreter.impl.store)
+
+  val analysis = new Interval()
+  analysis.run(p)
+  println(analysis.impl.env)
+  println(analysis.impl.store)
+}
+
+object ex2 extends App {
   val p = Block(List(
     Assign("x", RandomNum()),
     If(Lt(Var("x"), NumLit(0.5)),
@@ -109,9 +140,12 @@ object ex extends App {
 
   val interpreter = new Concrete()
   interpreter.run(p)
+  println(interpreter.impl.env)
   println(interpreter.impl.store)
 
   val analysis = new Interval()
   analysis.run(p)
+  println(analysis.impl.env)
   println(analysis.impl.store)
 }
+
