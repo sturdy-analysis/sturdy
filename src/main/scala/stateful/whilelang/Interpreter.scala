@@ -5,13 +5,15 @@ import sturdy.common.Label
 import sturdy.lang.whilee.Syntax._
 
 trait Interpreter[V, Addr] {
-  val impl: Val[V]
+  type Impl <: Val[V]
     with Random[V]
     with Environment[String, Addr]
     with Store[Addr, V]
     with Alloc[Addr]
     with Fail
     with Fix[Statement, Unit]
+
+  val impl: Impl
   import impl._
 
   implicit val envJoinV: impl.EnvironmentJoin[V]
@@ -48,14 +50,13 @@ trait Interpreter[V, Addr] {
   lazy val run: Statement => Unit = {
     fix(rec => {
       case s@Assign(x, e) =>
+        val v = eval(e)
         lookupAndThen(x, {
           val addr = alloc(s.label)
           bind(x, addr)
           addr
-        }) { addr => {
-          val v = eval(e)
+        }) { addr =>
           write(addr, v)
-        }
         }
       case If(cond, thn, els) => if_(eval(cond), rec(thn), rec(els))
       case s@While(cond, body) => rec(
@@ -63,22 +64,21 @@ trait Interpreter[V, Addr] {
           Block(List(body, s)) <@@ s.label,
           Block(Nil) <@@ s.label)
         <@@ s.label)
-      case Block(body) => {
+      case Block(body) =>
         body.foldLeft(())((_,s) => rec(s))
-      }
     })
   }
 }
 
 class Concrete extends Interpreter[ValImpl.Value, Int] {
-  override val impl =
-    new ValImpl
-      with RandomImpl
-      with EnvironmentImpl[String, Int]
-      with StoreImpl[Int, ValImpl.Value]
-      with AllocImpl
-      with FailImpl
-      with FixImpl[Statement, Unit]
+  class Impl extends ValImpl
+    with RandomImpl
+    with EnvironmentImpl[String, Int]
+    with StoreImpl[Int, ValImpl.Value]
+    with AllocImpl
+    with FailImpl
+    with FixImpl[Statement, Unit]
+  override val impl = new Impl
   override implicit val envJoinV: impl.EnvironmentJoin[Int] = ()
   override implicit val envJoinUnit: impl.EnvironmentJoin[Unit] = ()
   override implicit val storeJoin: impl.StoreJoin[ValImpl.Value] = ()
@@ -86,16 +86,16 @@ class Concrete extends Interpreter[ValImpl.Value, Int] {
 }
 
 class Interval extends Interpreter[ValAbs.Value, Label] {
-  override val impl =
-    new ValAbs
+  class Impl extends ValAbs
       with RandomAbs
       with EnvironmentAbs[String, Label]
       with StoreAbs[Label, ValAbs.Value]
       with AllocAbs
       with FailAbs
       with FixImpl[Statement, Unit] {
-      override val storeJoinVal: Join[ValAbs.Value] = ValAbs.Join
-    }
+    override val storeJoinVal: Join[ValAbs.Value] = ValAbs.Join
+  }
+  override val impl = new Impl
   override implicit val envJoinV: impl.EnvironmentJoin[ValAbs.Value] = ValAbs.Join
   override implicit val envJoinUnit: impl.EnvironmentJoin[Unit] = JoinUnit
   override implicit val storeJoin: impl.StoreJoin[ValAbs.Value] = ValAbs.Join
@@ -132,6 +132,29 @@ object ex2 extends App {
     If(Lt(Var("x"), NumLit(0.5)),
       Block(List(
         Assign("y", NumLit(1))
+      )),
+      Block(List(
+        Assign("y", NumLit(2))
+      )))
+  ))
+
+  val interpreter = new Concrete()
+  interpreter.run(p)
+  println(interpreter.impl.env)
+  println(interpreter.impl.store)
+
+  val analysis = new Interval()
+  analysis.run(p)
+  println(analysis.impl.env)
+  println(analysis.impl.store)
+}
+
+object ex3 extends App {
+  val p = Block(List(
+    Assign("x", NumLit(2.0)),
+    If(Lt(Var("x"), NumLit(2.5)),
+      Block(List(
+        Assign("y", Mul(NumLit(1), Var("x")))
       )),
       Block(List(
         Assign("y", NumLit(2))
