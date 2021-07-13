@@ -44,7 +44,7 @@ trait StoreAbs[Addr, V] extends Store[Addr, V] with JoinComputation {
     var joined: St = Map()
     for ((a1, (b1, v1)) <- st1)
       if (st2.contains(a1)) {
-        val (b2, v2) = st1(a1)
+        val (b2, v2) = st2(a1)
         joined += a1 -> (b1 && b2, storeJoinVal.join(v1, v2))
       } else {
         joined += a1 -> (false, v1)
