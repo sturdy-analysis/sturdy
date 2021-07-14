@@ -42,13 +42,14 @@ trait StoreAbs[Addr, V] extends Store[Addr, V] with JoinComputation {
   val storeJoinVal: Join[V]
   def joinStores(st1: St, st2: St): St = {
     var joined: St = Map()
-    for ((a1, (b1, v1)) <- st1)
-      if (st2.contains(a1)) {
-        val (b2, v2) = st2(a1)
-        joined += a1 -> (b1 && b2, storeJoinVal.join(v1, v2))
-      } else {
-        joined += a1 -> (false, v1)
+    for ((a1, (b1, v1)) <- st1) {
+      st2.get(a1) match {
+        case Some((b2, v2)) =>
+          joined += a1 -> (b1 && b2, storeJoinVal.join(v1, v2))
+        case None =>
+          joined += a1 -> (false, v1)
       }
+    }
     for ((a2, (_, v2)) <- st2 if !st1.contains(a2))
       joined += a2 -> (false, v2)
     joined
