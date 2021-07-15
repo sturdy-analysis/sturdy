@@ -1,11 +1,12 @@
 package sturdy.language.whilelang.analysis
 
 import sturdy.effect.allocation.AAllocationFromContext
+import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.AEnvironmentDynamicScope
 import sturdy.effect.store.AStoreKeysThreadded
 import sturdy.effect.failure.AFailureCollect
 import sturdy.fix.CFixpoint
-import sturdy.language.whilelang.GenericInterpreter
+import sturdy.language.whilelang.{GenericInterpreter, Statement}
 import sturdy.util.{Label, given}
 import sturdy.values.domain.{_, given}
 import sturdy.values.JoinValue
@@ -40,12 +41,6 @@ object SignAnalysis:
 
   given BooleanOps[Value] = new LiftedBooleanOps[Value, Topped[Boolean]](_.asBoolean, BooleanValue.apply)
   given DoubleOps[Value] = new LiftedDoubleOps[Value, Sign](_.asDouble, DoubleValue.apply)
-  given BranchOps[Value] with
-    type BranchJoin[A] = JoinValue[A]
-    def if_[A](v: Value, thn: => A, els: => A)(using j: JoinValue[A]): A = v.asBoolean match
-      case Actual(true) => thn
-      case Actual(false) => els
-      case Top => j.joinValues(thn, els)
   given CompareOps[Value, Value]  = new LiftedCompareOps[Value, Value, Sign, Topped[Boolean]](_.asDouble, BooleanValue.apply)
   given EqOps[Value, Value] with
     def equ(v1: Value, v2: Value): Value = BooleanValue((v1, v2) match
@@ -62,13 +57,16 @@ object SignAnalysis:
   type Context = Label
   type Addr = Label
   type Addrs = Set[Label]
+  type Environment =  Map[String, (Boolean, Addrs)]
+  type Store = Map[Addr, (Boolean, Value)]
 
+  def effects(initEnvironment: Environment, initStore: Store) =
+    new  ABoolBranching[Value]
+    with AEnvironmentDynamicScope[String, Addrs](initEnvironment)
+    with AStoreKeysThreadded[Addr, Addrs, Value](initStore)
+    with AAllocationFromContext[Addrs, Context](Set(_))
+    with AFailureCollect
+  def fixpoint = new CFixpoint[Statement, Unit]
 
-import SignAnalysis._
-
-//class SignAnalysis(initEnvironment: Map[String, Addrs], initStore: Map[Addr, Value]) extends GenericInterpreter[Value, Addrs]
-//  (using new AEnvironmentDynamicScope[String, Addrs](Map())
-//    with AStoreKeysThreadded[Addr, Addrs, Value](Map())
-//    with AAllocationFromContext[Addrs, Context](Set(_))
-//    with AFailureCollect)
-//  (using new CFixpoint)
+  def apply(initEnvironment: Environment, initStore: Store) =
+    new GenericInterpreter(using effects(initEnvironment, initStore))(using fixpoint) {}

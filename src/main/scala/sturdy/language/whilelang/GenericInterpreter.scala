@@ -1,5 +1,6 @@
 package sturdy.language.whilelang
 
+import sturdy.effect.branching.BoolBranching
 import sturdy.effect.environment.Environment
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocation
@@ -15,6 +16,7 @@ import sturdy.values.branch.BranchOps
 import sturdy.values.relational._
 
 type EffectfulOps[V, Addr] =
+  BoolBranching[V] with
   Environment[String, Addr] with
   Store[Addr, V] with
   Allocation[Addr, Label] with
@@ -23,14 +25,13 @@ type EffectfulOps[V, Addr] =
 trait GenericInterpreter[V, Addr, Effects <: EffectfulOps[V, Addr], Fix <: Fixpoint[Statement, Unit]]
   (using val effectOps: Effects)
   (using val fix: Fix)
-  (using val boolOps: BooleanOps[V], doubleOps: DoubleOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], branchOps: BranchOps[V])
-  (using effectOps.EnvJoin[V], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit], effectOps.StoreJoin[Unit], branchOps.BranchJoin[Unit]):
+  (using val boolOps: BooleanOps[V], doubleOps: DoubleOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V])
+  (using effectOps.EnvJoin[V], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
   import boolOps._
   import doubleOps._
   import compareOps._
   import eqOps._
-  import branchOps._
   import effectOps._
 
   def eval(e: Expr): V = e match {
@@ -63,7 +64,8 @@ trait GenericInterpreter[V, Addr, Effects <: EffectfulOps[V, Addr], Fix <: Fixpo
         }) { addr =>
           write(addr, v)
         }
-      case If(cond, thn, els) => if_(eval(cond), rec(thn), rec(els))
+      case If(cond, thn, els) =>
+        boolBranch(eval(cond), rec(thn), rec(els))
       case s@While(cond, body) => rec(
         If(cond,
           Block(List(body, s)) <@@ s.label,

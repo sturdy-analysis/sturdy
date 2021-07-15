@@ -13,10 +13,10 @@ import sturdy.values.JoinValue
 trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using JoinValue[V])
   extends Environment[Var, V], JoinComputation:
 
+  override type EnvJoin[A] = JoinValue[A]
+
   protected var env: Map[Var, (Boolean, V)] = _init
   protected var dirtyVars: Set[Var] = Set()
-
-  override type EnvJoin[A] = JoinValue[A]
 
   def getEnv: Map[Var, (Boolean, V)] = env
 
@@ -54,17 +54,24 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
       dirtyVars = Set()
       val fResult = f
       for (x <- dirtyVars) do
+        val (definite, newVal) = env(x)
         joinedEnv.get(x) match
           case None =>
-            val tup@(definite, v) = env(x)
-            joinedEnv += x -> tup
-            if (definite) then
-              // This binding is new and definite in f. If g does not definitely bind x, we must later weaken this binding.
-              newDefiniteVarsInF += x -> ((false, v))
-          case Some((oldDefinite, oldVal)) =>
-            // This binding already existed in env before.
-            val (newDefinite, newVal) = env(x)
-            joinedEnv += x -> ((oldDefinite && newDefinite, joinValues(oldVal, newVal)))
+            // This binding is new, so we add an entry for it
+            joinedEnv += x -> ((definite, newVal))
+            if definite then
+            // This binding is definite in f. If g does not definitely bind x, we must later mark this binding as non-definite.
+              newDefiniteVarsInF += x -> ((false, newVal))
+          case Some((_, oldVal)) =>
+            // This binding already existed in store before.
+            if definite then
+              // This binding is definite in f.
+              joinedEnv += x -> ((true, newVal))
+              // If g does not definitely bind x, we must later mark this binding as non-definite _and_ join it with the old value (which is retained through g).
+              newDefiniteVarsInF += x -> ((false, joinValues(oldVal, newVal)))
+            else
+            // This binding is not definite in f
+              joinedEnv += x -> ((false, joinValues(oldVal, newVal)))
       fResult
     } {
       env = snapshot
@@ -73,16 +80,33 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
       for (x <- dirtyVars) do
         joinedEnv.get(x) match
           case None =>
-            // This binding is new in g and thus did _not_ occur in f.
+            // This binding is new in g and thus did neither occur in f nor in the original store.
             joinedEnv += x -> ((false, env(x)._2))
           case Some((oldDefinite, oldVal)) =>
-            // This binding already existed in env before.
-            val (newDefinite, newVal) = env(x)
-            joinedEnv += x -> ((oldDefinite && newDefinite, joinValues(oldVal, newVal)))
-            // we have used g to (possibly) weaken the binding of x
+            // This binding already existed in store before or was added by f.
+            val (definite, newVal) = env(x)
+
+            // If the binding was definite in f, then oldDefinite==true and oldVal==fVal.
+            // If it was non-definite in f, then oldDefinite==false and oldVal==joinValues(prevVal, fVal).
+            // If it was not bound by f, then oldDefinite==prevDefinite and oldVal==prevVal.
+
+            if (definite) {
+              // This binding is definite in g.
+              joinedEnv += x -> ((oldDefinite, joinValues(oldVal, newVal)))
+            } else {
+              // This binding is not definite in g
+              newDefiniteVarsInF.get(x) match {
+                case Some((_, weakenedFVal)) =>
+                  // Binding was definite in f, weaken it
+                  joinedEnv += x -> ((oldDefinite, joinValues(weakenedFVal, newVal)))
+                case None =>
+                  // Binding was not bound or non-definite in f
+                  joinedEnv += x -> ((oldDefinite, joinValues(oldVal, newVal)))
+              }
+            }
             newDefiniteVarsInF -= x
 
-      // g did not bind x, hence weaken the binding of x
+      // g did not definitely bind x, hence weaken the binding of x
       joinedEnv ++= newDefiniteVarsInF
       gResult
     }

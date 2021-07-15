@@ -1,6 +1,7 @@
 package sturdy.language.whilelang
 
 import sturdy.effect.allocation.CAllocationIntIncrement
+import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.environment.CEnvironment
 import sturdy.effect.store.CStore
 import sturdy.effect.failure.CFailure
@@ -16,14 +17,13 @@ object ConcreteInterpreter:
     case BooleanValue(b: Boolean)
     case DoubleValue(d: Double)
 
-    def asBoolean: Boolean = this match {
+    def asBoolean: Boolean = this match
       case BooleanValue(b) => b
       case _ => throw new IllegalArgumentException(s"Expected Boolean but got $this")
-    }
-    def asDouble: Double = this match {
+    def asDouble: Double = this match
       case DoubleValue(d) => d
       case _ => throw new IllegalArgumentException(s"Expected Double but got $this")
-    }
+  
   import Value._
 
   given BooleanOps[Value] = new LiftedBooleanOps[Value, Boolean](_.asBoolean, BooleanValue.apply)
@@ -48,13 +48,14 @@ object ConcreteInterpreter:
   type Store = Map[Int, Value]
 
   def effects(initEnvironment: Environment, initStore: Store) =
-    new  CEnvironment[String, Int](initEnvironment)
+    new CBoolBranching[Value]
+    with CEnvironment[String, Int](initEnvironment)
     with CStore[Int, Value](initStore)
     with CAllocationIntIncrement
     with CFailure
 
   def fixpoint = new CFixpoint[Statement, Unit]
 
-  def apply(initEnvironment: Map[String, Int], initStore: Map[Int, Value]) =
+  def apply(initEnvironment: Environment, initStore: Store) =
     new GenericInterpreter(using effects(initEnvironment, initStore))(using fixpoint) {}
 

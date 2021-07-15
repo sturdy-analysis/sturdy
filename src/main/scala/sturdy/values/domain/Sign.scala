@@ -44,7 +44,7 @@ given SignDoubleOps: DoubleOps[Sign] with
     else if d > 0 then Pos
     else Zero
 
-  def randomDouble(): Sign = TopSign
+  def randomDouble(): Sign = ZeroOrPos
 
   def add(v1: Sign, v2: Sign): Sign = (v1, v2) match
     case (TopSign, _) => TopSign

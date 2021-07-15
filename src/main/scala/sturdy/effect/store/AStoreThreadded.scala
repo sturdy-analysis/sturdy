@@ -11,12 +11,12 @@ import sturdy.values.JoinValue
  */
 trait AStoreThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using JoinValue[V])
   extends Store[Addr, V], JoinComputation:
+  
+  override type StoreJoin[A] = JoinValue[A]
 
   protected var store: Map[Addr, (Boolean, V)] = _init
   protected var dirtyAddrs: Set[Addr] = Set()
-
-  override type StoreJoin[A] = JoinValue[A]
-
+  
   def getStore: Map[Addr, (Boolean, V)] = store
 
   override def read[A](x: Addr, found: V => A, notFound: => A): StoreJoined[A] =

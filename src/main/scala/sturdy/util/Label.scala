@@ -12,6 +12,8 @@ object Labeled:
     val n = _next
     _next += 1
     n
+  def reset(): Unit = 
+    _next = 0
 
 trait Labeled:
   private var _label: Label = IntLabel(Labeled.next())

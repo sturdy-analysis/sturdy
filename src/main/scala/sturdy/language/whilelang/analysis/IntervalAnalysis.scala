@@ -1,6 +1,7 @@
 package sturdy.language.whilelang.analysis
 
 import sturdy.effect.allocation.AAllocationFromContext
+import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.AEnvironmentDynamicScope
 import sturdy.effect.store.AStoreKeysThreadded
 import sturdy.effect.failure.AFailureCollect
@@ -22,14 +23,13 @@ object IntervalAnalysis:
     case BooleanValue(b: Topped[Boolean])
     case DoubleValue(d: Topped[DoubleInterval])
 
-    def asBoolean: Topped[Boolean] = this match {
+    def asBoolean: Topped[Boolean] = this match
       case BooleanValue(b) => b
       case _ => throw new IllegalArgumentException(s"Expected Boolean but got $this")
-    }
-    def asDouble: Topped[DoubleInterval] = this match {
+    def asDouble: Topped[DoubleInterval] = this match
       case DoubleValue(d) => d
       case _ => throw new IllegalArgumentException(s"Expected Double but got $this")
-    }
+    
   import Value._
 
   given JoinValue[Value] with
@@ -41,12 +41,6 @@ object IntervalAnalysis:
 
   given BooleanOps[Value] = new LiftedBooleanOps[Value, Topped[Boolean]](_.asBoolean, BooleanValue.apply)
   given DoubleOps[Value] = new LiftedDoubleOps[Value, Topped[DoubleInterval]](_.asDouble, DoubleValue.apply)
-  given BranchOps[Value] with
-    type BranchJoin[A] = JoinValue[A]
-    def if_[A](v: Value, thn: => A, els: => A)(using j: JoinValue[A]): A = v.asBoolean match
-      case Actual(true) => thn
-      case Actual(false) => els
-      case Top => j.joinValues(thn, els)
   given CompareOps[Value, Value]  = new LiftedCompareOps[Value, Value, Topped[DoubleInterval], Topped[Boolean]](_.asDouble, BooleanValue.apply)
   given EqOps[Value, Value] with
     def equ(v1: Value, v2: Value): Value = BooleanValue((v1, v2) match
@@ -63,13 +57,16 @@ object IntervalAnalysis:
   type Context = Label
   type Addr = Label
   type Addrs = Set[Label]
+  type Environment =  Map[String, (Boolean, Addrs)]
+  type Store = Map[Addr, (Boolean, Value)]
 
-  def effects(initEnvironment: Map[String, Addrs], initStore: Map[Addr, Value]) =
-    new  AEnvironmentDynamicScope[String, Addrs](Map())
-    with AStoreKeysThreadded[Addr, Addrs, Value](Map())
+  def effects(initEnvironment: Environment, initStore: Store) =
+    new  ABoolBranching[Value]
+    with AEnvironmentDynamicScope[String, Addrs](initEnvironment)
+    with AStoreKeysThreadded[Addr, Addrs, Value](initStore)
     with AAllocationFromContext[Addrs, Context](Set(_))
     with AFailureCollect
   def fixpoint = new CFixpoint[Statement, Unit]
 
-  def apply(initEnvironment: Map[String, Addrs], initStore: Map[Addr, Value]) =
+  def apply(initEnvironment: Environment, initStore: Store) =
     new GenericInterpreter(using effects(initEnvironment, initStore))(using fixpoint) {}
