@@ -66,10 +66,9 @@ trait GenericInterpreter[V, Addr, Effects <: EffectfulOps[V, Addr], Fix <: Fixpo
       case If(cond, thn, els) =>
         boolBranch(eval(cond), rec(thn), rec(els))
       case s@While(cond, body) => rec(
-        If(cond,
-          Block(List(body, s)) <@@ s.label,
-          Block(Nil) <@@ s.label)
-          <@@ s.label)
+        s.label @: If(cond,
+          s.label @: Block(List(body, s)),
+          s.label @: Block(Nil)))
       case Block(body) =>
         body.foldLeft(())((_,s) => rec(s))
     })

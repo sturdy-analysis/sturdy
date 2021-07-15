@@ -4,7 +4,7 @@ import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.AEnvironmentDynamicScope
 import sturdy.effect.store.AStoreKeysThreadded
-import sturdy.effect.failure.AFailureCollect
+import sturdy.effect.failure.{Failure, AFailureCollect}
 import sturdy.fix.CFixpoint
 import sturdy.language.whilelang.{GenericInterpreter, Statement}
 import sturdy.util.{Label, given}
@@ -38,20 +38,6 @@ object SignAnalysis:
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
 
-  given BooleanOps[Value] = new LiftedBooleanOps[Value, Topped[Boolean]](_.asBoolean, BooleanValue.apply)
-  given DoubleOps[Value] = new LiftedDoubleOps[Value, Sign](_.asDouble, DoubleValue.apply)
-  given CompareOps[Value, Value]  = new LiftedCompareOps[Value, Value, Sign, Topped[Boolean]](_.asDouble, BooleanValue.apply)
-  given EqOps[Value, Value] with
-    def equ(v1: Value, v2: Value): Value = BooleanValue((v1, v2) match
-      case (BooleanValue(b1), BooleanValue(b2)) => summon[EqOps[Topped[Boolean], Topped[Boolean]]].equ(b1, b2)
-      case (DoubleValue(d1), DoubleValue(d2)) => summon[EqOps[Sign, Topped[Boolean]]].equ(d1, d2)
-      case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
-    )
-    def neq(v1: Value, v2: Value): Value = BooleanValue((v1, v2) match
-      case (BooleanValue(b1), BooleanValue(b2)) => summon[EqOps[Topped[Boolean], Topped[Boolean]]].neq(b1, b2)
-      case (DoubleValue(d1), DoubleValue(d2)) => summon[EqOps[Sign, Topped[Boolean]]].neq(d1, d2)
-      case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
-    )
 
   type Context = Label
   type Addr = Label
@@ -59,13 +45,30 @@ object SignAnalysis:
   type Environment =  Map[String, (Boolean, Addrs)]
   type Store = Map[Addr, (Boolean, Value)]
 
-  def effects(initEnvironment: Environment, initStore: Store) =
-    new  ABoolBranching[Value]
-    with AEnvironmentDynamicScope[String, Addrs](initEnvironment)
-    with AStoreKeysThreadded[Addr, Addrs, Value](initStore)
-    with AAllocationFromContext[Addrs, Context](Set(_))
-    with AFailureCollect
-  def fixpoint = new CFixpoint[Statement, Unit]
+  def apply(initEnvironment: Environment, initStore: Store) = {
+    val effects =
+      new  ABoolBranching[Value]
+      with AEnvironmentDynamicScope[String, Addrs](initEnvironment)
+      with AStoreKeysThreadded[Addr, Addrs, Value](initStore)
+      with AAllocationFromContext[Addrs, Context](Set(_))
+      with AFailureCollect
+    val fixpoint = new CFixpoint[Statement, Unit]
 
-  def apply(initEnvironment: Environment, initStore: Store) =
-    new GenericInterpreter(using effects(initEnvironment, initStore))(using fixpoint) {}
+    given Failure = effects
+    given BooleanOps[Value] = new LiftedBooleanOps[Value, Topped[Boolean]](_.asBoolean, BooleanValue.apply)
+    given DoubleOps[Value] = new LiftedDoubleOps[Value, Sign](_.asDouble, DoubleValue.apply)
+    given CompareOps[Value, Value]  = new LiftedCompareOps[Value, Value, Sign, Topped[Boolean]](_.asDouble, BooleanValue.apply)
+    given EqOps[Value, Value] with
+      def equ(v1: Value, v2: Value): Value = BooleanValue((v1, v2) match
+        case (BooleanValue(b1), BooleanValue(b2)) => summon[EqOps[Topped[Boolean], Topped[Boolean]]].equ(b1, b2)
+        case (DoubleValue(d1), DoubleValue(d2)) => summon[EqOps[Sign, Topped[Boolean]]].equ(d1, d2)
+        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      )
+      def neq(v1: Value, v2: Value): Value = BooleanValue((v1, v2) match
+        case (BooleanValue(b1), BooleanValue(b2)) => summon[EqOps[Topped[Boolean], Topped[Boolean]]].neq(b1, b2)
+        case (DoubleValue(d1), DoubleValue(d2)) => summon[EqOps[Sign, Topped[Boolean]]].neq(d1, d2)
+        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+    )
+
+    new GenericInterpreter(using effects)(using fixpoint) {}
+  }

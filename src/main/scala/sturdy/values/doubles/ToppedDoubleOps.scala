@@ -1,10 +1,11 @@
 package sturdy.values.doubles
 
+import sturdy.effect.failure.Failure
 import sturdy.values.JoinValue
 import sturdy.values.Topped
-import sturdy.values.Topped._
+import sturdy.values.Topped.*
 
-given ToppedDoubleOps[V](using ops: DoubleOps[V]): DoubleOps[Topped[V]] with
+given ToppedDoubleOps[V](using ops: DoubleOps[V])(using Failure): DoubleOps[Topped[V]] with
   def numLit(d: Double): Topped[V] = Actual(ops.numLit(d))
   def randomDouble(): Topped[V] = Actual(ops.randomDouble())
   def add(v1: Topped[V], v2: Topped[V]): Topped[V] =

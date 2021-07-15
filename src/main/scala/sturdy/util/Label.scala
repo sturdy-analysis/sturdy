@@ -18,6 +18,6 @@ object Labeled:
 trait Labeled:
   private var _label: Label = IntLabel(Labeled.next())
   def label: Label = _label
-  def <@@(l: Label): this.type =
+  def @:(l: Label): this.type =
     _label = SynLabel(l)
     this

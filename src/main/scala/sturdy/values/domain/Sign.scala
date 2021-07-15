@@ -1,10 +1,11 @@
 package sturdy.values.domain
 
+import sturdy.effect.failure.Failure
 import sturdy.values.Topped
-import sturdy.values.Topped._
+import sturdy.values.Topped.*
 import sturdy.values.JoinValue
 import sturdy.values.doubles.DoubleOps
-import sturdy.values.relational._
+import sturdy.values.relational.*
 
 enum Sign:
   def <(s2: Sign): Boolean = s2 == TopSign || (this match
@@ -38,7 +39,7 @@ given SignJoin: JoinValue[Sign] with
       case (Pos, Zero) => ZeroOrPos
       case _ => TopSign
 
-given SignDoubleOps: DoubleOps[Sign] with
+given SignDoubleOps(using Failure): DoubleOps[Sign] with
   def numLit(d: Double): Sign =
     if d < 0 then Neg
     else if d > 0 then Pos
