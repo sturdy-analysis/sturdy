@@ -12,7 +12,6 @@ import sturdy.values.doubles.DoubleOps
 import Expr._
 import Statement._
 import sturdy.fix.Fixpoint
-import sturdy.values.branch.BranchOps
 import sturdy.values.relational._
 
 type EffectfulOps[V, Addr] =

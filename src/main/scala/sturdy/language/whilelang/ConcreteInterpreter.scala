@@ -7,7 +7,6 @@ import sturdy.effect.store.CStore
 import sturdy.effect.failure.CFailure
 import sturdy.fix.CFixpoint
 import sturdy.values.booleans.{_, given}
-import sturdy.values.branch.BranchOps
 import sturdy.values.doubles.{_, given}
 import sturdy.values.relational.{_, given}
 import sturdy.util.given
@@ -28,10 +27,6 @@ object ConcreteInterpreter:
 
   given BooleanOps[Value] = new LiftedBooleanOps[Value, Boolean](_.asBoolean, BooleanValue.apply)
   given DoubleOps[Value] = new LiftedDoubleOps[Value, Double](_.asDouble, DoubleValue.apply)
-  given BranchOps[Value] with
-    type BranchJoin[A] = Unit
-    def if_[A](v: Value, thn: => A, els: => A)(using Unit): A =
-      if v.asBoolean then thn else els
   given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, Double, Boolean](_.asDouble, BooleanValue.apply)
   given EqOps[Value, Value] with
     def equ(v1: Value, v2: Value): Value = (v1, v2) match

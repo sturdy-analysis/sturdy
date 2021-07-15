@@ -10,7 +10,6 @@ import sturdy.language.whilelang.{GenericInterpreter, Statement}
 import sturdy.util.{Label, given}
 import sturdy.values.domain.{_, given}
 import sturdy.values.JoinValue
-import sturdy.values.branch.BranchOps
 import sturdy.values.booleans.{_, given}
 import sturdy.values.doubles.{_, given}
 import sturdy.values.relational.{_, given}

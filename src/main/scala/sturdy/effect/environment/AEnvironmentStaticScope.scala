@@ -7,7 +7,7 @@ import sturdy.effect.JoinComputation
  * joined computations may not change the environment. Usually, this is achieved in the
  * generic interpreter by calling `scoped` around each alternative branch. For example:
  *
- *     case If(e, thn, els) => if_(eval(e), scoped(thn), scoped(els))
+ *     case If(e, thn, els) => boolBranch(eval(e), scoped(thn), scoped(els))
  */
 trait AEnvironmentStaticScope[Var, V] extends CEnvironment[Var, V], JoinComputation:
   override def joinComputations[A](f: => A)(g: => A): Join[A] =
