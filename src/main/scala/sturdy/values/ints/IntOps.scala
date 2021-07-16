@@ -8,20 +8,20 @@ import scala.util.Random
 case object IntDivisionByZero extends FailureKind
 
 trait IntOps[V](using Failure):
-  def numLit(d: Double): V
-  def randomDouble(): V
+  def intLit(i: Int): V
+  def randomInt(): V
   def add(v1: V, v2: V): V
   def sub(v1: V, v2: V): V
   def mul(v1: V, v2: V): V
   def div(v1: V, v2: V): V
 
-given ConcreteIntOps(using f: Failure): IntOps[Double] with
-  def numLit(d: Double): Double = d
-  def randomDouble(): Double = Random.nextDouble()
-  def add(v1: Double, v2: Double): Double = v1 + v2
-  def sub(v1: Double, v2: Double): Double = v1 - v2
-  def mul(v1: Double, v2: Double): Double = v1 * v2
-  def div(v1: Double, v2: Double): Double =
+given ConcreteIntOps(using f: Failure): IntOps[Int] with
+  def intLit(i: Int): Int = i
+  def randomInt(): Int = Random.nextInt()
+  def add(v1: Int, v2: Int): Int = v1 + v2
+  def sub(v1: Int, v2: Int): Int = v1 - v2
+  def mul(v1: Int, v2: Int): Int = v1 * v2
+  def div(v1: Int, v2: Int): Int =
     if (v2 == 0)
       f.fail(IntDivisionByZero, s"$v1 / $v2")
     else

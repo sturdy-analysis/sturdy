@@ -26,7 +26,7 @@ case object UnboundAddr extends FailureKind
 
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fixpoint[Statement, Unit]]
   (using val effectOps: Effects)
-  (using val fix: Fix)
+  (using val fixpoint: Fix)
   (using val boolOps: BooleanOps[V], doubleOps: DoubleOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V])
   (using effectOps.EnvJoin[V], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
@@ -55,8 +55,10 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
     case RandomDouble() => randomDouble()
   }
 
-  lazy val run: Statement => Unit = {
-    fix.fix(rec => {
+  private val fixed: fixpoint.Fixed = fixpoint.fix { fixed =>
+    inline def run(s: Statement): Unit = fixed(s)
+
+    def run_open(s: Statement): Unit = s match
       case s@Assign(x, e) =>
         val v = eval(e)
         lookupOrElseAndThen(x, {
@@ -67,12 +69,13 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
           write(addr, v)
         }
       case If(cond, thn, els) =>
-        boolBranch(eval(cond), rec(thn), rec(els))
-      case s@While(cond, body) => rec(
-        s.label @: If(cond,
-          s.label @: Block(List(body, s)),
-          s.label @: Block(Nil)))
+        boolBranch(eval(cond), run(thn), run(els))
+      case s@While(cond, body) =>
+        boolBranch(eval(cond), {run(body); run(s)}, {})
       case Block(body) =>
-        body.foldLeft(())((_,s) => rec(s))
-    })
+        body.foldLeft(())((_,s) => run(s))
+
+    run_open(_)
   }
+
+  def run = fixed
