@@ -4,7 +4,7 @@ import sturdy.effect.JoinComputation
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.AEnvironmentDynamicScope
-import sturdy.effect.store.AStoreKeysThreadded
+import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.failure.{Failure, AFailureCollect}
 import sturdy.fix.CFixpoint
 import sturdy.language.whilelang.{GenericEffects,GenericInterpreter}
@@ -45,7 +45,7 @@ object IntervalAnalysis:
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
     with AEnvironmentDynamicScope[String, Addr](initEnvironment)
-    with AStoreKeysThreadded[Label, Addr, Value](initStore)
+    with AStoreMultiAddrThreadded[Label, Addr, Value](initStore)
     with AAllocationFromContext[Addr, Context](Set(_))
     with AFailureCollect
   type Fix = CFixpoint[Statement, Unit]

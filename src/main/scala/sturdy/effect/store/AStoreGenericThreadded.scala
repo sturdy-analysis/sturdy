@@ -11,38 +11,14 @@ import scala.collection.mutable.ListBuffer
  * Internally, the store tracks dirty addresses that have been (re)writteb to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreKeysThreadded[Addr, Addrs <: Iterable[Addr], V](_init: Map[Addr, (Boolean, V)])(using JoinValue[V])
-  extends Store[Addrs, V], JoinComputation:
+trait AStoreGenericThreadded[Addr, V](using JoinValue[V])
+  extends JoinComputation:
 
-  override type StoreJoin[A] = JoinValue[A]
-  
-  protected var store: Map[Addr, (Boolean, V)] = _init
+  protected var store: Map[Addr, (Boolean, V)] = Map()
   protected var dirtyAddrs: Set[Addr] = Set()
 
   def getStore: Map[Addr, (Boolean, V)] = store
 
-  override def read[A](xs: Addrs, found: V => A, notFound: => A): StoreJoined[A] = {
-    var needsNotFound = false
-    var as = ListBuffer[A]()
-    for (x <- xs)
-      store.get(x) match
-        case None => needsNotFound = true
-        case Some((definite, v)) =>
-          as += found(v)
-          if !definite then
-            needsNotFound = true
-    as.reduce(joinValues)
-  }
-
-  override def write(xs: Addrs, v: V): Unit =
-    dirtyAddrs ++= xs
-    if xs.size == 1 then
-      store += xs.head -> ((true, v))
-    else for x <- xs do
-      store.get(x) match
-        case None => store += x -> ((false, v))
-        case Some((_, old)) => store += x -> ((false, joinValues(old, v)))
-  
   override def joinComputations[A](f: => A)(g: => A): Join[A] =
     val snapshot = store
     var joinedStore = store
