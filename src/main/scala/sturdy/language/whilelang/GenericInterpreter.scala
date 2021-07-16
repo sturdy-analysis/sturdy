@@ -4,7 +4,7 @@ import sturdy.effect.branching.BoolBranching
 import sturdy.effect.environment.Environment
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocation
-import sturdy.effect.failure.Failure
+import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.util.Label
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.doubles.DoubleOps
@@ -14,14 +14,17 @@ import Statement._
 import sturdy.fix.Fixpoint
 import sturdy.values.relational._
 
-type EffectfulOps[V, Addr] =
+type GenericEffects[V, Addr] =
   BoolBranching[V] with
   Environment[String, Addr] with
   Store[Addr, V] with
   Allocation[Addr, Label] with
   Failure
 
-trait GenericInterpreter[V, Addr, Effects <: EffectfulOps[V, Addr], Fix <: Fixpoint[Statement, Unit]]
+case object UnboundVariable extends FailureKind
+case object UnboundAddr extends FailureKind
+
+trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fixpoint[Statement, Unit]]
   (using val effectOps: Effects)
   (using val fix: Fix)
   (using val boolOps: BooleanOps[V], doubleOps: DoubleOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V])
@@ -35,8 +38,8 @@ trait GenericInterpreter[V, Addr, Effects <: EffectfulOps[V, Addr], Fix <: Fixpo
 
   def eval(e: Expr): V = e match {
     case Var(x) =>
-      lookupOrElseAndThen(x, fail(s"Unbound variable $x")) { addr =>
-        readOrElse(addr, fail(s"Unbound address $addr for variable $x"))
+      lookupOrElseAndThen(x, fail(UnboundVariable, x)) { addr =>
+        readOrElse(addr, fail(UnboundAddr, s"$addr for variable $x"))
       }
     case BoolLit(b) => boolLit(b)
     case And(e1, e2) => and(eval(e1), eval(e2))

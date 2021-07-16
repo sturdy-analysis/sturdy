@@ -40,18 +40,19 @@ object SignAnalysis:
 
 
   type Context = Label
-  type Addr = Label
-  type Addrs = Set[Label]
-  type Environment =  Map[String, (Boolean, Addrs)]
-  type Store = Map[Addr, (Boolean, Value)]
+  type Addr = Set[Label]
+  type Environment =  Map[String, (Boolean, Addr)]
+  type Store = Map[Label, (Boolean, Value)]
+  class Effects(initEnvironment: Environment, initStore: Store)
+    extends ABoolBranching[Value]
+    with AEnvironmentDynamicScope[String, Addr](initEnvironment)
+    with AStoreKeysThreadded[Label, Addr, Value](initStore)
+    with AAllocationFromContext[Addr, Context](Set(_))
+    with AFailureCollect
+  type Fix = CFixpoint[Statement, Unit]
 
   def apply(initEnvironment: Environment, initStore: Store) = {
-    val effects =
-      new  ABoolBranching[Value]
-      with AEnvironmentDynamicScope[String, Addrs](initEnvironment)
-      with AStoreKeysThreadded[Addr, Addrs, Value](initStore)
-      with AAllocationFromContext[Addrs, Context](Set(_))
-      with AFailureCollect
+    val effects = new Effects(initEnvironment, initStore)
     val fixpoint = new CFixpoint[Statement, Unit]
 
     given Failure = effects
@@ -72,3 +73,10 @@ object SignAnalysis:
 
     new GenericInterpreter(using effects)(using fixpoint) {}
   }
+
+import SignAnalysis.*
+class SignAnalysis
+  (using effectOps: Effects)
+  (using fix: Fix)
+  (using boolOps: BooleanOps[Value], doubleOps: DoubleOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value])
+  extends GenericInterpreter[Value, Addr, Effects, Fix]

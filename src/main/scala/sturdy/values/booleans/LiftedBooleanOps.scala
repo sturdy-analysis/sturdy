@@ -8,3 +8,6 @@ class LiftedBooleanOps[V, B](extract: V => B, inject: B => V)(using ops: Boolean
   def not(v: V): V = inject(ops.not(extract(v)))
   def and(v1: V, v2: V): V = inject(ops.and(extract(v1), extract(v2)))
   def or(v1: V, v2: V): V = inject(ops.or(extract(v1), extract(v2)))
+
+// class BooleanOps v b
+// instance (BooleanOps b, extract :: v -> b, inject :: b -> v) => BooleanOps v

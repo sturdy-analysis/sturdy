@@ -53,13 +53,14 @@ object Examples:
     Labeled.reset()
     Block(List(
       Assign("x", NumLit(0.0)),
-      If(Lt(Var("x"), NumLit(2.5)),
-        Block(List(
-          Assign("y", Mul(NumLit(1), Var("x")))
-        )),
-        Block(List(
-          Assign("y", NumLit(2))
-        )))
+      Assign("y", Div(NumLit(5), Var("x")))
     ))
   }
 
+  val ex5 = {
+    Labeled.reset()
+    Block(List(
+      Assign("x", RandomDouble()),
+      Assign("y", Div(NumLit(5), Var("x")))
+    ))
+  }

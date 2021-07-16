@@ -5,12 +5,12 @@ import sturdy.effect.JoinComputation.StarvedJoin
 
 import scala.collection.mutable.ListBuffer
 
-case class AFailureCollectException(msgs: Seq[String]) extends FailureException
+case class AFailureCollectException(msgs: Seq[(FailureKind, String)]) extends FailureException
 
 trait AFailureCollect extends Failure with JoinComputation:
-  protected val failures: ListBuffer[String] = ListBuffer()
+  protected val failures: ListBuffer[(FailureKind,String)] = ListBuffer()
 
-  def getFailures: Seq[String] = failures.toSeq
+  def getFailures: Seq[(FailureKind,String)] = failures.toSeq
 
   private def logFailures[A](fun: => A): A = try fun catch {
     case fail@AFailureCollectException(msgs) =>
@@ -18,8 +18,8 @@ trait AFailureCollect extends Failure with JoinComputation:
       throw fail
   }
 
-  override def fail(msg: String): Nothing =
-    throw AFailureCollectException(Seq(msg))
+  override def fail(kind: FailureKind, msg: String): Nothing =
+    throw AFailureCollectException(Seq(kind -> msg))
 
   override def joinComputations[A](f: => A)(g: => A): Join[A] =
     try super.joinComputations(logFailures(f))(logFailures(g)) catch {

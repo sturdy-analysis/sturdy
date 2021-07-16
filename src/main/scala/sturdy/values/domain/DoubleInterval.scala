@@ -1,5 +1,6 @@
 package sturdy.values.domain
 
+import sturdy.effect.JoinComputation
 import sturdy.effect.failure.Failure
 import sturdy.values.{JoinValue, Topped}
 import sturdy.values.Topped.*
@@ -32,7 +33,7 @@ given DoubleIntervalJoin: JoinValue[DoubleInterval] with
   override def joinValues(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =
     DoubleInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
 
-given IntervalDoubleOps(using Failure): DoubleOps[DoubleInterval] with
+given IntervalDoubleOps: DoubleOps[DoubleInterval] with
   def numLit(d: Double): DoubleInterval = DoubleInterval(d, d)
   def randomDouble(): DoubleInterval = DoubleInterval(0, 1)
   def add(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 + v2

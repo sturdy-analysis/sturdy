@@ -1,6 +1,6 @@
 package sturdy.values.domain
 
-import sturdy.effect.failure.Failure
+import sturdy.effect.JoinComputation
 import sturdy.values.Topped
 import sturdy.values.Topped.*
 import sturdy.values.JoinValue
@@ -8,19 +8,27 @@ import sturdy.values.doubles.DoubleOps
 import sturdy.values.relational.*
 
 enum Sign:
-  def <(s2: Sign): Boolean = s2 == TopSign || (this match
-    case Neg => s2 == NegOrZero
-    case Zero => s2 == NegOrZero || s2 == ZeroOrPos
-    case Pos => s2 == ZeroOrPos
-    case _ => false
-  )
-
   case TopSign
   case Neg
   case NegOrZero
   case Zero
   case ZeroOrPos
   case Pos
+
+  def <(s2: Sign): Boolean = s2 == TopSign || (this match
+    case Neg => s2 == NegOrZero
+    case Zero => s2 == NegOrZero || s2 == ZeroOrPos
+    case Pos => s2 == ZeroOrPos
+    case _ => false
+  )
+  def negated: Sign = this match
+    case TopSign => TopSign
+    case Neg => Pos
+    case NegOrZero => ZeroOrPos
+    case Zero => Zero
+    case ZeroOrPos => NegOrZero
+    case Pos => Neg
+
 
 import Sign._
 
@@ -39,7 +47,7 @@ given SignJoin: JoinValue[Sign] with
       case (Pos, Zero) => ZeroOrPos
       case _ => TopSign
 
-given SignDoubleOps(using Failure): DoubleOps[Sign] with
+given SignDoubleOps: DoubleOps[Sign] with
   def numLit(d: Double): Sign =
     if d < 0 then Neg
     else if d > 0 then Pos
@@ -109,7 +117,11 @@ given SignDoubleOps(using Failure): DoubleOps[Sign] with
     case (Pos, ZeroOrPos) => ZeroOrPos
     case (Pos, Pos) => Pos
 
-  def div(v1: Sign, v2: Sign): Sign = mul(v1, v2)
+  def div(v1: Sign, v2: Sign): Sign = v2 match
+    case Zero => v1 // division by zero yields infinity with the sign of v1
+    case ZeroOrPos => v1
+    case NegOrZero => v1.negated
+    case _ => mul(v1, v2)
 
 given SignCompareOps: CompareOps[Sign, Topped[Boolean]] with
   def lt(v1: Sign, v2: Sign): Topped[Boolean] = (v1, v2) match

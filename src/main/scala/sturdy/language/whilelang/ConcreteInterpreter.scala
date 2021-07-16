@@ -28,20 +28,22 @@ object ConcreteInterpreter:
   type Addr = Int
   type Environment = Map[String, Int]
   type Store = Map[Int, Value]
+  class Effects(initEnvironment: Environment, initStore: Store)
+    extends CBoolBranching[Value]
+    with CEnvironment[String, Int](initEnvironment)
+    with CStore[Int, Value](initStore)
+    with CAllocationIntIncrement
+    with CFailure
+  type Fix = CFixpoint[Statement, Unit]
 
-  def apply(initEnvironment: Environment, initStore: Store) = {
-    val effects =
-      new  CBoolBranching[Value]
-      with CEnvironment[String, Int](initEnvironment)
-      with CStore[Int, Value](initStore)
-      with CAllocationIntIncrement
-      with CFailure
+  def apply(initEnvironment: Environment, initStore: Store): ConcreteInterpreter = {
+    val effects = new Effects(initEnvironment, initStore)
     val fixpoint = new CFixpoint[Statement, Unit]
 
     given Failure = effects
     given BooleanOps[Value] = new LiftedBooleanOps[Value, Boolean](_.asBoolean, BooleanValue.apply)
-    given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, Double, Boolean](_.asDouble, BooleanValue.apply)
     given DoubleOps[Value] = new LiftedDoubleOps[Value, Double](_.asDouble, DoubleValue.apply)
+    given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, Double, Boolean](_.asDouble, BooleanValue.apply)
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
         case (BooleanValue(b1), BooleanValue(b2)) => BooleanValue(b1 == b2)
@@ -52,6 +54,12 @@ object ConcreteInterpreter:
         case (DoubleValue(d1), DoubleValue(d2)) => BooleanValue(d1 != d2)
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
-    new GenericInterpreter(using effects)(using fixpoint) {}
+    new ConcreteInterpreter(using effects)(using fixpoint)
   }
 
+import ConcreteInterpreter.*
+class ConcreteInterpreter
+  (using effectOps: Effects)
+  (using fix: Fix)
+  (using boolOps: BooleanOps[Value], doubleOps: DoubleOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value])
+  extends GenericInterpreter[Value, Addr, Effects, Fix]

@@ -1,6 +1,8 @@
-package sturdy.values.doubles
+package sturdy.values.ints
 
-class LiftedDoubleOps[V, D](extract: V => D, inject: D => V)(using ops: DoubleOps[D]) extends DoubleOps[V]:
+import sturdy.effect.failure.Failure
+
+class LiftedIntOps[V, D](extract: V => D, inject: D => V)(using ops: IntOps[D])(using Failure) extends IntOps[V]:
   def numLit(d: Double): V = inject(ops.numLit(d))
   def randomDouble(): V = inject(ops.randomDouble())
   def add(v1: V, v2: V): V = inject(ops.add(extract(v1), extract(v2)))
