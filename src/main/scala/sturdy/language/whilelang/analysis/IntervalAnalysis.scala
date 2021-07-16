@@ -10,7 +10,6 @@ import sturdy.fix.CFixpoint
 import sturdy.language.whilelang.{GenericEffects,GenericInterpreter}
 import sturdy.language.whilelang.Statement
 import sturdy.util.{Label, given}
-import sturdy.values.domain.{_, given}
 import sturdy.values.JoinValue
 import sturdy.values.booleans.{_, given}
 import sturdy.values.doubles.{_, given}

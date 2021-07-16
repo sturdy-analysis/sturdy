@@ -1,8 +1,9 @@
-package sturdy.values.domain
+package sturdy.values.doubles
 
 import sturdy.effect.JoinComputation
 import sturdy.effect.failure.Failure
-import sturdy.values.{JoinValue, Topped}
+import sturdy.values.JoinValue
+import sturdy.values.Topped
 import sturdy.values.Topped.*
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.relational.*

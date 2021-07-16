@@ -10,7 +10,7 @@ import sturdy.language.whilelang.analysis.IntervalAnalysis.Value.*
 import sturdy.util.IntLabel
 import sturdy.values.Topped
 import sturdy.values.Topped.*
-import sturdy.values.domain.DoubleInterval
+import sturdy.values.doubles.DoubleInterval
 
 class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   def run(s: Statement): IntervalAnalysis.Effects =

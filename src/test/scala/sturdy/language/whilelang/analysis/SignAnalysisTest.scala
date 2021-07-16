@@ -10,7 +10,7 @@ import sturdy.language.whilelang.analysis.SignAnalysis.Value.*
 import sturdy.util.IntLabel
 import sturdy.values.Topped
 import sturdy.values.Topped.*
-import sturdy.values.domain.Sign
+import sturdy.values.doubles.Sign
 
 class SignAnalysisTest extends AnyFlatSpec, Matchers:
   def run(s: Statement): SignAnalysis.Effects =

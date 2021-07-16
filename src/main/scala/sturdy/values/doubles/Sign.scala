@@ -1,4 +1,4 @@
-package sturdy.values.domain
+package sturdy.values.doubles
 
 import sturdy.effect.JoinComputation
 import sturdy.values.Topped
@@ -30,7 +30,7 @@ enum Sign:
     case Pos => Neg
 
 
-import Sign._
+import Sign.*
 
 
 given SignJoin: JoinValue[Sign] with
