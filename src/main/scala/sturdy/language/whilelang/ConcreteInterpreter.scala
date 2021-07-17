@@ -9,7 +9,7 @@ import sturdy.fix.CFixpoint
 import sturdy.values.booleans.{_, given}
 import sturdy.values.doubles.{_, given}
 import sturdy.values.relational.{_, given}
-import sturdy.util.given
+import sturdy.values.given
 
 object ConcreteInterpreter:
   enum Value:

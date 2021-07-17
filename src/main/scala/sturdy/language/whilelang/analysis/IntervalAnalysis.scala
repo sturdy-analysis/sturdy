@@ -10,7 +10,7 @@ import sturdy.fix.CFixpoint
 import sturdy.language.whilelang.GenericInterpreter
 import sturdy.language.whilelang.Statement
 import sturdy.util.{Label, given}
-import sturdy.values.JoinValue
+import sturdy.values.{*, given}
 import sturdy.values.booleans.{_, given}
 import sturdy.values.doubles.{_, given}
 import sturdy.values.relational.{_, given}
@@ -39,14 +39,14 @@ object IntervalAnalysis:
 
 
   type Context = Statement.Assign
-  type Addr = Set[Label]
+  type Addr = Powerset[Label]
   type Environment =  Map[String, (Boolean, Addr)]
   type Store = Map[Label, (Boolean, Value)]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
     with AEnvironmentDynamicScope[String, Addr](initEnvironment)
-    with AStoreMultiAddrThreadded[Label, Addr, Value](initStore)
-    with AAllocationFromContext[Addr, Context](a => Set(a.label))
+    with AStoreMultiAddrThreadded[Label, Value](initStore)
+    with AAllocationFromContext[Addr, Context](a => Powerset(a.label))
     with AFailureCollect
   type Fix = CFixpoint[Statement, Unit]
 

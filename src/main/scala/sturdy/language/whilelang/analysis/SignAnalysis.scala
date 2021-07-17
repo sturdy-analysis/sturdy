@@ -8,7 +8,7 @@ import sturdy.effect.failure.{Failure, AFailureCollect}
 import sturdy.fix.CFixpoint
 import sturdy.language.whilelang.{GenericInterpreter, Statement}
 import sturdy.util.{Label, given}
-import sturdy.values.JoinValue
+import sturdy.values.{*, given}
 import sturdy.values.booleans.{_, given}
 import sturdy.values.doubles.{_, given}
 import sturdy.values.relational.{_, given}
@@ -18,13 +18,13 @@ import sturdy.values.Topped.{_, given}
 object SignAnalysis:
   enum Value:
     case BooleanValue(b: Topped[Boolean])
-    case DoubleValue(d: Sign)
+    case DoubleValue(d: DoubleSign)
 
     def asBoolean: Topped[Boolean] = this match {
       case BooleanValue(b) => b
       case _ => throw new IllegalArgumentException(s"Expected Boolean but got $this")
     }
-    def asDouble: Sign = this match {
+    def asDouble: DoubleSign = this match {
       case DoubleValue(d) => d
       case _ => throw new IllegalArgumentException(s"Expected Double but got $this")
     }
@@ -33,20 +33,20 @@ object SignAnalysis:
   given JoinValue[Value] with
     override def joinValues(v1: Value, v2: Value): Value = (v1, v2) match
       case (BooleanValue(b1), BooleanValue(b2)) => BooleanValue(flatToppedJoin.joinValues(b1, b2))
-      case (DoubleValue(d1), DoubleValue(d2)) => DoubleValue(SignJoin.joinValues(d1, d2))
+      case (DoubleValue(d1), DoubleValue(d2)) => DoubleValue(DoubleSignJoin.joinValues(d1, d2))
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
 
 
   type Context = Statement.Assign
-  type Addr = Set[Label]
+  type Addr = Powerset[Label]
   type Environment =  Map[String, (Boolean, Addr)]
   type Store = Map[Label, (Boolean, Value)]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
     with AEnvironmentDynamicScope[String, Addr](initEnvironment)
-    with AStoreMultiAddrThreadded[Label, Addr, Value](initStore)
-    with AAllocationFromContext[Addr, Context](a => Set(a.label))
+    with AStoreMultiAddrThreadded[Label, Value](initStore)
+    with AAllocationFromContext[Addr, Context](a => Powerset(a.label))
     with AFailureCollect
   type Fix = CFixpoint[Statement, Unit]
 
@@ -55,17 +55,17 @@ object SignAnalysis:
     val fixpoint = new CFixpoint[Statement, Unit]
 
     given BooleanOps[Value] = new LiftedBooleanOps[Value, Topped[Boolean]](_.asBoolean, BooleanValue.apply)
-    given DoubleOps[Value] = new LiftedDoubleOps[Value, Sign](_.asDouble, DoubleValue.apply)
-    given CompareOps[Value, Value]  = new LiftedCompareOps[Value, Value, Sign, Topped[Boolean]](_.asDouble, BooleanValue.apply)
+    given DoubleOps[Value] = new LiftedDoubleOps[Value, DoubleSign](_.asDouble, DoubleValue.apply)
+    given CompareOps[Value, Value]  = new LiftedCompareOps[Value, Value, DoubleSign, Topped[Boolean]](_.asDouble, BooleanValue.apply)
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = BooleanValue((v1, v2) match
         case (BooleanValue(b1), BooleanValue(b2)) => summon[EqOps[Topped[Boolean], Topped[Boolean]]].equ(b1, b2)
-        case (DoubleValue(d1), DoubleValue(d2)) => summon[EqOps[Sign, Topped[Boolean]]].equ(d1, d2)
+        case (DoubleValue(d1), DoubleValue(d2)) => summon[EqOps[DoubleSign, Topped[Boolean]]].equ(d1, d2)
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       )
       def neq(v1: Value, v2: Value): Value = BooleanValue((v1, v2) match
         case (BooleanValue(b1), BooleanValue(b2)) => summon[EqOps[Topped[Boolean], Topped[Boolean]]].neq(b1, b2)
-        case (DoubleValue(d1), DoubleValue(d2)) => summon[EqOps[Sign, Topped[Boolean]]].neq(d1, d2)
+        case (DoubleValue(d1), DoubleValue(d2)) => summon[EqOps[DoubleSign, Topped[Boolean]]].neq(d1, d2)
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
     )
 

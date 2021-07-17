@@ -1,7 +1,7 @@
 package sturdy.effect.store
 
 import sturdy.effect.JoinComputation
-import sturdy.values.JoinValue
+import sturdy.values.*
 
 import scala.collection.mutable.ListBuffer
 
@@ -11,17 +11,17 @@ import scala.collection.mutable.ListBuffer
  * Internally, the store tracks dirty addresses that have been (re)writteb to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreMultiAddrThreadded[Addr, Addrs <: Iterable[Addr], V](_init: Map[Addr, (Boolean, V)])(using JoinValue[V])
-  extends Store[Addrs, V], AStoreGenericThreadded[Addr, V]:
+trait AStoreMultiAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using JoinValue[V])
+  extends Store[Powerset[Addr], V], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
   
   override type StoreJoin[A] = JoinValue[A]
   
-  override def read[A](xs: Addrs, found: V => A, notFound: => A): StoreJoined[A] = {
+  override def read[A](xs: Powerset[Addr], found: V => A, notFound: => A): StoreJoined[A] = {
     var needsNotFound = false
     var as = ListBuffer[A]()
-    for (x <- xs)
+    for (x <- xs.set)
       store.get(x) match
         case None => needsNotFound = true
         case Some((definite, v)) =>
@@ -31,11 +31,12 @@ trait AStoreMultiAddrThreadded[Addr, Addrs <: Iterable[Addr], V](_init: Map[Addr
     as.reduce(joinValues)
   }
 
-  override def write(xs: Addrs, v: V): Unit =
-    dirtyAddrs ++= xs
-    if xs.size == 1 then
-      store += xs.head -> ((true, v))
-    else for x <- xs do
+  override def write(xs: Powerset[Addr], v: V): Unit =
+    val addrs = xs.set
+    dirtyAddrs ++= addrs
+    if addrs.size == 1 then
+      store += addrs.head -> ((true, v))
+    else for x <- addrs do
       store.get(x) match
         case None => store += x -> ((false, v))
         case Some((_, old)) => store += x -> ((false, joinValues(old, v)))

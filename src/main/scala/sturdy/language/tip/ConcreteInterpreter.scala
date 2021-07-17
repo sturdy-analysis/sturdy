@@ -11,7 +11,7 @@ import sturdy.values.ints.{_, given}
 import sturdy.values.functions.{_, given}
 import sturdy.values.references.{_, given}
 import sturdy.values.relational.{_, given}
-import sturdy.util.given
+import sturdy.values.given
 
 import sturdy.language.tip.GenericInterpreter.*
 

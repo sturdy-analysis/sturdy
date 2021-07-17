@@ -21,6 +21,17 @@ trait JoinComputation:
       case (_, Success(a2)) => a2
       case (Failure(ex1), Failure(ex2)) => throw StarvedJoin(ex1, ex2)
 
+  final def joinComputations[A](as: Iterator[() => A]): Join[A] =
+    if (as.isEmpty)
+      throw new IllegalArgumentException
+    else {
+      val a = as.next()
+      if (as.isEmpty)
+        a()
+      else
+        joinComputations(a())(joinComputations(as))
+    }
+
   final def joinValues[A](a1: A, a2: A)(using j: JoinValue[A]) =
     j.joinValues(a1, a2)
 
