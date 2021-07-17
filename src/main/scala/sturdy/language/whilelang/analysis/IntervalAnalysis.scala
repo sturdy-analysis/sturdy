@@ -7,7 +7,7 @@ import sturdy.effect.environment.AEnvironmentDynamicScope
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.failure.{Failure, AFailureCollect}
 import sturdy.fix.CFixpoint
-import sturdy.language.whilelang.{GenericEffects,GenericInterpreter}
+import sturdy.language.whilelang.GenericInterpreter
 import sturdy.language.whilelang.Statement
 import sturdy.util.{Label, given}
 import sturdy.values.JoinValue
@@ -38,7 +38,7 @@ object IntervalAnalysis:
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
 
-  type Context = Label
+  type Context = Statement.Assign
   type Addr = Set[Label]
   type Environment =  Map[String, (Boolean, Addr)]
   type Store = Map[Label, (Boolean, Value)]
@@ -46,7 +46,7 @@ object IntervalAnalysis:
     extends ABoolBranching[Value]
     with AEnvironmentDynamicScope[String, Addr](initEnvironment)
     with AStoreMultiAddrThreadded[Label, Addr, Value](initStore)
-    with AAllocationFromContext[Addr, Context](Set(_))
+    with AAllocationFromContext[Addr, Context](a => Set(a.label))
     with AFailureCollect
   type Fix = CFixpoint[Statement, Unit]
 

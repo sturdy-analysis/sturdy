@@ -22,9 +22,9 @@ enum Exp extends Labeled:
 
 enum Stm extends Labeled:
   case Assign(lhs: Assignable, e: Exp)
-  case Seq(s1: Stm, s2: Stm)
   case If(cond: Exp, thn: Stm, els: Option[Stm])
   case While(cond: Exp, body: Stm)
+  case Block(body: Seq[Stm])
 
 enum Assignable:
   case AVar(name: String)

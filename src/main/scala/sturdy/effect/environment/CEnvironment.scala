@@ -19,3 +19,6 @@ trait CEnvironment[Var, V](_init: Map[Var, V] = Map()) extends Environment[Var, 
     try f finally {
       env = snapshot
     }
+
+  override def clear(): Unit =
+    env = Map()

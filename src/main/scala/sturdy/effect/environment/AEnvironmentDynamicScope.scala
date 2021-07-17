@@ -41,6 +41,10 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
       dirtyVars = snapshotDirty
     }
 
+  override def clear(): Unit =
+    dirtyVars ++= env.keys
+    env = Map()
+  
   override def joinComputations[A](f: => A)(g: => A): Join[A] =
     val snapshot = env
     var joinedEnv = env

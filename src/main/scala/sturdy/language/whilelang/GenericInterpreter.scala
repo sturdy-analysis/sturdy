@@ -9,20 +9,23 @@ import sturdy.util.Label
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.doubles.DoubleOps
-import Expr._
-import Statement._
+import Expr.*
+import Statement.*
 import sturdy.fix.Fixpoint
-import sturdy.values.relational._
+import sturdy.values.relational.*
 
-type GenericEffects[V, Addr] =
-  BoolBranching[V] with
-  Environment[String, Addr] with
-  Store[Addr, V] with
-  Allocation[Addr, Label] with
-  Failure
+object GenericInterpreter:
+  type GenericEffects[V, Addr] =
+    BoolBranching[V] with
+    Environment[String, Addr] with
+    Store[Addr, V] with
+    Allocation[Addr, Assign] with
+    Failure
 
-case object UnboundVariable extends FailureKind
-case object UnboundAddr extends FailureKind
+  case object UnboundVariable extends FailureKind
+  case object UnboundAddr extends FailureKind
+
+import GenericInterpreter.*
 
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fixpoint[Statement, Unit]]
   (using val effectOps: Effects)
@@ -62,7 +65,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
       case s@Assign(x, e) =>
         val v = eval(e)
         lookupOrElseAndThen(x, {
-          val addr = alloc(s.label)
+          val addr = alloc(s)
           bind(x, addr)
           addr
         }) { addr =>
@@ -73,7 +76,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
       case s@While(cond, body) =>
         boolBranch(eval(cond), {run(body); run(s)}, {})
       case Block(body) =>
-        body.foldLeft(())((_,s) => run(s))
+        body.foreach(run(_))
 
     run_open(_)
   }

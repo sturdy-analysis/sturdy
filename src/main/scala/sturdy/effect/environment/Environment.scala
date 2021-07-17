@@ -10,6 +10,7 @@ trait Environment[Var, V]:
   def lookup[A](x: Var, found: V => A, notFound: => A): EnvJoined[A]
   def bind(x: Var, v: V): Unit
   def scoped[A](f: => A): A
+  def clear(): Unit
 
   final def lookupOrElse(x: Var, notFound: => V): EnvJoined[V] =
     lookup(x, identity, notFound)
@@ -19,3 +20,7 @@ trait Environment[Var, V]:
 
   final def bindLocal[A](x: Var, v: V)(f: => A): A =
     scoped({bind(x, v); f})
+
+  final def freshScoped[A](f: => A): A =
+    scoped({clear(); f})
+  

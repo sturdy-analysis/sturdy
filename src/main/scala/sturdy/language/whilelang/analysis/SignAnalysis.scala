@@ -38,7 +38,7 @@ object SignAnalysis:
 
 
 
-  type Context = Label
+  type Context = Statement.Assign
   type Addr = Set[Label]
   type Environment =  Map[String, (Boolean, Addr)]
   type Store = Map[Label, (Boolean, Value)]
@@ -46,7 +46,7 @@ object SignAnalysis:
     extends ABoolBranching[Value]
     with AEnvironmentDynamicScope[String, Addr](initEnvironment)
     with AStoreMultiAddrThreadded[Label, Addr, Value](initStore)
-    with AAllocationFromContext[Addr, Context](Set(_))
+    with AAllocationFromContext[Addr, Context](a => Set(a.label))
     with AFailureCollect
   type Fix = CFixpoint[Statement, Unit]
 
