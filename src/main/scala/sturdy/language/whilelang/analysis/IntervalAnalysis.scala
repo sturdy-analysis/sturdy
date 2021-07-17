@@ -54,8 +54,6 @@ object IntervalAnalysis:
     val effects = new Effects(initEnvironment, initStore)
     val fixpoint = new CFixpoint[Statement, Unit]
 
-    given Failure = effects
-    given JoinComputation = effects
     given BooleanOps[Value] = new LiftedBooleanOps[Value, Topped[Boolean]](_.asBoolean, BooleanValue.apply)
     given DoubleOps[Value] = new LiftedDoubleOps[Value, Topped[DoubleInterval]](_.asDouble, DoubleValue.apply)
     given CompareOps[Value, Value]  = new LiftedCompareOps[Value, Value, Topped[DoubleInterval], Topped[Boolean]](_.asDouble, BooleanValue.apply)

@@ -2,7 +2,7 @@ package sturdy.values.ints
 
 import sturdy.effect.failure.Failure
 
-class LiftedIntOps[V, D](extract: V => D, inject: D => V)(using ops: IntOps[D])(using Failure) extends IntOps[V]:
+class LiftedIntOps[V, I](extract: V => I, inject: I => V)(using ops: IntOps[I])(using Failure) extends IntOps[V]:
   def intLit(i: Int): V = inject(ops.intLit(i))
   def randomInt(): V = inject(ops.randomInt())
   def add(v1: V, v2: V): V = inject(ops.add(extract(v1), extract(v2)))

@@ -43,10 +43,9 @@ import GenericInterpreter.*
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fixpoint[FixIn[V], FixOut[V]]]
   (using val effectOps: Effects)
   (using val fixpoint: Fix)
-  (using val boolOps: BooleanOps[V], intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V])
+  (using val intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V])
   (using effectOps.EnvJoin[V], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
-  import boolOps._
   import intOps._
   import compareOps._
   import eqOps._

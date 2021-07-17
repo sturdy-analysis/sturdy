@@ -40,7 +40,6 @@ object ConcreteInterpreter:
     val effects = new Effects(initEnvironment, initStore)
     val fixpoint = new CFixpoint[Statement, Unit]
 
-    given Failure = effects
     given BooleanOps[Value] = new LiftedBooleanOps[Value, Boolean](_.asBoolean, BooleanValue.apply)
     given DoubleOps[Value] = new LiftedDoubleOps[Value, Double](_.asDouble, DoubleValue.apply)
     given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, Double, Boolean](_.asDouble, BooleanValue.apply)
@@ -58,6 +57,7 @@ object ConcreteInterpreter:
   }
 
 import ConcreteInterpreter.*
+
 class ConcreteInterpreter
   (using effectOps: Effects)
   (using fix: Fix)
