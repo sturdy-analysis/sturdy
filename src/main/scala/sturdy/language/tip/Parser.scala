@@ -46,7 +46,7 @@ object Parser {
   )
 
   def keyword(s: String): P[Unit] =
-    spaced(P.string(s))
+    P.string(s)
 
   val letter: P[Unit] = P.ignoreCaseCharIn('a' to 'z').void
   val digit: P[Unit] = P.charIn('0' to '9').void
@@ -61,10 +61,10 @@ object Parser {
     spaced(id)
 
   def inParens[A](p: P0[A]): P[A] =
-    spaced(P.char('(') *> p <* P.char(')'))
+    spaced(P.char('(')) *> p <* spaced(P.char(')'))
 
   def inBraces[A](p: P0[A]): P[A] =
-    spaced(P.char('{') *> p <* P.char('}'))
+    spaced(P.char('{')) *> p <* spaced(P.char('}'))
 
   def list[A](p: P[A]): P0[List[A]] =
     p.repSep0(P.char(','))

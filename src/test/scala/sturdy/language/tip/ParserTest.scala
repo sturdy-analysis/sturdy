@@ -27,11 +27,16 @@ class ParserTest extends AnyFlatSpec, Matchers:
     println((keyword(KRETURN) *> expression <* semi).parseAll("return 0;"))
     println(identifier.parseAll("foo"))
     println((identifier ~ inParens(list(identifier))).parseAll("foo(x)"))
+    println(inBraces(
+      varDecl.rep0 ~
+        statement.rep0 ~
+        (keyword(KRETURN) *> expression <* semi)
+    ).parseAll(" { return 0; } "))
 
     val s =
-      """foo(x) {
-        |  return 0;
+      """foo( x ) {
+        |  return 0 ;
         |}
         |""".stripMargin
-    parse(s)
+    println(parse(s))
   }
