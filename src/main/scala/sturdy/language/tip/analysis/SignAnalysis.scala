@@ -4,7 +4,7 @@ import sturdy.effect.JoinComputation
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.{AEnvironmentStaticScope, CEnvironment}
-import sturdy.effect.store.AStoreSingleAddrThreadded
+import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.failure.{AFailureCollect, Failure}
 import sturdy.effect.store.Store
 import sturdy.fix.CFixpoint
@@ -15,13 +15,13 @@ import sturdy.values.ints.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
-import sturdy.util.given
+import sturdy.util.{*, given}
 import sturdy.language.tip.GenericInterpreter.*
 
 object SignAnalysis:
   enum Value:
     case IntValue(i: IntSign)
-    case RefValue(addr: Option[Addr])
+    case RefValue(addr: PowAddr)
     case FunValue(fun: Powerset[Function])
 
     def asBoolean: Topped[Boolean] = this match
@@ -36,7 +36,7 @@ object SignAnalysis:
     def asFunction: Powerset[Function] = this match
       case FunValue(fs) => fs
       case _ => throw new IllegalArgumentException(s"Expected Function but got $this")
-    def asReference: Option[Addr] = this match
+    def asReference: PowAddr = this match
       case RefValue(a) => a
       case _ => throw new IllegalArgumentException(s"Expected Reference but got $this")
 
@@ -46,7 +46,7 @@ object SignAnalysis:
     override def joinValues(v1: Value, v2: Value): Value = (v1, v2) match
       case (IntValue(i1), IntValue(i2)) => IntValue(IntSignJoin.joinValues(i1, i2))
       case (FunValue(funs1), FunValue(funs2)) => FunValue(funs1 ++ funs2)
-      // TODO; RefValues
+      case (RefValue(addrs1), RefValue(addrs2)) => RefValue(addrs1 ++ addrs2)
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
   def boolValue(b: Topped[Boolean]): Value = IntValue(b match
@@ -55,15 +55,20 @@ object SignAnalysis:
     case Topped.Actual(false) => IntSign.Zero
   )
 
-  // TODO abstract Addr
-  type Addr = Int
-  type Environment = Map[String, Int]
-  type Store = Map[Int, (Boolean, Value)]
+  type Addr = AllocationSiteAddr
+  type PowAddr = Powerset[Addr]
+  def fromAllocationSite(asite: AllocationSite): PowAddr = Powerset(asite match
+    case AllocationSite.Alloc(ealloc) => AllocationSiteAddr.Alloc(ealloc.label)
+    case AllocationSite.ParamBinding(fun, p) => AllocationSiteAddr.Variable(s"$fun.$p")
+    case AllocationSite.LocalBinding(fun, v) => AllocationSiteAddr.Variable(s"$fun.$v")
+  )
+  type Environment = Map[String, Powerset[Addr]]
+  type Store = Map[Addr, (Boolean, Value)]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
-      with AEnvironmentStaticScope[String, Addr] with CEnvironment[String, Addr](initEnvironment)
-      with AStoreSingleAddrThreadded[Addr, Value](initStore)
-      with AAllocationFromContext[Addr, AllocationSite](???)
+      with AEnvironmentStaticScope[String, PowAddr] with CEnvironment[String, PowAddr](initEnvironment)
+      with AStoreMultiAddrThreadded[Addr, Value](initStore)
+      with AAllocationFromContext[AllocationSite, PowAddr](fromAllocationSite)
       with AFailureCollect
   type Fix = CFixpoint[FixIn[Value], FixOut[Value]]
 
@@ -79,13 +84,12 @@ object SignAnalysis:
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
         case (IntValue(i1), IntValue(i2)) => boolValue(summon[EqOps[IntSign, Topped[Boolean]]].equ(i1, i2))
-        // TODO
-//        case (RefValue(a1), RefValue(a2)) => boolValue(a1 == a2)
+        case (RefValue(a1), RefValue(a2)) => boolValue(if (a1 == a2) Topped.Top else Topped.Actual(false))
         case (FunValue(f1), FunValue(f2)) => boolValue(summon[EqOps[Powerset[Function], Topped[Boolean]]].equ(f1, f2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       def neq(v1: Value, v2: Value): Value = boolValue(equ(v1, v2).asBoolean.map(!_))
     given FunctionOps[Function, Value, Value, Value] = new LiftedFunctionOps[Function, Value, Value, Value, Powerset[Function]](_.asFunction, FunValue.apply)
-    given ReferenceOps[Addr, Value] = new LiftedReferenceOps[Value, Addr, Option[Addr]](_.asReference, RefValue.apply)
+    given ReferenceOps[PowAddr, Value] = new LiftedReferenceOps[Value, PowAddr, PowAddr](_.asReference, RefValue.apply)
 
     new SignAnalysis(using effects)(using fixpoint)
   }
@@ -96,5 +100,5 @@ class SignAnalysis
   (using effectOps: Effects)
   (using fix: Fix)
   (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value],
-   functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[Addr, Value])
-    extends GenericInterpreter[Value, Addr, Effects, Fix]
+   functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[PowAddr, Value])
+    extends GenericInterpreter[Value, PowAddr, Effects, Fix]

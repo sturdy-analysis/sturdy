@@ -8,7 +8,7 @@ import sturdy.language.whilelang.Statement.*
 import sturdy.language.whilelang.analysis.SignAnalysis.*
 import sturdy.language.whilelang.analysis.SignAnalysis.Value.*
 import sturdy.util.IntLabel
-import sturdy.values.Topped
+import sturdy.values.*
 import sturdy.values.Topped.*
 import sturdy.values.doubles.DoubleSign
 
@@ -23,8 +23,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,yAssign,_)) = Examples.ex1
-    assertResult(Some(true -> Set(xAssign.label)))(env.get("x"))
-    assertResult(Some(true -> Set(yAssign.label)))(env.get("y"))
+    assertResult(Some(true -> Powerset(xAssign.label)))(env.get("x"))
+    assertResult(Some(true -> Powerset(yAssign.label)))(env.get("y"))
     assertResult(Some(true -> DoubleValue(DoubleSign.ZeroOrPos)))(store.get(xAssign.label))
     assertResult(Some(true -> DoubleValue(DoubleSign.Pos)))(store.get(yAssign.label))
   }
@@ -34,8 +34,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,If(_,Block(List(yAssign1)),Block(List(yAssign2))))) = Examples.ex2
-    assertResult(Some(true -> Set(xAssign.label)))(env.get("x"))
-    assertResult(Some(true -> Set(yAssign1.label, yAssign2.label)))(env.get("y"))
+    assertResult(Some(true -> Powerset(xAssign.label)))(env.get("x"))
+    assertResult(Some(true -> Powerset(yAssign1.label, yAssign2.label)))(env.get("y"))
     assertResult(Some(true -> DoubleValue(DoubleSign.ZeroOrPos)))(store.get(xAssign.label))
     assertResult(Some(false -> DoubleValue(DoubleSign.Pos)))(store.get(yAssign1.label))
     assertResult(Some(false -> DoubleValue(DoubleSign.Pos)))(store.get(yAssign2.label))
@@ -46,8 +46,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,If(_,Block(List(yAssign1)),Block(List(yAssign2))))) = Examples.ex3
-    assertResult(Some(true -> Set(xAssign.label)))(env.get("x"))
-    assertResult(Some(true -> Set(yAssign1.label, yAssign2.label)))(env.get("y"))
+    assertResult(Some(true -> Powerset(xAssign.label)))(env.get("x"))
+    assertResult(Some(true -> Powerset(yAssign1.label, yAssign2.label)))(env.get("y"))
     assertResult(Some(true -> DoubleValue(DoubleSign.Pos)))(store.get(xAssign.label))
     assertResult(Some(false -> DoubleValue(DoubleSign.Pos)))(store.get(yAssign1.label))
     assertResult(Some(false -> DoubleValue(DoubleSign.Pos)))(store.get(yAssign2.label))
@@ -58,8 +58,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,yAssign)) = Examples.ex4
-    assertResult(Some(true -> Set(xAssign.label)))(env.get("x"))
-    assertResult(Some(true -> Set(yAssign.label)))(env.get("y"))
+    assertResult(Some(true -> Powerset(xAssign.label)))(env.get("x"))
+    assertResult(Some(true -> Powerset(yAssign.label)))(env.get("y"))
     assertResult(Some(true -> DoubleValue(DoubleSign.Zero)))(store.get(xAssign.label))
     assertResult(Some(true -> DoubleValue(DoubleSign.Pos)))(store.get(yAssign.label))
   }
@@ -69,8 +69,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,yAssign)) = Examples.ex5
-    assertResult(Some(true -> Set(xAssign.label)))(env.get("x"))
-    assertResult(Some(true -> Set(yAssign.label)))(env.get("y"))
+    assertResult(Some(true -> Powerset(xAssign.label)))(env.get("x"))
+    assertResult(Some(true -> Powerset(yAssign.label)))(env.get("y"))
     assertResult(Some(true -> DoubleValue(DoubleSign.ZeroOrPos)))(store.get(xAssign.label))
     assertResult(Some(true -> DoubleValue(DoubleSign.Pos)))(store.get(yAssign.label))
   }

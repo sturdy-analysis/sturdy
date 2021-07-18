@@ -5,9 +5,10 @@ import sturdy.values.relational.EqOps
 case class Powerset[A](val set: Set[A]) extends AnyVal {
   def size: Int = set.size
   def ++(that: Powerset[A]) = Powerset(this.set ++ that.set)
+  def map[B](f: A => B): Powerset[B] = Powerset(set.map(f))
 }
 object Powerset {
-  def apply[A](a: A): Powerset[A] = Powerset(Set(a))
+  def apply[A](as: A*): Powerset[A] = Powerset(Set.from(as))
 }
 
 given PowersetJoin[A]: JoinValue[Powerset[A]] with

@@ -46,7 +46,7 @@ object IntervalAnalysis:
     extends ABoolBranching[Value]
     with AEnvironmentDynamicScope[String, Addr](initEnvironment)
     with AStoreMultiAddrThreadded[Label, Value](initStore)
-    with AAllocationFromContext[Addr, Context](a => Powerset(a.label))
+    with AAllocationFromContext[Context, Addr](a => Powerset(a.label))
     with AFailureCollect
   type Fix = CFixpoint[Statement, Unit]
 
