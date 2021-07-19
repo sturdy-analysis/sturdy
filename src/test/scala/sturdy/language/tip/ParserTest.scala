@@ -27,7 +27,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
       file.close()
       val tree = parse(sourceCode)
       if (tree.isLeft)
-      println(tree)
+        println(tree)
       assert(tree.isRight)
     }
   }

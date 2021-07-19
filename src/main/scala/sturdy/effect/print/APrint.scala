@@ -29,7 +29,8 @@ trait APrint[A] extends Print[A], JoinComputation:
       val printedF = printed
       printed = snapshot
       val a = g
-      printed = PrintResult.OneOf(printedF, printed)
+      if (printed != printedF)
+        printed = PrintResult.OneOf(printedF, printed)
       a
     }
   }

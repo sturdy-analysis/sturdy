@@ -10,6 +10,11 @@ import scala.language.implicitConversions
  */
 object Parser:
 
+  def parse(source: String): Program =
+    program.parseAll(source) match
+      case Right(p) => p
+      case Left(err) => throw new IllegalArgumentException(err.toString)
+
   /* LEXICAL */
 
   val lineComment: P[Unit] = P.string("//") *> P.charsWhile0(c => c != '\n' && c != '\r').void

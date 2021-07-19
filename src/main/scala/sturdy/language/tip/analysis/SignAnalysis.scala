@@ -9,7 +9,7 @@ import sturdy.effect.print.APrint
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
-import sturdy.fix.CFixpoint
+import sturdy.fix.AFixpointFuel
 import sturdy.language.tip.{Function, GenericInterpreter}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
@@ -22,6 +22,7 @@ import sturdy.language.tip.GenericInterpreter.*
 
 object SignAnalysis:
   enum Value:
+    case TopValue // only used as fallback for fixpoint
     case IntValue(i: IntSign)
     case RefValue(addr: PowAddr)
     case FunValue(fun: Powerset[Function])
@@ -31,12 +32,15 @@ object SignAnalysis:
         case IntSign.Zero => Topped.Actual(false)
         case IntSign.Pos | IntSign.Neg => Topped.Actual(true)
         case _ => Topped.Top
+      case TopValue => Topped.Top
       case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
     def asInt: IntSign = this match
       case IntValue(i) => i
+      case TopValue => IntSign.TopSign
       case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
     def asFunction: Powerset[Function] = this match
       case FunValue(fs) => fs
+      case TopValue => ???
       case _ => throw new IllegalArgumentException(s"Expected Function but got $this")
     def asReference: PowAddr = this match
       case RefValue(a) => a
@@ -74,11 +78,15 @@ object SignAnalysis:
       with APrint[Value]
       with AUserInput[Value](IntValue(IntSign.TopSign))
       with AFailureCollect
-  type Fix = CFixpoint[FixIn[Value], FixOut[Value]]
+  type Fix = AFixpointFuel[FixIn[Value], FixOut[Value]]
 
-  def apply(initEnvironment: Environment, initStore: Store): SignAnalysis = {
+  def apply(initEnvironment: Environment, initStore: Store, steps: Int): SignAnalysis = {
     val effects = new Effects(initEnvironment, initStore)
-    val fixpoint = new CFixpoint[FixIn[Value], FixOut[Value]]
+    val fixpoint = new AFixpointFuel[FixIn[Value], FixOut[Value]](steps, {
+      case FixIn.Eval(_) => FixOut.Eval(Value.TopValue)
+      case FixIn.Run(_) => FixOut.Run(())
+      case FixIn.Call(_, _) => FixOut.Call(Value.TopValue)
+    })
 
     given JoinComputation = effects
     given Failure = effects
