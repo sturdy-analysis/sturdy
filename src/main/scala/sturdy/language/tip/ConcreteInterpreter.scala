@@ -3,8 +3,10 @@ package sturdy.language.tip
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.environment.CEnvironment
-import sturdy.effect.store.CStore
 import sturdy.effect.failure.{Failure, CFailure}
+import sturdy.effect.print.CPrint
+import sturdy.effect.store.CStore
+import sturdy.effect.userinput.CUserInput
 import sturdy.fix.CFixpoint
 import sturdy.values.booleans.{_, given}
 import sturdy.values.ints.{_, given}
@@ -41,16 +43,18 @@ object ConcreteInterpreter:
   type Addr = Int
   type Environment = Map[String, Int]
   type Store = Map[Int, Value]
-  class Effects(initEnvironment: Environment, initStore: Store)
+  class Effects(initEnvironment: Environment, initStore: Store, nextInput: () => Value)
     extends CBoolBranching[Value]
       with CEnvironment[String, Int](initEnvironment)
       with CStore[Int, Value](initStore)
       with CAllocationIntIncrement
+      with CPrint[Value]
+      with CUserInput[Value](nextInput)
       with CFailure
   type Fix = CFixpoint[FixIn[Value], FixOut[Value]]
 
-  def apply(initEnvironment: Environment, initStore: Store): ConcreteInterpreter = {
-    val effects = new Effects(initEnvironment, initStore)
+  def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): ConcreteInterpreter = {
+    val effects = new Effects(initEnvironment, initStore, nextInput)
     val fixpoint = new CFixpoint[FixIn[Value], FixOut[Value]]
 
     given Failure = effects

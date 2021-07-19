@@ -6,37 +6,28 @@ import sturdy.effect.failure.CFailureException
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.whilelang.ConcreteInterpreter.*
 import sturdy.language.whilelang.ConcreteInterpreter.Value.*
+import cats.parse.{Numbers, Parser as P, Parser0 as P0}
+import Parser.*
 
-import cats.parse.{Parser0 => P0, Parser => P, Numbers}
-import Parser._
+import java.nio.file.{Files, Paths}
+import scala.io.Source
+import scala.jdk.StreamConverters.*
 
 class ParserTest extends AnyFlatSpec, Matchers:
-  def parse(s: String): Program =
-    Parser.program.parseAll(s) match
-      case Right(p) => p
-      case Left(err) => throw new IllegalStateException(err.toString)
+  def parse(s: String): Either[P.Error, Program] =
+    Parser.program.parseAll(s)
 
-  "TIP parser" should "run ex1" in {
-    println(whitespace.parseAll(" "))
-    println(whitespaces0.parseAll("  "))
-    println(whitespaces0.parseAll(""))
-    println(P.char('a').parseAll("a"))
-    println(P.string(KRETURN).parseAll("return"))
-    println(keyword(KRETURN).parseAll(" return"))
-    println(expression.parseAll("0"))
-    println((keyword(KRETURN) *> expression <* semi).parseAll("return 0;"))
-    println(identifier.parseAll("foo"))
-    println((identifier ~ inParens(list(identifier))).parseAll("foo(x)"))
-    println(inBraces(
-      varDecl.rep0 ~
-        statement.rep0 ~
-        (keyword(KRETURN) *> expression <* semi)
-    ).parseAll(" { return 0; } "))
-
-    val s =
-      """foo( x ) {
-        |  return 0 ;
-        |}
-        |""".stripMargin
-    println(parse(s))
+  "TIP parser" should "parse all example files" in {
+    val uri = classOf[ParserTest].getResource("/sturdy/language/tip").toURI();
+    val tipDir = Paths.get(uri)
+    Files.list(tipDir).toScala(Iterator).filter(_.toString.endsWith(".tip")).foreach { p =>
+      println(s"Parsing $p")
+      val file = Source.fromURI(p.toUri)
+      val sourceCode = file.getLines().mkString("\n")
+      file.close()
+      val tree = parse(sourceCode)
+      if (tree.isLeft)
+      println(tree)
+      assert(tree.isRight)
+    }
   }

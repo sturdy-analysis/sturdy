@@ -5,7 +5,8 @@ import sturdy.effect.JoinComputation.StarvedJoin
 
 import scala.collection.mutable.ListBuffer
 
-case class AFailureCollectException(msgs: Seq[(FailureKind, String)]) extends FailureException
+case class AFailureCollectException(msgs: Seq[(FailureKind, String)]) extends FailureException:
+  override def toString: String = msgs.map((kind, msg) => s"Failure $kind: $msg").mkString("; ")
 
 trait AFailureCollect extends Failure with JoinComputation:
   protected val failures: ListBuffer[(FailureKind,String)] = ListBuffer()

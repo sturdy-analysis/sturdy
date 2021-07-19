@@ -1,10 +1,12 @@
 package sturdy.language.tip
 
+import sturdy.effect.allocation.Allocation
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.environment.Environment
-import sturdy.effect.store.Store
-import sturdy.effect.allocation.Allocation
 import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.print.Print
+import sturdy.effect.store.Store
+import sturdy.effect.userinput.UserInput
 import sturdy.util.Label
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.ints.IntOps
@@ -19,6 +21,8 @@ object GenericInterpreter:
     Environment[String, Addr] with
     Store[Addr, V] with
     Allocation[Addr, AllocationSite] with
+    Print[V] with
+    UserInput[V] with
     Failure
 
   enum AllocationSite:
@@ -28,6 +32,7 @@ object GenericInterpreter:
 
   case object UnboundVariable extends FailureKind
   case object UnboundAddr extends FailureKind
+  case object UserError extends FailureKind
 
   enum FixIn[V]:
     case Eval(e: Exp)
@@ -43,7 +48,7 @@ import GenericInterpreter.*
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fixpoint[FixIn[V], FixOut[V]]]
   (using val effectOps: Effects)
   (using val fixpoint: Fix)
-  (using val intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V])
+  (using intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V])
   (using effectOps.EnvJoin[V], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
   import intOps._
@@ -61,14 +66,14 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
     def call(f: Function, args: Seq[V]): V = rec(FixIn.Call(f, args)) match {case FixOut.Call(ret) => ret; case _ => throw new IllegalStateException()}
 
     def eval_open(e: Exp): V = e match {
+      case Exp.NumLit(n) => intLit(n)
+      case Exp.Input() => readInput()
       case Exp.Var(x) => functions.get(x) match
         case Some(fun) => funValue(fun)
         case None =>
           lookupOrElseAndThen(x, fail(UnboundVariable, x)) { addr =>
             readOrElse(addr, fail(UnboundAddr, s"$addr for variable $x"))
           }
-      case Exp.NumLit(n) => intLit(n)
-      case Exp.RandomInt() => randomInt()
       case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
       case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
       case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -103,6 +108,10 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
         boolBranch(eval(cond), {run(body); run(s)}, {})
       case Stm.Block(body) =>
         body.foreach(run)
+      case Stm.Output(e) =>
+        print(eval(e))
+      case Stm.Error(e) =>
+        fail(UserError, eval(e).toString)
 
     def assign(lhs: Assignable, v: V): Unit = lhs match
       case Assignable.AVar(x) =>
@@ -145,5 +154,5 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
   def execute(p: Program): V =
     functions = p.funs.map(f => f.name -> f).toMap
     val main = functions("main")
-    val args = main.params.map(_ => eval(Exp.RandomInt()))
+    val args = main.params.map(_ => eval(Exp.Input()))
     call(main, args)
