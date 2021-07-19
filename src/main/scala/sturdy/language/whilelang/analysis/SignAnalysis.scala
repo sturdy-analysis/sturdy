@@ -6,7 +6,7 @@ import sturdy.effect.environment.AEnvironmentDynamicScope
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.failure.{Failure, AFailureCollect}
 import sturdy.fix.CFixpoint
-import sturdy.language.whilelang.{GenericInterpreter, Statement}
+import sturdy.language.whilelang.{GenericInterpreter, Statement, ConcreteInterpreter}
 import sturdy.util.{Label, given}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{_, given}
@@ -14,6 +14,7 @@ import sturdy.values.doubles.{_, given}
 import sturdy.values.relational.{_, given}
 import sturdy.values.{Topped, given}
 import sturdy.values.Topped.{_, given}
+import sturdy.{IsSound, Soundness, given}
 
 object SignAnalysis:
   enum Value:
@@ -36,8 +37,6 @@ object SignAnalysis:
       case (DoubleValue(d1), DoubleValue(d2)) => DoubleValue(DoubleSignJoin.joinValues(d1, d2))
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
-
-
   type Context = Statement.Assign
   type Addr = Powerset[Label]
   type Environment =  Map[String, (Boolean, Addr)]
@@ -50,7 +49,7 @@ object SignAnalysis:
     with AFailureCollect
   type Fix = CFixpoint[Statement, Unit]
 
-  def apply(initEnvironment: Environment, initStore: Store) = {
+  def apply(initEnvironment: Environment, initStore: Store): SignAnalysis = {
     val effects = new Effects(initEnvironment, initStore)
     val fixpoint = new CFixpoint[Statement, Unit]
 
@@ -69,7 +68,7 @@ object SignAnalysis:
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
     )
 
-    new GenericInterpreter(using effects)(using fixpoint) {}
+    new SignAnalysis(using effects)(using fixpoint) {}
   }
 
 import SignAnalysis.*
@@ -77,4 +76,31 @@ class SignAnalysis
   (using effectOps: Effects)
   (using fix: Fix)
   (using boolOps: BooleanOps[Value], doubleOps: DoubleOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value])
-  extends GenericInterpreter[Value, Addr, Effects, Fix]
+  extends GenericInterpreter[Value, Addr, Effects, Fix] {
+
+  private val a = this
+
+  given Abstractly[ConcreteInterpreter.Value, Value] with
+    override def abstractly(c: ConcreteInterpreter.Value): Value = c match
+      case ConcreteInterpreter.Value.BooleanValue(b) => Value.BooleanValue(summon[Abstractly[Boolean, Topped[Boolean]]].abstractly(b))
+      case ConcreteInterpreter.Value.DoubleValue(d) => Value.DoubleValue(summon[Abstractly[Double, DoubleSign]].abstractly(d))
+
+  given PartialOrder[Value] with
+    override def lteq(x: Value, y: Value): Boolean = (x, y) match
+      case (Value.BooleanValue(b1), Value.BooleanValue(b2)) => summon[PartialOrdering[Topped[Boolean]]].lteq(b1, b2)
+      case (Value.DoubleValue(d1), Value.DoubleValue(d2)) => summon[PartialOrdering[DoubleSign]].lteq(d1, d2)
+      case _ => false
+
+  def isSound(c: ConcreteInterpreter): IsSound = {
+    given Soundness[ConcreteInterpreter.Addr, Addr] with
+      override def isSound(caddr: ConcreteInterpreter.Addr, aaddr: Addr): IsSound =
+        c.effectOps.read(caddr, Some.apply, None) match
+          case None => IsSound.Sound
+          case Some(cv) =>
+            val avs = a.effectOps.read(aaddr, Powerset(_), Powerset.empty)
+            summon[Soundness[ConcreteInterpreter.Value, Powerset[Value]]].isSound(cv, avs)
+
+    a.effectOps.environmentIsSound(c.effectOps)
+  }
+
+}

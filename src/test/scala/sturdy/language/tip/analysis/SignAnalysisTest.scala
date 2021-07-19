@@ -16,6 +16,7 @@ import scala.jdk.StreamConverters.*
 import scala.util.{Failure, Success, Try}
 
 class SignAnalysisTest extends AnyFlatSpec, Matchers:
+  
   "TIP sign analysis" should "runs all example files" in {
     val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
     val tipDir = Paths.get(uri)
@@ -26,9 +27,15 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
       val program = Parser.parse(sourceCode)
       if (program.funs.exists(_.name == "main")) {
         print(s"${p.getFileName} prints: ")
-        val analysis = SignAnalysis(Map(), Map(), 100)
+        val analysis = SignAnalysis(Map(), Map(), 200)
         Try(analysis.execute(program)) match
-          case Success(_) => println(analysis.effectOps.getPrinted)
+          case Success(_) =>
+            val printed = analysis.effectOps.getPrinted
+            val printedSize = printed.size
+            if (printedSize < 100)
+              println(printed)
+            else
+              println(s"$printedSize elements")
           case Failure(e) => println(e)
       } else {
         println(s"${p.getFileName}: no main function")

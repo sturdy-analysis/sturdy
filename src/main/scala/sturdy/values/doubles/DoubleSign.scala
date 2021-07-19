@@ -1,7 +1,7 @@
 package sturdy.values.doubles
 
 import sturdy.effect.JoinComputation
-import sturdy.values.Topped
+import sturdy.values.*
 import sturdy.values.Topped.*
 import sturdy.values.JoinValue
 import sturdy.values.doubles.DoubleOps
@@ -32,6 +32,14 @@ enum DoubleSign:
 
 import DoubleSign.*
 
+given Abstractly[Double, DoubleSign] with
+  override def abstractly(d: Double): DoubleSign =
+    if d < 0 then Neg
+    else if d > 0 then Pos
+    else Zero
+
+given PartialOrder[DoubleSign] with
+  override def lteq(x: DoubleSign, y: DoubleSign): Boolean = x < y || x == y
 
 given DoubleSignJoin: JoinValue[DoubleSign] with
   override def joinValues(v1: DoubleSign, v2: DoubleSign): DoubleSign =

@@ -2,6 +2,7 @@ package sturdy.values.doubles
 
 import sturdy.effect.JoinComputation
 import sturdy.effect.failure.Failure
+import sturdy.values.Abstractly
 import sturdy.values.JoinValue
 import sturdy.values.Topped
 import sturdy.values.Topped.*
@@ -28,6 +29,10 @@ case class DoubleInterval(l: Double, h: Double):
     DoubleInterval(low, high)
   }
   override def toString: String = s"[$l,$h]"
+
+given Abstractly[Double, DoubleInterval] with
+  override def abstractly(d: Double): DoubleInterval =
+    DoubleInterval(d, d)
 
 
 given DoubleIntervalJoin: JoinValue[DoubleInterval] with

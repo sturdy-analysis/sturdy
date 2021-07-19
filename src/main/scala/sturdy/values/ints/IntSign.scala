@@ -2,6 +2,7 @@ package sturdy.values.ints
 
 import sturdy.effect.JoinComputation
 import sturdy.effect.failure.Failure
+import sturdy.values.Abstractly
 import sturdy.values.Topped
 import sturdy.values.Topped.*
 import sturdy.values.JoinValue
@@ -32,6 +33,11 @@ enum IntSign:
 
 import IntSign.*
 
+given Abstractly[Int, IntSign] with
+  override def abstractly(i: Int): IntSign =
+    if i < 0 then Neg
+    else if i > 0 then Pos
+    else Zero
 
 given IntSignJoin: JoinValue[IntSign] with
   override def joinValues(v1: IntSign, v2: IntSign): IntSign =
@@ -48,9 +54,9 @@ given IntSignJoin: JoinValue[IntSign] with
       case _ => TopSign
 
 given SignIntOps(using f: Failure, j: JoinComputation): IntOps[IntSign] with
-  def intLit(d: Int): IntSign =
-    if d < 0 then Neg
-    else if d > 0 then Pos
+  def intLit(i: Int): IntSign =
+    if i < 0 then Neg
+    else if i > 0 then Pos
     else Zero
 
   def randomInt(): IntSign = ZeroOrPos

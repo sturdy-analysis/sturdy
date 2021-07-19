@@ -1,5 +1,7 @@
 package sturdy.effect.environment
 
+import sturdy.IsSound
+import sturdy.Soundness
 import sturdy.effect.JoinComputation
 import sturdy.values.JoinValue
 
@@ -119,3 +121,18 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
     dirtyVars = joinedDirtyVars
     joinedResult
 
+  def environmentIsSound[VC](c: CEnvironment[Var, VC])(using vSoundness: Soundness[VC, V]): IsSound =
+    if (!c.getEnv.keySet.subsetOf(env.keySet)) {
+      val notContained = c.getEnv.keySet -- env.keySet
+      IsSound.NotSound(s"AEnvironmentDynamicScope: Expected all concrete keys to be contained, but $notContained are missing")
+    } else if (env.exists(e => e._2._1 && !c.getEnv.keySet.contains(e._1))) {
+      val missing = env.filter(_._2._1).keySet -- c.getEnv.keySet
+      IsSound.NotSound(s"AEnvironmentDynamicScope: Expected all definitely bound keys to be bound in concrete environment, but $missing are missing")
+    } else {
+      c.getEnv.foreachEntry { case (x, v) =>
+        val subSound = vSoundness.isSound(v, env(x)._2)
+        if (subSound.isNotSound)
+          return subSound
+      }
+      IsSound.Sound
+    }

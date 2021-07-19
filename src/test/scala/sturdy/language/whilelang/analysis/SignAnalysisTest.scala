@@ -1,13 +1,16 @@
 package sturdy.language.whilelang.analysis
 
+import org.scalatest.Assertion
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.language.whilelang.ConcreteInterpreter
 import sturdy.language.whilelang.Examples
 import sturdy.language.whilelang.Statement
 import sturdy.language.whilelang.Statement.*
 import sturdy.language.whilelang.analysis.SignAnalysis.*
 import sturdy.language.whilelang.analysis.SignAnalysis.Value.*
 import sturdy.util.IntLabel
+import sturdy.IsSound
 import sturdy.values.*
 import sturdy.values.Topped.*
 import sturdy.values.doubles.DoubleSign
@@ -17,6 +20,14 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val analysis = SignAnalysis(Map(), Map())
     analysis.run(s)
     analysis.effectOps
+
+  def testSoundness(s: Statement): Assertion =
+    val interp = ConcreteInterpreter(Map(), Map())
+    val analysis = SignAnalysis(Map(), Map())
+    interp.run(s)
+    analysis.run(s)
+    assertResult(IsSound.Sound)(analysis.isSound(interp))
+
 
   "sign analysis" should "run ex1" in {
     val res = run(Examples.ex1)
@@ -73,4 +84,17 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     assertResult(Some(true -> Powerset(yAssign.label)))(env.get("y"))
     assertResult(Some(true -> DoubleValue(DoubleSign.ZeroOrPos)))(store.get(xAssign.label))
     assertResult(Some(true -> DoubleValue(DoubleSign.Pos)))(store.get(yAssign.label))
+  }
+
+  it should "soundly abstract ex1" in {
+    testSoundness(Examples.ex1)
+  }
+  it should "soundly abstract ex2" in {
+    testSoundness(Examples.ex2)
+  }
+  it should "soundly abstract ex3" in {
+    testSoundness(Examples.ex3)
+  }
+  it should "soundly abstract ex4" in {
+    testSoundness(Examples.ex4)
   }

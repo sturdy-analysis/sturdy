@@ -27,6 +27,15 @@ enum Topped[+V]:
     case Top => Top
     case Actual(v) => f(v)
 
+given toppedAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[C, Topped[A]] with
+  override def abstractly(c: C): Topped[A] = Topped.Actual(abs.abstractly(c))
+
+given toppedPartialOrder[A](using po: PartialOrder[A]): PartialOrder[Topped[A]] with
+  override def lteq(x: Topped[A], y: Topped[A]): Boolean = (x, y) match
+    case (_, Topped.Top) => true
+    case (Topped.Top, _) => false
+    case (Topped.Actual(a1), Topped.Actual(a2)) => po.lteq(a1, a2)
+
 object Topped:
   given flatToppedJoin[V]: JoinValue[Topped[V]] with
     def joinValues(v1: Topped[V], v2: Topped[V]): Topped[V] =

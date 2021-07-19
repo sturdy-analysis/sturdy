@@ -1,5 +1,7 @@
 package sturdy.effect.environment
 
+import sturdy.IsSound
+import sturdy.Soundness
 import sturdy.effect.JoinComputation
 
 /*
@@ -19,3 +21,16 @@ trait AEnvironmentStaticScope[Var, V] extends CEnvironment[Var, V], JoinComputat
     if !(oldEnv eq this.env) then
       throw new IllegalStateException(s"Statically scoped environment has changed at join point, which is illegal. Old environment was $oldEnv, new environment is ${this.env}.")
     result
+
+  def environmentIsSound[VC](c: CEnvironment[Var, VC])(using vSoundness: Soundness[VC, V]): IsSound =
+    if (c.getEnv.keySet != env.keySet) {
+      val different = (c.getEnv.keySet -- env.keySet) ++ (env.keySet -- c.getEnv.keySet)
+      IsSound.NotSound(s"${this.getClass.getName}: Expected identical keys but environments differ for $different")
+    } else {
+      c.getEnv.foreachEntry { case (x, v) =>
+        val subSound = vSoundness.isSound(v, env(x))
+        if (subSound.isNotSound)
+          return subSound
+      }
+      IsSound.Sound
+    }
