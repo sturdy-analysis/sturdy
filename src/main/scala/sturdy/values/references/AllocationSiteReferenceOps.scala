@@ -1,6 +1,7 @@
 package sturdy.values.references
 
 import sturdy.util.Label
+import sturdy.values.Structural
 
 enum AllocationSiteAddr:
   case Null
@@ -10,7 +11,7 @@ enum AllocationSiteAddr:
   override def toString: String = this match
     case Null => "null"
     case Alloc(l) => s"alloc-$l"
-    case Variable(name) => s"#$name"
+    case Variable(name) => s"&$name"
 
 
 given AllocationSiteReferenceOps: ReferenceOps[AllocationSiteAddr, AllocationSiteAddr] with
@@ -18,3 +19,4 @@ given AllocationSiteReferenceOps: ReferenceOps[AllocationSiteAddr, AllocationSit
   override def refAddr(v: AllocationSiteAddr): AllocationSiteAddr = v
   override def refValue(addr: AllocationSiteAddr): AllocationSiteAddr = addr
 
+given Structural[AllocationSiteAddr] with {}

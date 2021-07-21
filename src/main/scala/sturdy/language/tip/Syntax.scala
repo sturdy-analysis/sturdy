@@ -1,6 +1,7 @@
 package sturdy.language.tip
 
 import sturdy.util.Labeled
+import sturdy.values.Structural
 
 enum Exp extends Labeled:
   case NumLit(n: Int)
@@ -34,6 +35,10 @@ enum Assignable:
   case AField(rec: String, field: String)
   case ADerefField(rec: Exp, field: String)
 
-case class Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp)
+case class Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp):
+  override def toString: String = s"function $name"
 
 case class Program(funs: Seq[Function])
+
+
+given Structural[Function] with {}

@@ -6,6 +6,7 @@ import sturdy.values.Abstractly
 import sturdy.values.Topped
 import sturdy.values.Topped.*
 import sturdy.values.JoinValue
+import sturdy.values.PartialOrder
 import sturdy.values.relational.*
 
 enum IntSign:
@@ -38,6 +39,9 @@ given Abstractly[Int, IntSign] with
     if i < 0 then Neg
     else if i > 0 then Pos
     else Zero
+
+given PartialOrder[IntSign] with
+  override def lteq(x: IntSign, y: IntSign): Boolean = x == y || x < y
 
 given IntSignJoin: JoinValue[IntSign] with
   override def joinValues(v1: IntSign, v2: IntSign): IntSign =

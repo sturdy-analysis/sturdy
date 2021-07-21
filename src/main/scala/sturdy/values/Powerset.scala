@@ -8,11 +8,15 @@ case class Powerset[A](val set: Set[A]) extends AnyVal {
   def size: Int = set.size
   def ++(that: Powerset[A]) = Powerset(this.set ++ that.set)
   def map[B](f: A => B): Powerset[B] = Powerset(set.map(f))
+  override def toString: String = s"Powerset(${set.mkString(", ")})"
 }
 object Powerset {
   def empty[A]: Powerset[A] = Powerset[A](Set.empty)
   def apply[A](as: A*): Powerset[A] = Powerset(Set.from(as))
 }
+
+given concretePowersetPO[T: Structural]: PartialOrder[Powerset[T]] with
+  override def lteq(x: Powerset[T], y: Powerset[T]): Boolean = x.set.subsetOf(y.set)
 
 given PowersetJoin[A]: JoinValue[Powerset[A]] with
   override def joinValues(v1: Powerset[A], v2: Powerset[A]): Powerset[A] = new Powerset(v1.set ++ v2.set)
@@ -35,3 +39,8 @@ given PowersetContainsOneSound[C, A](using s: Soundness[C, A]): Soundness[C, Pow
       IsSound.Sound
     else
       IsSound.NotSound(s"$as did not contain any sound abstraction of $c")
+
+given PowersetOptionSound[C, A](using s: Soundness[C, A]): Soundness[Option[C], Powerset[A]] with
+  override def isSound(c: Option[C], as: Powerset[A]): IsSound = c match
+      case None => IsSound.Sound
+      case Some(c) => Soundness.isSound(c, as)

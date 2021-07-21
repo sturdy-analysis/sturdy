@@ -132,10 +132,10 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
         else
           Some(s"abs($k)=$ak")
       }
-      IsSound.NotSound(s"${this.getClass.getName}: Expected all concrete keys to be contained, but $missing are missing in $this")
+      IsSound.NotSound(s"${classOf[AEnvironmentDynamicScope[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $env")
     } else if (env.exists(e => e._2._1 && !abstractedKeys.contains(e._1))) {
       val missing = env.filter(_._2._1).keySet -- abstractedKeys
-      IsSound.NotSound(s"${this.getClass.getName}: Expected all definitely bound keys to be bound in concrete environment, but $missing are missing in $this")
+      IsSound.NotSound(s"${classOf[AEnvironmentDynamicScope[_, _]].getName}: Expected all definitely bound keys to be bound in concrete environment, but $missing are missing in $env")
     } else {
       c.getEnv.foreachEntry { case (x, v) =>
         val subSound = vSoundness.isSound(v, env(varAbstractly.abstractly(x))._2)

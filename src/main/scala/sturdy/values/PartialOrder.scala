@@ -18,11 +18,8 @@ trait PartialOrder[T] extends PartialOrdering[T] {
 object PartialOrder:
   def apply[T](using po: PartialOrder[T]): PartialOrder[T] = po
 
-given PartialOrder[Unit] with
-  def lteq(c1: Unit, c2: Unit): Boolean = true
-
-given PartialOrder[Boolean] with
-  def lteq(c1: Boolean, c2: Boolean): Boolean = c1 == c2
+given concretePO[T: Structural] : PartialOrder[T] with
+  def lteq(c1: T, c2: T): Boolean = c1 == c2
 
 given eitherPartialOrder[T1, T2](using po1: PartialOrder[T1], po2: PartialOrder[T2]): PartialOrder[Either[T1, T2]] with
   override def lteq(x: Either[T1, T2], y: Either[T1, T2]): Boolean = (x, y) match

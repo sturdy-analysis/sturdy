@@ -25,7 +25,7 @@ trait AEnvironmentStaticScope[Var, V] extends CEnvironment[Var, V], JoinComputat
   def environmentIsSound[VC](c: CEnvironment[Var, VC])(using vSoundness: Soundness[VC, V]): IsSound =
     if (c.getEnv.keySet != env.keySet) {
       val different = (c.getEnv.keySet -- env.keySet) ++ (env.keySet -- c.getEnv.keySet)
-      IsSound.NotSound(s"${this.getClass.getName}: Expected identical keys but environments differ for $different in $this")
+      IsSound.NotSound(s"${classOf[AEnvironmentStaticScope[_, _]].getName}: Expected identical keys but environments differ for $different in $env")
     } else {
       c.getEnv.foreachEntry { case (x, v) =>
         val subSound = vSoundness.isSound(v, env(x))

@@ -32,7 +32,7 @@ object ConcreteInterpreter:
     extends CBoolBranching[Value]
     with CEnvironment[String, Int](initEnvironment)
     with CStore[Int, Value](initStore)
-    with CAllocationIntIncrement
+    with CAllocationIntIncrement[Statement.Assign]
     with CFailure
   type Fix = CFixpoint[Statement, Unit]
 

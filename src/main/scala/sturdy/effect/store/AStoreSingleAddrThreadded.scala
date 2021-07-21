@@ -42,10 +42,10 @@ trait AStoreSingleAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using J
         else
           Some((k, ak))
       }
-      IsSound.NotSound(s"${this.getClass.getName}: Expected all concrete keys to be contained, but $missing are missing in $this")
+      IsSound.NotSound(s"${classOf[AStoreSingleAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else if (store.exists(e => e._2._1 && !abstractedKeys.contains(e._1))) {
       val missing = store.filter(_._2._1).keySet -- abstractedKeys
-      IsSound.NotSound(s"${this.getClass.getName}: Expected all definitely bound keys to be bound in concrete environment, but $missing are missing in $this")
+      IsSound.NotSound(s"${classOf[AStoreSingleAddrThreadded[_, _]].getName}: Expected all definitely bound keys to be bound in concrete environment, but $missing are missing in $store")
     } else {
       c.getStore.foreachEntry { case (x, v) =>
         val subSound = vSoundness.isSound(v, store(varAbstractly.abstractly(x))._2)

@@ -50,17 +50,18 @@ trait AStoreMultiAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using Jo
 
     val abstractedKeys = c.getStore.keySet.flatMap(k => varAbstractly.abstractly(k).set)
     if (!abstractedKeys.subsetOf(store.keySet)) {
-      val missing = c.getStore.keySet.flatMap{ k =>
+      val missing = c.getStore.flatMap{ kv =>
+        val k = kv._1
         val ak = varAbstractly.abstractly(k)
         if (ak.set.subsetOf(store.keySet))
           None
         else
-          Some(s"abs($k)=$ak")
+          Some(s"abs($k->${kv._2})=$ak")
       }
-      IsSound.NotSound(s"${this.getClass.getName}: Expected all concrete keys to be contained, but $missing are missing in $this")
+      IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else if (store.exists(e => e._2._1 && !abstractedKeys.contains(e._1))) {
       val missing = store.filter(_._2._1).keySet -- abstractedKeys
-      IsSound.NotSound(s"${this.getClass.getName}: Expected all definitely bound keys to be bound in concrete store, but $missing are missing in $this")
+      IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all definitely bound keys to be bound in concrete store, but $missing are missing in $store")
     } else {
       c.getStore.foreachEntry { case (x, v) =>
         val avs = this.read(varAbstractly.abstractly(x), Powerset(_), Powerset.empty)

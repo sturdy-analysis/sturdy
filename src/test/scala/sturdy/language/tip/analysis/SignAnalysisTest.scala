@@ -1,23 +1,34 @@
 package sturdy.language.tip.analysis
 
-import cats.parse.{Numbers, Parser as P, Parser0 as P0}
+import cats.parse.{Numbers, Parser0 as P0, Parser as P}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.CFailureException
+import sturdy.IsSound
+import sturdy.Soundness
+import sturdy.effect.allocation.CAllocationIntIncrement
+import sturdy.language.tip.ConcreteInterpreter
+import sturdy.language.tip.GenericInterpreter.AllocationSite
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
-import sturdy.language.tip.{Parser, Program}
+import sturdy.language.tip.{Program, Parser}
 import sturdy.language.whilelang.ConcreteInterpreter.*
 import sturdy.language.whilelang.ConcreteInterpreter.Value.*
 
-import java.nio.file.{Files, Paths}
+import sturdy.effect.failure.given
+import sturdy.{*, given}
+import sturdy.values.{*, given}
+import sturdy.language.tip.analysis.SignAnalysisSoundness.given
+
+import java.nio.file.{Paths, Files}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
-import scala.util.{Failure, Success, Try}
+import scala.util.{Try, Success, Failure}
 
 class SignAnalysisTest extends AnyFlatSpec, Matchers:
   
   "TIP sign analysis" should "runs all example files" in {
+    val steps = 1000
+
     val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
     val tipDir = Paths.get(uri)
     Files.list(tipDir).toScala(Iterator).filter(_.toString.endsWith(".tip")).foreach { p =>
@@ -26,17 +37,17 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
       file.close()
       val program = Parser.parse(sourceCode)
       if (program.funs.exists(_.name == "main")) {
-        print(s"${p.getFileName} prints: ")
-        val analysis = SignAnalysis(Map(), Map(), 200)
-        Try(analysis.execute(program)) match
-          case Success(_) =>
-            val printed = analysis.effectOps.getPrinted
-            val printedSize = printed.size
-            if (printedSize < 100)
-              println(printed)
-            else
-              println(s"$printedSize elements")
-          case Failure(e) => println(e)
+        println(s"Running ${p.getFileName}")
+
+        val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+        val cresult = interp.captured(interp.execute(program))
+
+        val analysis = SignAnalysis(Map(), Map(), steps)
+        val aresult = analysis.captured(analysis.execute(program))
+
+        given CAllocationIntIncrement[AllocationSite] = interp.effectOps
+        assertResult(IsSound.Sound)(Soundness.isSound(cresult, aresult))
+        assertResult(IsSound.Sound)(Soundness.isSound(interp, analysis))
       } else {
         println(s"${p.getFileName}: no main function")
       }

@@ -1,5 +1,6 @@
 package sturdy.language.whilelang.analysis
 
+import sturdy.effect.allocation.AllocationContextAbstractly
 import sturdy.values.Abstractly
 import sturdy.language.whilelang.ConcreteInterpreter
 import sturdy.values.PartialOrder
@@ -28,21 +29,11 @@ object SignAnalysisSoundness:
 
   given Soundness[ConcreteInterpreter, SignAnalysis] with
     def isSound(c: ConcreteInterpreter, a: SignAnalysis): IsSound = {
-      given Soundness[ConcreteInterpreter.Addr, Addr] with
-        override def isSound(caddr: ConcreteInterpreter.Addr, aaddr: Addr): IsSound =
-          c.effectOps.read(caddr, Some.apply, None) match
-            case None => IsSound.Sound
-            case Some(cv) =>
-              val avs = a.effectOps.read(aaddr, Powerset(_), Powerset.empty)
-              Soundness.isSound(cv, avs)
 
-      given Abstractly[ConcreteInterpreter.Addr, Addr] with
-        override def abstractly(caddr: ConcreteInterpreter.Addr): Addr =
-          val xs = c.effectOps.getEnv.filter(kv => kv._2 == caddr).keySet
-          val aaddrs = xs.flatMap(x => a.effectOps.getEnv.get(x).map(_._2.set).getOrElse(Set()))
-          Powerset(aaddrs)
+      given Abstractly[ConcreteInterpreter.Addr, Addr] =
+        new AllocationContextAbstractly(c.effectOps, a => Powerset(a.label))
 
       a.effectOps.environmentIsSound(c.effectOps) &&
-        a.effectOps.storeIsSound(c.effectOps)
+      a.effectOps.storeIsSound(c.effectOps)
     }
 

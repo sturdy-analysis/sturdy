@@ -39,7 +39,7 @@ given Abstractly[Double, DoubleSign] with
     else Zero
 
 given PartialOrder[DoubleSign] with
-  override def lteq(x: DoubleSign, y: DoubleSign): Boolean = x < y || x == y
+  override def lteq(x: DoubleSign, y: DoubleSign): Boolean = x == y || x < y
 
 given DoubleSignJoin: JoinValue[DoubleSign] with
   override def joinValues(v1: DoubleSign, v2: DoubleSign): DoubleSign =
