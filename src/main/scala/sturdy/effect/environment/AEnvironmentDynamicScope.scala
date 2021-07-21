@@ -3,6 +3,7 @@ package sturdy.effect.environment
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.JoinComputation
+import sturdy.values.Abstractly
 import sturdy.values.JoinValue
 
 /*
@@ -121,18 +122,26 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
     dirtyVars = joinedDirtyVars
     joinedResult
 
-  def environmentIsSound[VC](c: CEnvironment[Var, VC])(using vSoundness: Soundness[VC, V]): IsSound =
-    if (!c.getEnv.keySet.subsetOf(env.keySet)) {
-      val notContained = c.getEnv.keySet -- env.keySet
-      IsSound.NotSound(s"AEnvironmentDynamicScope: Expected all concrete keys to be contained, but $notContained are missing")
-    } else if (env.exists(e => e._2._1 && !c.getEnv.keySet.contains(e._1))) {
-      val missing = env.filter(_._2._1).keySet -- c.getEnv.keySet
-      IsSound.NotSound(s"AEnvironmentDynamicScope: Expected all definitely bound keys to be bound in concrete environment, but $missing are missing")
+  def environmentIsSound[cVar, cV](c: CEnvironment[cVar, cV])(using varAbstractly: Abstractly[cVar, Var], vSoundness: Soundness[cV, V]): IsSound = {
+    val abstractedKeys = c.getEnv.keySet.map(varAbstractly.abstractly)
+    if (!abstractedKeys.subsetOf(env.keySet)) {
+      val missing = c.getEnv.keySet.flatMap{ k =>
+        val ak = varAbstractly.abstractly(k)
+        if (env.keySet.contains(ak))
+          None
+        else
+          Some(s"abs($k)=$ak")
+      }
+      IsSound.NotSound(s"${this.getClass.getName}: Expected all concrete keys to be contained, but $missing are missing in $this")
+    } else if (env.exists(e => e._2._1 && !abstractedKeys.contains(e._1))) {
+      val missing = env.filter(_._2._1).keySet -- abstractedKeys
+      IsSound.NotSound(s"${this.getClass.getName}: Expected all definitely bound keys to be bound in concrete environment, but $missing are missing in $this")
     } else {
       c.getEnv.foreachEntry { case (x, v) =>
-        val subSound = vSoundness.isSound(v, env(x)._2)
+        val subSound = vSoundness.isSound(v, env(varAbstractly.abstractly(x))._2)
         if (subSound.isNotSound)
           return subSound
       }
       IsSound.Sound
     }
+  }

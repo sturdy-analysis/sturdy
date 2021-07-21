@@ -95,9 +95,9 @@ object SignAnalysis:
     given EqOps[Function, Boolean] = new EqualsEqOps[Function]
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
-        case (IntValue(i1), IntValue(i2)) => boolValue(summon[EqOps[IntSign, Topped[Boolean]]].equ(i1, i2))
+        case (IntValue(i1), IntValue(i2)) => boolValue(EqOps.equ(i1, i2))
         case (RefValue(a1), RefValue(a2)) => boolValue(if (a1 == a2) Topped.Top else Topped.Actual(false))
-        case (FunValue(f1), FunValue(f2)) => boolValue(summon[EqOps[Powerset[Function], Topped[Boolean]]].equ(f1, f2))
+        case (FunValue(f1), FunValue(f2)) => boolValue(EqOps.equ(f1, f2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       def neq(v1: Value, v2: Value): Value = boolValue(equ(v1, v2).asBoolean.map(!_))
     given FunctionOps[Function, Value, Value, Value] = new LiftedFunctionOps[Function, Value, Value, Value, Powerset[Function]](_.asFunction, FunValue.apply)

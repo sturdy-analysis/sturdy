@@ -59,13 +59,13 @@ object IntervalAnalysis:
     given CompareOps[Value, Value]  = new LiftedCompareOps[Value, Value, Topped[DoubleInterval], Topped[Boolean]](_.asDouble, BooleanValue.apply)
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = BooleanValue((v1, v2) match
-        case (BooleanValue(b1), BooleanValue(b2)) => summon[EqOps[Topped[Boolean], Topped[Boolean]]].equ(b1, b2)
-        case (DoubleValue(d1), DoubleValue(d2)) => summon[EqOps[Topped[DoubleInterval], Topped[Boolean]]].equ(d1, d2)
+        case (BooleanValue(b1), BooleanValue(b2)) => EqOps.equ(b1, b2)
+        case (DoubleValue(d1), DoubleValue(d2)) => EqOps.equ(d1, d2)
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       )
       def neq(v1: Value, v2: Value): Value = BooleanValue((v1, v2) match
-        case (BooleanValue(b1), BooleanValue(b2)) => summon[EqOps[Topped[Boolean], Topped[Boolean]]].neq(b1, b2)
-        case (DoubleValue(d1), DoubleValue(d2)) => summon[EqOps[Topped[DoubleInterval], Topped[Boolean]]].neq(d1, d2)
+        case (BooleanValue(b1), BooleanValue(b2)) => EqOps.neq(b1, b2)
+        case (DoubleValue(d1), DoubleValue(d2)) => EqOps.neq(d1, d2)
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       )
 

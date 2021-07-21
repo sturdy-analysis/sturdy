@@ -3,17 +3,21 @@ package sturdy.language.whilelang.analysis
 import org.scalatest.Assertion
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.effect.failure.given
 import sturdy.language.whilelang.ConcreteInterpreter
 import sturdy.language.whilelang.Examples
 import sturdy.language.whilelang.Statement
 import sturdy.language.whilelang.Statement.*
 import sturdy.language.whilelang.analysis.SignAnalysis.*
 import sturdy.language.whilelang.analysis.SignAnalysis.Value.*
+import sturdy.language.whilelang.analysis.SignAnalysisSoundness.given
 import sturdy.util.IntLabel
-import sturdy.IsSound
-import sturdy.values.*
+import sturdy.{*, given}
+import sturdy.values.{*, given}
 import sturdy.values.Topped.*
 import sturdy.values.doubles.DoubleSign
+
+import scala.util.Try
 
 class SignAnalysisTest extends AnyFlatSpec, Matchers:
   def run(s: Statement): SignAnalysis.Effects =
@@ -24,9 +28,10 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
   def testSoundness(s: Statement): Assertion =
     val interp = ConcreteInterpreter(Map(), Map())
     val analysis = SignAnalysis(Map(), Map())
-    interp.run(s)
-    analysis.run(s)
-    assertResult(IsSound.Sound)(analysis.isSound(interp))
+    val cresult = interp.captured(interp.run(s))
+    val aresult = analysis.captured(analysis.run(s))
+    assertResult(IsSound.Sound)(Soundness.isSound(cresult, aresult))
+    assertResult(IsSound.Sound)(Soundness.isSound(interp, analysis))
 
 
   "sign analysis" should "run ex1" in {
