@@ -4,6 +4,7 @@ import sturdy.effect.JoinComputation
 import sturdy.effect.failure.Failure
 import sturdy.values.Abstractly
 import sturdy.values.JoinValue
+import sturdy.values.PartialOrder
 import sturdy.values.Topped
 import sturdy.values.Topped.*
 import sturdy.values.doubles.DoubleOps
@@ -34,6 +35,8 @@ given Abstractly[Double, DoubleInterval] with
   override def abstractly(d: Double): DoubleInterval =
     DoubleInterval(d, d)
 
+given PartialOrder[DoubleInterval] with
+  override def lteq(x: DoubleInterval, y: DoubleInterval): Boolean = x.l >= y.l && x.h <= y.h
 
 given DoubleIntervalJoin: JoinValue[DoubleInterval] with
   override def joinValues(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =

@@ -12,9 +12,9 @@ import sturdy.values.relational.{*, given}
 import sturdy.values.{Topped, given}
 import sturdy.values.Topped.{*, given}
 
-import SignAnalysis.*
+import IntervalAnalysis.*
 
-object SignAnalysisSoundness:
+object IntervalAnalysisSoundness:
   given Abstractly[ConcreteInterpreter.Value, Value] with
     override def abstractly(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.BooleanValue(b) => Value.BooleanValue(Abstractly.abstractly(b))
@@ -23,11 +23,11 @@ object SignAnalysisSoundness:
   given PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x, y) match
       case (Value.BooleanValue(b1), Value.BooleanValue(b2)) => PartialOrder[Topped[Boolean]].lteq(b1, b2)
-      case (Value.DoubleValue(d1), Value.DoubleValue(d2)) => PartialOrder[DoubleSign].lteq(d1, d2)
+      case (Value.DoubleValue(d1), Value.DoubleValue(d2)) => PartialOrder[Topped[DoubleInterval]].lteq(d1, d2)
       case _ => false
 
-  given Soundness[ConcreteInterpreter, SignAnalysis] with
-    def isSound(c: ConcreteInterpreter, a: SignAnalysis): IsSound = {
+  given Soundness[ConcreteInterpreter, IntervalAnalysis] with
+    def isSound(c: ConcreteInterpreter, a: IntervalAnalysis): IsSound = {
       given Soundness[ConcreteInterpreter.Addr, Addr] with
         override def isSound(caddr: ConcreteInterpreter.Addr, aaddr: Addr): IsSound =
           c.effectOps.read(caddr, Some.apply, None) match
@@ -43,6 +43,6 @@ object SignAnalysisSoundness:
           Powerset(aaddrs)
 
       a.effectOps.environmentIsSound(c.effectOps) &&
-        a.effectOps.storeIsSound(c.effectOps)
+      a.effectOps.storeIsSound(c.effectOps)
     }
 

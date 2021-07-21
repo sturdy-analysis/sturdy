@@ -55,6 +55,7 @@ given DoubleSignJoin: JoinValue[DoubleSign] with
       case (Pos, Zero) => ZeroOrPos
       case _ => TopSign
 
+
 given SignDoubleOps: DoubleOps[DoubleSign] with
   def numLit(d: Double): DoubleSign =
     if d < 0 then Neg
