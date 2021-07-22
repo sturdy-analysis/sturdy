@@ -29,8 +29,8 @@ object IntervalAnalysisSoundness:
 
   given Soundness[ConcreteInterpreter, IntervalAnalysis] with
     def isSound(c: ConcreteInterpreter, a: IntervalAnalysis): IsSound = {
-      given Abstractly[ConcreteInterpreter.Addr, Addr] =
-        new AllocationContextAbstractly(c.effectOps, a => Powerset(a.label))
+      given Abstractly[ConcreteInterpreter.Addr, PowAddr] =
+        new AllocationContextAbstractly(c.effectOps, a => Powerset(Addr(a.label)))
 
       a.effectOps.environmentIsSound(c.effectOps) &&
       a.effectOps.storeIsSound(c.effectOps)

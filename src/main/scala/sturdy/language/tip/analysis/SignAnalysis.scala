@@ -66,8 +66,8 @@ object SignAnalysis:
   type PowAddr = Powerset[AllocationSiteAddr]
   def fromAllocationSite(asite: AllocationSite): PowAddr = Powerset(asite match
     case AllocationSite.Alloc(ealloc) => AllocationSiteAddr.Alloc(ealloc.label)
-    case AllocationSite.ParamBinding(fun, p) => AllocationSiteAddr.Variable(s"${fun.name}:$p")
-    case AllocationSite.LocalBinding(fun, v) => AllocationSiteAddr.Variable(s"${fun.name}:$v")
+    case AllocationSite.ParamBinding(fun, p) => AllocationSiteAddr.Variable(s"${fun.name}:$p")(true)
+    case AllocationSite.LocalBinding(fun, v) => AllocationSiteAddr.Variable(s"${fun.name}:$v")(true)
   )
   type Environment = Map[String, Powerset[Addr]]
   type Store = Map[Addr, Value]

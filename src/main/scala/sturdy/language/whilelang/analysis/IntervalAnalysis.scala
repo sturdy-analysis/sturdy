@@ -4,7 +4,7 @@ import sturdy.effect.JoinComputation
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.AEnvironmentDynamicScope
-import sturdy.effect.store.AStoreMultiAddrThreadded
+import sturdy.effect.store.{AStoreMultiAddrThreadded, ManageableAddr}
 import sturdy.effect.failure.{Failure, AFailureCollect}
 import sturdy.fix.CFixpoint
 import sturdy.language.whilelang.GenericInterpreter
@@ -39,14 +39,16 @@ object IntervalAnalysis:
 
 
   type Context = Statement.Assign
-  type Addr = Powerset[Label]
-  type Environment =  Map[String, (Boolean, Addr)]
-  type Store = Map[Label, Value]
+  case class Addr(l: Label) extends ManageableAddr(false)
+  given Structural[Addr] with {}
+  type PowAddr = Powerset[Addr]
+  type Environment =  Map[String, (Boolean, PowAddr)]
+  type Store = Map[Addr, Value]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
-    with AEnvironmentDynamicScope[String, Addr](initEnvironment)
-    with AStoreMultiAddrThreadded[Label, Value](initStore)
-    with AAllocationFromContext[Context, Addr](a => Powerset(a.label))
+    with AEnvironmentDynamicScope[String, PowAddr](initEnvironment)
+    with AStoreMultiAddrThreadded[Addr, Value](initStore)
+    with AAllocationFromContext[Context, PowAddr](a => Powerset(Addr(a.label)))
     with AFailureCollect
   type Fix = CFixpoint[Statement, Unit]
 
@@ -77,4 +79,4 @@ class IntervalAnalysis
   (using effectOps: Effects)
   (using fix: Fix)
   (using boolOps: BooleanOps[Value], doubleOps: DoubleOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value])
-  extends GenericInterpreter[Value, Addr, Effects, Fix]
+  extends GenericInterpreter[Value, PowAddr, Effects, Fix]

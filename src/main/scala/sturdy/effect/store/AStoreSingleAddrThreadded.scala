@@ -12,7 +12,7 @@ import sturdy.values.JoinValue
  * Internally, the store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreSingleAddrThreadded[Addr, V](_init: Map[Addr, V])(using JoinValue[V])
+trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using JoinValue[V])
   extends Store[Addr, V], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
@@ -23,7 +23,10 @@ trait AStoreSingleAddrThreadded[Addr, V](_init: Map[Addr, V])(using JoinValue[V]
     store.get(x) match
       case None => notFound
       case Some(v) =>
-        joinValues(found(v), notFound)
+        if (x.isManaged)
+          found(v)
+        else
+          joinValues(found(v), notFound)
 
   override def write(x: Addr, v: V): Unit =
     dirtyAddrs += x

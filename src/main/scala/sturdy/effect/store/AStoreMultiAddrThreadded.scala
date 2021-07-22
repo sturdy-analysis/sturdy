@@ -8,6 +8,7 @@ import sturdy.language.whilelang.analysis.SignAnalysis.Value
 import sturdy.values.*
 
 import scala.collection.mutable.ListBuffer
+import reflect.Selectable.reflectiveSelectable
 
 /*
  * An abstract threadded store. The store tracks if an address is definitely bound,
@@ -15,7 +16,7 @@ import scala.collection.mutable.ListBuffer
  * Internally, the store tracks dirty addresses that have been (re)writteb to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreMultiAddrThreadded[Addr, V](_init: Map[Addr, V])(using JoinValue[V])
+trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using JoinValue[V])
   extends Store[Powerset[Addr], V], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
@@ -23,11 +24,17 @@ trait AStoreMultiAddrThreadded[Addr, V](_init: Map[Addr, V])(using JoinValue[V])
   override type StoreJoin[A] = JoinValue[A]
   
   override def read[A](xs: Powerset[Addr], found: V => A, notFound: => A): StoreJoined[A] = {
-    var as = ListBuffer[() => A](() => notFound)
+    var needsNotFound = false
+    var as = ListBuffer[() => A]()
     for (x <- xs.set)
+      if (!x.isManaged)
+        needsNotFound = true
       store.get(x) match
-        case None => // nothing
+        case None =>
+          needsNotFound = true
         case Some(v) => as += (() => found(v))
+    if (needsNotFound)
+      as += (() => notFound)
     joinComputationsIt(as)
   }
 

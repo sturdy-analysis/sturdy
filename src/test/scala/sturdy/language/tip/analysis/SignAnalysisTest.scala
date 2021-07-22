@@ -77,29 +77,29 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
 
 
-//  "TIP sign analysis" should "runs all example files" in {
-//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
-//    val tipDir = Paths.get(uri)
-//    var files = 0
-//    var successful = 0
-//    Files.list(tipDir).toScala(List).sorted.filter(_.toString.endsWith(".tip")).foreach { p =>
-//      val res = runFile(p, 1000)
-//      if (res == 1) {
-//        files += 1
-//        successful += 1
-//      } else if (res == 0) {
-//        files += 1
-//      }
-//    }
-//    assertResult(files)(successful)
-//  }
-
-
-
-  it should "run this file" in {
-    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/signs.tip").toURI();
-    val (res, effects) = runAnalysis(Paths.get(uri), 10000)
-    println(res)
-    println(effects.getEnv)
-    println(effects.getStore)
+  "TIP sign analysis" should "runs all example files" in {
+    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
+    val tipDir = Paths.get(uri)
+    var files = 0
+    var successful = 0
+    Files.list(tipDir).toScala(List).sorted.filter(_.toString.endsWith(".tip")).foreach { p =>
+      val res = runFile(p, 1000)
+      if (res == 1) {
+        files += 1
+        successful += 1
+      } else if (res == 0) {
+        files += 1
+      }
+    }
+    assertResult(files)(successful)
   }
+
+
+
+//  it should "run this file" in {
+//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/signs.tip").toURI();
+//    val (res, effects) = runAnalysis(Paths.get(uri), 10000)
+//    println(res)
+//    println(effects.getEnv)
+//    println(effects.getStore)
+//  }

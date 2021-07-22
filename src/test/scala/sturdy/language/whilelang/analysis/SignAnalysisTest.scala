@@ -39,10 +39,10 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,yAssign,_)) = Examples.ex1
-    assertResult(Some(true -> Powerset(xAssign.label)))(env.get("x"))
-    assertResult(Some(true -> Powerset(yAssign.label)))(env.get("y"))
-    assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(xAssign.label))
-    assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(yAssign.label))
+    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
+    assertResult(Some(true -> Powerset(Addr(yAssign.label))))(env.get("y"))
+    assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(Addr(xAssign.label)))
+    assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(Addr(yAssign.label)))
   }
 
   it should "run ex2" in {
@@ -50,11 +50,11 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,If(_,Block(List(yAssign1)),Block(List(yAssign2))))) = Examples.ex2
-    assertResult(Some(true -> Powerset(xAssign.label)))(env.get("x"))
-    assertResult(Some(true -> Powerset(yAssign1.label, yAssign2.label)))(env.get("y"))
-    assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(xAssign.label))
-    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(yAssign1.label))
-    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(yAssign2.label))
+    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
+    assertResult(Some(true -> Powerset(Addr(yAssign1.label), Addr(yAssign2.label))))(env.get("y"))
+    assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(Addr(xAssign.label)))
+    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign1.label)))
+    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign2.label)))
   }
 
   it should "run ex3" in {
@@ -62,11 +62,11 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,If(_,Block(List(yAssign1)),Block(List(yAssign2))))) = Examples.ex3
-    assertResult(Some(true -> Powerset(xAssign.label)))(env.get("x"))
-    assertResult(Some(true -> Powerset(yAssign1.label, yAssign2.label)))(env.get("y"))
-    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(xAssign.label))
-    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(yAssign1.label))
-    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(yAssign2.label))
+    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
+    assertResult(Some(true -> Powerset(Addr(yAssign1.label), Addr(yAssign2.label))))(env.get("y"))
+    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(xAssign.label)))
+    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign1.label)))
+    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign2.label)))
   }
 
   it should "run ex4" in {
@@ -74,10 +74,10 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,yAssign)) = Examples.ex4
-    assertResult(Some(true -> Powerset(xAssign.label)))(env.get("x"))
-    assertResult(Some(true -> Powerset(yAssign.label)))(env.get("y"))
-    assertResult(Some(DoubleValue(DoubleSign.Zero)))(store.get(xAssign.label))
-    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(yAssign.label))
+    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
+    assertResult(Some(true -> Powerset(Addr(yAssign.label))))(env.get("y"))
+    assertResult(Some(DoubleValue(DoubleSign.Zero)))(store.get(Addr(xAssign.label)))
+    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign.label)))
   }
 
   it should "run ex5" in {
@@ -85,10 +85,10 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,yAssign)) = Examples.ex5
-    assertResult(Some(true -> Powerset(xAssign.label)))(env.get("x"))
-    assertResult(Some(true -> Powerset(yAssign.label)))(env.get("y"))
-    assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(xAssign.label))
-    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(yAssign.label))
+    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
+    assertResult(Some(true -> Powerset(Addr(yAssign.label))))(env.get("y"))
+    assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(Addr(xAssign.label)))
+    assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign.label)))
   }
 
   it should "soundly abstract ex1" in {
