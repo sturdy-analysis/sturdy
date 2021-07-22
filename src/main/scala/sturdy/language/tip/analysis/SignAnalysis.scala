@@ -22,9 +22,9 @@ import sturdy.language.tip.GenericInterpreter.*
 
 object SignAnalysis:
   enum Value:
-    case TopValue // only used as fallback for fixpoint
+    case TopValue
     case IntValue(i: IntSign)
-    case RefValue(addr: PowAddr)
+    case RefValue(addr: Refs)
     case FunValue(fun: Powerset[Function])
 
     def asBoolean: Topped[Boolean] = this match
@@ -42,7 +42,7 @@ object SignAnalysis:
       case FunValue(fs) => fs
       case TopValue => ???
       case _ => throw new IllegalArgumentException(s"Expected Function but got $this")
-    def asReference: PowAddr = this match
+    def asReference: Refs = this match
       case RefValue(a) => a
       case _ => throw new IllegalArgumentException(s"Expected Reference but got $this")
 
@@ -53,7 +53,7 @@ object SignAnalysis:
       case (IntValue(i1), IntValue(i2)) => IntValue(IntSignJoin.joinValues(i1, i2))
       case (FunValue(funs1), FunValue(funs2)) => FunValue(funs1 ++ funs2)
       case (RefValue(addrs1), RefValue(addrs2)) => RefValue(addrs1 ++ addrs2)
-      case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+      case _ => TopValue
 
   def boolValue(b: Topped[Boolean]): Value = IntValue(b match
     case Topped.Top => IntSign.ZeroOrPos
@@ -61,8 +61,9 @@ object SignAnalysis:
     case Topped.Actual(false) => IntSign.Zero
   )
 
+  type Refs = Powerset[AllocationSiteRef]
   type Addr = AllocationSiteAddr
-  type PowAddr = Powerset[Addr]
+  type PowAddr = Powerset[AllocationSiteAddr]
   def fromAllocationSite(asite: AllocationSite): PowAddr = Powerset(asite match
     case AllocationSite.Alloc(ealloc) => AllocationSiteAddr.Alloc(ealloc.label)
     case AllocationSite.ParamBinding(fun, p) => AllocationSiteAddr.Variable(s"${fun.name}:$p")
@@ -101,7 +102,7 @@ object SignAnalysis:
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       def neq(v1: Value, v2: Value): Value = boolValue(equ(v1, v2).asBoolean.map(!_))
     given FunctionOps[Function, Value, Value, Value] = new LiftedFunctionOps[Function, Value, Value, Value, Powerset[Function]](_.asFunction, FunValue.apply)
-    given ReferenceOps[PowAddr, Value] = new LiftedReferenceOps[Value, PowAddr, PowAddr](_.asReference, RefValue.apply)
+    given ReferenceOps[PowAddr, Value] = new LiftedReferenceOps[Value, Powerset[AllocationSiteAddr], Powerset[AllocationSiteRef]](_.asReference, RefValue.apply)
 
     new SignAnalysis(using effects)(using fixpoint)
   }

@@ -9,7 +9,7 @@ import sturdy.values.JoinValue
 /*
  * An abstract threadded store. The store tracks if an address is definitely bound,
  * maybe bound, or unbound and calls the corresponding continuations upon read.
- * Internally, the store tracks dirty addresses that have been (re)writteb to
+ * Internally, the store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
 trait AStoreSingleAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using JoinValue[V])
@@ -31,6 +31,10 @@ trait AStoreSingleAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using J
   override def write(x: Addr, v: V): Unit =
     dirtyAddrs += x
     store += x -> ((true, v))
+  
+  override def free(x: Addr): Unit =
+    dirtyAddrs -= x
+    store -= x
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Addr], vSoundness: Soundness[cV, V]): IsSound = {
     val abstractedKeys = c.getStore.keySet.map(varAbstractly.abstractly)

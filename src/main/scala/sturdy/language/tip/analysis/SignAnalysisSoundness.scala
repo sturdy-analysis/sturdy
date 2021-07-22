@@ -24,15 +24,15 @@ object SignAnalysisSoundness:
     override def abstractly(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.IntValue(d) => Value.IntValue(Abstractly.abstractly(d))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
-        case None => Value.RefValue(Powerset(AllocationSiteAddr.Null))
-        case Some(ca) => Value.RefValue(Abstractly.abstractly(ca))
+        case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
+        case Some(ca) => Value.RefValue(Abstractly.abstractly(ca).map(AllocationSiteRef.Addr.apply))
       case ConcreteInterpreter.Value.FunValue(fun) => Value.FunValue(Powerset(fun))
 
   given PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x, y) match
       case (_, Value.TopValue) => true
       case (Value.IntValue(i1), Value.IntValue(i2)) => PartialOrder[IntSign].lteq(i1, i2)
-      case (Value.RefValue(r1), Value.RefValue(r2)) => PartialOrder[PowAddr].lteq(r1, r2)
+      case (Value.RefValue(r1), Value.RefValue(r2)) => PartialOrder[Refs].lteq(r1, r2)
       case (Value.FunValue(f1), Value.FunValue(f2)) => PartialOrder[Powerset[Function]].lteq(f1, f2)
       case _ => false
 

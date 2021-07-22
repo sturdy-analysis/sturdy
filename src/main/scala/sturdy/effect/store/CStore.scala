@@ -10,6 +10,12 @@ trait CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V]:
   def getStore: Map[Addr, V] = store
 
   override def read[A](x: Addr, found: V => A, notFound: => A): StoreJoined[A] =
-    store.get(x).map(found).getOrElse(notFound)
+    store.get(x) match
+      case Some(v) => found(v)
+      case None => notFound
 
-  override def write(x: Addr, v: V): Unit = store = store + (x -> v)
+  override def write(x: Addr, v: V): Unit = 
+    store += (x -> v)
+
+  def free(x: Addr): Unit = 
+    store -= x

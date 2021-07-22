@@ -15,6 +15,8 @@ import sturdy.values.relational.{EqOps, CompareOps}
 import sturdy.fix.Fixpoint
 import sturdy.values.references.ReferenceOps
 
+import scala.collection.mutable.ListBuffer
+
 object GenericInterpreter:
   type GenericEffects[V, Addr] =
     BoolBranching[V] with
@@ -127,17 +129,24 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
         ???
 
     def call_open(fun: Function, args: Seq[V]): V = freshScoped {
-      fun.params.zip(args).foreach { case (name, arg) =>
+      val localAddrs = ListBuffer[Addr]()
+      fun.params.zip(args).map { case (name, arg) =>
         val addr = alloc(AllocationSite.ParamBinding(fun, name))
         bind(name, addr)
         write(addr, arg)
+        localAddrs += addr
       }
-      fun.locals.foreach { name =>
+      fun.locals.map { name =>
         val addr = alloc(AllocationSite.LocalBinding(fun, name))
         bind(name, addr)
+        localAddrs += addr
       }
-      run(fun.body)
-      eval(fun.ret)
+      try {
+        run(fun.body)
+        eval(fun.ret)
+      } finally {
+        localAddrs.foreach(free(_))
+      }
     }
 
     dom => dom match {

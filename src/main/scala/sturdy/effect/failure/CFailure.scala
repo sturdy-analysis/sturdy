@@ -9,7 +9,8 @@ trait CFailure extends Failure:
 
   def fallible[A](f: => A): CFallible[A] =
     try {
-      CFallible.Unfailing(f)
+      val res = f
+      CFallible.Unfailing(res)
     } catch {
       case CFailureException(kind, msg) => CFallible.Failing(kind, msg)
       case ex => CFallible.Failing(RuntimeFailure, ex.toString)

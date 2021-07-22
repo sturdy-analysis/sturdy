@@ -48,6 +48,16 @@ trait AStoreMultiAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using Jo
         case None => store += x -> ((false, v))
         case Some((_, old)) => store += x -> ((false, joinValues(old, v)))
 
+  override def free(xs: Powerset[Addr]): Unit =
+    val addrs = xs.set
+    if addrs.size == 1 then
+      store -= addrs.head
+    else for x <- addrs do
+      store.get(x) match
+        case None => // nothing
+        case Some((_, old)) => store == x -> ((false, old))
+
+
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Powerset[Addr]], vSoundness: Soundness[cV, V]): IsSound = {
     import sturdy.values.given
 

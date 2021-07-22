@@ -33,7 +33,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      println(s"Running ${p.getFileName}")
+      print(s"Running ${p.getFileName}")
 
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.effectOps.fallible(interp.execute(program))
@@ -45,9 +45,12 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 //      assertResult(IsSound.Sound)(Soundness.isSound(cresult, aresult))
 //      assertResult(IsSound.Sound)(Soundness.isSound(interp, analysis))
       if ((Soundness.isSound(cresult, aresult) && Soundness.isSound(interp, analysis)) == IsSound.Sound)
+        println(": sound")
         1
-      else
+      else {
+        println(s": unsound")
         0
+      }
     } else {
       println(s"${p.getFileName}: no main function")
       -1
@@ -70,7 +73,22 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     assertResult(files)(successful)
   }
 
+
+
+/*
+a1.tip is unsound
+apply2.tip is unsound
+err_unify1.tip is unsound
+ex1.tip is unsound
+ex5.tip is unsound
+interval2.tip is unsound
+map.tip is unsound
+signs_fun.tip is unsound
+signs_fun_cfa.tip is unsound
+
+ */
+  
 //  it should "run this file" in {
-//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/testdiv.tip").toURI();
-//    runFile(Paths.get(uri), 100000)
+//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/ex1.tip").toURI();
+//    runFile(Paths.get(uri), 10000)
 //  }
