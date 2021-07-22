@@ -22,6 +22,9 @@ trait JoinComputation:
       case (Failure(ex1), Failure(ex2)) =>
         throw StarvedJoin(ex1, ex2)
 
+  final def joinComputationsIt[A](as: IterableOnce[() => A]): Join[A] =
+    joinComputationsIt(as.iterator)
+    
   final def joinComputationsIt[A](as: Iterator[() => A]): Join[A] =
     if (as.isEmpty) {
       throw new IllegalArgumentException

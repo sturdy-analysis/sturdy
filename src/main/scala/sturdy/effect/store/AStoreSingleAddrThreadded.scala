@@ -12,7 +12,7 @@ import sturdy.values.JoinValue
  * Internally, the store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreSingleAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using JoinValue[V])
+trait AStoreSingleAddrThreadded[Addr, V](_init: Map[Addr, V])(using JoinValue[V])
   extends Store[Addr, V], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
@@ -22,19 +22,15 @@ trait AStoreSingleAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using J
   override def read[A](x: Addr, found: V => A, notFound: => A): StoreJoined[A] =
     store.get(x) match
       case None => notFound
-      case Some((definite, v)) =>
-        if definite then
-          found(v)
-        else
-          joinValues(found(v), notFound)
+      case Some(v) =>
+        joinValues(found(v), notFound)
 
   override def write(x: Addr, v: V): Unit =
     dirtyAddrs += x
-    store += x -> ((true, v))
+    weakUpdate(x, v)
   
   override def free(x: Addr): Unit =
-    dirtyAddrs -= x
-    store -= x
+    () // nothing
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Addr], vSoundness: Soundness[cV, V]): IsSound = {
     val abstractedKeys = c.getStore.keySet.map(varAbstractly.abstractly)
@@ -47,12 +43,9 @@ trait AStoreSingleAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using J
           Some((k, ak))
       }
       IsSound.NotSound(s"${classOf[AStoreSingleAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
-    } else if (store.exists(e => e._2._1 && !abstractedKeys.contains(e._1))) {
-      val missing = store.filter(_._2._1).keySet -- abstractedKeys
-      IsSound.NotSound(s"${classOf[AStoreSingleAddrThreadded[_, _]].getName}: Expected all definitely bound keys to be bound in concrete environment, but $missing are missing in $store")
     } else {
       c.getStore.foreachEntry { case (x, v) =>
-        val subSound = vSoundness.isSound(v, store(varAbstractly.abstractly(x))._2)
+        val subSound = vSoundness.isSound(v, store(varAbstractly.abstractly(x)))
         if (subSound.isNotSound)
           return subSound
       }

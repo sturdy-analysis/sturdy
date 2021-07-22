@@ -102,10 +102,10 @@ given SignIntOps(using f: Failure, j: JoinComputation): IntOps[IntSign] with
     add(v1, negV2)
 
   def mul(v1: IntSign, v2: IntSign): IntSign = (v1, v2) match
-    case (TopSign, _) => TopSign
-    case (_, TopSign) => TopSign
     case (_, Zero) => Zero
     case (Zero, _) => Zero
+    case (TopSign, _) => TopSign
+    case (_, TopSign) => TopSign
 
     case (Neg, Neg) => Pos
     case (Neg, NegOrZero) => ZeroOrPos

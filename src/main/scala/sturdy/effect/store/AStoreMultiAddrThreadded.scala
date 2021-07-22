@@ -15,7 +15,7 @@ import scala.collection.mutable.ListBuffer
  * Internally, the store tracks dirty addresses that have been (re)writteb to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreMultiAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using JoinValue[V])
+trait AStoreMultiAddrThreadded[Addr, V](_init: Map[Addr, V])(using JoinValue[V])
   extends Store[Powerset[Addr], V], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
@@ -23,39 +23,22 @@ trait AStoreMultiAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using Jo
   override type StoreJoin[A] = JoinValue[A]
   
   override def read[A](xs: Powerset[Addr], found: V => A, notFound: => A): StoreJoined[A] = {
-    var needsNotFound = false
-    var as = ListBuffer[A]()
+    var as = ListBuffer[() => A](() => notFound)
     for (x <- xs.set)
       store.get(x) match
-        case None => needsNotFound = true
-        case Some((definite, v)) =>
-          as += found(v)
-          if !definite then
-            needsNotFound = true
-    if (as.isEmpty)
-      notFound
-    else
-      as.reduce(joinValues)
+        case None => // nothing
+        case Some(v) => as += (() => found(v))
+    joinComputationsIt(as)
   }
 
   override def write(xs: Powerset[Addr], v: V): Unit =
     val addrs = xs.set
     dirtyAddrs ++= addrs
-    if addrs.size == 1 then
-      store += addrs.head -> ((true, v))
-    else for x <- addrs do
-      store.get(x) match
-        case None => store += x -> ((false, v))
-        case Some((_, old)) => store += x -> ((false, joinValues(old, v)))
+    for x <- addrs do
+      weakUpdate(x, v)
 
   override def free(xs: Powerset[Addr]): Unit =
-    val addrs = xs.set
-    if addrs.size == 1 then
-      store -= addrs.head
-    else for x <- addrs do
-      store.get(x) match
-        case None => // nothing
-        case Some((_, old)) => store == x -> ((false, old))
+    () // nothing
 
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Powerset[Addr]], vSoundness: Soundness[cV, V]): IsSound = {
@@ -72,9 +55,6 @@ trait AStoreMultiAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using Jo
           Some(s"abs($k->${kv._2})=$ak")
       }
       IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
-    } else if (store.exists(e => e._2._1 && !abstractedKeys.contains(e._1))) {
-      val missing = store.filter(_._2._1).keySet -- abstractedKeys
-      IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all definitely bound keys to be bound in concrete store, but $missing are missing in $store")
     } else {
       c.getStore.foreachEntry { case (x, v) =>
         val avs = this.read(varAbstractly.abstractly(x), Powerset(_), Powerset.empty)

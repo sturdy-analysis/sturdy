@@ -39,7 +39,7 @@ object SignAnalysis:
   type Context = Statement.Assign
   type Addr = Powerset[Label]
   type Environment =  Map[String, (Boolean, Addr)]
-  type Store = Map[Label, (Boolean, Value)]
+  type Store = Map[Label, Value]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
     with AEnvironmentDynamicScope[String, Addr](initEnvironment)

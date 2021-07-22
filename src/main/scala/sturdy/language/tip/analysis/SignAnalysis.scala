@@ -70,7 +70,7 @@ object SignAnalysis:
     case AllocationSite.LocalBinding(fun, v) => AllocationSiteAddr.Variable(s"${fun.name}:$v")
   )
   type Environment = Map[String, Powerset[Addr]]
-  type Store = Map[Addr, (Boolean, Value)]
+  type Store = Map[Addr, Value]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
       with AEnvironmentStaticScope[String, PowAddr] with CEnvironment[String, PowAddr](initEnvironment)
