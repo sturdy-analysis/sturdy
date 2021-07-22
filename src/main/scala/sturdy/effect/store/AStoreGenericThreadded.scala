@@ -30,7 +30,10 @@ trait AStoreGenericThreadded[Addr, V](using JoinValue[V])
     val joinedResult = super.joinComputations {
       store = snapshot
       dirtyAddrs = Set()
+      
       val fResult = f
+      
+      joinedDirtyAddrs ++= dirtyAddrs
       for (x <- dirtyAddrs) do
         val (definite, newVal) = store(x)
         joinedStore.get(x) match
@@ -40,13 +43,13 @@ trait AStoreGenericThreadded[Addr, V](using JoinValue[V])
             if definite then
               // This binding is definite in f. If g does not definitely bind x, we must later mark this binding as non-definite.
               newDefiniteAddrsInF += x -> ((false, newVal))
-          case Some((_, oldVal)) =>
+          case Some((oldDefinite, oldVal)) =>
             // This binding already existed in store before.
             if definite then
               // This binding is definite in f.
               joinedStore += x -> ((true, newVal))
               // If g does not definitely bind x, we must later mark this binding as non-definite _and_ join it with the old value (which is retained through g).
-              newDefiniteAddrsInF += x -> ((false, joinValues(oldVal, newVal)))
+              newDefiniteAddrsInF += x -> ((oldDefinite, joinValues(oldVal, newVal)))
             else
               // This binding is not definite in f
               joinedStore += x -> ((false, joinValues(oldVal, newVal)))
@@ -54,7 +57,10 @@ trait AStoreGenericThreadded[Addr, V](using JoinValue[V])
     } {
       store = snapshot
       dirtyAddrs = Set()
+      
       val gResult = g
+      
+      joinedDirtyAddrs ++= dirtyAddrs
       for (x <- dirtyAddrs) do
         joinedStore.get(x) match
           case None =>

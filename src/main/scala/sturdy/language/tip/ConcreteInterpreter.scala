@@ -3,7 +3,7 @@ package sturdy.language.tip
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.environment.CEnvironment
-import sturdy.effect.failure.{Failure, CFailure, CFailureException}
+import sturdy.effect.failure.{Failure, CFailure}
 import sturdy.effect.print.CPrint
 import sturdy.effect.store.CStore
 import sturdy.effect.userinput.CUserInput
@@ -80,8 +80,4 @@ class ConcreteInterpreter
   (using fix: Fix)
   (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value],
          functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[Addr, Value])
-  extends GenericInterpreter[Value, Addr, Effects, Fix]:
-
-  def captured[A](f: => A): Either[CFailureException, A] = try Right(f) catch {
-    case ex: CFailureException => Left(ex)
-  }
+  extends GenericInterpreter[Value, Addr, Effects, Fix]

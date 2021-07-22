@@ -59,7 +59,10 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
     val joinedResult = super.joinComputations {
       env = snapshot
       dirtyVars = Set()
+
       val fResult = f
+
+      joinedDirtyVars ++= dirtyVars
       for (x <- dirtyVars) do
         val (definite, newVal) = env(x)
         joinedEnv.get(x) match
@@ -69,13 +72,13 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
             if definite then
             // This binding is definite in f. If g does not definitely bind x, we must later mark this binding as non-definite.
               newDefiniteVarsInF += x -> ((false, newVal))
-          case Some((_, oldVal)) =>
+          case Some((oldDefinite, oldVal)) =>
             // This binding already existed in store before.
             if definite then
               // This binding is definite in f.
               joinedEnv += x -> ((true, newVal))
               // If g does not definitely bind x, we must later mark this binding as non-definite _and_ join it with the old value (which is retained through g).
-              newDefiniteVarsInF += x -> ((false, joinValues(oldVal, newVal)))
+              newDefiniteVarsInF += x -> ((oldDefinite, joinValues(oldVal, newVal)))
             else
             // This binding is not definite in f
               joinedEnv += x -> ((false, joinValues(oldVal, newVal)))
@@ -83,7 +86,10 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
     } {
       env = snapshot
       dirtyVars = Set()
+
       val gResult = g
+
+      joinedDirtyVars ++= dirtyVars
       for (x <- dirtyVars) do
         joinedEnv.get(x) match
           case None =>

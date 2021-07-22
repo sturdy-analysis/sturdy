@@ -32,7 +32,10 @@ trait AStoreMultiAddrThreadded[Addr, V](_init: Map[Addr, (Boolean, V)])(using Jo
           as += found(v)
           if !definite then
             needsNotFound = true
-    as.reduce(joinValues)
+    if (as.isEmpty)
+      notFound
+    else
+      as.reduce(joinValues)
   }
 
   override def write(xs: Powerset[Addr], v: V): Unit =

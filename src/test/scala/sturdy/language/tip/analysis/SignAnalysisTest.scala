@@ -19,37 +19,58 @@ import sturdy.{*, given}
 import sturdy.values.{*, given}
 import sturdy.language.tip.analysis.SignAnalysisSoundness.given
 
-import java.nio.file.{Paths, Files}
+import java.nio.file.{Paths, Files, Path}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.util.{Try, Success, Failure}
 
 class SignAnalysisTest extends AnyFlatSpec, Matchers:
-  
-  "TIP sign analysis" should "runs all example files" in {
-    val steps = 1000
 
+  def runFile(p: Path, steps: Int): Int =
+    val file = Source.fromURI(p.toUri)
+    val sourceCode = file.getLines().mkString("\n")
+    file.close()
+    val program = Parser.parse(sourceCode)
+
+    if (program.funs.exists(_.name == "main")) {
+      println(s"Running ${p.getFileName}")
+
+      val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+      val cresult = interp.effectOps.fallible(interp.execute(program))
+
+      val analysis = SignAnalysis(Map(), Map(), steps)
+      val aresult = analysis.effectOps.fallible(analysis.execute(program))
+
+      given CAllocationIntIncrement[AllocationSite] = interp.effectOps
+//      assertResult(IsSound.Sound)(Soundness.isSound(cresult, aresult))
+//      assertResult(IsSound.Sound)(Soundness.isSound(interp, analysis))
+      if ((Soundness.isSound(cresult, aresult) && Soundness.isSound(interp, analysis)) == IsSound.Sound)
+        1
+      else
+        0
+    } else {
+      println(s"${p.getFileName}: no main function")
+      -1
+    }
+
+  "TIP sign analysis" should "runs all example files" in {
     val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
     val tipDir = Paths.get(uri)
-    Files.list(tipDir).toScala(Iterator).filter(_.toString.endsWith(".tip")).foreach { p =>
-      val file = Source.fromURI(p.toUri)
-      val sourceCode = file.getLines().mkString("\n")
-      file.close()
-      val program = Parser.parse(sourceCode)
-      if (program.funs.exists(_.name == "main")) {
-        println(s"Running ${p.getFileName}")
-
-        val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
-        val cresult = interp.captured(interp.execute(program))
-
-        val analysis = SignAnalysis(Map(), Map(), steps)
-        val aresult = analysis.captured(analysis.execute(program))
-
-        given CAllocationIntIncrement[AllocationSite] = interp.effectOps
-        assertResult(IsSound.Sound)(Soundness.isSound(cresult, aresult))
-        assertResult(IsSound.Sound)(Soundness.isSound(interp, analysis))
-      } else {
-        println(s"${p.getFileName}: no main function")
+    var files = 0
+    var successful = 0
+    Files.list(tipDir).toScala(List).sorted.filter(_.toString.endsWith(".tip")).foreach { p =>
+      val res = runFile(p, 1000)
+      if (res == 1) {
+        files += 1
+        successful += 1
+      } else if (res == 0) {
+        files += 1
       }
     }
+    assertResult(files)(successful)
   }
+
+//  it should "run this file" in {
+//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/testdiv.tip").toURI();
+//    runFile(Paths.get(uri), 100000)
+//  }

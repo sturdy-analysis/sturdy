@@ -30,6 +30,7 @@ object SignAnalysisSoundness:
 
   given PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x, y) match
+      case (_, Value.TopValue) => true
       case (Value.IntValue(i1), Value.IntValue(i2)) => PartialOrder[IntSign].lteq(i1, i2)
       case (Value.RefValue(r1), Value.RefValue(r2)) => PartialOrder[PowAddr].lteq(r1, r2)
       case (Value.FunValue(f1), Value.FunValue(f2)) => PartialOrder[Powerset[Function]].lteq(f1, f2)

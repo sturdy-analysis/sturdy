@@ -28,8 +28,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
   def testSoundness(s: Statement): Assertion =
     val interp = ConcreteInterpreter(Map(), Map())
     val analysis = SignAnalysis(Map(), Map())
-    val cresult = interp.captured(interp.run(s))
-    val aresult = analysis.captured(analysis.run(s))
+    val cresult = interp.effectOps.fallible(interp.run(s))
+    val aresult = analysis.effectOps.fallible(analysis.run(s))
     assertResult(IsSound.Sound)(Soundness.isSound(cresult, aresult))
     assertResult(IsSound.Sound)(Soundness.isSound(interp, analysis))
 

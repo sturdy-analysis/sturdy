@@ -6,3 +6,11 @@ case class CFailureException(kind: FailureKind, msg: String) extends FailureExce
 trait CFailure extends Failure:
   override def fail(kind: FailureKind, msg: String): Nothing =
     throw CFailureException(kind, msg)
+
+  def fallible[A](f: => A): CFallible[A] =
+    try {
+      CFallible.Unfailing(f)
+    } catch {
+      case CFailureException(kind, msg) => CFallible.Failing(kind, msg)
+      case ex => CFallible.Failing(RuntimeFailure, ex.toString)
+    }

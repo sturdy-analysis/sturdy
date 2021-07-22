@@ -4,7 +4,7 @@ import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.AEnvironmentDynamicScope
 import sturdy.effect.store.AStoreMultiAddrThreadded
-import sturdy.effect.failure.{Failure, AFailureCollect, AFailureCollectException}
+import sturdy.effect.failure.{Failure, AFailureCollect}
 import sturdy.fix.CFixpoint
 import sturdy.language.whilelang.{GenericInterpreter, Statement, ConcreteInterpreter}
 import sturdy.util.{Label, given}
@@ -75,8 +75,4 @@ class SignAnalysis
   (using effectOps: Effects)
   (using fix: Fix)
   (using boolOps: BooleanOps[Value], doubleOps: DoubleOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value])
-  extends GenericInterpreter[Value, Addr, Effects, Fix]:
-
-  def captured[A](f: => A): Either[AFailureCollectException, A] = try Right(f) catch {
-    case ex: AFailureCollectException => Left(AFailureCollectException(effectOps.getFailures))
-  }
+  extends GenericInterpreter[Value, Addr, Effects, Fix]

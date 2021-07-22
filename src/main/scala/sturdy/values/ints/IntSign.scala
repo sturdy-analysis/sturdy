@@ -131,6 +131,7 @@ given SignIntOps(using f: Failure, j: JoinComputation): IntOps[IntSign] with
     case Zero => f.fail(IntDivisionByZero, s"$v1 / $v2")
     case ZeroOrPos => j.joinComputations(v1)(f.fail(IntDivisionByZero, s"$v1 / $v2"))
     case NegOrZero => j.joinComputations(v1.negated)(f.fail(IntDivisionByZero, s"$v1 / $v2"))
+    case TopSign => j.joinComputations(TopSign)(f.fail(IntDivisionByZero, s"$v1 / $v2"))
     case _ => mul(v1, v2)
 
 given SignCompareOps: CompareOps[IntSign, Topped[Boolean]] with

@@ -4,7 +4,7 @@ import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.environment.CEnvironment
 import sturdy.effect.store.CStore
-import sturdy.effect.failure.{Failure, CFailure, CFailureException}
+import sturdy.effect.failure.{Failure, CFailure}
 import sturdy.fix.CFixpoint
 import sturdy.values.booleans.{_, given}
 import sturdy.values.doubles.{_, given}
@@ -62,8 +62,4 @@ class ConcreteInterpreter
   (using effectOps: Effects)
   (using fix: Fix)
   (using boolOps: BooleanOps[Value], doubleOps: DoubleOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value])
-  extends GenericInterpreter[Value, Addr, Effects, Fix]:
-
-  def captured[A](f: => A): Either[CFailureException, A] = try Right(f) catch {
-    case ex: CFailureException => Left(ex)
-  }
+  extends GenericInterpreter[Value, Addr, Effects, Fix]
