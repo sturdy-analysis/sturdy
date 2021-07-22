@@ -22,7 +22,7 @@ sealed trait AllocationSiteAddr extends ManageableAddr:
     case AllocationSiteAddr.Variable(name) => AllocationSiteAddr.Variable(name)(false)
 
 object AllocationSiteAddr:
-  case class Alloc(lab: Label) extends AllocationSiteAddr with ManageableAddr(false)
+  case class Alloc(lab: Label)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
   case class Variable(name: String)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
 
 
