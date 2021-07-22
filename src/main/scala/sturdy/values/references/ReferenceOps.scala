@@ -1,5 +1,6 @@
 package sturdy.values.references
 
+import sturdy.effect.JoinComputation
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.values.Powerset
 
@@ -16,7 +17,7 @@ given ConcreteReferenceOps[Addr](using f: Failure): ReferenceOps[Addr, Option[Ad
   def refValue(addr: Addr): Option[Addr] = Some(addr)
   def refAddr(v: Option[Addr]): Addr = v.getOrElse(f.fail(NullDereference, ""))
 
-given PowersetReferenceOps[Addr, V](using ops: ReferenceOps[Addr, V]): ReferenceOps[Powerset[Addr], Powerset[V]] with
+given PowersetReferenceOps[Addr, V](using ops: ReferenceOps[Addr, V], j: JoinComputation): ReferenceOps[Powerset[Addr], Powerset[V]] with
   override def nullValue: Powerset[V] = Powerset(ops.nullValue)
   override def refValue(addr: Powerset[Addr]): Powerset[V] = addr.map(ops.refValue)
   override def refAddr(v: Powerset[V]): Powerset[Addr] = v.map(ops.refAddr)

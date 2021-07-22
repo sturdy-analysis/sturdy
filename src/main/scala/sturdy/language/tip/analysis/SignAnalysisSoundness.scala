@@ -25,7 +25,7 @@ object SignAnalysisSoundness:
       case ConcreteInterpreter.Value.IntValue(d) => Value.IntValue(Abstractly.abstractly(d))
       case ConcreteInterpreter.Value.RefValue(caddr) => caddr match
         case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
-        case Some(ca) => Value.RefValue(Abstractly.abstractly(ca).map(AllocationSiteRef.Addr.apply))
+        case Some(ca) => Value.RefValue(Abstractly.abstractly(ca).pureMap(AllocationSiteRef.Addr.apply))
       case ConcreteInterpreter.Value.FunValue(fun) => Value.FunValue(Powerset(fun))
 
   given PartialOrder[Value] with

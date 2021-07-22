@@ -35,7 +35,7 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
         case Some(v) => as += (() => found(v))
     if (needsNotFound)
       as += (() => notFound)
-    joinComputationsIt(as)
+    joinComputationsIterable(as)
   }
 
   override def write(xs: Powerset[Addr], v: V): Unit =

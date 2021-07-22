@@ -25,7 +25,7 @@ trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
   
   override def joinComputations[A](f: => A)(g: => A): Join[A] =
     val snapshot = store
-    var joinedDirtyAddrs = dirtyAddrs
+    var snapshotDirtyAddrs = dirtyAddrs
     dirtyAddrs = Set()
 
     var fStore: Map[Addr, V] = null
@@ -41,9 +41,9 @@ trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
     }
 
     for (x <- fDirtyAddrs)
-      store.get(x) match
-        case None => store += x -> fStore(x)
-        case Some(gVal) => store += x -> j.joinValues(fStore(x), gVal)
+      weakUpdate(x, fStore(x))
+
+    dirtyAddrs ++= snapshotDirtyAddrs
     dirtyAddrs ++= fDirtyAddrs
 
     joinedResult

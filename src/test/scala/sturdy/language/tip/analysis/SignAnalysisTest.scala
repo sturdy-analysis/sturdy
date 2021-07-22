@@ -15,6 +15,7 @@ import sturdy.language.whilelang.ConcreteInterpreter.*
 import sturdy.language.whilelang.ConcreteInterpreter.Value.*
 
 import sturdy.effect.failure.given
+import sturdy.util.Labeled
 import sturdy.{*, given}
 import sturdy.values.{*, given}
 import sturdy.language.tip.analysis.SignAnalysisSoundness.given
@@ -55,13 +56,15 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.effectOps.fallible(interp.execute(program))
+//      println("\n" + interp.effectOps.getStore)
+//      println(interp.effectOps.getAddressContexts.map{case (i,AllocationSite.Alloc(a)) => (i,a.label); case a => a})
 
       val analysis = SignAnalysis(Map(), Map(), steps)
       val aresult = analysis.effectOps.fallible(analysis.execute(program))
 
       given CAllocationIntIncrement[AllocationSite] = interp.effectOps
-//      assertResult(IsSound.Sound)(Soundness.isSound(cresult, aresult))
-//      assertResult(IsSound.Sound)(Soundness.isSound(interp, analysis))
+      assertResult(IsSound.Sound)(Soundness.isSound(cresult, aresult))
+      assertResult(IsSound.Sound)(Soundness.isSound(interp, analysis))
       if ((Soundness.isSound(cresult, aresult) && Soundness.isSound(interp, analysis)) == IsSound.Sound)
         println(": sound")
         1
@@ -97,9 +100,12 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
 
 //  it should "run this file" in {
-//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/signs.tip").toURI();
-//    val (res, effects) = runAnalysis(Paths.get(uri), 10000)
+//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/a1.tip").toURI();
+//    val (res, effects) = runAnalysis(Paths.get(uri), 1000)
 //    println(res)
 //    println(effects.getEnv)
 //    println(effects.getStore)
+//
+//    Labeled.reset()
+//    runFile(Paths.get(uri), 1000)
 //  }

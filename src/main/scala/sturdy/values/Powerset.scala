@@ -2,12 +2,15 @@ package sturdy.values
 
 import sturdy.IsSound
 import sturdy.Soundness
+import sturdy.effect.JoinComputation
 import sturdy.values.relational.EqOps
 
 case class Powerset[A](val set: Set[A]) extends AnyVal {
   def size: Int = set.size
   def ++(that: Powerset[A]) = Powerset(this.set ++ that.set)
-  def map[B](f: A => B): Powerset[B] = Powerset(set.map(f))
+  def pureMap[B](f: A => B): Powerset[B] = Powerset(set.map(f))
+  def map[B](f: A => B)(using j: JoinComputation): Powerset[B] =
+    j.joinComputationsIterable(set.map(a => () => Powerset(f(a))))
   override def toString: String = s"Powerset(${set.mkString(", ")})"
 }
 object Powerset {
