@@ -26,10 +26,9 @@ trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(
         if (x.isManaged)
           found(v)
         else
-          joinValues(found(v), notFound)
+          joinComputations(found(v))(notFound)
 
   override def write(x: Addr, v: V): Unit =
-    dirtyAddrs += x
     weakUpdate(x, v)
   
   override def free(x: Addr): Unit =

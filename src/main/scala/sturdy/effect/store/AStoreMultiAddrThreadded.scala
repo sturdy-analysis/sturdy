@@ -40,7 +40,6 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
 
   override def write(xs: Powerset[Addr], v: V): Unit =
     val addrs = xs.set
-    dirtyAddrs ++= addrs
     for x <- addrs do
       weakUpdate(x, v)
 

@@ -9,7 +9,7 @@ import scala.collection.mutable.ListBuffer
  * An abstract threadded store. The store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreGenericThreadded[Addr, V](using JoinValue[V])
+trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
   extends JoinComputation:
 
   protected var store: Map[Addr, V] = Map()
@@ -17,10 +17,11 @@ trait AStoreGenericThreadded[Addr, V](using JoinValue[V])
 
   def getStore: Map[Addr, V] = store
 
-  protected def weakUpdate(x: Addr, v: V)(using JoinValue[V]): Unit =
+  protected def weakUpdate(x: Addr, v: V): Unit =
+    dirtyAddrs += x
     store.get(x) match
       case None => store += x -> v
-      case Some(old) => store += x -> joinValues(old, v)
+      case Some(old) => store += x -> j.joinValues(old, v)
   
   override def joinComputations[A](f: => A)(g: => A): Join[A] =
     val snapshot = store
@@ -42,7 +43,7 @@ trait AStoreGenericThreadded[Addr, V](using JoinValue[V])
     for (x <- fDirtyAddrs)
       store.get(x) match
         case None => store += x -> fStore(x)
-        case Some(gVal) => store += x -> joinValues(fStore(x), gVal)
+        case Some(gVal) => store += x -> j.joinValues(fStore(x), gVal)
     dirtyAddrs ++= fDirtyAddrs
 
     joinedResult

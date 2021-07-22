@@ -16,7 +16,7 @@ trait JoinComputation:
    */
   def joinComputations[A](f: => A)(g: => A): Join[A] =
     (Try(f), Try(g)) match
-      case (Success(a1), Success(a2)) => joinValues(a1, a2)
+      case (Success(a1), Success(a2)) => summon[JoinValue[A]].joinValues(a1, a2)
       case (Success(a1), _) => a1
       case (_, Success(a2)) => a2
       case (Failure(ex1), Failure(ex2)) =>
@@ -40,9 +40,6 @@ trait JoinComputation:
           joinComputations(a1())(joinComputationsIt(as))
       }
     }
-
-  final def joinValues[A](a1: A, a2: A)(using j: JoinValue[A]) =
-    j.joinValues(a1, a2)
 
 object JoinComputation:
   case class StarvedJoin(ex1: Throwable, ex2: Throwable) extends Throwable(s"Starved Join with $ex1 and $ex2")
