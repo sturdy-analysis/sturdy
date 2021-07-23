@@ -9,7 +9,7 @@ import sturdy.effect.print.APrintPrefix
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
-import sturdy.fix.AFixpointFuel
+import sturdy.fix
 import sturdy.language.tip.{Function, GenericInterpreter}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
@@ -79,15 +79,10 @@ object SignAnalysis:
       with APrintPrefix[Value]
       with AUserInput[Value](IntValue(IntSign.TopSign))
       with AFailureCollect
-  type Fix = AFixpointFuel[FixIn[Value], FixOut[Value]]
+//  type Fix = FixUnwind[FixIn[Value], FixOut[Value]]
 
   def apply(initEnvironment: Environment, initStore: Store, steps: Int): SignAnalysis = {
     val effects = new Effects(initEnvironment, initStore)
-    val fixpoint = new AFixpointFuel[FixIn[Value], FixOut[Value]](steps, {
-      case FixIn.Eval(_) => FixOut.Eval(Value.TopValue)
-      case FixIn.Run(_) => FixOut.Run(())
-      case FixIn.Call(_, _) => FixOut.Call(Value.TopValue)
-    })
 
     given JoinComputation = effects
     given Failure = effects
@@ -104,14 +99,19 @@ object SignAnalysis:
     given FunctionOps[Function, Value, Value, Value] = new LiftedFunctionOps[Function, Value, Value, Value, Powerset[Function]](_.asFunction, FunValue.apply)
     given ReferenceOps[PowAddr, Value] = new LiftedReferenceOps[Value, Powerset[AllocationSiteAddr], Powerset[AllocationSiteRef]](_.asReference, RefValue.apply)
 
-    new SignAnalysis(using effects)(using fixpoint)
+    new SignAnalysis(steps)(using effects)
   }
 
 import SignAnalysis.*
 
-class SignAnalysis
+class SignAnalysis(steps: Int)
   (using effectOps: Effects)
-  (using fix: Fix)
   (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value],
    functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[PowAddr, Value])
-    extends GenericInterpreter[Value, PowAddr, Effects, Fix]
+    extends GenericInterpreter[Value, PowAddr, Effects]:
+
+  val phi = fix.unwind(steps, fix.const[FixIn[Value], FixOut[Value]]({
+    case FixIn.Eval(_) => FixOut.Eval(Value.TopValue)
+    case FixIn.Run(_) => FixOut.Run(())
+    case FixIn.Call(_, _) => FixOut.Call(Value.TopValue)
+  }))

@@ -5,7 +5,7 @@ import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.AEnvironmentDynamicScope
 import sturdy.effect.store.{AStoreMultiAddrThreadded, ManageableAddr}
 import sturdy.effect.failure.{Failure, AFailureCollect}
-import sturdy.fix.CFixpoint
+import sturdy.fix
 import sturdy.language.whilelang.{GenericInterpreter, Statement, ConcreteInterpreter}
 import sturdy.util.{Label, given}
 import sturdy.values.{*, given}
@@ -14,6 +14,8 @@ import sturdy.values.doubles.{_, given}
 import sturdy.values.relational.{_, given}
 import sturdy.values.{Topped, given}
 import sturdy.values.Topped.{_, given}
+
+import GenericInterpreter.GenericPhi
 
 object SignAnalysis:
   enum Value:
@@ -48,11 +50,9 @@ object SignAnalysis:
     with AStoreMultiAddrThreadded[Addr, Value](initStore)
     with AAllocationFromContext[Context, PowAddr](a => Powerset(Addr(a.label)))
     with AFailureCollect
-  type Fix = CFixpoint[Statement, Unit]
 
   def apply(initEnvironment: Environment, initStore: Store): SignAnalysis = {
     val effects = new Effects(initEnvironment, initStore)
-    val fixpoint = new CFixpoint[Statement, Unit]
 
     given BooleanOps[Value] = new LiftedBooleanOps[Value, Topped[Boolean]](_.asBoolean, BooleanValue.apply)
     given DoubleOps[Value] = new LiftedDoubleOps[Value, DoubleSign](_.asDouble, DoubleValue.apply)
@@ -69,12 +69,14 @@ object SignAnalysis:
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
     )
 
-    new SignAnalysis(using effects)(using fixpoint) {}
+    new SignAnalysis(using effects) {}
   }
 
 import SignAnalysis.*
 class SignAnalysis
   (using effectOps: Effects)
-  (using fix: Fix)
   (using boolOps: BooleanOps[Value], doubleOps: DoubleOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value])
-  extends GenericInterpreter[Value, PowAddr, Effects, Fix]
+  extends GenericInterpreter[Value, PowAddr, Effects]:
+
+  val phi = fix.identity[Statement, Unit]
+  

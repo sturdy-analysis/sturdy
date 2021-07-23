@@ -5,11 +5,13 @@ import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.environment.CEnvironment
 import sturdy.effect.store.CStore
 import sturdy.effect.failure.{Failure, CFailure}
-import sturdy.fix.CFixpoint
+import sturdy.fix
 import sturdy.values.booleans.{_, given}
 import sturdy.values.doubles.{_, given}
 import sturdy.values.relational.{_, given}
 import sturdy.values.given
+
+import GenericInterpreter.GenericPhi
 
 object ConcreteInterpreter:
   enum Value:
@@ -34,11 +36,9 @@ object ConcreteInterpreter:
     with CStore[Int, Value](initStore)
     with CAllocationIntIncrement[Statement.Assign]
     with CFailure
-  type Fix = CFixpoint[Statement, Unit]
 
   def apply(initEnvironment: Environment, initStore: Store): ConcreteInterpreter = {
     val effects = new Effects(initEnvironment, initStore)
-    val fixpoint = new CFixpoint[Statement, Unit]
 
     given BooleanOps[Value] = new LiftedBooleanOps[Value, Boolean](_.asBoolean, BooleanValue.apply)
     given DoubleOps[Value] = new LiftedDoubleOps[Value, Double](_.asDouble, DoubleValue.apply)
@@ -53,13 +53,14 @@ object ConcreteInterpreter:
         case (DoubleValue(d1), DoubleValue(d2)) => BooleanValue(d1 != d2)
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
-    new ConcreteInterpreter(using effects)(using fixpoint)
+    new ConcreteInterpreter(using effects)
   }
 
 import ConcreteInterpreter.*
 
 class ConcreteInterpreter
   (using effectOps: Effects)
-  (using fix: Fix)
   (using boolOps: BooleanOps[Value], doubleOps: DoubleOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value])
-  extends GenericInterpreter[Value, Addr, Effects, Fix]
+  extends GenericInterpreter[Value, Addr, Effects]:
+
+  val phi = fix.identity[Statement, Unit]

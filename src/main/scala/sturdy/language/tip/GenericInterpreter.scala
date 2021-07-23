@@ -12,7 +12,7 @@ import sturdy.values.booleans.BooleanOps
 import sturdy.values.ints.IntOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.relational.{EqOps, CompareOps}
-import sturdy.fix.Fixpoint
+import sturdy.fix
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
@@ -45,11 +45,12 @@ object GenericInterpreter:
     case Run(u: Unit)
     case Call(ret: V)
 
+  type GenericPhi[V] = fix.Combinator[FixIn[V], FixOut[V]]
+
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fixpoint[FixIn[V], FixOut[V]]]
+trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   (using val effectOps: Effects)
-  (using val fixpoint: Fix)
   (using intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V])
   (using effectOps.EnvJoin[V], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
@@ -60,9 +61,11 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
   import functionOps._
   import refOps._
 
+  val phi: GenericPhi[V]
+
   private var functions: Map[String, Function] = Map()
 
-  private val fixed: fixpoint.Fixed = fixpoint.fix { rec =>
+  private lazy val fixed = fix.Fixpoint { (rec: FixIn[V] => FixOut[V]) =>
     def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
     def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run(u) => u; case _ => throw new IllegalStateException()}
     def call(f: Function, args: Seq[V]): V = rec(FixIn.Call(f, args)) match {case FixOut.Call(ret) => ret; case _ => throw new IllegalStateException()}
@@ -149,7 +152,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
       }
     }
 
-    dom => dom match {
+    phi {
       case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
       case FixIn.Run(s) => FixOut.Run(run_open(s))
       case FixIn.Call(f, args) => FixOut.Call(call_open(f, args))

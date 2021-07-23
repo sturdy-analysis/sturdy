@@ -1,6 +1,5 @@
 package sturdy.fix
 
-trait Fixpoint[Dom, Codom] {
-  type Fixed = Dom => Codom
-  def fix(f: Fixed => Fixed): Fixed
-}
+object Fixpoint:
+  def apply[Dom, Codom](f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
+    f(dom => apply(f)(dom))

@@ -11,7 +11,7 @@ import sturdy.values.doubles.DoubleOps
 import sturdy.values.doubles.DoubleOps
 import Expr.*
 import Statement.*
-import sturdy.fix.Fixpoint
+import sturdy.fix
 import sturdy.values.relational.*
 
 object GenericInterpreter:
@@ -21,15 +21,16 @@ object GenericInterpreter:
     Store[Addr, V] with
     Allocation[Addr, Assign] with
     Failure
+  
+  type GenericPhi = fix.Combinator[Statement, Unit] 
 
   case object UnboundVariable extends FailureKind
   case object UnboundAddr extends FailureKind
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fixpoint[Statement, Unit]]
+trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   (using val effectOps: Effects)
-  (using val fixpoint: Fix)
   (using val boolOps: BooleanOps[V], doubleOps: DoubleOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V])
   (using effectOps.EnvJoin[V], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
@@ -39,6 +40,8 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
   import eqOps._
   import effectOps._
 
+  val phi: GenericPhi
+  
   def eval(e: Expr): V = e match {
     case Var(x) =>
       lookupOrElseAndThen(x, fail(UnboundVariable, x)) { addr =>
@@ -58,7 +61,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
     case RandomDouble() => randomDouble()
   }
 
-  private val fixed: fixpoint.Fixed = fixpoint.fix { fixed =>
+  private lazy val fixed = fix.Fixpoint { (fixed: Statement => Unit) =>
     inline def run(s: Statement): Unit = fixed(s)
 
     def run_open(s: Statement): Unit = s match
@@ -78,7 +81,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Fix <: Fix
       case Block(body) =>
         body.foreach(run(_))
 
-    run_open(_)
+    phi(run_open(_))
   }
 
   def run = fixed

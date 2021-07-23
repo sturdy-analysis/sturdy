@@ -7,7 +7,7 @@ import sturdy.effect.failure.{Failure, CFailure}
 import sturdy.effect.print.CPrint
 import sturdy.effect.store.CStore
 import sturdy.effect.userinput.CUserInput
-import sturdy.fix.CFixpoint
+import sturdy.fix
 import sturdy.values.booleans.{_, given}
 import sturdy.values.ints.{_, given}
 import sturdy.values.functions.{_, given}
@@ -15,7 +15,7 @@ import sturdy.values.references.{_, given}
 import sturdy.values.relational.{_, given}
 import sturdy.values.given
 
-import sturdy.language.tip.GenericInterpreter.*
+import GenericInterpreter.{AllocationSite, GenericPhi, FixIn, FixOut}
 
 object ConcreteInterpreter:
   enum Value:
@@ -51,11 +51,9 @@ object ConcreteInterpreter:
       with CPrint[Value]
       with CUserInput[Value](nextInput)
       with CFailure
-  type Fix = CFixpoint[FixIn[Value], FixOut[Value]]
 
   def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): ConcreteInterpreter = {
     val effects = new Effects(initEnvironment, initStore, nextInput)
-    val fixpoint = new CFixpoint[FixIn[Value], FixOut[Value]]
 
     given Failure = effects
     given IntOps[Value] = new LiftedIntOps[Value, Int](_.asInt, IntValue.apply)
@@ -70,14 +68,16 @@ object ConcreteInterpreter:
     given FunctionOps[Function, Value, Value, Value] = new LiftedFunctionOps[Function, Value, Value, Value, Function](_.asFunction, FunValue.apply)
     given ReferenceOps[Addr, Value] = new LiftedReferenceOps[Value, Addr, Option[Addr]](_.asReference, RefValue.apply)
 
-    new ConcreteInterpreter(using effects)(using fixpoint)
+    new ConcreteInterpreter(using effects)
   }
 
 import ConcreteInterpreter.*
 
 class ConcreteInterpreter
   (using effectOps: Effects)
-  (using fix: Fix)
   (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value],
          functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[Addr, Value])
-  extends GenericInterpreter[Value, Addr, Effects, Fix]
+  extends GenericInterpreter[Value, Addr, Effects]:
+
+  val phi = fix.identity[FixIn[Value], FixOut[Value]]
+
