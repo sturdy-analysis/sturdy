@@ -32,7 +32,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
       println(s"${p.getFileName}: no main function")
     }
 
-  "TIP interpreter" should "runs all example files" in {
+  "TIP interpreter" should "run all example files" in {
     val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tip").toURI();
     val tipDir = Paths.get(uri)
     Files.list(tipDir).toScala(List).sorted.filter(_.toString.endsWith(".tip")).foreach { p =>

@@ -56,7 +56,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.effectOps.fallible(interp.execute(program))
-//      println("\n" + interp.effectOps.getStore)
+//      println("\n" + cresult)
+//      println(interp.effectOps.getStore)
 //      println(interp.effectOps.getAddressContexts.map{case (i,AllocationSite.Alloc(a)) => (i,a.label); case a => a})
 
       val analysis = SignAnalysis(Map(), Map(), steps)
@@ -80,7 +81,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
 
 
-  "TIP sign analysis" should "runs all example files" in {
+  "TIP sign analysis" should "run all example files" in {
     val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
     val tipDir = Paths.get(uri)
     var files = 0
@@ -97,10 +98,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     assertResult(files)(successful)
   }
 
-
-
 //  it should "run this file" in {
-//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/a1.tip").toURI();
+//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/copyconst.tip").toURI();
 //    val (res, effects) = runAnalysis(Paths.get(uri), 1000)
 //    println(res)
 //    println(effects.getEnv)
