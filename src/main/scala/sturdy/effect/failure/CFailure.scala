@@ -13,5 +13,6 @@ trait CFailure extends Failure:
       CFallible.Unfailing(res)
     } catch {
       case CFailureException(kind, msg) => CFallible.Failing(kind, msg)
+      case ex: StackOverflowError => throw ex
       case ex => CFallible.Failing(RuntimeFailure, ex.toString)
     }

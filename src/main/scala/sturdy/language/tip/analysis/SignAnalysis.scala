@@ -5,7 +5,7 @@ import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.{AEnvironmentStaticScope, CEnvironment}
 import sturdy.effect.failure.{AFailureCollect, Failure}
-import sturdy.effect.print.APrint
+import sturdy.effect.print.APrintPrefix
 import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
@@ -76,7 +76,7 @@ object SignAnalysis:
       with AEnvironmentStaticScope[String, PowAddr] with CEnvironment[String, PowAddr](initEnvironment)
       with AStoreMultiAddrThreadded[Addr, Value](initStore)
       with AAllocationFromContext[AllocationSite, PowAddr](fromAllocationSite)
-      with APrint[Value]
+      with APrintPrefix[Value]
       with AUserInput[Value](IntValue(IntSign.TopSign))
       with AFailureCollect
   type Fix = AFixpointFuel[FixIn[Value], FixOut[Value]]

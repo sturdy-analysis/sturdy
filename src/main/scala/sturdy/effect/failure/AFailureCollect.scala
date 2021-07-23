@@ -34,5 +34,6 @@ trait AFailureCollect extends Failure with JoinComputation:
         AFallible.MaybeFailing(res, Powerset(failures.toSet))
     } catch {
       case AFailureCollectException => AFallible.Failing(Powerset(failures.toSet))
+      case ex: StackOverflowError => throw ex
       case ex => AFallible.Failing(Powerset(failures.toSet + (RuntimeFailure -> ex.toString)))
     }
