@@ -13,6 +13,11 @@ given ToppedCertainCompareOps[V, B](using ops: CompareOps[V, B]): CompareOps[Top
     for (d1 <- v1; d2 <- v2) yield ops.ge(d1, d2)
   override def gt(v1: Topped[V], v2: Topped[V]): Topped[B] =
     for (d1 <- v1; d2 <- v2) yield ops.gt(d1, d2)
+  def isZero(v1: Topped[V]): Topped[B] = ???
+  def isPositive(v1: Topped[V]): Topped[B] = ???
+  def isNegative(v1: Topped[V]): Topped[B] = ???
+  def isOdd(v1: Topped[V]): Topped[B] = ???
+  def isEven(v1: Topped[V]): Topped[B] = ???
 
 given ToppedUncertainCompareOps[V, B](using ops: CompareOps[V, Topped[B]]): CompareOps[Topped[V], Topped[B]] with
   override def lt(v1: Topped[V], v2: Topped[V]): Topped[B] =
@@ -23,3 +28,9 @@ given ToppedUncertainCompareOps[V, B](using ops: CompareOps[V, Topped[B]]): Comp
     for (d1 <- v1; d2 <- v2; r <- ops.ge(d1, d2)) yield r
   override def gt(v1: Topped[V], v2: Topped[V]): Topped[B] =
     for (d1 <- v1; d2 <- v2; r <- ops.gt(d1, d2)) yield r
+  def isZero(v1: Topped[V]): Topped[B] = ???
+  def isPositive(v1: Topped[V]): Topped[B] = ???
+  def isNegative(v1: Topped[V]): Topped[B] = ???
+  def isOdd(v1: Topped[V]): Topped[B] = ???
+  def isEven(v1: Topped[V]): Topped[B] = ???
+

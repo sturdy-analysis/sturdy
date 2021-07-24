@@ -140,6 +140,11 @@ given SignCompareOps: CompareOps[Sign, Topped[Boolean]] with
     case _ => Top
   def ge(v1: Sign, v2: Sign): Topped[Boolean] = lt(v2, v1)
   def gt(v1: Sign, v2: Sign): Topped[Boolean] = le(v2, v1)
+  def isZero(v1: Sign): Topped[Boolean] = ???
+  def isPositive(v1: Sign): Topped[Boolean] = ???
+  def isNegative(v1: Sign): Topped[Boolean] = ???
+  def isOdd(v1: Sign): Topped[Boolean] = ???
+  def isEven(v1: Sign): Topped[Boolean] = ???
 
 given SignEqOps: EqOps[Sign, Topped[Boolean]] with
   def equ(v1: Sign, v2: Sign): Topped[Boolean] = (v1, v2) match

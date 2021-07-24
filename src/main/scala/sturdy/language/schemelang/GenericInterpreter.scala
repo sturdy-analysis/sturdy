@@ -1,0 +1,242 @@
+package sturdy.language.schemelang
+
+import sturdy.effect.allocation.Allocation
+import sturdy.effect.branching.BoolBranching
+import sturdy.effect.closure.Closure
+import sturdy.effect.environment.Environment
+import sturdy.effect.failure.Failure
+import sturdy.effect.store.Store
+import sturdy.fix.Fixpoint
+import sturdy.language.schemelang.*
+import Literal._
+import Expr._
+import Op1Kinds._
+import Op2Kinds._
+import OpVarKinds._
+import sturdy.util.Label
+import sturdy.values.ints.IntOps
+import sturdy.values.doubles.DoubleOps
+import sturdy.values.booleans.BooleanOps
+import sturdy.values.chars.CharOps
+import sturdy.values.rational.RationalOps
+import sturdy.values.strings.StringOps
+import sturdy.values.symbols.SymbolOps
+import sturdy.values.quotes.QuoteOps
+import sturdy.values.void.VoidOps
+import sturdy.values.types.TypeOps
+import sturdy.values.closure.ClosureOps
+import sturdy.values.relational.*
+
+type EffectfulOps[V, Addr] =
+  BoolBranching[V] with
+  Closure[Expr, (Expr, Map[String, Addr])] with
+  Environment[String, Addr] with
+  Store[Addr, V] with
+  Allocation[Addr, Label] with
+  Failure
+
+trait GenericInterpreter[V, Addr , Effects <: EffectfulOps[V, Addr], Fix <: Fixpoint[List[Expr], V]]
+  (using val effectOps: Effects)
+  (using val fix: Fix)
+  (using val intOps: IntOps[V],
+             boolOps: BooleanOps[V],
+             eqOps: EqOps[V, V], compareOps: CompareOps[V, V],
+             charOps: CharOps[V], stringOps: StringOps[V],
+             symbolOps: SymbolOps[V], quoteOps: QuoteOps[Literal, V],
+             voidOps: VoidOps[V], typeOps: TypeOps[V], closureOps: ClosureOps[Expr, String, Addr, V]
+  )
+  (using effectOps.EnvJoin[V], effectOps.EnvJoin[Addr], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit],
+   effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[V], effectOps.ClsJoin[V]):
+
+  import intOps._
+  import boolOps._
+  import eqOps._
+  import charOps._
+  import stringOps._
+  import symbolOps._
+  import quoteOps._
+  import effectOps._
+  import voidOps._
+  import closureOps._
+  import compareOps._
+
+  def lit(literal: Literal): V = literal match {
+    case IntLit(i) => intLit(i)
+    case BoolLit(b) => boolLit(b)
+    case CharLit(c) => charLit(c)
+    case StringLit(str) => stringLit(str)
+    case SymbolLit(sym) => symbolLit(sym)
+    case QuoteLit(qot) => quoteLit(qot)
+  }
+
+  def op1(op: Op1Kinds, v: V): V = op match {
+    case IsNumber => typeOps.isNumber(v)
+    case IsInteger => typeOps.isInteger(v)
+    case IsDouble => typeOps.isDouble(v)
+    case IsRational => typeOps.isRational(v)
+    case IsZero => isZero(v)
+    case IsPositive => isPositive(v)
+    case IsNegative => isNegative(v)
+    case IsOdd => isOdd(v)
+    case IsEven => isEven(v)
+    case IsNull => typeOps.isNull(v)
+    case IsCons => typeOps.isCons(v)
+    case IsBoolean => typeOps.isBoolean(v)
+
+    case Abs => abs(v)
+    case Floor => floor(v)
+    case Ceiling => ceiling(v)
+
+    case Not => not(v)
+
+    case Car => ???
+    case Cdr => ???
+    case Caar => ???
+    case Cadr => ???
+    case Caddr => ???
+    case Cadddr => ???
+
+    case NumberToString => ???
+    case StringToSymbol => ???
+    case SymbolToString => ???
+
+    case Random => ???
+  }
+
+  // TODO
+  def op2(op: Op2Kinds, v1: V, v2: V): V = op match {
+    case Eqv => ???
+
+    case Quotient => quotient(v1, v2)
+    case Remainder => remainder(v1, v2)
+    case Modulo => modulo(v1, v2)
+
+    case StringRef => ???
+  }
+
+
+  // TODO
+  def opVar(op: OpVarKinds, vs: List[V]): V = op match {
+    case Equal => ???
+    case Smaller => helpFoldBool(vs, lt)
+    case Greater => helpFoldBool(vs, gt)
+    case SmallerEqual => helpFoldBool(vs, le)
+    case GreaterEqual => helpFoldBool(vs, ge)
+    case Max => vs.tail.fold(vs.head){max}
+    case Min => vs.tail.fold(vs.head){min}
+    case Add => vs.tail.fold(vs.head){add}
+    case Mul => vs.tail.fold(vs.head){mul}
+    case Sub => vs.tail.fold(vs.head){sub}
+    case Div => vs.tail.fold(vs.head){div}
+    case Gcd => vs.tail.fold(vs.head){gcd}
+    case Lcm => vs.tail.fold(vs.head){lcm}
+    case StringAppend => ???
+  }
+
+  // TODO
+  def eval(_run: List[Expr] => V): (Expr => V) = {
+    case Lit(l) => lit(l)
+    case Nil_ => ???
+    case Cons(e1, e2) => ???
+    case Begin(es) => _run(es)
+    case AppFoo(e1, e2) =>
+      val foo = _run(List(e1))
+      val args = for e <- e2 yield (_run(List(e)),e)
+      apply(applyClosure, valToClosure(foo), (args,_run))
+    case Apply(es) => _run(es)
+    case Var(x) => {
+      lookupOrElseAndThen(x, fail(s"(var): variable $x does not exist in environment")) {
+        addr => readOrElse(addr, fail(s"(var): address $addr does not exist in store "))
+      }
+    }
+    case e@Lam(names, body) => closureToVal(closure(e))
+    case Let(bnds, body) => {
+      val vs = evalBindings(_run, bnds)
+      bindLocal_(vs){ _run(body) }
+    }
+    case LetRec(bnds, body) => {
+      val addrs = for (_, e) <- bnds yield alloc(e.label)
+      val envbnds =  for (x, _) <- bnds; addr <- addrs yield (x, addr)
+      val storebnds = for (_, e) <- bnds; addr <- addrs yield (addr, e)
+      bindLocal_(envbnds){ evalBindings_(_run, storebnds, body) }
+    }
+    case s@Set_(x, e) => _run(List(s))
+    case s@Define(x, e) => _run(List(s))
+    case If(e1, e2, e3) => {
+      val v = _run(List(e1))
+      boolBranch(v, _run(List(e2)), _run(List(e3)))
+    }
+    case Op1(op, e) => op1(op, _run(List(e)))
+    case Op2(op, e1, e2) => op2(op, _run(List(e1)), _run(List(e2)))
+    case OpVar(op, es) => {
+      val vs = for e <- es yield _run(List(e))
+      opVar(op, vs)
+    }
+    case Error(s) => fail(s"error: $s")
+  }
+
+  def run(_eval: Expr => V, _run: List[Expr] => V): (List[Expr] => V) = {
+    case Set_(x, e) :: rest => {
+      val addr = lookupOrElse(x, fail(s"(set!): cannot set variable $x before its definition"))
+      val v = _run(List(e))
+      write(addr, v)
+      _run(rest)
+    }
+    case (s@Define(x, e)) :: rest => {
+      val addr = alloc(s.label)
+      bindLocal(x, addr) {
+        val v = _run(List(e))
+        write(addr, v)
+        _run(rest)
+      }
+    }
+    case e::List() => _eval(e)
+    case List() => void()
+    case e::rest => {
+      _eval(e)
+      _run(rest)
+    }
+  }
+
+  lazy val runFixed: List[Expr] => V = {
+    fix.fix(_run => run( eval(_run), _run))
+  }
+
+  def applyClosure(expr: Expr, args: (List[(V, Expr)], (List[Expr] => V))): V = {
+    expr match {
+      case Lam(xs, body) =>
+        if (xs.length == args._1.length) {
+          //TODO: fix address allocation to take variable names into account
+          val addrs = for arg <- args._1 yield alloc(arg._2.label)
+          for addr <- addrs; arg <- args._1 yield write(addr, arg._1)
+          val bnds = for x <- xs; addr <- addrs yield (x, addr)
+          bindLocal_(bnds) {
+            args._2(List(Apply(body)))
+          }
+        } else fail (s"(applyClosure): applied function $expr with %i arguments to %i  arguments".format(xs.length, args._1.length))
+      case _ => fail(s"(applyClosure): expected a function, but got $expr")
+    }
+  }
+
+  def evalBindings(_run: List[Expr] => V, bnds: List[(String, Expr)]): List[(String, Addr)] =  {
+    for (x, e) <- bnds yield {
+      val v = _run(List(e))
+      val addr = alloc(e.label)
+      write(addr, v)
+      (x, addr)
+    }
+  }
+
+  def evalBindings_(_run: List[Expr] => V, bnds: List[(Addr, Expr)], body: List[Expr]): V = {
+    for (addr, e) <- bnds yield {
+      val v = _run(List(e))
+      write(addr, v)
+    }
+    _run(body)
+  }
+
+  def helpFoldBool(vs: List[V], op: (V, V) => V): V = {
+    val bools = for v <- vs.tail yield op(vs.head, v)
+    bools.tail.fold(bools.head){and}
+  }
+

@@ -51,6 +51,11 @@ given IntervalCompareOps: CompareOps[DoubleInterval, Topped[Boolean]] with
     else Top
   def ge(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] = lt(iv2, iv1)
   def gt(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] = le(iv2, iv1)
+  def isZero(v1: DoubleInterval): Topped[Boolean] = ???
+  def isPositive(v1: DoubleInterval): Topped[Boolean] = ???
+  def isNegative(v1: DoubleInterval): Topped[Boolean] = ???
+  def isOdd(v1: DoubleInterval): Topped[Boolean] = ???
+  def isEven(v1: DoubleInterval): Topped[Boolean] = ???
 
 given IntervalEqOps: EqOps[DoubleInterval, Topped[Boolean]] with
   override def equ(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =
