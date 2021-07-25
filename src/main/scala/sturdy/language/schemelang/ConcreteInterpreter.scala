@@ -19,7 +19,6 @@ import sturdy.values.void.VoidOps
 import sturdy.values.closure.ClosureOps
 import sturdy.values.types.TypeOps
 import sturdy.util.given
-import sturdy.values.nums.{_,given}
 
 
 object ConcreteInterpreter:
