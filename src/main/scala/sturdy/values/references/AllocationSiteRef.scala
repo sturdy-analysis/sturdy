@@ -4,6 +4,8 @@ import sturdy.effect.failure.Failure
 import sturdy.effect.store.ManageableAddr
 import sturdy.util.Label
 import sturdy.values.Structural
+import sturdy.values.relational.EqOps
+import sturdy.values.Topped
 
 enum AllocationSiteRef:
   case Null
@@ -25,7 +27,8 @@ object AllocationSiteAddr:
   case class Alloc(lab: Label)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
   case class Variable(name: String)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
 
-
+given Structural[AllocationSiteRef] with {}
+given Structural[AllocationSiteAddr] with {}
 
 given AllocationSiteReferenceOps(using f: Failure): ReferenceOps[AllocationSiteAddr, AllocationSiteRef] with
   override def nullValue: AllocationSiteRef = AllocationSiteRef.Null
@@ -34,5 +37,20 @@ given AllocationSiteReferenceOps(using f: Failure): ReferenceOps[AllocationSiteA
     case AllocationSiteRef.Null => f.fail(NullDereference, "")
     case AllocationSiteRef.Addr(a) => a
 
-given Structural[AllocationSiteRef] with {}
-given Structural[AllocationSiteAddr] with {}
+given EqOps[AllocationSiteRef, Topped[Boolean]] with
+  override def equ(v1: AllocationSiteRef, v2: AllocationSiteRef): Topped[Boolean] = (v1, v2) match
+    case (AllocationSiteRef.Null, AllocationSiteRef.Null) => Topped.Actual(true)
+    case (AllocationSiteRef.Addr(a1), AllocationSiteRef.Addr(a2)) =>
+      if (a1 == a2)
+        Topped.Top
+      else
+        Topped.Actual(false)
+    case _ => Topped.Actual(false)
+  override def neq(v1: AllocationSiteRef, v2: AllocationSiteRef): Topped[Boolean] = (v1, v2) match
+    case (AllocationSiteRef.Null, AllocationSiteRef.Null) => Topped.Actual(false)
+    case (AllocationSiteRef.Addr(a1), AllocationSiteRef.Addr(a2)) =>
+      if (a1 == a2)
+        Topped.Top
+      else
+        Topped.Actual(true)
+    case _ => Topped.Actual(true)

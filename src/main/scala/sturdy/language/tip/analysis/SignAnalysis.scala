@@ -10,7 +10,7 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
-import sturdy.language.tip.{Function, GenericInterpreter}
+import sturdy.language.tip.{Function, GenericInterpreter, Stm}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.ints.{*, given}
@@ -69,7 +69,7 @@ object SignAnalysis:
     case AllocationSite.ParamBinding(fun, p) => AllocationSiteAddr.Variable(s"${fun.name}:$p")(true)
     case AllocationSite.LocalBinding(fun, v) => AllocationSiteAddr.Variable(s"${fun.name}:$v")(true)
   )
-  type Environment = Map[String, Powerset[Addr]]
+  type Environment = Map[String, PowAddr]
   type Store = Map[Addr, Value]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
@@ -79,7 +79,6 @@ object SignAnalysis:
       with APrintPrefix[Value]
       with AUserInput[Value](IntValue(IntSign.TopSign))
       with AFailureCollect
-//  type Fix = FixUnwind[FixIn[Value], FixOut[Value]]
 
   def apply(initEnvironment: Environment, initStore: Store, steps: Int): SignAnalysis = {
     val effects = new Effects(initEnvironment, initStore)
@@ -92,7 +91,7 @@ object SignAnalysis:
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
         case (IntValue(i1), IntValue(i2)) => boolValue(EqOps.equ(i1, i2))
-        case (RefValue(a1), RefValue(a2)) => boolValue(if (a1 == a2) Topped.Top else Topped.Actual(false))
+        case (RefValue(a1), RefValue(a2)) => boolValue(EqOps.equ(a1, a2))
         case (FunValue(f1), FunValue(f2)) => boolValue(EqOps.equ(f1, f2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       def neq(v1: Value, v2: Value): Value = boolValue(equ(v1, v2).asBoolean.map(!_))
@@ -110,8 +109,38 @@ class SignAnalysis(steps: Int)
    functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[PowAddr, Value])
     extends GenericInterpreter[Value, PowAddr, Effects]:
 
-  val phi = fix.unwind(steps, fix.const[FixIn[Value], FixOut[Value]]({
+  def unsoundFixed(dom: FixIn[Value]): FixOut[Value] = dom match {
     case FixIn.Eval(_) => FixOut.Eval(Value.TopValue)
     case FixIn.Run(_) => FixOut.Run(())
     case FixIn.Call(_, _) => FixOut.Call(Value.TopValue)
-  }))
+  }
+
+  private var lastWasCall = false
+  def isCallOrWhile(dom: FixIn[Value]): Int =
+    if (lastWasCall) {
+      lastWasCall = false
+      0
+    } else {
+      lastWasCall = false
+      dom match {
+        case FixIn.Run(Stm.While(_, _)) => 1
+        case FixIn.Call(_, _) =>
+          lastWasCall = true
+          -1
+        case _ => -1
+      }
+    }
+
+  type State = SignAnalysis.Store
+  def currentState(): State = effectOps.getStore
+  val stack = new fix.Stack[FixIn[Value], State]
+  val phi =
+    fix.dispatch(isCallOrWhile, Seq(
+      // call
+      fix.iter.topmost(stack, currentState),
+      // while
+      fix.iter.topmost(stack, currentState)
+//      fix.unwind(steps,
+//        fix.const(unsoundFixed)
+//      )
+    ))

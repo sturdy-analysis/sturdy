@@ -87,7 +87,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     var files = 0
     var successful = 0
     Files.list(tipDir).toScala(List).sorted.filter(_.toString.endsWith(".tip")).foreach { p =>
-      val res = runFile(p, 1000)
+      val res = runFile(p, 10)
       if (res == 1) {
         files += 1
         successful += 1
@@ -99,12 +99,12 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
   }
 
 //  it should "run this file" in {
-//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/copyconst.tip").toURI();
-//    val (res, effects) = runAnalysis(Paths.get(uri), 1000)
+//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/a1.tip").toURI();
+//    val (res, effects) = runAnalysis(Paths.get(uri), 3)
 //    println(res)
 //    println(effects.getEnv)
 //    println(effects.getStore)
 //
-//    Labeled.reset()
-//    runFile(Paths.get(uri), 1000)
+////    Labeled.reset()
+////    runFile(Paths.get(uri), 3)
 //  }

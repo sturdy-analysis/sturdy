@@ -18,12 +18,11 @@ trait AFailureCollect extends Failure with JoinComputation:
     failures += kind -> msg
     throw AFailureCollectException
 
-  override def joinComputations[A](f: => A)(g: => A): Join[A] =
-    try super.joinComputations(f)(g) catch {
-      case StarvedJoin(AFailureCollectException, AFailureCollectException) =>
-        throw AFailureCollectException
-      case ex => throw ex
-    }
+  override def joinFailedComputations(failA: Throwable, failB: Throwable): Throwable = (failA, failB) match
+    case (AFailureCollectException, AFailureCollectException) => AFailureCollectException
+    case (AFailureCollectException, ex) => ex
+    case (ex, AFailureCollectException) => ex
+    case _ => super.joinFailedComputations(failA, failB)
 
   def fallible[A](f: => A): AFallible[A] =
     try {

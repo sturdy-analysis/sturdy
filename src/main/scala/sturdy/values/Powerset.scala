@@ -26,15 +26,31 @@ given PowersetJoin[A]: JoinValue[Powerset[A]] with
 
 given PowersetCertainEqualOps[A](using ops: EqOps[A, Boolean]): EqOps[Powerset[A], Topped[Boolean]] with
   override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] =
-    if (v1.set.size == 1 && v2.set.size == 1 && ops.equ(v1.set.head, v2.set.head))
-      Topped.Actual(true)
+    if (v1.set.size == 1 && v2.set.size == 1)
+      Topped.Actual(ops.equ(v1.set.head, v2.set.head))
     else {
-      val intersect = v1.set.withFilter(a1 => v2.set.exists(a2 => ops.equ(a1, a2)))
-      intersect.foreach(_ => return Topped.Top) // non-empty intersection
+      for (a1 <- v1.set; a2 <- v2.set)
+        if (ops.equ(a1, a2))
+          return Topped.Top
       Topped.Actual(false)
     }
 
   override def neq(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] = equ(v1, v2).map(!_)
+
+given PowersetUncertainEqualOps[A](using ops: EqOps[A, Topped[Boolean]]): EqOps[Powerset[A], Topped[Boolean]] with
+  override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] =
+    if (v1.set.size == 1 && v2.set.size == 1)
+      ops.equ(v1.set.head, v2.set.head)
+    else {
+      for (a1 <- v1.set; a2 <- v2.set) ops.equ(a1, a2) match
+        case Topped.Top => return Topped.Top
+        case Topped.Actual(true) => return Topped.Top
+        case _ => // nothing
+      Topped.Actual(false)
+    }
+
+  override def neq(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] = equ(v1, v2).map(!_)
+
 
 given PowersetContainsOneSound[C, A](using s: Soundness[C, A]): Soundness[C, Powerset[A]] with
   override def isSound(c: C, as: Powerset[A]): IsSound =

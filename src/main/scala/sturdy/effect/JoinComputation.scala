@@ -1,6 +1,8 @@
 package sturdy.effect
 
 import sturdy.effect.JoinComputation.StarvedJoin
+import sturdy.effect.except.ExceptException
+import sturdy.effect.failure.FailureException
 import sturdy.values.JoinValue
 
 import scala.util.Failure
@@ -11,18 +13,21 @@ trait JoinComputation:
   type JoinExceptions
   type Join[A] = JoinValue[A] ?=> A
 
+  def joinFailedComputations(failA: Throwable, failB: Throwable): Throwable =
+    StarvedJoin(failA, failB)
+
   /* This is the default join for pure computations f and g.
    * Subclasses must override join to join effects and call super.join
    */
   def joinComputations[A](f: => A)(g: => A): Join[A] = {
     val triedF = Try(f)
     val triedG = Try(g)
+
     (triedF, triedG) match
-      case (Success(a1), Success(a2)) => summon[JoinValue[A]].joinValues(a1, a2)
-      case (Success(a1), _) => a1
-      case (_, Success(a2)) => a2
-      case (Failure(ex1), Failure(ex2)) =>
-        throw StarvedJoin(ex1, ex2)
+      case (Success(aF), Success(aG)) => summon[JoinValue[A]].joinValues(aF, aG)
+      case (Success(aF), _) => aF
+      case (_, Success(aG)) => aG
+      case (Failure(failA), Failure(failB)) => throw joinFailedComputations(failA, failB)
   }
 
   final def joinComputationsIterable[A](as: IterableOnce[() => A]): Join[A] =
