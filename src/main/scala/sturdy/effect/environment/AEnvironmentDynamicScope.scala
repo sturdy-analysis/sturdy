@@ -1,6 +1,9 @@
 package sturdy.effect.environment
 
+import sturdy.IsSound
+import sturdy.Soundness
 import sturdy.effect.JoinComputation
+import sturdy.values.Abstractly
 import sturdy.values.JoinValue
 
 /*
@@ -10,7 +13,7 @@ import sturdy.values.JoinValue
  * have been (re)bound to optimize the join computation, since only values of dirty
  * variables need joining.
  */
-trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using JoinValue[V])
+trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using j: JoinValue[V])
   extends Environment[Var, V], JoinComputation:
 
   override type EnvJoin[A] = JoinValue[A]
@@ -27,7 +30,7 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
         if definite then
           found(v)
         else
-          joinValues(found(v), notFound)
+          joinComputations(found(v))(notFound)
 
   override def bind(x: Var, v: V): Unit =
     dirtyVars += x
@@ -41,6 +44,10 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
       dirtyVars = snapshotDirty
     }
 
+  override def clear(): Unit =
+    dirtyVars ++= env.keys
+    env = Map()
+  
   override def joinComputations[A](f: => A)(g: => A): Join[A] =
     val snapshot = env
     var joinedEnv = env
@@ -52,7 +59,10 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
     val joinedResult = super.joinComputations {
       env = snapshot
       dirtyVars = Set()
+
       val fResult = f
+
+      joinedDirtyVars ++= dirtyVars
       for (x <- dirtyVars) do
         val (definite, newVal) = env(x)
         joinedEnv.get(x) match
@@ -62,21 +72,24 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
             if definite then
             // This binding is definite in f. If g does not definitely bind x, we must later mark this binding as non-definite.
               newDefiniteVarsInF += x -> ((false, newVal))
-          case Some((_, oldVal)) =>
+          case Some((oldDefinite, oldVal)) =>
             // This binding already existed in store before.
             if definite then
               // This binding is definite in f.
               joinedEnv += x -> ((true, newVal))
               // If g does not definitely bind x, we must later mark this binding as non-definite _and_ join it with the old value (which is retained through g).
-              newDefiniteVarsInF += x -> ((false, joinValues(oldVal, newVal)))
+              newDefiniteVarsInF += x -> ((oldDefinite, j.joinValues(oldVal, newVal)))
             else
             // This binding is not definite in f
-              joinedEnv += x -> ((false, joinValues(oldVal, newVal)))
+              joinedEnv += x -> ((false, j.joinValues(oldVal, newVal)))
       fResult
     } {
       env = snapshot
       dirtyVars = Set()
+
       val gResult = g
+
+      joinedDirtyVars ++= dirtyVars
       for (x <- dirtyVars) do
         joinedEnv.get(x) match
           case None =>
@@ -92,16 +105,16 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
 
             if (definite) {
               // This binding is definite in g.
-              joinedEnv += x -> ((oldDefinite, joinValues(oldVal, newVal)))
+              joinedEnv += x -> ((oldDefinite, j.joinValues(oldVal, newVal)))
             } else {
               // This binding is not definite in g
               newDefiniteVarsInF.get(x) match {
                 case Some((_, weakenedFVal)) =>
                   // Binding was definite in f, weaken it
-                  joinedEnv += x -> ((oldDefinite, joinValues(weakenedFVal, newVal)))
+                  joinedEnv += x -> ((oldDefinite, j.joinValues(weakenedFVal, newVal)))
                 case None =>
                   // Binding was not bound or non-definite in f
-                  joinedEnv += x -> ((oldDefinite, joinValues(oldVal, newVal)))
+                  joinedEnv += x -> ((oldDefinite, j.joinValues(oldVal, newVal)))
               }
             }
             newDefiniteVarsInF -= x
@@ -115,3 +128,26 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, (Boolean, V)])(using Join
     dirtyVars = joinedDirtyVars
     joinedResult
 
+  def environmentIsSound[cVar, cV](c: CEnvironment[cVar, cV])(using varAbstractly: Abstractly[cVar, Var], vSoundness: Soundness[cV, V]): IsSound = {
+    val abstractedKeys = c.getEnv.keySet.map(varAbstractly.abstractly)
+    if (!abstractedKeys.subsetOf(env.keySet)) {
+      val missing = c.getEnv.keySet.flatMap{ k =>
+        val ak = varAbstractly.abstractly(k)
+        if (env.keySet.contains(ak))
+          None
+        else
+          Some(s"abs($k)=$ak")
+      }
+      IsSound.NotSound(s"${classOf[AEnvironmentDynamicScope[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $env")
+    } else if (env.exists(e => e._2._1 && !abstractedKeys.contains(e._1))) {
+      val missing = env.filter(_._2._1).keySet -- abstractedKeys
+      IsSound.NotSound(s"${classOf[AEnvironmentDynamicScope[_, _]].getName}: Expected all definitely bound keys to be bound in concrete environment, but $missing are missing in $env")
+    } else {
+      c.getEnv.foreachEntry { case (x, v) =>
+        val subSound = vSoundness.isSound(v, env(varAbstractly.abstractly(x))._2)
+        if (subSound.isNotSound)
+          return subSound
+      }
+      IsSound.Sound
+    }
+  }

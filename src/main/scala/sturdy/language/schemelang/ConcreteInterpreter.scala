@@ -2,27 +2,27 @@ package sturdy.language.schemelang
 
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.branching.CBoolBranching
-import sturdy.effect.environment.CEnvironmentClosures
+import sturdy.effect.environment.CEnvironment
 import sturdy.effect.store.CStore
 import sturdy.effect.failure.{CFailure, Failure}
-import sturdy.fix.CFixpoint
-import sturdy.values.ints.{_,given}
-import sturdy.values.doubles.{_,given}
-import sturdy.values.rational.{_,given}
-import sturdy.values.booleans.{_,given}
-import sturdy.values.chars.{_,given}
-import sturdy.values.strings.{_,given}
-import sturdy.values.symbols.{_,given}
-import sturdy.values.quotes.{_,given}
-import sturdy.values.relational.{_,given}
+import sturdy.fix
+import sturdy.values.ints.{_, given}
+import sturdy.values.doubles.{_, given}
+import sturdy.values.rational.{_, given}
+import sturdy.values.booleans.{_, given}
+import sturdy.values.chars.{_, given}
+import sturdy.values.strings.{_, given}
+import sturdy.values.symbols.{_, given}
+import sturdy.values.quotes.{_, given}
+import sturdy.values.relational.{_, given}
 import sturdy.values.void.VoidOps
 import sturdy.values.closure.ClosureOps
 import sturdy.values.types.TypeOps
-import sturdy.util.given
-
+import sturdy.values.given
+import sturdy.util
+import GenericInterpreter.{AllocationSite, FixIn, FixOut}
 
 object ConcreteInterpreter:
-
   enum Value:
     case IntVal(i: Int)
     case BoolVal(b: Boolean)
@@ -52,7 +52,6 @@ object ConcreteInterpreter:
       case QuoteVal(qot) => qot
       case _ => throw new IllegalArgumentException(s"Expected Quote but got $this")
 
-
   import Value._
 
 //  def toRational(x: (Int, Int)): Value = RationalVal(x._1, x._2)
@@ -62,14 +61,23 @@ object ConcreteInterpreter:
   type Store = Map[Addr, Value]
   type Closure = (Expr, Environment)
 
-  def apply(initEnvironment: Environment, initStore: Store) = {
-    val effects =
-      new  CBoolBranching[Value]
-      with CEnvironmentClosures[String, Addr, Expr](initEnvironment)
+  class Effects(initEnvironment: Environment, initStore: Store)
+    extends CBoolBranching[Value]
+      with CEnvironment[String, Addr](initEnvironment)
       with CStore[Addr, Value](initStore)
-      with CAllocationIntIncrement
+      with CAllocationIntIncrement[AllocationSite]
       with CFailure
-    val fixpoint = new CFixpoint[List[Expr], Value]
+
+
+  def apply(initEnvironment: Environment, initStore: Store): ConcreteInterpreter = {
+    val effects = new Effects(initEnvironment, initStore)
+//    val effects =
+//      new  CBoolBranching[Value]
+//      with CEnvironmentClosures[String, Addr, Expr](initEnvironment)
+//      with CStore[Addr, Value](initStore)
+//      with CAllocationIntIncrement
+//      with CFailure
+//    val fixpoint = new CFixpoint[List[Expr], Value]
 
     given Failure = effects
     given IntOps[Value] = new LiftedIntOps[Value, Int](_.asInt, IntVal.apply)
@@ -111,12 +119,24 @@ object ConcreteInterpreter:
         case BoolVal(_) => BoolVal(true)
         case _ => BoolVal(false)
 
-    given ClosureOps[Expr, String, Addr, Value] with
-      def closureToVal(cls: (Expr, Map[String, Addr])) = ClosureVal(cls)
-      def valToClosure(v: Value): (Expr, Map[String, Addr]) = v match
-        case ClosureVal(cls) => cls
-        case _ => throw new IllegalArgumentException(s"Expected ClosureVal but got $this")
+//    given ClosureOps[Expr, String, Addr, Value] with
+//      def closureToVal(cls: (Expr, Map[String, Addr])) = ClosureVal(cls)
+//      def valToClosure(v: Value): (Expr, Map[String, Addr]) = v match
+//        case ClosureVal(cls) => cls
+//        case _ => throw new IllegalArgumentException(s"Expected ClosureVal but got $this")
 
-    new GenericInterpreter(using effects)(using fixpoint) {}
+    new ConcreteInterpreter(using effects)
   }
 
+import ConcreteInterpreter.*
+
+class ConcreteInterpreter
+  (using effectOps: Effects)
+  (using intOps: IntOps[Value],
+             boolOps: BooleanOps[Value], eqOps: EqOps[Value, Value], compareOps: CompareOps[Value, Value],
+             charOps: CharOps[Value], stringOps: StringOps[Value],
+             symbolOps: SymbolOps[Value], quoteOps: QuoteOps[Literal, Value],
+             voidOps: VoidOps[Value], typeOps: TypeOps[Value]) //, closureOps: ClosureOps[Expr, String, Addr, V])
+  extends GenericInterpreter[Value, Addr, Effects]:
+
+  val phi = fix.identity[FixIn[Value], FixOut[Value]]

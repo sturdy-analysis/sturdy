@@ -4,26 +4,33 @@ import sturdy.effect.branching.BoolBranching
 import sturdy.effect.environment.Environment
 import sturdy.effect.store.Store
 import sturdy.effect.allocation.Allocation
-import sturdy.effect.failure.Failure
+import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.util.Label
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.doubles.DoubleOps
-import Expr._
-import Statement._
-import sturdy.fix.Fixpoint
-import sturdy.values.relational._
+import Expr.*
+import Statement.*
+import sturdy.fix
+import sturdy.values.relational.*
 
-type EffectfulOps[V, Addr] =
-  BoolBranching[V] with
-  Environment[String, Addr] with
-  Store[Addr, V] with
-  Allocation[Addr, Label] with
-  Failure
+object GenericInterpreter:
+  type GenericEffects[V, Addr] =
+    BoolBranching[V] with
+    Environment[String, Addr] with
+    Store[Addr, V] with
+    Allocation[Addr, Assign] with
+    Failure
+  
+  type GenericPhi = fix.Combinator[Statement, Unit] 
 
-trait GenericInterpreter[V, Addr, Effects <: EffectfulOps[V, Addr], Fix <: Fixpoint[Statement, Unit]]
+  case object UnboundVariable extends FailureKind
+  case object UnboundAddr extends FailureKind
+
+import GenericInterpreter.*
+
+trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   (using val effectOps: Effects)
-  (using val fix: Fix)
   (using val boolOps: BooleanOps[V], doubleOps: DoubleOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V])
   (using effectOps.EnvJoin[V], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
@@ -33,10 +40,12 @@ trait GenericInterpreter[V, Addr, Effects <: EffectfulOps[V, Addr], Fix <: Fixpo
   import eqOps._
   import effectOps._
 
+  val phi: GenericPhi
+  
   def eval(e: Expr): V = e match {
     case Var(x) =>
-      lookupOrElseAndThen(x, fail(s"Unbound variable $x")) { addr =>
-        readOrElse(addr, fail(s"Unbound address $addr for variable $x"))
+      lookupOrElseAndThen(x, fail(UnboundVariable, x)) { addr =>
+        readOrElse(addr, fail(UnboundAddr, s"$addr for variable $x"))
       }
     case BoolLit(b) => boolLit(b)
     case And(e1, e2) => and(eval(e1), eval(e2))
@@ -52,24 +61,27 @@ trait GenericInterpreter[V, Addr, Effects <: EffectfulOps[V, Addr], Fix <: Fixpo
     case RandomDouble() => randomDouble()
   }
 
-  lazy val run: Statement => Unit = {
-    fix.fix(rec => {
+  private lazy val fixed = fix.Fixpoint { (fixed: Statement => Unit) =>
+    inline def run(s: Statement): Unit = fixed(s)
+
+    def run_open(s: Statement): Unit = s match
       case s@Assign(x, e) =>
         val v = eval(e)
         lookupOrElseAndThen(x, {
-          val addr = alloc(s.label)
+          val addr = alloc(s)
           bind(x, addr)
           addr
         }) { addr =>
           write(addr, v)
         }
       case If(cond, thn, els) =>
-        boolBranch(eval(cond), rec(thn), rec(els))
-      case s@While(cond, body) => rec(
-        s.label @: If(cond,
-          s.label @: Block(List(body, s)),
-          s.label @: Block(Nil)))
+        boolBranch(eval(cond), run(thn), run(els))
+      case s@While(cond, body) =>
+        boolBranch(eval(cond), {run(body); run(s)}, {})
       case Block(body) =>
-        body.foldLeft(())((_,s) => rec(s))
-    })
+        body.foreach(run(_))
+
+    phi(run_open(_))
   }
+
+  def run = fixed

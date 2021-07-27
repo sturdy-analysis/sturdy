@@ -9,6 +9,7 @@ trait Store[Addr, V]:
 
   def read[A](x: Addr, found: V => A, notFound: => A): StoreJoined[A]
   def write(x: Addr, v: V): Unit
+  def free(x: Addr): Unit
 
   def readOrElse(a: Addr, notFound: => V): StoreJoined[V] =
     read(a, identity, notFound)

@@ -1,11 +1,16 @@
 package sturdy.values.ints
 
+import sturdy.effect.failure.FailureKind
 import sturdy.effect.failure.Failure
+import sturdy.effect.failure.FailureKind
 
 import scala.util.Random
 
+case object IntDivisionByZero extends FailureKind
+
 trait IntOps[V](using Failure):
   def intLit(i: Int): V
+  def randomInt(): V
   def abs(i: V): V
   def floor(i: V): V
   def ceiling(i: V): V
@@ -15,14 +20,15 @@ trait IntOps[V](using Failure):
   def max(v1: V, v2: V): V
   def min(v1: V, v2: V): V
   def add(v1: V, v2: V): V
-  def mul(v1: V, v2: V): V
   def sub(v1: V, v2: V): V
+  def mul(v1: V, v2: V): V
   def div(v1: V, v2: V): V
   def gcd(v1: V, v2: V): V
   def lcm(v1: V, v2: V): V
-  
+
 given ConcreteIntOps(using f: Failure): IntOps[Int] with
   def intLit(i: Int): Int = i
+  def randomInt(): Int = Random.nextInt()
   def abs(v1: Int): Int = v1.abs
   def floor(v1: Int): Int = v1
   def ceiling(v1: Int): Int = v1
@@ -32,11 +38,11 @@ given ConcreteIntOps(using f: Failure): IntOps[Int] with
   def max(v1: Int, v2: Int): Int = v1.max(v2)
   def min(v1: Int, v2: Int): Int = v1.min(v2)
   def add(v1: Int, v2: Int): Int = v1 + v2
-  def mul(v1: Int, v2: Int): Int = v1 * v2
   def sub(v1: Int, v2: Int): Int = v1 - v2
+  def mul(v1: Int, v2: Int): Int = v1 * v2
   def div(v1: Int, v2: Int): Int =
     if (v2 == 0)
-      f.fail(s"Division by zero: $v1 / $v2")
+      f.fail(IntDivisionByZero, s"$v1 / $v2")
     else
       v1 / v2
   def gcd(v1: Int, v2: Int): Int = if (v1 == 0) v1.abs else gcd(v1, v1%v2)

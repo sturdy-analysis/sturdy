@@ -1,7 +1,18 @@
 package sturdy.effect.failure
 
-case class CFailureException(msg: String) extends FailureException
+case class CFailureException(kind: FailureKind, msg: String) extends FailureException:
+  override def toString: String = s"Failure $kind: $msg"
 
 trait CFailure extends Failure:
-  override def fail(msg: String): Nothing =
-    throw CFailureException(msg)
+  override def fail(kind: FailureKind, msg: String): Nothing =
+    throw CFailureException(kind, msg)
+
+  def fallible[A](f: => A): CFallible[A] =
+    try {
+      val res = f
+      CFallible.Unfailing(res)
+    } catch {
+      case CFailureException(kind, msg) => CFallible.Failing(kind, msg)
+      case ex: StackOverflowError => throw ex
+      case ex => CFallible.Failing(RuntimeFailure, ex.toString)
+    }

@@ -2,9 +2,9 @@ package sturdy.language.whilelang
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-
-import sturdy.language.whilelang.ConcreteInterpreter._
-import sturdy.language.whilelang.ConcreteInterpreter.Value._
+import sturdy.effect.failure.CFailureException
+import sturdy.language.whilelang.ConcreteInterpreter.*
+import sturdy.language.whilelang.ConcreteInterpreter.Value.*
 
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   def run(s: Statement): (Environment, Store) =
@@ -36,4 +36,12 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
     assertResult(Some(1))(env.get("y"))
     assertResult(Some(DoubleValue(2.0)))(store.get(0))
     assertResult(Some(DoubleValue(2.0)))(store.get(1))
+  }
+
+  it should "run ex4" in {
+    val (env, store) = run(Examples.ex4)
+    assertResult(Some(0))(env.get("x"))
+    assertResult(Some(1))(env.get("y"))
+    assertResult(Some(DoubleValue(0.0)))(store.get(0))
+    assertResult(Some(DoubleValue(Double.PositiveInfinity)))(store.get(1))
   }

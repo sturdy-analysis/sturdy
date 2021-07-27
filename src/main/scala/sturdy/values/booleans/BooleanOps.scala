@@ -5,6 +5,7 @@ trait BooleanOps[V]:
   def and(v1: V, v2: V): V
   def not(v: V): V
   def or(v1: V, v2: V): V
+  def imply(v1: V, v2: V): V = or(not(v1), v2)
 
 given ConcreteBooleanOps: BooleanOps[Boolean] with
   def boolLit(b: Boolean): Boolean = b

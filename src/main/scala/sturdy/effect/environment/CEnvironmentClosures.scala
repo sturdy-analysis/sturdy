@@ -6,6 +6,7 @@ import sturdy.effect.closure.Closure
 /*
  * A concrete environment.
  */
+// TODO: Change s.t. CEnvironmentClosures extends CEnvironment, Closure
 trait CEnvironmentClosures[Var, Addr, Expr](_init: Map[Var, Addr] = Map())
   extends Environment[Var, Addr], Closure[Expr, (Expr, Map[Var, Addr])]:
   override type EnvJoin[_] = Unit
@@ -28,11 +29,11 @@ trait CEnvironmentClosures[Var, Addr, Expr](_init: Map[Var, Addr] = Map())
 
   override def closure(e: Expr): (Expr, Map[Var, Addr]) = (e, getEnv)
 
-  // TODO: create functionality similar to Reader.local?
+  // TODO: create functionality similar to Reader.local? use scoped
   override def apply[A,B](foo: (Expr, B) => A, cls: (Expr, Map[Var, Addr]), foo_args: B): ClsJoined[A] =
     val snapshot = env
     try {
-      setEnv(cls._2)
+      setEnv(cls._2) // Todo bind
       foo(cls._1, foo_args)
     } finally {
       env = snapshot

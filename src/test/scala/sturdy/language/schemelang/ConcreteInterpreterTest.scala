@@ -12,7 +12,7 @@ import sturdy.language.schemelang.OpVarKinds.*
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   def run(es: List[Expr]): Value =
     val interp = ConcreteInterpreter(Map(), Map())
-    interp.runFixed(es)
+    interp.run(es)
 
   "concrete interpreter" should "run ex1" in {
     for _ <- 0 until 10 do
@@ -193,7 +193,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
       assertResult(IntVal(10))(res)
   }
 
-  it should "test < on multiple ints (< checkts wether the first arg is smaller than all others) " in {
+  it should "test < on multiple ints #t (< checks wether the elements are in ascending order) " in {
     for _ <- 0 until 10 do
       val res = run(List(
         OpVar(Smaller, List(
@@ -203,6 +203,18 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
           Lit(IntLit(4))))
       ))
       assertResult(BoolVal(true))(res)
+  }
+
+  it should "test < on multiple ints #f (< checks wether the elements are in ascending order) " in {
+    for _ <- 0 until 10 do
+      val res = run(List(
+        OpVar(Smaller, List(
+          Lit(IntLit(1)),
+          Lit(IntLit(2)),
+          Lit(IntLit(2)),
+          Lit(IntLit(4))))
+      ))
+      assertResult(BoolVal(false))(res)
   }
 
   it should "test min on multiple ints" in {
