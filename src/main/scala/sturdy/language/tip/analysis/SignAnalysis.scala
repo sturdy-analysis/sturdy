@@ -132,8 +132,7 @@ class SignAnalysis(steps: Int)
       // call
       fix.iter.topmost(stack, effectOps),
       // while
-      fix.iter.topmost(stack, effectOps)
-//      fix.unwind(steps,
-//        fix.const(unsoundFixed)
-//      )
+      fix.unwind(steps,
+        fix.iter.innermost(stack, effectOps)
+      )
     ))

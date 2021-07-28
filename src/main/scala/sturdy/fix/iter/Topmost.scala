@@ -34,12 +34,11 @@ final class Topmost[Dom, Codom, In, Out](stack: Stack[Dom, Codom, In, Out], stat
         state.setOutState(outState)
         result
       case None =>
-        try {
-          val result = f(dom)
-          hasLoop = stack.pop((dom, inState), result) || hasLoop
-          result
-        } catch {
+        var throws: Option[() => Nothing] = None
+        val result = try f(dom) catch {
           case ex =>
-            hasLoop = stack.pop((dom, inState), null.asInstanceOf[Codom]) || hasLoop
-            throw ex
+            throws = Some(() => throw ex)
+            null.asInstanceOf[Codom]
         }
+        hasLoop = stack.pop((dom, inState), result) || hasLoop
+        result
