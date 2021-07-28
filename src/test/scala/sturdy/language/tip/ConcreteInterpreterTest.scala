@@ -23,11 +23,11 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
     file.close()
     val program = Parser.parse(sourceCode)
     if (program.funs.exists(_.name == "main")) {
-      print(s"${p.getFileName} prints: ")
+      print(s"${p.getFileName}")
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       Try(interp.execute(program)) match
-        case Success(_) => println(interp.effectOps.getPrinted)
-        case Failure(e) => println(e)
+        case Success(_) => println(" prints: " + interp.effectOps.getPrinted)
+        case Failure(e) => println(" errors: " + e)
     } else {
       println(s"${p.getFileName}: no main function")
     }

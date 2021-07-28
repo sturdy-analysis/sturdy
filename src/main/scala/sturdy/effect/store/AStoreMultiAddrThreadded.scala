@@ -19,7 +19,7 @@ import reflect.Selectable.reflectiveSelectable
 trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using JoinValue[V])
   extends Store[Powerset[Addr], V], AStoreGenericThreadded[Addr, V]:
 
-  this.store = _init
+  this.setStore(_init)
   
   override type StoreJoin[A] = JoinValue[A]
   

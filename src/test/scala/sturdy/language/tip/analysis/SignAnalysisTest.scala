@@ -57,11 +57,14 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.effectOps.fallible(interp.execute(program))
 //      println("\n" + cresult)
+//      println(interp.effectOps.getPrinted)
 //      println(interp.effectOps.getStore)
 //      println(interp.effectOps.getAddressContexts.map{case (i,AllocationSite.Alloc(a)) => (i,a.label); case a => a})
 
       val analysis = SignAnalysis(Map(), Map(), steps)
       val aresult = analysis.effectOps.fallible(analysis.execute(program))
+//      println("\n" + analysis.effectOps.getPrinted)
+//      println(analysis.effectOps.getStore)
 
       given CAllocationIntIncrement[AllocationSite] = interp.effectOps
       assertResult(IsSound.Sound)(Soundness.isSound(cresult, aresult))
@@ -81,12 +84,12 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
 
 
-  "TIP sign analysis" should "run all example files" in {
+  "TIP sign analysis" should "run all examples" in {
     val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
     val tipDir = Paths.get(uri)
     var files = 0
     var successful = 0
-    Files.list(tipDir).toScala(List).sorted.filter(_.toString.endsWith(".tip")).foreach { p =>
+    Files.list(tipDir).toScala(List).sorted.filter(p => p.toString.endsWith(".tip")).foreach { p =>
       val res = runFile(p, 10)
       if (res == 1) {
         files += 1
@@ -98,8 +101,25 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     assertResult(files)(successful)
   }
 
+//  "TIP sign analysis" should "run all fix examples" in {
+//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
+//    val tipDir = Paths.get(uri)
+//    var files = 0
+//    var successful = 0
+//    Files.list(tipDir).toScala(List).sorted.filter(p => p.toString.endsWith(".tip") && p.getFileName.toString.startsWith("fix")).foreach { p =>
+//      val res = runFile(p, 10)
+//      if (res == 1) {
+//        files += 1
+//        successful += 1
+//      } else if (res == 0) {
+//        files += 1
+//      }
+//    }
+//    assertResult(files)(successful)
+//  }
+
 //  it should "run this file" in {
-//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/a1.tip").toURI();
+//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/mpolyrec.tip").toURI();
 //    val (res, effects) = runAnalysis(Paths.get(uri), 3)
 //    println(res)
 //    println(effects.getEnv)

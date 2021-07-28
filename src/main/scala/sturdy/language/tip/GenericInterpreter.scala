@@ -13,6 +13,7 @@ import sturdy.values.ints.IntOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.relational.{EqOps, CompareOps}
 import sturdy.fix
+import sturdy.values.JoinValue
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
@@ -39,11 +40,18 @@ object GenericInterpreter:
   enum FixIn[V]:
     case Eval(e: Exp)
     case Run(s: Stm)
-    case Call(f: Function, args: Seq[V])
+    case EnterFunction(f: Function, args: Seq[V])
   enum FixOut[V]:
     case Eval(v: V)
-    case Run(u: Unit)
-    case Call(ret: V)
+    case Run()
+    case ExitFunction(ret: V)
+
+  given joinFixOut[V](using j: JoinValue[V]): JoinValue[FixOut[V]] with
+    override def joinValues(out1: FixOut[V], out2: FixOut[V]): FixOut[V] = (out1, out2) match
+      case (FixOut.Eval(v1), FixOut.Eval(v2)) => FixOut.Eval(j.joinValues(v1, v2))
+      case (FixOut.Run(), FixOut.Run()) => FixOut.Run()
+      case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => FixOut.ExitFunction(j.joinValues(v1, v2))
+      case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
 
   type GenericPhi[V] = fix.Combinator[FixIn[V], FixOut[V]]
 
@@ -67,8 +75,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
   private lazy val fixed = fix.Fixpoint { (rec: FixIn[V] => FixOut[V]) =>
     def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
-    def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run(u) => u; case _ => throw new IllegalStateException()}
-    def call(f: Function, args: Seq[V]): V = rec(FixIn.Call(f, args)) match {case FixOut.Call(ret) => ret; case _ => throw new IllegalStateException()}
+    def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
 
     def eval_open(e: Exp): V = e match {
       case Exp.NumLit(n) => intLit(n)
@@ -134,7 +141,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Assignable.ADerefField(rec, field) =>
         ???
 
-    def call_open(fun: Function, args: Seq[V]): V = freshScoped {
+    def call(fun: Function, args: Seq[V]): V = freshScoped {
       val localAddrs = ListBuffer[Addr]()
       fun.params.zip(args).map { case (name, arg) =>
         val addr = alloc(AllocationSite.ParamBinding(fun, name))
@@ -148,8 +155,9 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         localAddrs += addr
       }
       try {
-        run(fun.body)
-        eval(fun.ret)
+        rec(FixIn.EnterFunction(fun, args))  match
+          case FixOut.ExitFunction(v) => v
+          case _ => throw new IllegalStateException()
       } finally {
         localAddrs.foreach(free(_))
       }
@@ -157,17 +165,16 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
     phi {
       case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
-      case FixIn.Run(s) => FixOut.Run(run_open(s))
-      case FixIn.Call(f, args) => FixOut.Call(call_open(f, args))
+      case FixIn.Run(s) => {run_open(s); FixOut.Run()}
+      case FixIn.EnterFunction(f, args) => FixOut.ExitFunction({run(f.body); eval(f.ret)})
     }
   }
 
   def eval(e: Exp): V = fixed(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
-  def run(s: Stm): Unit = fixed(FixIn.Run(s)) match {case FixOut.Run(u) => u; case _ => throw new IllegalStateException()}
-  def call(f: Function, args: Seq[V]): V = fixed(FixIn.Call(f, args)) match {case FixOut.Call(ret) => ret; case _ => throw new IllegalStateException()}
+  def run(s: Stm): Unit = fixed(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
 
   def execute(p: Program): V =
     functions = p.funs.map(f => f.name -> f).toMap
     val main = functions("main")
-    val args = main.params.map(_ => eval(Exp.Input()))
-    call(main, args)
+    val args = main.params.map(_ => Exp.Input())
+    eval(Exp.Call(Exp.Var("main"), args))

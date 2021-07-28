@@ -16,6 +16,8 @@ trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
   protected var dirtyAddrs: Set[Addr] = Set()
 
   def getStore: Map[Addr, V] = store
+  protected def setStore(m: Map[Addr, V]): Unit =
+    this.store = m
 
   protected def weakUpdate(x: Addr, v: V): Unit =
     dirtyAddrs += x
@@ -48,4 +50,15 @@ trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
 
     joinedResult
 
-
+  def getStoreJoinedWith(previous: Map[Addr, V]): Map[Addr, V] =
+    var joined = previous
+    for (x <- this.dirtyAddrs)
+      joined.get(x) match
+        case None => joined += x -> store(x)
+        case Some(old) =>
+          val now = store(x)
+          val joinedV = j.joinValues(old, now)
+          if (joinedV != now)
+            throw new IllegalStateException(s"New store is not larger than old store, was $old now $now")
+          joined += x -> joinedV
+    joined

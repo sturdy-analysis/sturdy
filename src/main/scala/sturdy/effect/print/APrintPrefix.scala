@@ -95,6 +95,8 @@ trait APrintPrefix[A] extends Print[A], JoinComputation:
   private var printed: PrintResult[A] = PrintResult.Definite(Vector.empty)
 
   def getPrinted: PrintResult[A] = printed
+  protected def setPrinted(p: PrintResult[A]): Unit =
+    this.printed = p
 
   override def print(a: A): Unit =
     printed = printed :+ a
@@ -115,3 +117,5 @@ trait APrintPrefix[A] extends Print[A], JoinComputation:
       case MatchResult.PrefixMatched() | MatchResult.Partial(_) => IsSound.Sound
       case MatchResult.Mismatch(as, p) => IsSound.NotSound(s"Abstract print $p does not describe a prefix of concrete print $as")
 
+  def getPrintedJoinedWith(previous: PrintResult[A]): PrintResult[A] =
+    previous.join(printed)

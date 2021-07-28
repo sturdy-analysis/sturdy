@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.effect.JoinComputation
+import sturdy.effect.{AnalysisState, JoinComputation}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.{AEnvironmentStaticScope, CEnvironment}
@@ -79,6 +79,17 @@ object SignAnalysis:
       with APrintPrefix[Value]
       with AUserInput[Value](IntValue(IntSign.TopSign))
       with AFailureCollect
+      with AnalysisState[SignAnalysis.Store, (SignAnalysis.Store, APrintPrefix.PrintResult[Value])] {
+
+    override def getRelevantInState(): InState = getStore
+    override def getRelevantOutState(): OutState = (getStore, getPrinted)
+    override def getRelevantOutStateJoinedWith(previous: OutState): OutState =
+      (getStoreJoinedWith(previous._1), getPrintedJoinedWith(previous._2))
+    override def isOutStateStable(old: OutState, now: OutState): Boolean = old._1 == now._1
+    override def setOutState(out: (Store, APrintPrefix.PrintResult[Value])): Unit =
+      this.setStore(out._1)
+      this.setPrinted(out._2)
+  }
 
   def apply(initEnvironment: Environment, initStore: Store, steps: Int): SignAnalysis = {
     val effects = new Effects(initEnvironment, initStore)
@@ -109,37 +120,19 @@ class SignAnalysis(steps: Int)
    functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[PowAddr, Value])
     extends GenericInterpreter[Value, PowAddr, Effects]:
 
-  def unsoundFixed(dom: FixIn[Value]): FixOut[Value] = dom match {
-    case FixIn.Eval(_) => FixOut.Eval(Value.TopValue)
-    case FixIn.Run(_) => FixOut.Run(())
-    case FixIn.Call(_, _) => FixOut.Call(Value.TopValue)
+  def isCallOrWhile(dom: FixIn[Value]): Int = dom match {
+    case FixIn.EnterFunction(_, _) => 0
+    case FixIn.Run(Stm.While(_, _)) => 1
+    case _ => -1
   }
 
-  private var lastWasCall = false
-  def isCallOrWhile(dom: FixIn[Value]): Int =
-    if (lastWasCall) {
-      lastWasCall = false
-      0
-    } else {
-      lastWasCall = false
-      dom match {
-        case FixIn.Run(Stm.While(_, _)) => 1
-        case FixIn.Call(_, _) =>
-          lastWasCall = true
-          -1
-        case _ => -1
-      }
-    }
-
-  type State = SignAnalysis.Store
-  def currentState(): State = effectOps.getStore
-  val stack = new fix.Stack[FixIn[Value], State]
+  val stack = new fix.Stack[FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState](effectOps)
   val phi =
     fix.dispatch(isCallOrWhile, Seq(
       // call
-      fix.iter.topmost(stack, currentState),
+      fix.iter.topmost(stack, effectOps),
       // while
-      fix.iter.topmost(stack, currentState)
+      fix.iter.topmost(stack, effectOps)
 //      fix.unwind(steps,
 //        fix.const(unsoundFixed)
 //      )
