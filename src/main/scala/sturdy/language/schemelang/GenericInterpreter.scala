@@ -2,7 +2,6 @@ package sturdy.language.schemelang
 
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.branching.BoolBranching
-import sturdy.effect.closure.Closure
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
@@ -24,7 +23,7 @@ import sturdy.values.symbols.SymbolOps
 import sturdy.values.quotes.QuoteOps
 import sturdy.values.void.VoidOps
 import sturdy.values.types.TypeOps
-import sturdy.values.closure.ClosureOps
+import sturdy.values.closures.ClosureOps
 import sturdy.values.relational.*
 
 object GenericInterpreter:
@@ -36,9 +35,9 @@ object GenericInterpreter:
     Failure
 
   enum AllocationSite:
-    case LetBinding(arg: Expr, x: String)
+    case LetBinding(arg: Expr, x: String) // not optimal
     case Define(d: Expr.Define)
-    case ClosureArg(lam: Expr, x: String)
+    case ClosureArg(body: List[Expr], x: String) // not optimal
 
   case object UnboundVariable extends FailureKind
   case object UnboundAddr extends FailureKind
@@ -55,13 +54,14 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, Addr , Effects <: GenericEffects[V, Addr]]
+trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Env]
   (using val effectOps: Effects)
   (using val intOps: IntOps[V],
              boolOps: BooleanOps[V],
              eqOps: EqOps[V, V], compareOps: CompareOps[V, V],
              charOps: CharOps[V], stringOps: StringOps[V],
              symbolOps: SymbolOps[V], quoteOps: QuoteOps[Literal, V],
+             closureOps: ClosureOps[String, Addr, Env, List[Expr], V, V, V],
              voidOps: VoidOps[V], typeOps: TypeOps[V]) //, closureOps: ClosureOps[Expr, String, Addr, V])
   (using effectOps.EnvJoin[V], effectOps.EnvJoin[Addr], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit],
    effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[V]):
@@ -75,7 +75,7 @@ trait GenericInterpreter[V, Addr , Effects <: GenericEffects[V, Addr]]
   import quoteOps._
   import effectOps._
   import voidOps._
-//  import closureOps._
+  import closureOps._
   import compareOps._
 
   val phi: GenericPhi[V]
@@ -84,55 +84,34 @@ trait GenericInterpreter[V, Addr , Effects <: GenericEffects[V, Addr]]
     def eval(e: Expr): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
     def run(es: List[Expr]): V = rec(FixIn.Run(es)) match {case FixOut.Run(v) => v; case _ => throw new IllegalStateException()}
 
-
     def eval_open(e: Expr): V = e match {
       case Lit(l) => lit(l)
       case Nil_ => ???
       case Cons(e1, e2) => ???
       case Begin(es) => run(es)
-//      case AppFoo(e1, args) =>
-//        val foo = _run(List(e1))
-//        val args = for e <- args yield (_run(List(e)),e) // Todo use map
-//        apply(applyClosure, valToClosure(foo), (args,_run))
+      case AppFoo(e1, args) =>
+        val clsVal = eval(e1)
+        val argVals = args.map(arg => eval(arg))
+        invokeClosure(clsVal, argVals) { applyClosure }
       case Apply(es) => run(es)
       case Var(x) => {
         lookupOrElseAndThen(x, fail(UnboundVariable, x)) {
         addr => readOrElse(addr, fail(UnboundAddr, s"$addr for variable $x"))
         }
       }
-//      case e@Lam(names, body) => closureToVal(closure(e))
+      case e@Lam(names, body) => closureValue(names, body)
       case expr@Let(bnds, body) => {
-//        val (vars, es) = bnds.unzip
-//        val addrs = vars.map(x => alloc(AllocationSite.LetBinding(expr,x)))
-//        val envbnds = vars.zip(addrs)
-//        val storebnds = addrs.zip(es)
         val (envbnds, storebnds) = allocateBindings(bnds)
         evalBindings(storebnds)
         bindLocal_(envbnds) { run(body) }
       }
       case expr@LetRec(bnds, body) => {
-//        val (vars, es) = bnds.unzip
-//        val addrs = vars.map(x => alloc(AllocationSite.LetBinding(expr,x)))
-//        val envbnds =  vars.zip(addrs)
-//        val storebnds = addrs.zip(es)
         val (envbnds, storebnds) = allocateBindings(bnds)
         bindLocal_(envbnds) {
           evalBindings(storebnds)
           run(body)
         }
       }
-        //      val addr = lookupOrElse(x, fail(s"(set!): cannot set variable $x before its definition"))
-        //      val v = _run(List(e))
-        //      write(addr, v)
-        //      _run(rest)
-        //    }
-        //    case (s@Define(x, e)) :: rest => {
-        //      val addr = alloc(s.label)
-        //      bindLocal(x, addr) {
-        //        val v = _run(List(e))
-        //        write(addr, v)
-        //        _run(rest)
-        //      }
       case s@Set_(x, e) => {
         val addr = lookupOrElse(x, fail(UnboundVariable, x))
         write(addr, eval(e))
@@ -167,7 +146,6 @@ trait GenericInterpreter[V, Addr , Effects <: GenericEffects[V, Addr]]
         run(rest)
       }
     }
-
 
     def lit(literal: Literal): V = literal match {
       case IntLit(i) => intLit(i)
@@ -212,7 +190,6 @@ trait GenericInterpreter[V, Addr , Effects <: GenericEffects[V, Addr]]
       case Random => ???
     }
 
-    // TODO
     def op2(op: Op2Kinds, v1: V, v2: V): V = op match {
       case Eqv => ???
 
@@ -223,8 +200,6 @@ trait GenericInterpreter[V, Addr , Effects <: GenericEffects[V, Addr]]
       case StringRef => ???
     }
 
-
-    // TODO
     def opVar(op: OpVarKinds, vs: List[V]): V = op match {
       case Equal => ???
       case Smaller => ??? // helpFoldBool(vs, lt) // TODO: fix, dont compare head with every element, but do pairwise compaarisons for consecutive elements
@@ -241,30 +216,14 @@ trait GenericInterpreter[V, Addr , Effects <: GenericEffects[V, Addr]]
       case Lcm => vs.tail.fold(vs.head){lcm}
       case StringAppend => ???
     }
-//    def applyClosure(expr: Expr, args: (List[(V, Expr)], (List[Expr] => V))): V = {
-//      expr match {
-//        case Lam(xs, body) =>
-//          if (xs.length == args._1.length) {
-//            //TODO: fix address allocation to take variable names into account, or just pass labels/exprs
-//            val addrs = for arg <- args._1 yield alloc(arg._2.label)
-//            for addr <- addrs; arg <- args._1 yield write(addr, arg._1) // Todo zip addrs.zip(args...)
-//            val bnds = for x <- xs; addr <- addrs yield (x, addr)
-//            bindLocal_(bnds) {
-//              args._2(List(Apply(body)))
-//            }
-//          } else fail (s"(applyClosure): applied function $expr with %i arguments to %i  arguments".format(xs.length, args._1.length))
-//        case _ => fail(s"(applyClosure): expected a function, but got $expr")
-//      }
-//    }
 
-//    def evalBindings(bnds: List[(String, Expr)]): List[(String, Addr)] =  {
-//      for (x, e) <- bnds yield {
-//        val v = run(List(e))
-//        val addr = alloc(AllocationSite.LetBinding(e)
-//        write(addr, v)
-//        (x, addr)
-//      }
-//    }
+    def applyClosure(vars: List[String], body: List[Expr], args: List[V]): V = {
+      val addrs = vars.map(x => alloc(AllocationSite.ClosureArg(body, x)))
+      bindLocal_(vars.zip(addrs)) {
+        addrs.zip(args).map((x,v) => write(x, v))
+        run(body)
+      }
+    }
 
     def allocateBindings(bnds: List[(String, Expr)]): (List[(String, Addr)], List[(Addr, Expr)]) = {
       val (vars, es) = bnds.unzip
@@ -284,120 +243,8 @@ trait GenericInterpreter[V, Addr , Effects <: GenericEffects[V, Addr]]
       case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
       case FixIn.Run(es) => FixOut.Run(run_open(es))
     }
-
-
   }
 
   def eval(e: Expr): V = fixed(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
   def run(es: List[Expr]): V = fixed(FixIn.Run(es)) match {case FixOut.Run(v) => v; case _ => throw new IllegalStateException()}
-
-
-
-
-  // TODO
-//  def eval(_run: List[Expr] => V): (Expr => V) = {
-//    case Lit(l) => lit(l)
-//    case Nil_ => ???
-//    case Cons(e1, e2) => ???
-//    case Begin(es) => _run(es)
-//    case AppFoo(e1, args) =>
-//      val foo = _run(List(e1))
-//      val args = for e <- args yield (_run(List(e)),e) // Todo use map
-//      apply(applyClosure, valToClosure(foo), (args,_run))
-//    case Apply(es) => _run(es)
-//    case Var(x) => {
-//      lookupOrElseAndThen(x, fail(s"(var): variable $x does not exist in environment")) {
-//        addr => readOrElse(addr, fail(s"(var): address $addr does not exist in store "))
-//      }
-//    }
-//    case e@Lam(names, body) => closureToVal(closure(e))
-//    case Let(bnds, body) => {
-//      val vs = evalBindings(_run, bnds)
-//      bindLocal_(vs){ _run(body) }
-//    }
-//    case LetRec(bnds, body) => {
-//      val addrs = for (_, e) <- bnds yield alloc(e.label)
-//      val envbnds =  for (x, _) <- bnds; addr <- addrs yield (x, addr)
-//      val storebnds = for (_, e) <- bnds; addr <- addrs yield (addr, e)
-//      bindLocal_(envbnds){ evalBindings_(_run, storebnds, body) }
-//    }
-//    case s@Set_(x, e) => _run(List(s))
-//    case s@Define(x, e) => _run(List(s))
-//    case If(e1, e2, e3) => {
-//      val v = _run(List(e1))
-//      boolBranch(v, _run(List(e2)), _run(List(e3)))
-//    }
-//    case Op1(op, e) => op1(op, _run(List(e)))
-//    case Op2(op, e1, e2) => op2(op, _run(List(e1)), _run(List(e2)))
-//    case OpVar(op, es) => {
-//      val vs = for e <- es yield _run(List(e))
-//      opVar(op, vs)
-//    }
-//    case Error(s) => fail(s"error: $s")
-//  }
-
-//  def run(_eval: Expr => V, _run: List[Expr] => V): (List[Expr] => V) = {
-//    case Set_(x, e) :: rest => {
-//      val addr = lookupOrElse(x, fail(s"(set!): cannot set variable $x before its definition"))
-//      val v = _run(List(e))
-//      write(addr, v)
-//      _run(rest)
-//    }
-//    case (s@Define(x, e)) :: rest => {
-//      val addr = alloc(s.label)
-//      bindLocal(x, addr) {
-//        val v = _run(List(e))
-//        write(addr, v)
-//        _run(rest)
-//      }
-//    }
-//    case e::List() => _eval(e) // TODO remove
-//    case List() => void()
-//    case e::rest => {
-//      _eval(e)
-//      _run(rest)
-//    }
-//  }
-//
-//  lazy val runFixed: List[Expr] => V = {
-//    fix.fix(_run => run( eval(_run), _run))
-//  }
-
-//  def applyClosure(expr: Expr, args: (List[(V, Expr)], (List[Expr] => V))): V = {
-//    expr match {
-//      case Lam(xs, body) =>
-//        if (xs.length == args._1.length) {
-//          //TODO: fix address allocation to take variable names into account, or just pass labels/exprs
-//          val addrs = for arg <- args._1 yield alloc(arg._2.label)
-//          for addr <- addrs; arg <- args._1 yield write(addr, arg._1) // Todo zip addrs.zip(args...)
-//          val bnds = for x <- xs; addr <- addrs yield (x, addr)
-//          bindLocal_(bnds) {
-//            args._2(List(Apply(body)))
-//          }
-//        } else fail (s"(applyClosure): applied function $expr with %i arguments to %i  arguments".format(xs.length, args._1.length))
-//      case _ => fail(s"(applyClosure): expected a function, but got $expr")
-//    }
-//  }
-//
-//  def evalBindings(_run: List[Expr] => V, bnds: List[(String, Expr)]): List[(String, Addr)] =  {
-//    for (x, e) <- bnds yield {
-//      val v = _run(List(e))
-//      val addr = alloc(e.label)
-//      write(addr, v)
-//      (x, addr)
-//    }
-//  }
-//
-//  def evalBindings_(_run: List[Expr] => V, bnds: List[(Addr, Expr)], body: List[Expr]): V = {
-//    for (addr, e) <- bnds yield {
-//      val v = _run(List(e))
-//      write(addr, v)
-//    }
-//    _run(body)
-//  }
-//
-//  def helpFoldBool(vs: List[V], op: (V, V) => V): V = {
-//    val bools = for v <- vs.tail yield op(vs.head, v)
-//    bools.tail.fold(bools.head){and}
-//  }
 

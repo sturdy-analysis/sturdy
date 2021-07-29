@@ -9,10 +9,12 @@ trait Environment[Var, V]:
 
   def lookup[A](x: Var, found: V => A, notFound: => A): EnvJoined[A]
   def bind(x: Var, v: V): Unit
-  def bind_(xvs: List[(Var, V)]): Unit = for xv <- xvs yield bind(xv._1, xv._2)
 
   def scoped[A](f: => A): A
   def clear(): Unit
+
+  final def bind_(xvs: List[(Var, V)]): Unit =
+    xvs.map((x,y) => bind(x, y))
 
   final def lookupOrElse(x: Var, notFound: => V): EnvJoined[V] =
     lookup(x, identity, notFound)

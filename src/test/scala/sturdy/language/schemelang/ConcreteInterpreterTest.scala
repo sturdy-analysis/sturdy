@@ -118,7 +118,9 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
       val res = run(List(
         Lam(List("x"), List(Var("x")))
       ))
-      assertResult(ClosureVal((Lam(List("x"), List(Var("x"))), Map())))(res)
+//      assertResult(ClosureVal((Lam(List("x"), List(Var("x"))), Map())))(res)
+      assertResult(ClosureVal((List("x"), Map(), List(Var("x")))))(res)
+
   }
 
   it should "test simple closure application" in {
@@ -176,7 +178,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
         LetRec(
           List(("y", Lam(List(), List(Var("x")))),
                ("x", Lit(IntLit(2)))),
-          List(Var("y")))
+          List(AppFoo(Var("y"), List())))
       ))
       assertResult(IntVal(2))(res)
   }
