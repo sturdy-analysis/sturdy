@@ -1,8 +1,6 @@
 package sturdy.values.ints
 
-import sturdy.effect.failure.FailureKind
-import sturdy.effect.failure.Failure
-import sturdy.effect.failure.FailureKind
+import sturdy.effect.failure.{Failure, FailureKind}
 
 import scala.util.Random
 

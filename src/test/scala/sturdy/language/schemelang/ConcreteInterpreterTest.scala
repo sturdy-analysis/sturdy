@@ -4,9 +4,11 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.language.schemelang.ConcreteInterpreter.*
 import sturdy.language.schemelang.ConcreteInterpreter.Value.*
+import sturdy.language.schemelang.ConcreteInterpreter.Num.*
 import sturdy.language.schemelang.Literal.*
 import sturdy.language.schemelang.Expr.*
 import sturdy.language.schemelang.Op1Kinds.*
+import sturdy.language.schemelang.Op2Kinds.*
 import sturdy.language.schemelang.OpVarKinds.*
 
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
@@ -23,7 +25,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   it should "run ex2" in {
     for _ <- 0 until 10 do
       val res = run(Examples.ex2)
-      assertResult(IntVal(1))(res)
+      assertResult(NumVal(IntVal(1)))(res)
   }
 
   it should "test set! var" in {
@@ -33,7 +35,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
         Set_("x", Lit(IntLit(3))),
         Var("x")
       ))
-      assertResult(IntVal(3))(res)
+      assertResult(NumVal(IntVal(3)))(res)
   }
 
   it should "test set! void" in {
@@ -54,7 +56,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
           Set_("x", Lit(IntLit(4)))),
         Var("x")
       ))
-      assertResult(IntVal(3))(res)
+      assertResult(NumVal(IntVal(3)))(res)
   }
 
   it should "test if false" in {
@@ -66,7 +68,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
           Set_("x", Lit(IntLit(4)))),
         Var("x")
       ))
-      assertResult(IntVal(4))(res)
+      assertResult(NumVal(IntVal(4)))(res)
   }
 
   it should "test isNumber true" in {
@@ -91,7 +93,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
         Let(List(("y", Lit(IntLit(1)))),
             List(Var("y")))
       ))
-      assertResult(IntVal(1))(res)
+      assertResult(NumVal(IntVal(1)))(res)
   }
 
   it should "test simple letrec" in {
@@ -100,7 +102,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
         LetRec(List(("y", Lit(IntLit(1)))),
           List(Var("y")))
       ))
-      assertResult(IntVal(1))(res)
+      assertResult(NumVal(IntVal(1)))(res)
   }
 
   it should "test need for stepwise evaluation of letrec bindings" in {
@@ -110,7 +112,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
           ("y", Var("x"))),
           List(Var("y")))
       ))
-      assertResult(IntVal(4))(res)
+      assertResult(NumVal(IntVal(4)))(res)
   }
 
   it should "test closure creation" in {
@@ -118,7 +120,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
       val res = run(List(
         Lam(List("x"), List(Var("x")))
       ))
-//      assertResult(ClosureVal((Lam(List("x"), List(Var("x"))), Map())))(res)
       assertResult(ClosureVal((List("x"), Map(), List(Var("x")))))(res)
 
   }
@@ -130,7 +131,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
           Lam(List("x"), List(Var("x"))),
           List(Lit(IntLit(1))))
       ))
-      assertResult(IntVal(1))(res)
+      assertResult(NumVal(IntVal(1)))(res)
   }
 
   it should "test letrec with lambda body" in {
@@ -140,7 +141,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
           List(("y", Lam(List("y"), List(Var("y"))))),
           List(AppFoo(Var("y"), List(Lit(IntLit(3))))))
       ))
-      assertResult(IntVal(3))(res)
+      assertResult(NumVal(IntVal(3)))(res)
   }
 
   it should "test let with lambda body" in {
@@ -150,7 +151,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
           List(("y", Lam(List("y"), List(Var("y"))))),
           List(AppFoo(Var("y"), List(Lit(IntLit(3))))))
       ))
-      assertResult(IntVal(3))(res)
+      assertResult(NumVal(IntVal(3)))(res)
   }
 
   it should "test define with lambda body" in {
@@ -159,7 +160,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
         Define("y", Lam(List("y"), List(Var("y")))),
         AppFoo(Var("y"), List(Lit(IntLit(3))))
       ))
-      assertResult(IntVal(3))(res)
+      assertResult(NumVal(IntVal(3)))(res)
   }
 
   it should "illustrate necessity of store " in {
@@ -169,7 +170,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
         AppFoo(Lam(List(), List(Set_("x", Lit(IntLit(3))))), List()),
         Var("x")
       ))
-      assertResult(IntVal(3))(res)
+      assertResult(NumVal(IntVal(3)))(res)
   }
 
   it should "test self referencing letrec" in {
@@ -180,7 +181,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
                ("x", Lit(IntLit(2)))),
           List(AppFoo(Var("y"), List())))
       ))
-      assertResult(IntVal(2))(res)
+      assertResult(NumVal(IntVal(2)))(res)
   }
 
   it should "test addition of multiple ints" in {
@@ -192,7 +193,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
           Lit(IntLit(3)),
           Lit(IntLit(4))))
       ))
-      assertResult(IntVal(10))(res)
+      assertResult(NumVal(IntVal(10)))(res)
   }
 
   it should "test < on multiple ints #t (< checks wether the elements are in ascending order) " in {
@@ -228,5 +229,74 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
           Lit(IntLit(0)),
           Lit(IntLit(-1))))
       ))
-      assertResult(IntVal(-1))(res)
+      assertResult(NumVal(IntVal(-1)))(res)
+  }
+
+  it should "test add on multiple doubles" in {
+    for _ <- 0 until 10 do
+      val res = run(List(
+        OpVar(Add, List(
+          Lit(DoubleLit(1.1)),
+          Lit(DoubleLit(1.1)),
+          Lit(DoubleLit(1.1)),
+          Lit(DoubleLit(1.1))))
+        ))
+      assertResult(NumVal(DoubleVal(4.4)))(res)
+  }
+
+  it should "test add on multiple ints" in {
+    for _ <- 0 until 10 do
+      val res = run(List(
+        OpVar(Add, List(
+          Lit(IntLit(1)),
+          Lit(IntLit(1)),
+          Lit(IntLit(1)),
+          Lit(IntLit(1))))
+      ))
+      assertResult(NumVal(IntVal(4)))(res)
+  }
+
+  it should "test add on mixed ints and doubles" in {
+    for _ <- 0 until 10 do
+      val res = run(List(
+        OpVar(Add, List(
+          Lit(IntLit(1)),
+          Lit(IntLit(1)),
+          Lit(DoubleLit(1.0)),
+          Lit(DoubleLit(1.0))))
+      ))
+      assertResult(NumVal(DoubleVal(4.0)))(res)
+  }
+
+  it should "test modulo on ints" in {
+    for _ <- 0 until 10 do
+      val res = run(List(
+        Op2(Modulo, Lit(IntLit(15)), Lit(IntLit(3)))
+      ))
+      assertResult(NumVal(IntVal(0)))(res)
+  }
+
+  it should "test modulo on doubles" in {
+    assertThrows[IllegalArgumentException] {
+      val res = run(List(
+        Op2(Modulo, Lit(DoubleLit(15)), Lit(IntLit(3)))
+      ))
+    }
+  }
+
+  it should "test quotient on ints" in {
+    for _ <- 0 until 10 do
+      val res = run(List(
+        Op2(Quotient, Lit(IntLit(1)), Lit(IntLit(3)))
+      ))
+      assertResult(NumVal(IntVal(0)))(res)
+  }
+
+  it should "test int division by 0" in {
+    assertThrows[ArithmeticException] {
+      val res = run(List(
+        OpVar(Div, List(
+          Lit(IntLit(1)), Lit(IntLit(0))))
+      ))
+    }
   }

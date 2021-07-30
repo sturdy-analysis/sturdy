@@ -25,6 +25,7 @@ import sturdy.values.void.VoidOps
 import sturdy.values.types.TypeOps
 import sturdy.values.closures.ClosureOps
 import sturdy.values.relational.*
+import sturdy.values.numerics.NumericOps
 
 object GenericInterpreter:
   type GenericEffects[V, Addr] =
@@ -56,17 +57,19 @@ import GenericInterpreter.*
 
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Env]
   (using val effectOps: Effects)
-  (using val intOps: IntOps[V],
+  (using val intOps: IntOps[V], doubleOps: DoubleOps[V], numericOps: NumericOps[V],
              boolOps: BooleanOps[V],
              eqOps: EqOps[V, V], compareOps: CompareOps[V, V],
              charOps: CharOps[V], stringOps: StringOps[V],
              symbolOps: SymbolOps[V], quoteOps: QuoteOps[Literal, V],
              closureOps: ClosureOps[String, Addr, Env, List[Expr], V, V, V],
-             voidOps: VoidOps[V], typeOps: TypeOps[V]) //, closureOps: ClosureOps[Expr, String, Addr, V])
+             voidOps: VoidOps[V], typeOps: TypeOps[V])
   (using effectOps.EnvJoin[V], effectOps.EnvJoin[Addr], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit],
    effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[V]):
 
-  import intOps._
+  import numericOps._
+  import intOps.intLit
+  import doubleOps.numLit
   import boolOps._
   import eqOps._
   import charOps._
@@ -77,6 +80,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Env]
   import voidOps._
   import closureOps._
   import compareOps._
+  import typeOps._
 
   val phi: GenericPhi[V]
 
@@ -149,6 +153,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Env]
 
     def lit(literal: Literal): V = literal match {
       case IntLit(i) => intLit(i)
+      case DoubleLit(d) => numLit(d)
       case BoolLit(b) => boolLit(b)
       case CharLit(c) => charLit(c)
       case StringLit(str) => stringLit(str)
@@ -157,18 +162,18 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Env]
     }
 
     def op1(op: Op1Kinds, v: V): V = op match {
-      case IsNumber => typeOps.isNumber(v)
-      case IsInteger => typeOps.isInteger(v)
-      case IsDouble => typeOps.isDouble(v)
-      case IsRational => typeOps.isRational(v)
+      case IsNumber => isNumber(v)
+      case IsInteger => isInteger(v)
+      case IsDouble => isDouble(v)
+      case IsRational => isRational(v)
       case IsZero => isZero(v)
       case IsPositive => isPositive(v)
       case IsNegative => isNegative(v)
       case IsOdd => isOdd(v)
       case IsEven => isEven(v)
-      case IsNull => typeOps.isNull(v)
-      case IsCons => typeOps.isCons(v)
-      case IsBoolean => typeOps.isBoolean(v)
+      case IsNull => isNull(v)
+      case IsCons => isCons(v)
+      case IsBoolean => isBoolean(v)
 
       case Abs => abs(v)
       case Floor => floor(v)
