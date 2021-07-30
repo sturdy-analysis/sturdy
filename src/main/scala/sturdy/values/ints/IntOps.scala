@@ -7,7 +7,7 @@ import scala.util.Random
 
 case object IntDivisionByZero extends FailureKind
 
-trait IntOps[V](using Failure):
+trait IntOps[V]:
   def intLit(i: Int): V
   def randomInt(): V
   def add(v1: V, v2: V): V

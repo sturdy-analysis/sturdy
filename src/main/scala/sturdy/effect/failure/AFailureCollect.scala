@@ -6,6 +6,7 @@ import sturdy.values.Powerset
 import sturdy.values.{PartialOrder, Abstractly}
 
 import scala.collection.mutable.ListBuffer
+import scala.util.control.NonFatal
 
 case object AFailureCollectException extends FailureException
 
@@ -33,6 +34,5 @@ trait AFailureCollect extends Failure with JoinComputation:
         AFallible.MaybeFailing(res, Powerset(failures.toSet))
     } catch {
       case AFailureCollectException => AFallible.Failing(Powerset(failures.toSet))
-      case ex: StackOverflowError => throw ex
-      case ex => AFallible.Failing(Powerset(failures.toSet + (RuntimeFailure -> ex.toString)))
+      case NonFatal(ex) => AFallible.Failing(Powerset(failures.toSet + (RuntimeFailure -> ex.toString)))
     }

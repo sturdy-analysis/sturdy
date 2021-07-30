@@ -18,14 +18,14 @@ import sturdy.effect.failure.given
 import sturdy.util.Labeled
 import sturdy.{*, given}
 import sturdy.values.{*, given}
-import sturdy.language.tip.analysis.SignAnalysisSoundness.given
+import sturdy.language.tip.analysis.IntervalAnalysisSoundness.given
 
 import java.nio.file.{Paths, Files, Path}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 import scala.util.{Try, Success, Failure}
 
-class SignAnalysisTest extends AnyFlatSpec, Matchers:
+class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
   def runAnalysis(p: Path, steps: Int) =
     val file = Source.fromURI(p.toUri)
@@ -36,7 +36,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     if (program.funs.exists(_.name == "main")) {
       println(s"Running ${p.getFileName}")
 
-      val analysis = SignAnalysis(Map(), Map(), steps)
+      val analysis = IntervalAnalysis(Map(), Map(), steps)
       (analysis.effectOps.fallible(analysis.execute(program)), analysis.effectOps)
     } else {
       null
@@ -53,21 +53,22 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.effectOps.fallible(interp.execute(program))
-//      println("\n" + cresult)
-//      println(interp.effectOps.getPrinted)
-//      println(interp.effectOps.getStore)
-//      println(interp.effectOps.getAddressContexts.map{case (i,AllocationSite.Alloc(a)) => (i,a.label); case a => a})
+      //      println("\n" + cresult)
+      //      println(interp.effectOps.getPrinted)
+      //      println(interp.effectOps.getStore)
+      //      println(interp.effectOps.getAddressContexts.map{case (i,AllocationSite.Alloc(a)) => (i,a.label); case a => a})
 
-      val analysis = SignAnalysis(Map(), Map(), steps)
+      val analysis = IntervalAnalysis(Map(), Map(), steps)
       val aresult = analysis.effectOps.fallible(analysis.execute(program))
-//      println("\n" + analysis.effectOps.getPrinted)
-//      println(analysis.effectOps.getStore)
+      println(aresult)
+      println(analysis.effectOps.getPrinted)
+      println(analysis.effectOps.getStore)
 
       given CAllocationIntIncrement[AllocationSite] = interp.effectOps
       assertResult(IsSound.Sound)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound)(Soundness.isSound(interp, analysis))
       if ((Soundness.isSound(cresult, aresult) && Soundness.isSound(interp, analysis)) == IsSound.Sound)
-        println("Running ${p.getFileName}: sound")
+        println(s"Running ${p.getFileName}: sound")
         1
       else {
         println(s"Running ${p.getFileName}: unsound")
@@ -81,25 +82,25 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
 
 
-  "TIP sign analysis" should "run all examples" in {
-    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
-    val tipDir = Paths.get(uri)
-    var files = 0
-    var successful = 0
-    Files.list(tipDir).toScala(List).sorted.filter(p => p.toString.endsWith(".tip")).foreach { p =>
-      val res = runFile(p, 10)
-      if (res == 1) {
-        files += 1
-        successful += 1
-      } else if (res == 0) {
-        files += 1
-      }
-    }
-    assertResult(files)(successful)
-  }
+//  "TIP interval analysis" should "run all examples" in {
+//    val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip").toURI();
+//    val tipDir = Paths.get(uri)
+//    var files = 0
+//    var successful = 0
+//    Files.list(tipDir).toScala(List).sorted.filter(p => p.toString.endsWith(".tip")).foreach { p =>
+//      val res = runFile(p, 10)
+//      if (res == 1) {
+//        files += 1
+//        successful += 1
+//      } else if (res == 0) {
+//        files += 1
+//      }
+//    }
+//    assertResult(files)(successful)
+//  }
 
-//  "TIP sign analysis" should "run all fix examples" in {
-//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
+//  it should "run all fix examples" in {
+//    val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip").toURI();
 //    val tipDir = Paths.get(uri)
 //    var files = 0
 //    var successful = 0
@@ -115,13 +116,13 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 //    assertResult(files)(successful)
 //  }
 
-//  it should "run this file" in {
-//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/mpolyrec.tip").toURI();
-//    val (res, effects) = runAnalysis(Paths.get(uri), 3)
-//    println(res)
-//    println(effects.getEnv)
-//    println(effects.getStore)
-//
-////    Labeled.reset()
-////    runFile(Paths.get(uri), 3)
-//  }
+  it should "run this file" in {
+    val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip/fix4.tip").toURI();
+    val (res, effects) = runAnalysis(Paths.get(uri), 10)
+    println(res)
+    println(effects.getEnv)
+    println(effects.getStore)
+
+//    Labeled.reset()
+//    runFile(Paths.get(uri), 3)
+  }

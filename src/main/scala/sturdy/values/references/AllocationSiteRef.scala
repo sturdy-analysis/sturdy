@@ -3,6 +3,7 @@ package sturdy.values.references
 import sturdy.effect.failure.Failure
 import sturdy.effect.store.ManageableAddr
 import sturdy.util.Label
+import sturdy.values.Finite
 import sturdy.values.Structural
 import sturdy.values.relational.EqOps
 import sturdy.values.Topped
@@ -29,6 +30,9 @@ object AllocationSiteAddr:
 
 given Structural[AllocationSiteRef] with {}
 given Structural[AllocationSiteAddr] with {}
+
+given Finite[AllocationSiteRef] with {}
+given Finite[AllocationSiteAddr] with {}
 
 given AllocationSiteReferenceOps(using f: Failure): ReferenceOps[AllocationSiteAddr, AllocationSiteRef] with
   override def nullValue: AllocationSiteRef = AllocationSiteRef.Null

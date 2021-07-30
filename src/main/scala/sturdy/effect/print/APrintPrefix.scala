@@ -3,7 +3,7 @@ package sturdy.effect.print
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.JoinComputation
-import sturdy.values.JoinValue
+import sturdy.values.{JoinValue, Finite}
 
 import scala.collection.mutable.ListBuffer
 
@@ -90,6 +90,13 @@ object APrintPrefix:
     case Partial(rest: PrintResult[A])
 
 import APrintPrefix.*
+
+// TODO this is a workaround. We don't need widening for PrintResult since it's stability does not influence the fixed point
+given finitePrintResult[A]: Finite[PrintResult[A]] with {}
+
+given joinPrintResult[A]: JoinValue[PrintResult[A]] with
+  override def joinValues(v1: PrintResult[A], v2: PrintResult[A]): PrintResult[A] = v1.join(v2)
+
 
 trait APrintPrefix[A] extends Print[A], JoinComputation:
   private var printed: PrintResult[A] = PrintResult.Definite(Vector.empty)

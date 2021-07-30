@@ -7,10 +7,12 @@ import sturdy.effect.environment.{AEnvironmentStaticScope, CEnvironment}
 import sturdy.effect.failure.{AFailureCollect, Failure}
 import sturdy.effect.print.{APrintPrefix, given}
 import sturdy.effect.store.AStoreMultiAddrThreadded
+import sturdy.effect.store.AStoreGenericThreadded.StoreState
+import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.given
-import sturdy.language.tip.{Function, GenericInterpreter, Stm}
+import sturdy.language.tip.{Function, GenericInterpreter, Stm, Program}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.ints.{*, given}
@@ -20,23 +22,20 @@ import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.GenericInterpreter.{*, given}
 
-object SignAnalysis:
+object IntervalAnalysis:
   enum Value:
     case TopValue
-    case IntValue(i: IntSign)
+    case IntValue(i: IntInterval)
     case RefValue(addr: Refs)
     case FunValue(fun: Powerset[Function])
 
     def asBoolean: Topped[Boolean] = this match
-      case IntValue(i) => i match
-        case IntSign.Zero => Topped.Actual(false)
-        case IntSign.Pos | IntSign.Neg => Topped.Actual(true)
-        case _ => Topped.Top
+      case IntValue(i) => EqOps.equ(i, IntInterval(0, 0)).map(!_)
       case TopValue => Topped.Top
       case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
-    def asInt: IntSign = this match
+    def asInt: IntInterval = this match
       case IntValue(i) => i
-      case TopValue => IntSign.TopSign
+      case TopValue => IntInterval.Top
       case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
     def asFunction: Powerset[Function] = this match
       case FunValue(fs) => fs
@@ -48,19 +47,24 @@ object SignAnalysis:
 
   import Value._
 
-  given Finite[Value] with {}
+  given widenValue(using bounds: => Set[Int]): fix.Widening[Value] with
+    override def widen(v1: Value, v2: Value): Value = (v1, v2) match
+      case (IntValue(i1), IntValue(i2)) => IntValue(intIntervalWiden.widen(i1, i2))
+      case (FunValue(funs1), FunValue(funs2)) => FunValue(funs1 ++ funs2)
+      case (RefValue(addrs1), RefValue(addrs2)) => RefValue(addrs1 ++ addrs2)
+      case _ => TopValue
 
   given JoinValue[Value] with
     override def joinValues(v1: Value, v2: Value): Value = (v1, v2) match
-      case (IntValue(i1), IntValue(i2)) => IntValue(IntSignJoin.joinValues(i1, i2))
+      case (IntValue(i1), IntValue(i2)) => IntValue(intIntervalJoin.joinValues(i1, i2))
       case (FunValue(funs1), FunValue(funs2)) => FunValue(funs1 ++ funs2)
       case (RefValue(addrs1), RefValue(addrs2)) => RefValue(addrs1 ++ addrs2)
       case _ => TopValue
 
   def boolValue(b: Topped[Boolean]): Value = IntValue(b match
-    case Topped.Top => IntSign.ZeroOrPos
-    case Topped.Actual(true) => IntSign.Pos
-    case Topped.Actual(false) => IntSign.Zero
+    case Topped.Top => IntInterval(0, 1)
+    case Topped.Actual(true) => IntInterval(1, 1)
+    case Topped.Actual(false) => IntInterval(0, 0)
   )
 
   type Refs = Powerset[AllocationSiteRef]
@@ -79,7 +83,7 @@ object SignAnalysis:
       with AStoreMultiAddrThreadded[Addr, Value](initStore)
       with AAllocationFromContext[AllocationSite, PowAddr](fromAllocationSite)
       with APrintPrefix[Value]
-      with AUserInput[Value](IntValue(IntSign.TopSign))
+      with AUserInput[Value](IntValue(IntInterval.Top))
       with AFailureCollect
       with AnalysisState[Map[Addr, Value], (Map[Addr, Value], APrintPrefix.PrintResult[Value])] {
 
@@ -90,16 +94,17 @@ object SignAnalysis:
     override def setOutState(out: OutState): Unit =
       setStore(out._1)
       setPrinted(out._2)
+
     override def isOutStateStable(old: OutState, now: OutState): Boolean = old._1 == now._1
   }
 
-  def apply(initEnvironment: Environment, initStore: Store, steps: Int): SignAnalysis = {
+  def apply(initEnvironment: Environment, initStore: Store, steps: Int): IntervalAnalysis = {
     val effects = new Effects(initEnvironment, initStore)
 
     given JoinComputation = effects
     given Failure = effects
-    given IntOps[Value] = new LiftedIntOps[Value, IntSign](_.asInt, IntValue.apply)
-    given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, IntSign, Topped[Boolean]](_.asInt, boolValue)
+    given IntOps[Value] = new LiftedIntOps[Value, IntInterval](_.asInt, IntValue.apply)
+    given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, IntInterval, Topped[Boolean]](_.asInt, boolValue)
     given EqOps[Function, Boolean] = new EqualsEqOps[Function]
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
@@ -111,16 +116,16 @@ object SignAnalysis:
     given FunctionOps[Function, Value, Value, Value] = new LiftedFunctionOps[Function, Value, Value, Value, Powerset[Function]](_.asFunction, FunValue.apply)
     given ReferenceOps[PowAddr, Value] = new LiftedReferenceOps[Value, Powerset[AllocationSiteAddr], Powerset[AllocationSiteRef]](_.asReference, RefValue.apply)
 
-    new SignAnalysis(steps)(using effects)
+    new IntervalAnalysis(steps)(using effects)
   }
 
-import SignAnalysis.{*, given}
+import IntervalAnalysis.{*, given}
 
-class SignAnalysis(steps: Int)
-  (using effectOps: Effects)
-  (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value],
-   functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[PowAddr, Value])
-    extends GenericInterpreter[Value, PowAddr, Effects]:
+class IntervalAnalysis(steps: Int)
+                  (using effectOps: Effects)
+                  (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value],
+                   functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[PowAddr, Value])
+  extends GenericInterpreter[Value, PowAddr, Effects]:
 
   def isCallOrWhile(dom: FixIn[Value]): Int = dom match {
     case FixIn.EnterFunction(_) => 0
@@ -128,6 +133,11 @@ class SignAnalysis(steps: Int)
     case _ => -1
   }
 
+  override def execute(p: Program): Value =
+    bounds = p.intLiterals
+    super.execute(p)
+
+  implicit var bounds: Set[Int] = Set.empty
   val stack = fix.Stack[FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState](effectOps)(fix.ContextSensitive.none)
   val phi =
     fix.dispatch(isCallOrWhile, Seq(

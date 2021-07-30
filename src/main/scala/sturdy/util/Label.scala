@@ -21,3 +21,9 @@ trait Labeled:
   def @:(l: Label): this.type =
     _label = SynLabel(l)
     this
+
+  override def hashCode(): Int = this.label.hashCode()
+  override def equals(obj: Any): Boolean = obj match
+    case other: Labeled => this.label == other.label
+    case _ => false
+

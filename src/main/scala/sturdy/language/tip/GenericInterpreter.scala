@@ -13,7 +13,7 @@ import sturdy.values.ints.IntOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.relational.{EqOps, CompareOps}
 import sturdy.fix
-import sturdy.values.JoinValue
+import sturdy.values.*
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
@@ -40,7 +40,7 @@ object GenericInterpreter:
   enum FixIn[V]:
     case Eval(e: Exp)
     case Run(s: Stm)
-    case EnterFunction(f: Function, args: Seq[V])
+    case EnterFunction(f: Function)
   enum FixOut[V]:
     case Eval(v: V)
     case Run()
@@ -51,6 +51,15 @@ object GenericInterpreter:
       case (FixOut.Eval(v1), FixOut.Eval(v2)) => FixOut.Eval(j.joinValues(v1, v2))
       case (FixOut.Run(), FixOut.Run()) => FixOut.Run()
       case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => FixOut.ExitFunction(j.joinValues(v1, v2))
+      case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
+
+  given finiteFixOut[V](using f: Finite[V]): Finite[FixOut[V]] with {}
+
+  given widenFixOut[V](using w: fix.Widening[V]): fix.Widening[FixOut[V]] with
+    override def widen(out1: FixOut[V], out2: FixOut[V]): FixOut[V] = (out1, out2) match
+      case (FixOut.Eval(v1), FixOut.Eval(v2)) => FixOut.Eval(w.widen(v1, v2))
+      case (FixOut.Run(), FixOut.Run()) => FixOut.Run()
+      case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => FixOut.ExitFunction(w.widen(v1, v2))
       case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
 
   type GenericPhi[V] = fix.Combinator[FixIn[V], FixOut[V]]
@@ -75,7 +84,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
   private lazy val fixed = fix.Fixpoint { (rec: FixIn[V] => FixOut[V]) =>
     def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
-    def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
+    def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case v => throw new IllegalStateException()}
 
     def eval_open(e: Exp): V = e match {
       case Exp.NumLit(n) => intLit(n)
@@ -155,7 +164,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         localAddrs += addr
       }
       try {
-        rec(FixIn.EnterFunction(fun, args))  match
+        rec(FixIn.EnterFunction(fun)) match
           case FixOut.ExitFunction(v) => v
           case _ => throw new IllegalStateException()
       } finally {
@@ -166,7 +175,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
     phi {
       case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
       case FixIn.Run(s) => {run_open(s); FixOut.Run()}
-      case FixIn.EnterFunction(f, args) => FixOut.ExitFunction({run(f.body); eval(f.ret)})
+      case FixIn.EnterFunction(f) => FixOut.ExitFunction({run(f.body); eval(f.ret)})
     }
   }
 

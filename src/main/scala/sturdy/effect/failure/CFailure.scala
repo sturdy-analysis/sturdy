@@ -1,5 +1,7 @@
 package sturdy.effect.failure
 
+import scala.util.control.NonFatal
+
 case class CFailureException(kind: FailureKind, msg: String) extends FailureException:
   override def toString: String = s"Failure $kind: $msg"
 
@@ -13,6 +15,5 @@ trait CFailure extends Failure:
       CFallible.Unfailing(res)
     } catch {
       case CFailureException(kind, msg) => CFallible.Failing(kind, msg)
-      case ex: StackOverflowError => throw ex
-      case ex => CFallible.Failing(RuntimeFailure, ex.toString)
+      case NonFatal(ex) => CFallible.Failing(RuntimeFailure, ex.toString)
     }

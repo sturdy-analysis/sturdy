@@ -7,10 +7,10 @@ import sturdy.values.JoinValue
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
 import sturdy.values.Topped.*
-import sturdy.values.doubles.DoubleOps
 import sturdy.values.relational.*
 
-
+object DoubleInterval:
+  val Top = DoubleInterval(Double.MinValue, Double.MaxValue)
 case class DoubleInterval(l: Double, h: Double):
   if (l > h) throw new IllegalArgumentException(s"Empty intervals are illegal $this")
 
@@ -36,7 +36,7 @@ given Abstractly[Double, DoubleInterval] with
     DoubleInterval(d, d)
 
 given PartialOrder[DoubleInterval] with
-  override def lteq(x: DoubleInterval, y: DoubleInterval): Boolean = x.l >= y.l && x.h <= y.h
+  override def lteq(x: DoubleInterval, y: DoubleInterval): Boolean = y.l <= x.l && x.h <= y.h
 
 given DoubleIntervalJoin: JoinValue[DoubleInterval] with
   override def joinValues(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =
@@ -50,7 +50,7 @@ given IntervalDoubleOps: DoubleOps[DoubleInterval] with
   def mul(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 * v2
   def div(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 / v2
 
-given IntervalCompareOps: CompareOps[DoubleInterval, Topped[Boolean]] with
+given DoubleIntervalCompareOps: CompareOps[DoubleInterval, Topped[Boolean]] with
   def lt(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =
     if iv1.h < iv2.l then Actual(true)
     else if iv2.h <= iv1.l then Actual(false)
@@ -62,7 +62,7 @@ given IntervalCompareOps: CompareOps[DoubleInterval, Topped[Boolean]] with
   def ge(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] = lt(iv2, iv1)
   def gt(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] = le(iv2, iv1)
 
-given IntervalEqOps: EqOps[DoubleInterval, Topped[Boolean]] with
+given DoubleIntervalEqOps: EqOps[DoubleInterval, Topped[Boolean]] with
   override def equ(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =
     if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Actual(true)
     else if iv1.h < iv2.l || iv2.h < iv1.l then Actual(false)

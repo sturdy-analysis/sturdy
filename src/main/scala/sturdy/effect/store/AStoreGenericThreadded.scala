@@ -1,6 +1,8 @@
 package sturdy.effect.store
 
+import sturdy.effect.AnalysisState
 import sturdy.effect.JoinComputation
+import sturdy.effect.store.AStoreGenericThreadded.StoreState
 import sturdy.values.JoinValue
 
 import scala.collection.mutable.ListBuffer
@@ -16,8 +18,9 @@ trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
   protected var dirtyAddrs: Set[Addr] = Set()
 
   def getStore: Map[Addr, V] = store
-  protected def setStore(m: Map[Addr, V]): Unit =
-    this.store = m
+  protected def setStore(s: Map[Addr, V]): Unit =
+    this.store = s
+    this.dirtyAddrs = s.keySet
 
   protected def weakUpdate(x: Addr, v: V): Unit =
     dirtyAddrs += x
@@ -50,15 +53,27 @@ trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
 
     joinedResult
 
-  def getStoreJoinedWith(previous: Map[Addr, V]): Map[Addr, V] =
-    var joined = previous
+  def getStoreJoinedWith(other: Map[Addr, V]): Map[Addr, V] =
+    var joined = other
     for (x <- this.dirtyAddrs)
       joined.get(x) match
         case None => joined += x -> store(x)
-        case Some(old) =>
-          val now = store(x)
-          val joinedV = j.joinValues(old, now)
-          if (joinedV != now)
-            throw new IllegalStateException(s"New store is not larger than old store, was $old now $now")
+        case Some(otherV) =>
+          val thisV = store(x)
+          val joinedV = j.joinValues(otherV, thisV)
           joined += x -> joinedV
     joined
+
+object AStoreGenericThreadded:
+  case class StoreState[Addr, V](store: Map[Addr, V])(using j: JoinValue[V]) {
+    def join(other: StoreState[Addr, V]): StoreState[Addr, V] =
+      var joined = this.store
+      for (x <- other.store.keySet)
+        joined.get(x) match
+          case None => joined += x -> other.store(x)
+          case Some(thisV) =>
+            val otherV = other.store(x)
+            val joinedV = j.joinValues(otherV, thisV)
+            joined += x -> joinedV
+      StoreState(joined)
+  }
