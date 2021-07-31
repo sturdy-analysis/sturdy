@@ -117,7 +117,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 //  }
 
   it should "run this file" in {
-    val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip/fix4.tip").toURI();
+    val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip/a1.tip").toURI();
     val (res, effects) = runAnalysis(Paths.get(uri), 10)
     println(res)
     println(effects.getEnv)

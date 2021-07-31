@@ -15,7 +15,7 @@ trait JoinComputation:
   type Join[A] = JoinValue[A] ?=> A
 
   def joinFailedComputations(failA: Throwable, failB: Throwable): Throwable = (failA, failB) match
-    case (_: RecurrentCall, _: RecurrentCall) => failA
+    case (RecurrentCall, RecurrentCall) => failA
     case _ => StarvedJoin(failA, failB)
 
   /* This is the default join for pure computations f and g.
