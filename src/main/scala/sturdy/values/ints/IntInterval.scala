@@ -56,11 +56,10 @@ given intIntervalWiden(using bounds: => Set[Int]): Widening[IntInterval] with
         treeSet.maxBefore(v2.l + 1).getOrElse(Int.MinValue)
     val high =
       if (v1.h >= v2.h)
-        v2.h
+        v1.h
       else
-        treeSet.minAfter(v1.h).getOrElse(Int.MaxValue)
+        treeSet.minAfter(v2.h).getOrElse(Int.MaxValue)
     IntInterval(low, high)
-
 
 given IntervalIntOps(using f: Failure, j: JoinComputation): IntOps[IntInterval] with
   def intLit(i: Int): IntInterval = IntInterval(i, i)
