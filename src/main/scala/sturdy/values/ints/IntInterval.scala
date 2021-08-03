@@ -79,13 +79,13 @@ given IntervalIntOps(using f: Failure, j: JoinComputation): IntOps[IntInterval] 
 
 given IntIntervalCompareOps: CompareOps[IntInterval, Topped[Boolean]] with
   def lt(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] =
-    if iv1.h < iv2.l then Actual(true)
-    else if iv2.h <= iv1.l then Actual(false)
-    else Top
+    if iv1.h < iv2.l then Topped.Actual(true)
+    else if iv2.h <= iv1.l then Topped.Actual(false)
+    else Topped.Top
   def le(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] =
-    if iv1.h <= iv2.l then Actual(true)
-    else if iv2.h < iv1.l then Actual(false)
-    else Top
+    if iv1.h <= iv2.l then Topped.Actual(true)
+    else if iv2.h < iv1.l then Topped.Actual(false)
+    else Topped.Top
   def ge(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] = lt(iv2, iv1)
   def gt(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] = le(iv2, iv1)
 

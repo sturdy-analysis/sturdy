@@ -38,8 +38,9 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   import doubleOps._
   import compareOps._
   import eqOps._
+  
   import effectOps._
-
+  
   val phi: GenericPhi
   
   def eval(e: Expr): V = e match {

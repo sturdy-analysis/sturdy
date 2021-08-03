@@ -109,7 +109,8 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         val v1 = eval(e1)
         val v2 = eval(e2)
         equ(v1, v2)
-      case Exp.Call(fun, args) => invokeFun(eval(fun), args.map(eval))(call)
+      case Exp.Call(fun, args) =>
+        invokeFun(eval(fun), args.map(eval))(call)
       case a@Exp.Alloc(e) =>
         val addr = alloc(AllocationSite.Alloc(a))
         write(addr, eval(e))

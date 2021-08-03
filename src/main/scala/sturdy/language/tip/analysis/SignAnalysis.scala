@@ -75,7 +75,7 @@ object SignAnalysis:
   type Store = Map[Addr, Value]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
-      with AEnvironmentStaticScope[String, PowAddr] with CEnvironment[String, PowAddr](initEnvironment)
+      with CEnvironment[String, PowAddr](initEnvironment)
       with AStoreMultiAddrThreadded[Addr, Value](initStore)
       with AAllocationFromContext[AllocationSite, PowAddr](fromAllocationSite)
       with APrintPrefix[Value]

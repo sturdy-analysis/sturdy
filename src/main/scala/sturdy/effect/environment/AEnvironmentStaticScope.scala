@@ -18,7 +18,7 @@ trait AEnvironmentStaticScope[Var, V] extends CEnvironment[Var, V], JoinComputat
 
   def ensureUnchangedEnv[A](f: => A, oldEnv: Map[Var, V]): A =
     val result = f
-    if !(oldEnv eq this.env) then
+    if (!(oldEnv eq this.env))
       throw new IllegalStateException(s"Statically scoped environment has changed at join point, which is illegal. Old environment was $oldEnv, new environment is ${this.env}.")
     result
 
