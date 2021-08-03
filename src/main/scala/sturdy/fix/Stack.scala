@@ -26,7 +26,7 @@ case object RecurrentCall extends Exception {
  *  finitely many calls. This property holds in particular if the set of contexts is finite.
  */
 final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], context: ContextSensitive[Dom, In, Ctx])
-  (using joinIn: JoinValue[In], joinOut: JoinValue[Out])
+  (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], j: JoinComputation):
 
   /** Set of active calls identified by their context and their stack position.
@@ -36,7 +36,6 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
   private var stackHeight = 0
 
   /** Cache of the inputs of previously executed stack frames.
-   *  Inputs are joined upon write, that is,
    */
   private var inCache: Map[Ctx, In] = Map()
 
@@ -47,7 +46,7 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
    *  When a stack frame becomes inactive, it is also removed from this set.
    */
   private val recurrentCalls: mutable.Set[Int] = mutable.BitSet()
-//  private val corecurrentCalls: mutable.Set[Ctx] = mutable.Set()
+  private val corecurrentCalls: mutable.Set[Ctx] = mutable.Set()
 
   override def toString: String = stack.toList.sortBy(_._2).map(_._1).mkString("Stack(", ", ", ")")
 
@@ -66,10 +65,10 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
         // push call to stack
         stack += ctx -> stackHeight
         stackHeight += 1
-//        if (corecurrentCalls.contains(ctx)) {
+        if (corecurrentCalls.contains(ctx)) {
           // store and join with input state based on previous calls with the same context
           storeAndSetJoinedInState(ctx, in)
-//        }
+        }
         if (Fixpoint.DEBUG)
           println(("  " * (stackHeight)) + s"PUSH $ctx -> ${state.getInState()}")
         None
@@ -93,12 +92,12 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
     val newStackHeight = stackHeight - 1
     stackHeight = newStackHeight
     if (recurrentCalls.remove(newStackHeight)) {
-//      corecurrentCalls += ctx
+      corecurrentCalls += ctx
       storeOutput(ctx, result)
       true
     } else {
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  POP  $ctx -> $result, ${state.getOutState()}")
+        println(("  " * stackHeight) + s"  POP  $ctx <- $result, ${state.getOutState()}")
       false
     }
 
@@ -136,12 +135,13 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
       outCache += ctx -> (result, out)
       if (Fixpoint.DEBUG)
         println(("  " * stackHeight) + s"  POP  $ctx <- $result, $out")
+      result
     case Some((previousResult, previousOut)) =>
       val joinedResult = (previousResult, result) match
         case (Failure(ex1), Failure(ex2)) => Failure(j.joinFailedComputations(ex1, ex2))
         case (Failure(_), Success(v)) => Success(v)
         case (Success(v), Failure(_)) => Success(v)
-        case (Success(v1), Success(v2)) => Success(widenCodom.widen(v1, v2))
+        case (Success(v1), Success(v2)) => Success(joinCodom.joinValues(v1, v2))
       val joinedOut = joinOut.joinValues(previousOut, state.getOutState())
       // should we do this here?
 //      state.setOutState(joinedOut)
@@ -152,13 +152,13 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
 object Stack:
   class StackBuilder[Dom, Codom, In, Out]
     (state: AnalysisState[In, Out])
-    (using joinIn: JoinValue[In], joinOut: JoinValue[Out])
+    (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
     (using wCodom: Widening[Codom], wIn: Widening[In], jComp: JoinComputation) {
-    def apply[Ctx](context: ContextSensitive[Dom, In, Ctx]) = new Stack(state, context)(using joinIn, joinOut)(using wCodom, wIn, jComp)
+    def apply[Ctx](context: ContextSensitive[Dom, In, Ctx]) = new Stack(state, context)(using joinCodom, joinIn, joinOut)(using wCodom, wIn, jComp)
   }
   def apply[Dom, Codom, In, Out]
     (state: AnalysisState[In, Out])
-    (using joinIn: JoinValue[In], joinOut: JoinValue[Out])
+    (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
     (using wCodom: Widening[Codom], wIn: Widening[In], jComp: JoinComputation)
       : StackBuilder[Dom, Codom, In, Out] =
-    new StackBuilder(state)(using joinIn, joinOut)(using wCodom, wIn, jComp)
+    new StackBuilder(state)(using joinCodom, joinIn, joinOut)(using wCodom, wIn, jComp)

@@ -41,6 +41,11 @@ object GenericInterpreter:
     case Eval(e: Exp)
     case Run(s: Stm)
     case EnterFunction(f: Function)
+    override def toString: String = this match
+      case Eval(e) => s"eval ${e.getClass.getSimpleName}@${e.label}"
+      case Run(s) => s"run ${s.getClass.getSimpleName}@${s.label}"
+      case EnterFunction(fun) => s"enter ${fun.name}"
+
   enum FixOut[V]:
     case Eval(v: V)
     case Run()
