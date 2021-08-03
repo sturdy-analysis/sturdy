@@ -33,5 +33,4 @@ final class Innermost[Dom, Codom, In, Out, Ctx](stack: Stack[Dom, Codom, In, Out
         (result, false)
       case None =>
         val result = Try(f(dom))
-        val hasLoop = stack.pop(dom, inState, result)
-        (result, hasLoop)
+        stack.pop(dom, inState, result)

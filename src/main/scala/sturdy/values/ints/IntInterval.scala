@@ -15,23 +15,26 @@ import scala.collection.immutable.TreeSet
 
 object IntInterval:
   val Top = IntInterval(Int.MinValue, Int.MaxValue)
+  def bounded(l: Long, h: Long): IntInterval =
+    IntInterval(Math.max(l, Int.MinValue).toInt, Math.min(h, Int.MaxValue).toInt)
 case class IntInterval(l: Int, h: Int):
-  if (l > h) throw new IllegalArgumentException(s"Empty intervals are illegal $this")
+  if (l > h)
+    throw new IllegalArgumentException(s"Empty intervals are illegal $this")
 
   def join(other: IntInterval): IntInterval =
     IntInterval(Math.min(l, other.l), Math.max(h, other.h))
-  def +(y: IntInterval): IntInterval = IntInterval(l + y.l, h + y.h)
-  def -(y: IntInterval): IntInterval = IntInterval(l - y.l, h - y.h)
+  def +(y: IntInterval): IntInterval = IntInterval.bounded(l.toLong + y.l, h.toLong + y.h)
+  def -(y: IntInterval): IntInterval = IntInterval.bounded(l.toLong - y.l, h.toLong - y.h)
   def *(y: IntInterval): IntInterval = withBounds2(_*_, y)
   def /(y: IntInterval): IntInterval = withBounds2(_/_, y)
-  def withBounds2(f: (Int, Int) => Int, that: IntInterval): IntInterval = {
+  def withBounds2(f: (Long, Long) => Long, that: IntInterval): IntInterval = {
     val v1 = f(this.l, that.l)
     val v2 = f(this.l, that.h)
     val v3 = f(this.h, that.l)
     val v4 = f(this.h, that.h)
     val low = Math.min(v1, Math.min(v2, Math.min(v3, v4)))
     val high = Math.max(v1, Math.max(v2, Math.max(v3, v4)))
-    IntInterval(low, high)
+    IntInterval.bounded(low, high)
   }
   override def toString: String = s"[$l,$h]"
 

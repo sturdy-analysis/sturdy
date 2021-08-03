@@ -35,5 +35,6 @@ final class Topmost[Dom, Codom, In, Out, Ctx](stack: Stack[Dom, Codom, In, Out, 
         result
       case None =>
         val result = Try(f(dom))
-        hasLoop = stack.pop(dom, inState, result) || hasLoop
-        result
+        val (widenedResult, looping) = stack.pop(dom, inState, result)
+        hasLoop = hasLoop || looping
+        widenedResult

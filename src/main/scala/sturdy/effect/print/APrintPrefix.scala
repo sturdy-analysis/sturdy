@@ -10,17 +10,17 @@ import scala.collection.mutable.ListBuffer
 object APrintPrefix:
   enum PrintResult[A]:
     case Definite(as: Vector[A])
-    case OneOf(rs: Vector[PrintResult[A]])
+    case OneOf(rs: Set[PrintResult[A]])
     case Concat(p1: PrintResult[A], p2: PrintResult[A])
 
     def join(that: PrintResult[A]): PrintResult[A] = (this, that) match
       case _ if this.isEmpty => this
       case _ if that.isEmpty => that
       case (PrintResult.OneOf(rs1), PrintResult.OneOf(rs2)) => PrintResult.OneOf(rs1 ++ rs2)
-      case (PrintResult.OneOf(rs1), _) => PrintResult.OneOf(rs1 :+ that)
-      case (_, PrintResult.OneOf(rs2)) => PrintResult.OneOf(this +: rs2)
+      case (PrintResult.OneOf(rs1), _) => PrintResult.OneOf(rs1 + that)
+      case (_, PrintResult.OneOf(rs2)) => PrintResult.OneOf(rs2 + this)
       case (r1: PrintResult.Definite[A], r2: PrintResult.Definite[A]) if r1.as == r2.as => r1
-      case _ => PrintResult.OneOf(Vector(this, that))
+      case _ => PrintResult.OneOf(Set(this, that))
 
     def :+(a: A): PrintResult[A] = this match
       case Definite(as) => Definite(as :+ a)
@@ -98,31 +98,30 @@ given joinPrintResult[A]: JoinValue[PrintResult[A]] with
   override def joinValues(v1: PrintResult[A], v2: PrintResult[A]): PrintResult[A] = v1.join(v2)
 
 
-trait APrintPrefix[A] extends Print[A], JoinComputation:
-  private var printed: PrintResult[A] = PrintResult.Definite(Vector.empty)
+trait APrintPrefix[P] extends Print[P], JoinComputation:
+  private var printed: PrintResult[P] = PrintResult.Definite(Vector.empty)
 
-  def getPrinted: PrintResult[A] = printed
-  protected def setPrinted(p: PrintResult[A]): Unit =
+  def getPrinted: PrintResult[P] = printed
+  protected def setPrinted(p: PrintResult[P]): Unit =
     this.printed = p
 
-  override def print(a: A): Unit =
+  override def print(a: P): Unit =
     printed = printed :+ a
 
   override def joinComputations[A](f: => A)(g: => A): Join[A] = {
     val snapshot = printed
-    super.joinComputations(f) {
-      val printedF = printed
-      printed = snapshot
-      val a = g
-      printed = printedF.join(printed)
-      a
-    }
+    var printedF: PrintResult[P] = null
+    var printedG: PrintResult[P] = null
+    try 
+      super.joinComputations(
+        try f finally printedF = printed)(
+        try g finally printedG = printed)
+    finally 
+      printed = printedF.join(printedG)
   }
 
-  def printIsSound[C](c: CPrint[C])(using Soundness[C, A]): IsSound =
+  def printIsSound[C](c: CPrint[C])(using Soundness[C, P]): IsSound =
     printed.matchAll(c.getPrinted) match
       case MatchResult.PrefixMatched() | MatchResult.Partial(_) => IsSound.Sound
       case MatchResult.Mismatch(as, p) => IsSound.NotSound(s"Abstract print $p does not describe a prefix of concrete print $as")
 
-  def getPrintedJoinedWith(previous: PrintResult[A]): PrintResult[A] =
-    previous.join(printed)
