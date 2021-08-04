@@ -2,6 +2,7 @@ package sturdy.values.doubles
 
 import sturdy.effect.JoinComputation
 import sturdy.effect.failure.Failure
+import sturdy.fix.Widening
 import sturdy.values.Abstractly
 import sturdy.values.JoinValue
 import sturdy.values.PartialOrder
@@ -10,7 +11,7 @@ import sturdy.values.Topped.*
 import sturdy.values.relational.*
 
 object DoubleInterval:
-  val Top = DoubleInterval(Double.MinValue, Double.MaxValue)
+  val Top = DoubleInterval(Double.NegativeInfinity, Double.PositiveInfinity)
 case class DoubleInterval(l: Double, h: Double):
   if (l > h) throw new IllegalArgumentException(s"Empty intervals are illegal $this")
 
@@ -38,9 +39,23 @@ given Abstractly[Double, DoubleInterval] with
 given PartialOrder[DoubleInterval] with
   override def lteq(x: DoubleInterval, y: DoubleInterval): Boolean = y.l <= x.l && x.h <= y.h
 
-given DoubleIntervalJoin: JoinValue[DoubleInterval] with
+given doubleIntervalJoin: JoinValue[DoubleInterval] with
   override def joinValues(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =
     DoubleInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
+
+given doubleIntervalWiden: Widening[DoubleInterval] with
+  override def widen(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =
+    val low =
+      if (v1.l <= v2.l)
+        v1.l
+      else
+        Double.NegativeInfinity
+    val high =
+      if (v1.h >= v2.h)
+        v1.h
+      else
+        Double.PositiveInfinity
+    DoubleInterval(low, high)
 
 given IntervalDoubleOps: DoubleOps[DoubleInterval] with
   def numLit(d: Double): DoubleInterval = DoubleInterval(d, d)

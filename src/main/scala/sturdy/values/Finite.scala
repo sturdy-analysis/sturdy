@@ -2,6 +2,8 @@ package sturdy.values
 
 trait Finite[+T]
 
+given finiteUnit: Finite[Unit] with {}
+
 given finiteIterable[V] (using Finite[V]): Finite[Iterable[V]] with {}
 given finiteMap[K, V] (using Finite[K], Finite[V]): Finite[Map[K, V]] with {}
 

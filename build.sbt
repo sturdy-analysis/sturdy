@@ -2,7 +2,7 @@ name := "sturdy"
 
 ThisBuild / organization := "de.uni-mainz.informatik.pl"
 ThisBuild / version := "0.1"
-ThisBuild / scalaVersion := "3.0.0"
+ThisBuild / scalaVersion := "3.0.1"
 
 Test / parallelExecution := false
 

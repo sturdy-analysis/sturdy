@@ -10,9 +10,10 @@ import sturdy.language.whilelang.Statement.*
 import sturdy.language.whilelang.analysis.IntervalAnalysis.*
 import sturdy.language.whilelang.analysis.IntervalAnalysis.Value.*
 import sturdy.language.whilelang.analysis.IntervalAnalysisSoundness.given
-import sturdy.util.IntLabel
+import sturdy.util.*
 import sturdy.{*, given}
 import sturdy.values.{*, given}
+import sturdy.values.references.*
 import sturdy.values.Topped.*
 import sturdy.values.doubles.DoubleInterval
 
@@ -21,6 +22,9 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val analysis = IntervalAnalysis(Map(), Map())
     analysis.run(s)
     analysis.effectOps
+
+  def Addr(l: Labeled) = AllocationSiteAddr.Alloc(l.label)(true)
+  def Addr(l: Label) = AllocationSiteAddr.Alloc(l)(true)
 
   def testSoundness(s: Statement): Assertion =
     val interp = ConcreteInterpreter(Map(), Map())
@@ -35,10 +39,10 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,yAssign,_)) = Examples.ex1
-    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
-    assertResult(Some(true -> Powerset(Addr(yAssign.label))))(env.get("y"))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(0.0, 1.0)))))(store.get(Addr(xAssign.label)))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(0.0, 2.0)))))(store.get(Addr(yAssign.label)))
+    assertResult(Some(MayMust.Must(Powerset(Addr(xAssign)))))(env.get("x"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(yAssign)))))(env.get("y"))
+    assertResult(Some(DoubleValue(DoubleInterval(0.0, 1.0))))(store.get(Addr(xAssign)))
+    assertResult(Some(DoubleValue(DoubleInterval(0.0, 2.0))))(store.get(Addr(yAssign)))
   }
 
   it should "run ex2" in {
@@ -46,11 +50,11 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,If(_,Block(List(yAssign1)),Block(List(yAssign2))))) = Examples.ex2
-    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
-    assertResult(Some(true -> Powerset(Addr(yAssign1.label), Addr(yAssign2.label))))(env.get("y"))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(0.0, 1.0)))))(store.get(Addr(xAssign.label)))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(1.0, 1.0)))))(store.get(Addr(yAssign1.label)))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(2.0, 2.0)))))(store.get(Addr(yAssign2.label)))
+    assertResult(Some(MayMust.Must(Powerset(Addr(xAssign)))))(env.get("x"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(yAssign1), Addr(yAssign2)))))(env.get("y"))
+    assertResult(Some(DoubleValue(DoubleInterval(0.0, 1.0))))(store.get(Addr(xAssign.label)))
+    assertResult(Some(DoubleValue(DoubleInterval(1.0, 1.0))))(store.get(Addr(yAssign1.label)))
+    assertResult(Some(DoubleValue(DoubleInterval(2.0, 2.0))))(store.get(Addr(yAssign2.label)))
   }
 
   it should "run ex3" in {
@@ -58,10 +62,10 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,If(_,Block(List(yAssign)),_))) = Examples.ex3
-    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
-    assertResult(Some(true -> Powerset(Addr(yAssign.label))))(env.get("y"))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(2.0, 2.0)))))(store.get(Addr(xAssign.label)))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(2.0, 2.0)))))(store.get(Addr(yAssign.label)))
+    assertResult(Some(MayMust.Must(Powerset(Addr(xAssign)))))(env.get("x"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(yAssign)))))(env.get("y"))
+    assertResult(Some(DoubleValue(DoubleInterval(2.0, 2.0))))(store.get(Addr(xAssign.label)))
+    assertResult(Some(DoubleValue(DoubleInterval(2.0, 2.0))))(store.get(Addr(yAssign.label)))
   }
 
   it should "run ex4" in {
@@ -69,10 +73,10 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign, yAssign)) = Examples.ex4
-    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
-    assertResult(Some(true -> Powerset(Addr(yAssign.label))))(env.get("y"))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(0.0, 0.0)))))(store.get(Addr(xAssign.label)))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(Double.PositiveInfinity, Double.PositiveInfinity)))))(store.get(Addr(yAssign.label)))
+    assertResult(Some(MayMust.Must(Powerset(Addr(xAssign)))))(env.get("x"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(yAssign)))))(env.get("y"))
+    assertResult(Some(DoubleValue(DoubleInterval(0.0, 0.0))))(store.get(Addr(xAssign.label)))
+    assertResult(Some(DoubleValue(DoubleInterval(Double.PositiveInfinity, Double.PositiveInfinity))))(store.get(Addr(yAssign.label)))
   }
 
   it should "run ex5" in {
@@ -80,10 +84,10 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign, yAssign)) = Examples.ex5
-    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
-    assertResult(Some(true -> Powerset(Addr(yAssign.label))))(env.get("y"))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(0.0, 1.0)))))(store.get(Addr(xAssign.label)))
-    assertResult(Some(DoubleValue(Actual(DoubleInterval(5.0, Double.PositiveInfinity)))))(store.get(Addr(yAssign.label)))
+    assertResult(Some(MayMust.Must(Powerset(Addr(xAssign)))))(env.get("x"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(yAssign)))))(env.get("y"))
+    assertResult(Some(DoubleValue(DoubleInterval(0.0, 1.0))))(store.get(Addr(xAssign.label)))
+    assertResult(Some(DoubleValue(DoubleInterval(5.0, Double.PositiveInfinity))))(store.get(Addr(yAssign.label)))
   }
 
   it should "soundly abstract ex1" in {

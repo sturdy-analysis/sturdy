@@ -9,6 +9,7 @@ import sturdy.util.{Label, given}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.doubles.{*, given}
+import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.{Topped, given}
 import sturdy.values.Topped.{*, given}
@@ -24,13 +25,13 @@ object IntervalAnalysisSoundness:
   given PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x, y) match
       case (Value.BooleanValue(b1), Value.BooleanValue(b2)) => PartialOrder[Topped[Boolean]].lteq(b1, b2)
-      case (Value.DoubleValue(d1), Value.DoubleValue(d2)) => PartialOrder[Topped[DoubleInterval]].lteq(d1, d2)
+      case (Value.DoubleValue(d1), Value.DoubleValue(d2)) => PartialOrder[DoubleInterval].lteq(d1, d2)
       case _ => false
 
   given Soundness[ConcreteInterpreter, IntervalAnalysis] with
     def isSound(c: ConcreteInterpreter, a: IntervalAnalysis): IsSound = {
       given Abstractly[ConcreteInterpreter.Addr, PowAddr] =
-        new AllocationContextAbstractly(c.effectOps, a => Powerset(Addr(a.label)))
+        new AllocationContextAbstractly(c.effectOps, a => Powerset(AllocationSiteAddr.Alloc(a.label)(true)))
 
       a.effectOps.environmentIsSound(c.effectOps) &&
       a.effectOps.storeIsSound(c.effectOps)

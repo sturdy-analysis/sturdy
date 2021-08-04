@@ -11,9 +11,10 @@ import sturdy.language.whilelang.Statement.*
 import sturdy.language.whilelang.analysis.SignAnalysis.*
 import sturdy.language.whilelang.analysis.SignAnalysis.Value.*
 import sturdy.language.whilelang.analysis.SignAnalysisSoundness.given
-import sturdy.util.IntLabel
+import sturdy.util.*
 import sturdy.{*, given}
 import sturdy.values.{*, given}
+import sturdy.values.references.*
 import sturdy.values.Topped.*
 import sturdy.values.doubles.DoubleSign
 
@@ -24,6 +25,9 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val analysis = SignAnalysis(Map(), Map())
     analysis.run(s)
     analysis.effectOps
+
+  def Addr(l: Labeled) = AllocationSiteAddr.Alloc(l.label)(true)
+  def Addr(l: Label) = AllocationSiteAddr.Alloc(l)(true)
 
   def testSoundness(s: Statement): Assertion =
     val interp = ConcreteInterpreter(Map(), Map())
@@ -39,8 +43,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,yAssign,_)) = Examples.ex1
-    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
-    assertResult(Some(true -> Powerset(Addr(yAssign.label))))(env.get("y"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(xAssign)))))(env.get("x"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(yAssign)))))(env.get("y"))
     assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(Addr(xAssign.label)))
     assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(Addr(yAssign.label)))
   }
@@ -50,8 +54,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,If(_,Block(List(yAssign1)),Block(List(yAssign2))))) = Examples.ex2
-    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
-    assertResult(Some(true -> Powerset(Addr(yAssign1.label), Addr(yAssign2.label))))(env.get("y"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(xAssign)))))(env.get("x"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(yAssign1), Addr(yAssign2)))))(env.get("y"))
     assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(Addr(xAssign.label)))
     assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign1.label)))
     assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign2.label)))
@@ -62,8 +66,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,If(_,Block(List(yAssign1)),Block(List(yAssign2))))) = Examples.ex3
-    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
-    assertResult(Some(true -> Powerset(Addr(yAssign1.label), Addr(yAssign2.label))))(env.get("y"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(xAssign)))))(env.get("x"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(yAssign1), Addr(yAssign2)))))(env.get("y"))
     assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(xAssign.label)))
     assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign1.label)))
     assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign2.label)))
@@ -74,8 +78,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,yAssign)) = Examples.ex4
-    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
-    assertResult(Some(true -> Powerset(Addr(yAssign.label))))(env.get("y"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(xAssign)))))(env.get("x"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(yAssign)))))(env.get("y"))
     assertResult(Some(DoubleValue(DoubleSign.Zero)))(store.get(Addr(xAssign.label)))
     assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign.label)))
   }
@@ -85,8 +89,8 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val env = res.getEnv
     val store = res.getStore
     val Block(List(xAssign,yAssign)) = Examples.ex5
-    assertResult(Some(true -> Powerset(Addr(xAssign.label))))(env.get("x"))
-    assertResult(Some(true -> Powerset(Addr(yAssign.label))))(env.get("y"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(xAssign)))))(env.get("x"))
+    assertResult(Some(MayMust.Must(Powerset(Addr(yAssign)))))(env.get("y"))
     assertResult(Some(DoubleValue(DoubleSign.ZeroOrPos)))(store.get(Addr(xAssign.label)))
     assertResult(Some(DoubleValue(DoubleSign.Pos)))(store.get(Addr(yAssign.label)))
   }

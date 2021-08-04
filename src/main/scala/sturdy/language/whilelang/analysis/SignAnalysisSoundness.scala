@@ -9,6 +9,7 @@ import sturdy.util.{Label, given}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.doubles.{*, given}
+import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.{Topped, given}
 import sturdy.values.Topped.{*, given}
@@ -31,7 +32,7 @@ object SignAnalysisSoundness:
     def isSound(c: ConcreteInterpreter, a: SignAnalysis): IsSound = {
 
       given Abstractly[ConcreteInterpreter.Addr, PowAddr] =
-        new AllocationContextAbstractly(c.effectOps, a => Powerset(Addr(a.label)))
+        new AllocationContextAbstractly(c.effectOps, a => Powerset(AllocationSiteAddr.Alloc(a.label)(true)))
 
       a.effectOps.environmentIsSound(c.effectOps) &&
       a.effectOps.storeIsSound(c.effectOps)

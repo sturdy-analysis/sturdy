@@ -1,16 +1,19 @@
 package sturdy.language.whilelang.analysis
 
+import sturdy.effect.AnalysisState
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.environment.AEnvironmentDynamicScope
 import sturdy.effect.store.{AStoreMultiAddrThreadded, ManageableAddr}
 import sturdy.effect.failure.{Failure, AFailureCollect}
 import sturdy.fix
+import sturdy.fix.given
 import sturdy.language.whilelang.{GenericInterpreter, Statement, ConcreteInterpreter}
 import sturdy.util.{Label, given}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{_, given}
 import sturdy.values.doubles.{_, given}
+import sturdy.values.references.{_, given}
 import sturdy.values.relational.{_, given}
 import sturdy.values.{Topped, given}
 import sturdy.values.Topped.{_, given}
@@ -32,6 +35,8 @@ object SignAnalysis:
     }
   import Value._
 
+  given Finite[Value] with {}
+
   given JoinValue[Value] with
     override def joinValues(v1: Value, v2: Value): Value = (v1, v2) match
       case (BooleanValue(b1), BooleanValue(b2)) => BooleanValue(flatToppedJoin.joinValues(b1, b2))
@@ -39,17 +44,29 @@ object SignAnalysis:
       case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
   type Context = Statement.Assign
-  case class Addr(l: Label) extends ManageableAddr(false)
-  given Structural[Addr] with {}
+  type Addr = AllocationSiteAddr
   type PowAddr = Powerset[Addr]
-  type Environment =  Map[String, (Boolean, PowAddr)]
+  type Environment =  Map[String, MayMust[PowAddr]]
+  given Finite[String] with {}
   type Store = Map[Addr, Value]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
     with AEnvironmentDynamicScope[String, PowAddr](initEnvironment)
     with AStoreMultiAddrThreadded[Addr, Value](initStore)
-    with AAllocationFromContext[Context, PowAddr](a => Powerset(Addr(a.label)))
+    with AAllocationFromContext[Context, PowAddr](a => Powerset(AllocationSiteAddr.Alloc(a.label)(true)))
     with AFailureCollect
+    with AnalysisState[(Environment, Store), (Environment, Store)] {
+
+    override def getInState(): (Environment, Store) = (getEnv, getStore)
+    override def setInState(in: (Environment, Store)): Unit =
+      setEnv(in._1)
+      setStore(in._2)
+    override def getOutState(): (Environment, Store) = (getEnv, getStore)
+    override def setOutState(out: (Environment, Store)): Unit =
+      setEnv(out._1)
+      setStore(out._2)
+    override def isOutStateStable(old: (Environment, Store), now: (Environment, Store)): Boolean = old == now
+  }
 
   def apply(initEnvironment: Environment, initStore: Store): SignAnalysis = {
     val effects = new Effects(initEnvironment, initStore)
@@ -72,11 +89,20 @@ object SignAnalysis:
     new SignAnalysis(using effects) {}
   }
 
-import SignAnalysis.*
+import SignAnalysis.{*, given}
+
 class SignAnalysis
   (using effectOps: Effects)
   (using boolOps: BooleanOps[Value], doubleOps: DoubleOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value])
   extends GenericInterpreter[Value, PowAddr, Effects]:
 
-  val phi = fix.identity[Statement, Unit]
+  val isWhile: Statement => Boolean = {
+    case Statement.While(_, _) => true
+    case _ => false
+  }
+
+  val stack = fix.Stack[Statement, Unit, effectOps.InState, effectOps.OutState](effectOps)(fix.ContextSensitive.none)
+  val phi = fix.filter(isWhile,
+    fix.iter.innermost(stack, effectOps)
+  )
   

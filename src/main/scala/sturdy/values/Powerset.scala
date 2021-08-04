@@ -14,9 +14,11 @@ case class Powerset[A](val set: Set[A]) extends AnyVal {
   override def toString: String = s"Powerset(${set.mkString(", ")})"
 }
 object Powerset {
-  def empty[A]: Powerset[A] = Powerset[A](Set.empty)
+  def empty[A]: Powerset[A] = Powerset[A](Set.empty[A])
   def apply[A](as: A*): Powerset[A] = Powerset(Set.from(as))
 }
+
+given finitePowerset[T](using Finite[T]): Finite[Powerset[T]] with {}
 
 given concretePowersetPO[T: Structural]: PartialOrder[Powerset[T]] with
   override def lteq(x: Powerset[T], y: Powerset[T]): Boolean = x.set.subsetOf(y.set)
