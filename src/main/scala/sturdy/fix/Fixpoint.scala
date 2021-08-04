@@ -4,4 +4,4 @@ object Fixpoint:
   def apply[Dom, Codom](f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
     f(dom => Fixpoint(f)(dom))
   
-  val DEBUG: Boolean = true
+  var DEBUG: Boolean = System.getProperty("STURDY_DEBUG_FIXPOINT", "false").toBoolean

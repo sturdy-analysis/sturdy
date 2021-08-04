@@ -28,7 +28,9 @@ object APrintPrefix:
       case OneOf(_) => Concat(this, Definite(Vector(a)))
 
     def ++(that: PrintResult[A]): PrintResult[A] = (this, that) match
-      case (Definite(as1),Definite(as2)) => Definite(as1 ++ as2)
+      case (Definite(as1), Definite(as2)) => Definite(as1 ++ as2)
+      case (Definite(as1), OneOf(alts2)) => OneOf(alts2.map(this ++ _))
+      case (OneOf(alts1), Definite(as2)) => OneOf(alts1.map(_ ++ that))
       case _ => Concat(this, that)
 
     def size: Int = this match
@@ -115,7 +117,7 @@ trait APrintPrefix[P] extends Print[P], JoinComputation:
     try 
       super.joinComputations(
         try f finally printedF = printed)(
-        try g finally printedG = printed)
+        try {printed = snapshot; g} finally printedG = printed)
     finally 
       printed = printedF.join(printedG)
   }

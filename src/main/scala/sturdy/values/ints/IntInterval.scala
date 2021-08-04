@@ -89,8 +89,8 @@ given IntIntervalCompareOps: CompareOps[IntInterval, Topped[Boolean]] with
     if iv1.h <= iv2.l then Topped.Actual(true)
     else if iv2.h < iv1.l then Topped.Actual(false)
     else Topped.Top
-  def ge(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] = lt(iv2, iv1)
-  def gt(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] = le(iv2, iv1)
+  def ge(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] = le(iv2, iv1)
+  def gt(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] = lt(iv2, iv1)
 
 given IntIntervalEqOps: EqOps[IntInterval, Topped[Boolean]] with
   override def equ(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] =

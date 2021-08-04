@@ -66,7 +66,7 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
         stackHeight += 1
         if (corecurrentCalls.contains(ctx)) {
           // load input state based on previous calls with the same context
-          loadInputOfCorecurrentCall(ctx, in)
+          loadCorecurrentInput(ctx, in)
         }
         if (Fixpoint.DEBUG)
           println(("  " * stackHeight) + s"PUSH $ctx -> ${state.getInState()}")
@@ -75,9 +75,9 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
         // call is recurrent
         recurrentCalls += ix
         // store the input state so the co-recurrent call considers it
-        storeWidenedInState(ctx, in)
+        storeRecurrentInput(ctx, in)
         // load any previous output or throw RecurrentCall exception
-        loadOutputOfRecurrentCall(ctx, ix)
+        loadRecurrentOutput(ctx, ix)
 
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
@@ -92,7 +92,7 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
     stackHeight = newStackHeight
     if (recurrentCalls.remove(newStackHeight)) {
       corecurrentCalls += ctx
-      val widenedResult = storeOutput(ctx, result)
+      val widenedResult = storeCorecurrentOutput(ctx, result)
       (widenedResult, true)
     } else {
       if (Fixpoint.DEBUG)
@@ -100,7 +100,7 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
       (result, false)
     }
 
-  @inline private def storeWidenedInState(ctx: Ctx, in: In): Unit = inCache.get(ctx) match
+  @inline private def storeRecurrentInput(ctx: Ctx, in: In): Unit = inCache.get(ctx) match
     case None =>
       if (Fixpoint.DEBUG)
         println(("  " * stackHeight) + s"  ## RECURRENT $ctx -> $in")
@@ -111,24 +111,24 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
         println(("  " * stackHeight) + s"  ## RECURRENT $ctx -> $joinedIn")
       inCache += ctx -> joinedIn
 
-  @inline private def loadInputOfCorecurrentCall(ctx: Ctx, in: In): Unit = inCache.get(ctx) match
+  @inline private def loadCorecurrentInput(ctx: Ctx, in: In): Unit = inCache.get(ctx) match
     case None => inCache += ctx -> in
-    case Some(previousIn) =>
-      val joinedIn = widenIn.widen(previousIn, in)
+    case Some(recurrentIn) =>
+      val joinedIn = widenIn.widen(in, recurrentIn)
       inCache += ctx -> joinedIn
       state.setInState(joinedIn)
 
-  @inline private def loadOutputOfRecurrentCall(ctx: Ctx, ix: Int): Option[Try[Codom]] = outCache.get(ctx) match
+  @inline private def loadRecurrentOutput(ctx: Ctx, ix: Int): Option[Try[Codom]] = outCache.get(ctx) match
     case None =>
       throw RecurrentCall
     case Some((res, previousOut)) =>
-      val joinedOut = joinOut.joinValues(previousOut, state.getOutState())
+      val joinedOut = widenOut.widen(previousOut, state.getOutState())
       state.setOutState(joinedOut)
       if (Fixpoint.DEBUG)
         println(("  " * stackHeight) + s"  ## RECURRENT $ctx <- $res, $joinedOut")
       Some(res)
 
-  @inline private def storeOutput(ctx: Ctx, result: Try[Codom]): Try[Codom] = outCache.get(ctx) match
+  @inline private def storeCorecurrentOutput(ctx: Ctx, result: Try[Codom]): Try[Codom] = outCache.get(ctx) match
     case None =>
       val out = state.getOutState()
       outCache += ctx -> (result, out)
