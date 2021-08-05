@@ -3,8 +3,6 @@ package sturdy.language.schemelang
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.environment.CEnvironment
-import sturdy.effect.environment.CClosableEnvironment
-import sturdy.effect.environment.ClosableEnvironment
 import sturdy.effect.store.CStore
 import sturdy.effect.failure.{CFailure, Failure}
 import sturdy.fix
@@ -31,12 +29,10 @@ object ConcreteInterpreter:
   enum Num:
     case IntVal(i: Int)
     case DoubleVal(d: Double)
-
     def asInt: Int = this match {
       case IntVal(i: Int) => i
       case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
     }
-
     def asDouble: Double = this match {
       case DoubleVal(d: Double) => d
       case _ => throw new IllegalArgumentException(s"Expected Double but got $this")
@@ -87,11 +83,17 @@ object ConcreteInterpreter:
     case _ => throw new IllegalArgumentException(s"Expected IntVal but got $v")
 
   def withNum1ToBool(v: Value)
-                    (opInt: Int => Boolean)
+                    (opInt:Int => Boolean)
                     (opDouble:Double => Boolean): Value = v match
     case NumVal(IntVal(i)) => BoolVal(opInt(i))
     case NumVal(DoubleVal(d)) => BoolVal(opDouble(d))
     case _ => throw new IllegalArgumentException(s"Expected NumVal but got $v")
+
+  // TODO
+//  def withNum1ToBool_[N](v: Value)(op: Numeric[N] => Boolean): Value = v match
+//    case NumVal(IntVal(i)) => BoolVal(op(i))
+//    case NumVal(DoubleVal(d)) => BoolVal(op(d))
+//    case _ => throw new IllegalArgumentException(s"Expected NumVal but got $v")
 
   def withNum1ToNum(v: Value)
               (opInt: Int => Int)
@@ -107,7 +109,7 @@ object ConcreteInterpreter:
     case NumVal(DoubleVal(d)) => NumVal(DoubleVal(opDouble(d)))
     case _ => throw new IllegalArgumentException(s"Expected NumVal but got $v")
 
-  def withNum2ToNum(v1: Value, v2: Value)
+  inline def withNum2ToNum(v1: Value, v2: Value)
               (opInt: (Int, Int) => Int)
               (opDouble:(Double, Double) => Double): Value = (v1,v2) match
     case (NumVal(IntVal(i1)), NumVal(IntVal(i2))) => NumVal(IntVal(opInt(i1, i2)))
@@ -115,6 +117,13 @@ object ConcreteInterpreter:
     case (NumVal(IntVal(i)), NumVal(DoubleVal(d))) => NumVal(DoubleVal(opDouble(i, d)))
     case (NumVal(DoubleVal(d)), NumVal(IntVal(i))) => NumVal(DoubleVal(opDouble(i, d)))
     case _ => throw new IllegalArgumentException(s"Expected NumVal, NumVal but got $v1, $v2")
+
+//  def withNum2ToNum_(v1: Value, v2: Value): Value = (v1,v2) match
+//    case (NumVal(IntVal(i1)), NumVal(IntVal(i2))) => summon[NumericOps[Int]].add(i1,i2)
+//    case (NumVal(DoubleVal(d1)), NumVal(DoubleVal(d2))) => summon[NumericOps[Double]].add(d1,d2)
+//    case (NumVal(IntVal(i1)), NumVal(DoubleVal(d2))) => summon[NumericOps[Double]].add(i1.toDouble,d2)
+//    case (NumVal(DoubleVal(d1)), NumVal(IntVal(i2))) => summon[NumericOps[Double]].add(d1,i2.toDouble)
+//    case _ => throw new IllegalArgumentException(s"Expected NumVal, NumVal but got $v1, $v2")
 
   def withNumInt2ToNum(v1: Value, v2: Value)
                       (opInt: (Int, Int) => Int): Value = (v1,v2) match
@@ -128,7 +137,6 @@ object ConcreteInterpreter:
   class Effects(initEnvironment: Environment, initStore: Store)
     extends CBoolBranching[Value]
       with CEnvironment[String, Int](initEnvironment)
-      with CClosableEnvironment[String, Int]
       with CStore[Addr, Value](initStore)
       with CAllocationIntIncrement[AllocationSite]
       with CFailure
@@ -137,8 +145,6 @@ object ConcreteInterpreter:
     val effects = new Effects(initEnvironment, initStore)
 
     given Failure = effects
-    given ClosableEnvironment[String, Addr, Environment] = effects
-
     given IntOps[Value] = new LiftedIntOps[Value, Int](_.asNum.asInt, x => NumVal(IntVal(x)))
     given DoubleOps[Value] = new LiftedDoubleOps[Value, Double](_.asNum.asDouble, x => NumVal(DoubleVal(x)))
     given NumericOps[Value] with
@@ -157,6 +163,7 @@ object ConcreteInterpreter:
       override def max(v1: Value, v2: Value): Value = withNum2ToNum(v1, v2)(_.max(_))(_.max(_))
       override def min(v1: Value, v2: Value): Value = withNum2ToNum(v1, v2)(_.min(_))(_.min(_))
       override def add(v1: Value, v2: Value): Value = withNum2ToNum(v1, v2)(_ + _)(_ + _)
+//        (summon[NumericOps[Int]].add)(summon[NumericOps[Double]].add)
       override def mul(v1: Value, v2: Value): Value = withNum2ToNum(v1, v2)(_ * _)(_ * _)
       override def sub(v1: Value, v2: Value): Value = withNum2ToNum(v1, v2)(_ - _)(_ - _)
       override def div(v1: Value, v2: Value): Value = withNum2ToNum(v1, v2)(_ / _)(_ / _)
@@ -193,9 +200,8 @@ object ConcreteInterpreter:
       def isBoolean(v: Value): Value = v match
         case BoolVal(_) => BoolVal(true)
         case _ => BoolVal(false)
-    given ClosureOps[
-      String, Addr, Environment, List[Expr], Value, Value, Value] =
-      new LiftedClosureOps[String, Addr, Environment, (List[String], Environment, List[Expr]), List[Expr], Value, Value](_.asClosure, ClosureVal.apply)
+    given ClosureOps[String, Value, List[Expr], Environment, Value, Value] =
+      new LiftedClosureOps[String, Value, List[Expr], Environment, Value, Value, (List[String], Environment, List[Expr])](_.asClosure, ClosureVal.apply)
 
     new ConcreteInterpreter(using effects)
   }
@@ -209,8 +215,8 @@ class ConcreteInterpreter
          boolOps: BooleanOps[Value], eqOps: EqOps[Value, Value], compareOps: CompareOps[Value, Value],
          charOps: CharOps[Value], stringOps: StringOps[Value],
          symbolOps: SymbolOps[Value], quoteOps: QuoteOps[Literal, Value],
-         closureOps: ClosureOps[String, Addr, Environment, List[Expr], Value, Value, Value],
-         voidOps: VoidOps[Value], typeOps: TypeOps[Value]) //, closureOps: ClosureOps[Expr, String, Addr, V])
-  extends GenericInterpreter[Value, Addr, Effects, Environment]:
+         closureOps: ClosureOps[String, Value, List[Expr], Environment, Value, Value],
+         voidOps: VoidOps[Value], typeOps: TypeOps[Value])
+  extends GenericInterpreter[Value, Addr, Environment, Effects]:
 
   val phi = fix.identity[FixIn[Value], FixOut[Value]]

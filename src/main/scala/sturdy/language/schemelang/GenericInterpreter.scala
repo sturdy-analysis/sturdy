@@ -2,7 +2,7 @@ package sturdy.language.schemelang
 
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.branching.BoolBranching
-import sturdy.effect.environment.Environment
+import sturdy.effect.environment.ClosableEnvironment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.fix
@@ -28,17 +28,17 @@ import sturdy.values.relational.*
 import sturdy.values.numerics.NumericOps
 
 object GenericInterpreter:
-  type GenericEffects[V, Addr] =
+  type GenericEffects[V, Addr, Env] =
     BoolBranching[V] with
-    Environment[String, Addr] with
+    ClosableEnvironment[String, Addr, Env] with
     Store[Addr, V] with
     Allocation[Addr, AllocationSite] with
     Failure
 
   enum AllocationSite:
-    case LetBinding(arg: Expr, x: String) // not optimal
+    case LetBinding(let: Expr, x: String)
     case Define(d: Expr.Define)
-    case ClosureArg(body: List[Expr], x: String) // not optimal
+    case ClosureParam(body: List[Expr], x: String)
 
   case object UnboundVariable extends FailureKind
   case object UnboundAddr extends FailureKind
@@ -55,14 +55,14 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Env]
+trait GenericInterpreter[V, Addr, Env, Effects <: GenericEffects[V, Addr, Env]]
   (using val effectOps: Effects)
   (using val intOps: IntOps[V], doubleOps: DoubleOps[V], numericOps: NumericOps[V],
              boolOps: BooleanOps[V],
              eqOps: EqOps[V, V], compareOps: CompareOps[V, V],
              charOps: CharOps[V], stringOps: StringOps[V],
              symbolOps: SymbolOps[V], quoteOps: QuoteOps[Literal, V],
-             closureOps: ClosureOps[String, Addr, Env, List[Expr], V, V, V],
+             closureOps: ClosureOps[String, V, List[Expr], Env, V, V],
              voidOps: VoidOps[V], typeOps: TypeOps[V])
   (using effectOps.EnvJoin[V], effectOps.EnvJoin[Addr], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit],
    effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[V]):
@@ -98,57 +98,62 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Env]
         val argVals = args.map(arg => eval(arg))
         invokeClosure(clsVal, argVals) { applyClosure }
       case Apply(es) => run(es)
-      case Var(x) => {
+      case Var(x) =>
         lookupOrElseAndThen(x, fail(UnboundVariable, x)) {
-        addr => readOrElse(addr, fail(UnboundAddr, s"$addr for variable $x"))
+          addr => readOrElse(addr, fail(UnboundAddr, s"$addr for variable $x"))
         }
+      case e@Lam(names, body) => {
+        val env = getEnv
+        closureValue(names, body, env)
       }
-      case e@Lam(names, body) => closureValue(names, body)
-      case expr@Let(bnds, body) => {
-        val (envbnds, storebnds) = allocateBindings(bnds)
-        evalBindings(storebnds)
-        bindLocal_(envbnds) { run(body) }
-      }
-      case expr@LetRec(bnds, body) => {
-        val (envbnds, storebnds) = allocateBindings(bnds)
-        bindLocal_(envbnds) {
-          evalBindings(storebnds)
+      case expr@Let(bnds, body) =>
+        scoped {
+          bnds.foreach { case (x,e) =>
+            val addr = alloc(AllocationSite.LetBinding(expr, x))
+            val v = eval(e)
+            bind(x, addr)
+            write(addr, v)
+          }
           run(body)
         }
-      }
-      case s@Set_(x, e) => {
+      case expr@LetRec(bnds, body) =>
+        val (envbnds, storebnds) = bnds.map { case (x,e) =>
+          val addr = alloc(AllocationSite.LetBinding(expr, x))
+          ((x,addr),(addr,e))
+        }.unzip
+        bindLocal_(envbnds) {
+          storebnds.foreach { case (addr, e) =>
+            val v = eval(e)
+            write(addr, v)
+          }
+          run(body)
+        }
+      case s@Set_(x, e) =>
         val addr = lookupOrElse(x, fail(UnboundVariable, x))
         write(addr, eval(e))
         void()
-      }
       case s@Define(x, e) => fail(UserError, "Define should only be used at top level")
-      case If(e1, e2, e3) => {
-        val v = run(List(e1))
-        boolBranch(v, run(List(e2)), run(List(e3)))
-      }
-      case Op1(op, e) => op1(op, run(List(e)))
-      case Op2(op, e1, e2) => op2(op, run(List(e1)), run(List(e2)))
-      case OpVar(op, es) => {
-        val vs = for e <- es yield run(List(e))
+      case If(e1, e2, e3) => boolBranch(eval(e1), eval(e2), eval(e3))
+      case Op1(op, e) => op1(op, eval(e))
+      case Op2(op, e1, e2) => op2(op, eval(e1), eval(e2))
+      case OpVar(op, es) =>
+        val vs = es.map(e => eval(e))
         opVar(op, vs)
-      }
       case Error(err) => fail(UserError, err)
     }
 
     def run_open(es: List[Expr]): V = { es match
-      case (define@Define(x, e))::rest => {
+      case (define@Define(x, e))::rest =>
         val addr = alloc(AllocationSite.Define(define))
         bindLocal(x, addr) {
           write(addr, eval(e))
           run(rest)
         }
-      }
-      case e::List() => { eval(e) } // ensures that last evaluated value is returned
-      case List() => void() // ensures that empty program is evaluated
-      case e::rest => {
+      case Nil => void() // ensures that empty program is evaluated
+      case e::Nil => eval(e) // ensures that last evaluated value is returned
+      case e::rest =>
         eval(e)
         run(rest)
-      }
     }
 
     def lit(literal: Literal): V = literal match {
@@ -178,6 +183,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Env]
       case Abs => abs(v)
       case Floor => floor(v)
       case Ceiling => ceiling(v)
+      case Log => log(v)
 
       case Not => not(v)
 
@@ -211,34 +217,37 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr], Env]
       case Greater => ??? // helpFoldBool(vs, gt) // TODO: fix, dont compare head with every element, but do pairwise compaarisons for consecutive elements
       case SmallerEqual => ??? // helpFoldBool(vs, le) // TODO: fix, dont compare head with every element, but do pairwise compaarisons for consecutive elements
       case GreaterEqual => ??? // helpFoldBool(vs, ge) // TODO: fix, dont compare head with every element, but do pairwise compaarisons for consecutive elements
-      case Max => vs.tail.fold(vs.head){max}
-      case Min => vs.tail.fold(vs.head){min}
-      case Add => vs.tail.fold(vs.head){add}
-      case Mul => vs.tail.fold(vs.head){mul}
-      case Sub => vs.tail.fold(vs.head){sub}
-      case Div => vs.tail.fold(vs.head){div}
-      case Gcd => vs.tail.fold(vs.head){gcd}
-      case Lcm => vs.tail.fold(vs.head){lcm}
+      case Max => vs.reduce(max)
+      case Min => vs.reduce(min)
+      case Add => vs.reduce(add)
+      case Mul => vs.reduce(mul)
+      case Sub => vs.reduce(sub)
+      case Div => vs.reduce(div)
+      case Gcd => vs.reduce(gcd)
+      case Lcm => vs.reduce(lcm)
       case StringAppend => ???
     }
 
-    def applyClosure(vars: List[String], body: List[Expr], args: List[V]): V = {
-      val addrs = vars.map(x => alloc(AllocationSite.ClosureArg(body, x)))
-      bindLocal_(vars.zip(addrs)) {
-        addrs.zip(args).map((x,v) => write(x, v))
-        run(body)
+    def applyClosure(vars: List[String], body: List[Expr], args: List[V], env: Env): V = {
+      scoped {
+        setEnv(env)
+        val addrs = vars.map(x => alloc(AllocationSite.ClosureParam(body, x)))
+        bindLocal_(vars.zip(addrs)) {
+          addrs.zip(args).map((x,v) => write(x, v))
+          run(body)
+        }
       }
     }
 
-    def allocateBindings(bnds: List[(String, Expr)]): (List[(String, Addr)], List[(Addr, Expr)]) = {
-      val (vars, es) = bnds.unzip
-      val addrs = bnds.map((x,e) => alloc(AllocationSite.LetBinding(e,x)))
-      (vars.zip(addrs), addrs.zip(es))
-    }
+//    def allocateBindings(bnds: List[(String, Expr)]): (List[(String, Addr)], List[(Addr, Expr)]) = {
+//      val (vars, es) = bnds.unzip
+//      val addrs = bnds.map((x,e) => alloc(AllocationSite.LetBinding(e,x)))
+//      (vars.zip(addrs), addrs.zip(es))
+//    }
 
-    def evalBindings(storebnds: List[(Addr, Expr)]): Unit = {
-      storebnds.map((addr, e) => { write(addr, run(List(e))) })
-    }
+//    def evalBindings(storebnds: List[(Addr, Expr)]): Unit = {
+//      storebnds.map((addr, e) => { write(addr, run(List(e))) })
+//    }
 
 //    def helpFoldBool(vs: List[V], op: (V, V) => V): V = {
 //      val bools = for v <- vs.tail yield op(vs.head, v)
