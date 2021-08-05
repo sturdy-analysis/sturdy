@@ -12,7 +12,7 @@ import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.given
-import sturdy.language.tip.{Function, GenericInterpreter, Stm, Program}
+import sturdy.language.tip.{Function, GenericInterpreter, Exp, Stm, Program}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.ints.{*, given}
@@ -138,13 +138,19 @@ class IntervalAnalysis(steps: Int)
     super.execute(p)
 
   implicit var bounds: Set[Int] = Set.empty
-  val stack = fix.Stack[FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState](effectOps)(fix.ContextSensitive.none)
+  val callSites = fix.ContextSensitive.callSites[FixIn[Value], Exp.Call] {
+    case FixIn.Eval(c: Exp.Call) => Some(c)
+    case _ => None
+  }
+  val stack = fix.Stack[FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState](effectOps)(callSites.callString(2))
   val phi =
-    fix.dispatch(isCallOrWhile, Seq(
-      // call
-      fix.iter.topmost(stack, effectOps),
-      // while
-      fix.unwind(steps,
-        fix.iter.innermost(stack, effectOps)
-      )
-    ))
+    fix.log(callSites,
+      fix.dispatch(isCallOrWhile, Seq(
+        // call
+        fix.iter.topmost(stack, effectOps),
+        // while
+        fix.unwind(steps,
+          fix.iter.innermost(stack, effectOps)
+        )
+      ))
+    )

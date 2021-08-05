@@ -13,3 +13,18 @@ object ContextSensitive:
   def none[Dom, In] = new ContextSensitive[Dom, In, Dom] {
     override def apply(dom: Dom, in: In): Dom = dom
   }
+
+  def callSites[Dom, Call](call: Dom => Option[Call]): CallSiteLogger[Dom, Call] = new CallSiteLogger(call)
+  class CallSiteLogger[Dom, Call](getCall: Dom => Option[Call]) extends Logger[Dom]:
+    private var calls = List[Call]()
+    def enter(d: Dom): Unit = getCall(d) match
+      case Some(c) => calls = c :: calls
+      case _ => // nothing
+    def exit(d: Dom): Unit = getCall(d) match
+      case Some(c) => calls = calls.tail
+      case _ => // nothing
+    def callString[In](k: Int) = new ContextSensitive[Dom, In, (Dom, List[Call])] {
+      override def apply(dom: Dom, in: In): (Dom, List[Call]) = (dom, calls.take(k))
+    }
+
+

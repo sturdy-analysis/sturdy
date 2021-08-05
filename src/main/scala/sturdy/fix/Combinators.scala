@@ -46,3 +46,15 @@ final class Dispatch[Dom, Codom, Phi <: Combinator[Dom, Codom]](choose: Dom => I
     else
       f(dom)
 }
+
+trait Logger[Dom]:
+  def enter(d: Dom): Unit
+  def exit(d: Dom): Unit
+
+def log[Dom, Codom, Phi <: Combinator[Dom, Codom]](logger: Logger[Dom], phi: Phi): Log[Dom, Codom, Phi] = new Log(logger, phi)
+final class Log[Dom, Codom, Phi <: Combinator[Dom, Codom]](logger: Logger[Dom], val phi: Phi) extends Combinator[Dom, Codom] {
+  override def apply(f: Dom => Codom): Dom => Codom = dom =>
+    logger.enter(dom)
+    try phi(f)(dom) finally
+      logger.exit(dom)
+}
