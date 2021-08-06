@@ -82,7 +82,7 @@ enum OpVarKinds:
 enum Expr extends Labeled:
   case Lit(l: Literal)
   case Nil_
-  case Cons(e1: Expr, e2: Expr)
+  case Cons_(e1: Expr, e2: Expr)
   case Begin(es: List[Expr])
   case AppFoo(foo: Expr, args: List[Expr])
   case Apply(body: List[Expr])

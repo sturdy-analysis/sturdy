@@ -36,6 +36,11 @@ object ConcreteInterpreter:
       case RatioVal(i1: Int, i2: Int) => (i1 / i2).toDouble
       case DoubleVal(d: Double) => d
 
+  enum Cons:
+    import Value._
+
+    case ConsVal(head: Value, tail: Value.ListVal)
+    case NilVal
 
   enum Value:
     import Num._
@@ -43,6 +48,7 @@ object ConcreteInterpreter:
     case BoolVal(b: Boolean)
     case CharVal(c: Char)
     case StringVal(str: String)
+    case ListVal(cons: Cons)
     case SymbolVal(sym: String)
     case QuoteVal(qot: Literal)
     case VoidVal
@@ -61,6 +67,9 @@ object ConcreteInterpreter:
     def asString: String = this match
       case StringVal(str) => str
       case _ => throw new IllegalArgumentException(s"Expected String but got $this")
+    def asList: Cons = this match
+      case ListVal(cons) => cons
+      case _ => throw new IllegalArgumentException(s"Expected List but got $this")
     def asSymbol: String = this match
       case SymbolVal(sym) => sym
       case _ => throw new IllegalArgumentException(s"Expected Symbol but got $this")
@@ -74,6 +83,7 @@ object ConcreteInterpreter:
 
   import Value._
   import Num._
+  import Cons._
 
   type Addr = Int
   type Environment = Map[String, Addr]
@@ -107,6 +117,18 @@ object ConcreteInterpreter:
     given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, Double, Boolean](_.asNum.asDouble, BoolVal.apply)
     given ClosureOps[String, Value, List[Expr], Environment, Value, Value] = new LiftedClosureOps[String, Value, List[Expr], Environment, Value, Value, (List[String], Environment, List[Expr])](_.asClosure, ClosureVal.apply)
 
+    given ListOps[Value] with
+      override def cons(v1: Value, v2: Value): Value = v2 match
+        case lv@ListVal(x) => ListVal(ConsVal(v1, lv))
+        case _ => throw new IllegalArgumentException(s"Expected ListVal but got $v2")
+      override def nil: Value = ListVal(NilVal)
+      override def car(v: Value): Value = v match
+        case ListVal(ConsVal(head,_)) => head
+        case _ => throw new IllegalArgumentException(s"Expected ListVal but got $v")
+      override def cdr(v: Value): Value = v match
+        case ListVal(ConsVal(_,tail)) => tail
+        case _ => throw new IllegalArgumentException(s"Expected ListVal but got $v")
+
     given IfIsTypeOps[Value] with
       def ifIsInt[A](v: Value, thn: => A, els: => A): A = v match
         case NumVal(IntVal(_)) => thn
@@ -117,6 +139,7 @@ object ConcreteInterpreter:
       def ifIsDouble[A](v: Value, thn: => A, els: => A): A = v match
         case NumVal(DoubleVal(_)) => thn
         case _ => els
+
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
         case (BoolVal(b1), BoolVal(b2)) => BoolVal(b1 == b2)
@@ -124,12 +147,16 @@ object ConcreteInterpreter:
       def neq(v1: Value, v2: Value): Value = (v1, v2) match
         case (BoolVal(b1), BoolVal(b2)) => BoolVal(b1 != b2)
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+
     given QuoteOps[Literal, Value] with
       override def quoteLit(l: Literal): Value = QuoteVal(l)
+
     given SymbolOps[Value] with
       override def symbolLit(s: String): Value = SymbolVal(s)
+
     given VoidOps[Value] with
       def void:Value = VoidVal
+
     given TypeOps[Value] with
       def isNumber(v: Value) : BoolVal = v match
         case NumVal(_) => BoolVal(true)
@@ -158,6 +185,7 @@ class ConcreteInterpreter
          doubleOps: DoubleOps[Value], doubleIntOps: DoubleIntOps[Value, Value], doubleBoolOps: DoubleBoolOps[Value, Value],
          rationalOps: RationalOps[Value], rationalIntOps: RationalIntOps[Value,Value], rationalDoubleOps: RationalDoubleOps[Value,Value], rationalBoolOps: RationalBoolOps[Value, Value],
          boolOps: BooleanOps[Value], eqOps: EqOps[Value, Value], compareOps: CompareOps[Value, Value],
+         listOps: ListOps[Value],
          charOps: CharOps[Value], stringOps: StringOps[Value],
          symbolOps: SymbolOps[Value], quoteOps: QuoteOps[Literal, Value],
          closureOps: ClosureOps[String, Value, List[Expr], Environment, Value, Value],

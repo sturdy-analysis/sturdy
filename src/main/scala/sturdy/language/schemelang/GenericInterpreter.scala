@@ -63,6 +63,12 @@ trait TypeOps[V]:
   def isCons(v: V): V
   def isBoolean(v: V): V
 
+trait ListOps[V]:
+  def cons(v1: V, v2: V): V
+  def nil: V
+  def cdr(v: V): V
+  def car(v: V): V
+
 trait VoidOps[V]:
   def void: V
 
@@ -79,9 +85,9 @@ trait GenericInterpreter[V, Addr, Env, Effects <: GenericEffects[V, Addr, Env]]
   (using val intOps: IntOps[V], intDoubleOps: IntDoubleOps[V, V], intBoolOps: IntBoolOps[V, V],
              rationalOps: RationalOps[V], rationalIntOps: RationalIntOps[V,V], rationalDoubleOps: RationalDoubleOps[V,V], rationalBoolOps: RationalBoolOps[V, V],
              doubleOps: DoubleOps[V], doubleIntOps: DoubleIntOps[V, V], doubleBoolOps: DoubleBoolOps[V, V],
-             boolOps: BooleanOps[V],
+             boolOps: BooleanOps[V], charOps: CharOps[V], stringOps: StringOps[V],
+             listOps: ListOps[V],
              eqOps: EqOps[V, V], compareOps: CompareOps[V, V],
-             charOps: CharOps[V], stringOps: StringOps[V],
              symbolOps: SymbolOps[V], quoteOps: QuoteOps[Literal, V],
              closureOps: ClosureOps[String, V, List[Expr], Env, V, V],
              voidOps: VoidOps[V], typeOps: TypeOps[V], ifIsTypeOps: IfIsTypeOps[V])
@@ -109,8 +115,8 @@ trait GenericInterpreter[V, Addr, Env, Effects <: GenericEffects[V, Addr, Env]]
 
     def eval_open(e: Expr): V = { e match
       case Lit(l) => lit(l)
-      case Nil_ => ???
-      case Cons(e1, e2) => ???
+      case Nil_ => listOps.nil
+      case Cons_(e1, e2) => listOps.cons(eval(e1), eval(e2))
       case Begin(es) => run(es)
       case AppFoo(e1, args) =>
         val clsVal = eval(e1)
@@ -168,8 +174,8 @@ trait GenericInterpreter[V, Addr, Env, Effects <: GenericEffects[V, Addr, Env]]
           write(addr, eval(e))
           run(rest)
         }
-      case Nil => void // ensures that empty program is evaluated
-      case e::Nil => eval(e) // ensures that last evaluated value is returned
+      case Nil => void
+      case e::Nil => eval(e)
       case e::rest =>
         eval(e)
         run(rest)
@@ -207,12 +213,13 @@ trait GenericInterpreter[V, Addr, Env, Effects <: GenericEffects[V, Addr, Env]]
 
       case Not => not(v)
 
-      case Car => ???
-      case Cdr => ???
-      case Caar => ???
-      case Cadr => ???
-      case Caddr => ???
-      case Cadddr => ???
+      case Car => listOps.car(v)
+      case Cdr => listOps.cdr(v)
+      case Caar => listOps.car(listOps.car(v))
+      case Cadr => listOps.car(listOps.cdr(v))
+      case Cddr => listOps.cdr(listOps.cdr(v))
+      case Caddr => listOps.car(listOps.cdr(listOps.cdr(v)))
+      case Cadddr => listOps.car(listOps.cdr(listOps.cdr(listOps.cdr(v))))
 
       case NumberToString => ???
       case StringToSymbol => ???

@@ -6,6 +6,7 @@ import sturdy.effect.failure.CFailureException
 import sturdy.language.schemelang.ConcreteInterpreter.*
 import sturdy.language.schemelang.ConcreteInterpreter.Value.*
 import sturdy.language.schemelang.ConcreteInterpreter.Num.*
+import sturdy.language.schemelang.ConcreteInterpreter.Cons.*
 import sturdy.language.schemelang.GenericInterpreter.IllegalArgument
 import sturdy.values.ints.IntDivisionByZero
 import sturdy.language.schemelang.Literal.*
@@ -394,4 +395,27 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
         Lit(IntLit(4))))
     ))
     assertResult(NumVal(RatioVal(1,9)))(res)
+  }
+
+  it should "test cadr on list expression " in {
+    val res = run(List(
+      Op1(Cadr,
+        Cons_(Lit(IntLit(1)),
+          Cons_(Lit(IntLit(2)),
+            Cons_(Lit(IntLit(3)), Nil_))))
+    ))
+    assertResult(NumVal(IntVal(2)))(res)
+  }
+
+  it should "test creation of list expression " in {
+    val res = run(List(
+        Cons_(Lit(IntLit(1)),
+          Cons_(Lit(IntLit(2)),
+            Cons_(Lit(IntLit(3)), Nil_)))
+    ))
+    assertResult(
+      ListVal(ConsVal(NumVal(IntVal(1)),
+          ListVal(ConsVal(NumVal(IntVal(2)),
+              ListVal(ConsVal(NumVal(IntVal(3)),
+                ListVal(NilVal))))))))(res)
   }
