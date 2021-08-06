@@ -138,18 +138,25 @@ class IntervalAnalysis(steps: Int)
     super.execute(p)
 
   implicit var bounds: Set[Int] = Set.empty
-  val callSites = fix.ContextSensitive.callSites[FixIn[Value], Exp.Call] {
+
+  type Ctx = List[Exp.Call]
+  val callSites = fix.context.callSites[FixIn[Value], Exp.Call] {
     case FixIn.Eval(c: Exp.Call) => Some(c)
     case _ => None
   }
+  private implicit val contextual: fix.Contextual[Ctx, FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState] =
+    fix.contextual(callSites.callString(2), {case FixIn.Eval(Exp.Call(_, _)) => true; case _ => false})
+
   val phi =
     fix.log(callSites,
-      fix.dispatch(isCallOrWhile, Seq(
-        // call
-        fix.iter.topmost(callSites.callString(2)),
-        // while
-        fix.unwind(steps,
-          fix.iter.innermost(callSites.callString(2))
-        )
-      ))
+      fix.contextSensitive(
+        fix.dispatch(isCallOrWhile, Seq(
+          // call
+          fix.iter.topmost,
+          // while
+          fix.unwind(steps,
+            fix.iter.innermost
+          )
+        ))
+      )
     )

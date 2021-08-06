@@ -79,13 +79,25 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     }
 
 
-//  it should "run this file" in {
-//    val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip/fix6.tip").toURI();
-//    val (res, effects) = runAnalysis(Paths.get(uri), 10)
-//    println(res)
-//    println(effects.getEnv)
-//    println(effects.getStore)
-//    println(effects.getPrinted)
-////    Labeled.reset()
-////    runFile(Paths.get(uri), 3)
-//  }
+object RunIntervalAnalysis extends App {
+  def runAnalysis(p: Path, steps: Int) =
+    val file = Source.fromURI(p.toUri)
+    val sourceCode = file.getLines().mkString("\n")
+    file.close()
+    val program = Parser.parse(sourceCode)
+
+    if (program.funs.exists(_.name == "main")) {
+      //      println(s"Running ${p.getFileName}")
+
+      val analysis = IntervalAnalysis(Map(), Map(), steps)
+      (analysis.effectOps.fallible(analysis.execute(program)), analysis.effectOps)
+    } else {
+      null
+    }
+
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/fix4.tip").toURI();
+  val (res, effects) = runAnalysis(Paths.get(uri), 10)
+  println(res)
+  println(effects.getEnv)
+  println(effects.getStore)
+}

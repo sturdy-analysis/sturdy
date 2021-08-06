@@ -41,7 +41,7 @@ object SignAnalysisSoundness:
       given CAllocationIntIncrement[AllocationSite] = c.effectOps
 
 //      a.effectOps.environmentIsSound(c.effectOps) &&
-      a.effectOps.storeIsSound(c.effectOps) &&
+//      a.effectOps.storeIsSound(c.effectOps) &&
       a.effectOps.printIsSound(c.effectOps)
     }
 

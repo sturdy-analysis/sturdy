@@ -36,6 +36,26 @@ enum Exp extends Labeled:
     case FieldAccess(rec: Exp, field: String) => rec.intLiterals
     case _ => Set()
 
+  override def toString: String = this match
+    case NumLit(n) => s"$n@${this.label}"
+    case Input() => s"Input@${this.label}"
+    case Var(name) => s"$name@${this.label}"
+    case Add(e1, e2) => s"Add@${this.label}"
+    case Sub(e1, e2) => s"Sub@${this.label}"
+    case Mul(e1, e2) => s"Mul@${this.label}"
+    case Div(e1, e2) => s"Div@${this.label}"
+    case Gt(e1, e2) => s"Gt@${this.label}"
+    case Eq(e1, e2) => s"Eq@${this.label}"
+    case Call(Var(fun), args) => s"Call($fun)@${this.label}"
+    case Call(fun, args) => s"Call@${this.label}"
+    case Alloc(e) => s"Alloc@${this.label}"
+    case VarRef(name: String) => s"&$name@${this.label}"
+    case Deref(e) => s"Deref@${this.label}"
+    case NullRef() => s"Null@${this.label}"
+    case Record(fields: Seq[(String, Exp)]) => s"Record@${this.label}"
+    case FieldAccess(rec: Exp, field: String) => s"FieldAccess@${this.label}"
+
+
 enum Stm extends Labeled:
   case Assign(lhs: Assignable, e: Exp)
   case If(cond: Exp, thn: Stm, els: Option[Stm])
@@ -51,6 +71,14 @@ enum Stm extends Labeled:
     case Block(body) => body.flatMap(_.intLiterals).toSet
     case Output(e) => e.intLiterals
     case Error(e) => e.intLiterals
+
+  override def toString: String = this match
+    case Assign(x, _) => s"Assign(x)@${this.label}"
+    case If(c, t, e) => s"If(c)@${this.label}"
+    case While(c, b) => s"While(c)@${this.label}"
+    case Block(body) => s"Block@${this.label}"
+    case Output(e) => s"Output@${this.label}"
+    case Error(e) => s"Error@${this.label}"
 
 enum Assignable:
   case AVar(name: String)

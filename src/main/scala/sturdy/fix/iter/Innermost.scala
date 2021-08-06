@@ -2,8 +2,7 @@ package sturdy.fix.iter
 
 import sturdy.effect.AnalysisState
 import sturdy.effect.JoinComputation
-import sturdy.fix.Combinator
-import sturdy.fix.ContextSensitive
+import sturdy.fix.{Combinator, Contextual}
 import sturdy.fix.RecurrentCall
 import sturdy.fix.Stack
 import sturdy.fix.Widening
@@ -14,14 +13,14 @@ import scala.collection.mutable
 import scala.util.Try
 
 def innermost[Dom, Codom, In, Out, Ctx]
-  (context: ContextSensitive[Dom, In, Ctx])
+  (using context: Contextual[Ctx, Dom, Codom, In, Out])
   (using state: AnalysisState[In, Out])
   (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation)
   : Innermost[Dom, Codom, In, Out, Ctx] = new Innermost(state, context)
 
 final class Innermost[Dom, Codom, In, Out, Ctx]
-  (state: AnalysisState[In, Out], context: ContextSensitive[Dom, In, Ctx])
+  (state: AnalysisState[In, Out], context: Contextual[Ctx, Dom, Codom, In, Out])
   (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation)
   extends Combinator[Dom, Codom]:
@@ -31,7 +30,7 @@ final class Innermost[Dom, Codom, In, Out, Ctx]
   /** Runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
     def apply_(dom: Dom): Codom =
-      state.repeatUntilStable { () =>
+      stack.repeatUntilStable { () =>
         val (result, hasLoop) = step(f, dom, state.getInState())
         if (!hasLoop)
           return result.get

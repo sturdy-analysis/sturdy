@@ -6,6 +6,7 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFailureException
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
+import sturdy.language.tip.analysis.SignAnalysisTest
 import sturdy.language.whilelang.ConcreteInterpreter.*
 import sturdy.language.whilelang.ConcreteInterpreter.Value.*
 
@@ -42,3 +43,18 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
     } else {
 //      println(s"${p.getFileName}: no main function")
     }
+
+object RunConcreteInterpreter extends App:
+  def runFile(p: Path) =
+    val file = Source.fromURI(p.toUri)
+    val sourceCode = file.getLines().mkString("\n")
+    file.close()
+    val program = Parser.parse(sourceCode)
+    val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
+    (interp.effectOps.fallible(interp.execute(program)), interp.effectOps)
+
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/interpreter_test.tip").toURI();
+  val (res, effects) = runFile(Paths.get(uri))
+  println(res)
+  println(effects.getEnv)
+  println(effects.getStore)

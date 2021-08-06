@@ -102,6 +102,6 @@ class SignAnalysis
   }
 
   val phi = fix.filter(isWhile,
-    fix.iter.innermost(fix.ContextSensitive.none)
+    fix.iter.innermost(using fix.noContextual)
   )
   

@@ -128,19 +128,18 @@ class SignAnalysis(steps: Int)
     case _ => -1
   }
 
-  val callSites = fix.ContextSensitive.callSites[FixIn[Value], Exp.Call] {
-    case FixIn.Eval(c: Exp.Call) => Some(c)
-    case _ => None
-  }
-  val context = callSites.callString[effectOps.InState](2)
+  type Ctx = (FixIn[Value], effectOps.InState)
+  private implicit val contextual: fix.Contextual[Ctx, FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState] =
+    fix.contextual(fix.context.full, {case FixIn.Eval(Exp.Call(_, _)) => true; case _ => false})
+
   val phi =
-    fix.log(callSites,
+    fix.contextSensitive(
       fix.dispatch(isCallOrWhile, Seq(
         // call
-        fix.iter.topmost(context),
+        fix.iter.topmost,
         // while
         fix.unwind(steps,
-          fix.iter.innermost(context)
+          fix.iter.innermost
         )
       ))
     )

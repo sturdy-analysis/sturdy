@@ -77,7 +77,7 @@ object RunSignAnalysis extends App {
       null
     }
 
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/context.tip").toURI();
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/interpreter_test.tip").toURI();
   val (res, effects) = runAnalysis(Paths.get(uri), 10)
   println(res)
   println(effects.getEnv)

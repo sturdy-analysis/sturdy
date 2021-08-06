@@ -24,7 +24,7 @@ case object RecurrentCall extends Exception:
  *  This can be achieved by making sure that each call chain repeats a previous context after
  *  finitely many calls. This property holds in particular if the set of contexts is finite.
  */
-final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], context: ContextSensitive[Dom, In, Ctx])
+final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], contextual: Contextual[Ctx, Dom, Codom, In, Out])
   (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation):
 
@@ -52,13 +52,37 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
   /** Current height of the stack. */
   def height: Int = stackHeight
 
+  /** Iterates `f` until the outCache is stable. */
+  def repeatUntilStable[A](f: () => A): A = {
+    val originalInState = state.getInState()
+    val originalOutState = state.getOutState()
+    var iterationCount = 0
+
+    var previousOutCache = outCache
+
+    while (true) {
+      val result = f()
+      if (previousOutCache == outCache)
+        return result
+      else {
+        iterationCount += 1
+        if (Fixpoint.DEBUG)
+          println(s"## REPEAT (Iteration $iterationCount)")
+        previousOutCache = outCache
+        state.setInState(originalInState)
+        state.setOutState(originalOutState)
+      }
+    }
+    throw new IllegalStateException()
+  }
+  
   /** Pushes a frame on top of the stack and detects if the frame is recurrent.
    *
    *  If the frame is recurrent and has not been previously executed, throws a `RecurrentCall` exception.
    *  If the frame is recurrent and has been previously executed, yields the previous result.
    */
   def push(dom: Dom, in: In): Option[Try[Codom]] =
-    val ctx = context(dom, in)
+    val ctx = contextual.getCurrentContext
     stack.get(ctx) match
       case None => // call is not recurrent
         // push call to stack
@@ -69,15 +93,15 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
           loadCorecurrentInput(ctx, in)
         }
         if (Fixpoint.DEBUG)
-          println(("  " * stackHeight) + s"PUSH $ctx -> ${state.getInState()}")
+          println(("  " * stackHeight) + s"PUSH $dom[$ctx] -> ${state.getInState()}")
         None
       case Some(ix) =>
         // call is recurrent
         recurrentCalls += ix
         // store the input state so the co-recurrent call considers it
-        storeRecurrentInput(ctx, in)
+        storeRecurrentInput(dom, ctx, in)
         // load any previous output or throw RecurrentCall exception
-        loadRecurrentOutput(ctx, ix)
+        loadRecurrentOutput(dom, ctx, ix)
 
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
@@ -85,30 +109,30 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
    * If the frame recurred, updates the cache to store the result of this frame.
    */
   def pop(dom: Dom, in: In, result: Try[Codom]): (Try[Codom], Boolean) =
-    val ctx = context(dom, in)
+    val ctx = contextual.getCurrentContext
     val entry = stack(ctx)
     stack -= ctx
     val newStackHeight = stackHeight - 1
     stackHeight = newStackHeight
     if (recurrentCalls.remove(newStackHeight)) {
       corecurrentCalls += ctx
-      val widenedResult = storeCorecurrentOutput(ctx, result)
+      val widenedResult = storeCorecurrentOutput(dom, ctx, result)
       (widenedResult, true)
     } else {
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  POP  $ctx <- $result, ${state.getOutState()}")
+        println(("  " * stackHeight) + s"  POP  $dom[$ctx] <- $result, ${state.getOutState()}")
       (result, false)
     }
 
-  @inline private def storeRecurrentInput(ctx: Ctx, in: In): Unit = inCache.get(ctx) match
+  @inline private def storeRecurrentInput(dom: Dom, ctx: Ctx, in: In): Unit = inCache.get(ctx) match
     case None =>
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  ## RECURRENT $ctx -> $in")
+        println(("  " * stackHeight) + s"  ## RECURRENT $dom[$ctx] -> $in")
       inCache += ctx -> in
     case Some(previousIn) =>
       val joinedIn = widenIn.widen(previousIn, in)
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  ## RECURRENT $ctx -> $joinedIn")
+        println(("  " * stackHeight) + s"  ## RECURRENT $dom[$ctx] -> $joinedIn")
       inCache += ctx -> joinedIn
 
   @inline private def loadCorecurrentInput(ctx: Ctx, in: In): Unit = inCache.get(ctx) match
@@ -118,22 +142,22 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
       inCache += ctx -> joinedIn
       state.setInState(joinedIn)
 
-  @inline private def loadRecurrentOutput(ctx: Ctx, ix: Int): Option[Try[Codom]] = outCache.get(ctx) match
+  @inline private def loadRecurrentOutput(dom: Dom, ctx: Ctx, ix: Int): Option[Try[Codom]] = outCache.get(ctx) match
     case None =>
       throw RecurrentCall
     case Some((res, previousOut)) =>
       val joinedOut = widenOut.widen(previousOut, state.getOutState())
       state.setOutState(joinedOut)
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  ## RECURRENT $ctx <- $res, $joinedOut")
+        println(("  " * stackHeight) + s"  ## RECURRENT $dom[$ctx] <- $res, $joinedOut")
       Some(res)
 
-  @inline private def storeCorecurrentOutput(ctx: Ctx, result: Try[Codom]): Try[Codom] = outCache.get(ctx) match
+  @inline private def storeCorecurrentOutput(dom: Dom, ctx: Ctx, result: Try[Codom]): Try[Codom] = outCache.get(ctx) match
     case None =>
       val out = state.getOutState()
       outCache += ctx -> (result, out)
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  POP  $ctx <- $result, $out")
+        println(("  " * stackHeight) + s"  POP  $dom[$ctx] <- $result, $out")
       result
     case Some((previousResult, previousOut)) =>
       val joinedResult = (previousResult, result) match
@@ -145,5 +169,5 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
       state.setOutState(joinedOut)
       outCache += ctx -> (joinedResult, joinedOut)
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  POP  $ctx <- $joinedResult, $joinedOut")
+        println(("  " * stackHeight) + s"  POP  $dom[$ctx] <- $joinedResult, $joinedOut")
       joinedResult
