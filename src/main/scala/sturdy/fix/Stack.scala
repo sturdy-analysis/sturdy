@@ -147,17 +147,3 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
       if (Fixpoint.DEBUG)
         println(("  " * stackHeight) + s"  POP  $ctx <- $joinedResult, $joinedOut")
       joinedResult
-
-object Stack:
-  class StackBuilder[Dom, Codom, In, Out]
-    (state: AnalysisState[In, Out])
-    (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
-    (using wCodom: Widening[Codom], wIn: Widening[In], wOut: Widening[Out], jComp: JoinComputation) {
-    def apply[Ctx](context: ContextSensitive[Dom, In, Ctx]) = new Stack(state, context)(using joinCodom, joinIn, joinOut)(using wCodom, wIn, wOut, jComp)
-  }
-  def apply[Dom, Codom, In, Out]
-    (state: AnalysisState[In, Out])
-    (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
-    (using wCodom: Widening[Codom], wIn: Widening[In], wOut: Widening[Out], jComp: JoinComputation)
-      : StackBuilder[Dom, Codom, In, Out] =
-    new StackBuilder(state)(using joinCodom, joinIn, joinOut)(using wCodom, wIn, wOut, jComp)

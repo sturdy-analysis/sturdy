@@ -61,6 +61,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
     }
 
+object RunSignAnalysis extends App {
   def runAnalysis(p: Path, steps: Int) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
@@ -76,12 +77,9 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
       null
     }
 
-//  it should "run this file" in {
-//    val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/code.tip").toURI();
-//    val (res, effects) = runAnalysis(Paths.get(uri), 10)
-//    println(res)
-//    println(effects.getEnv)
-//    println(effects.getStore)
-////    Labeled.reset()
-////    runFile(Paths.get(uri), 3)
-//  }
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/context.tip").toURI();
+  val (res, effects) = runAnalysis(Paths.get(uri), 10)
+  println(res)
+  println(effects.getEnv)
+  println(effects.getStore)
+}

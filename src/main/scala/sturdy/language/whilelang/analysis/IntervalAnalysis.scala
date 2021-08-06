@@ -109,7 +109,6 @@ class IntervalAnalysis
     case _ => false
   }
 
-  val stack = fix.Stack[Statement, Unit, effectOps.InState, effectOps.OutState](effectOps)(fix.ContextSensitive.none)
   val phi = fix.filter(isWhile,
-    fix.iter.innermost(stack, effectOps)
+    fix.iter.innermost(fix.ContextSensitive.none)
   )

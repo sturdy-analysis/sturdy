@@ -142,15 +142,14 @@ class IntervalAnalysis(steps: Int)
     case FixIn.Eval(c: Exp.Call) => Some(c)
     case _ => None
   }
-  val stack = fix.Stack[FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState](effectOps)(callSites.callString(2))
   val phi =
     fix.log(callSites,
       fix.dispatch(isCallOrWhile, Seq(
         // call
-        fix.iter.topmost(stack, effectOps),
+        fix.iter.topmost(callSites.callString(2)),
         // while
         fix.unwind(steps,
-          fix.iter.innermost(stack, effectOps)
+          fix.iter.innermost(callSites.callString(2))
         )
       ))
     )

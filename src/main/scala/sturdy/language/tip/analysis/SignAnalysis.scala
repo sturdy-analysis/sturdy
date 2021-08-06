@@ -10,7 +10,7 @@ import sturdy.effect.store.AStoreMultiAddrThreadded
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix
 import sturdy.fix.given
-import sturdy.language.tip.{Function, GenericInterpreter, Stm}
+import sturdy.language.tip.{Function, GenericInterpreter, Stm, Exp}
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.ints.{*, given}
@@ -128,13 +128,19 @@ class SignAnalysis(steps: Int)
     case _ => -1
   }
 
-  val stack = fix.Stack[FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState](effectOps)(fix.ContextSensitive.none)
+  val callSites = fix.ContextSensitive.callSites[FixIn[Value], Exp.Call] {
+    case FixIn.Eval(c: Exp.Call) => Some(c)
+    case _ => None
+  }
+  val context = callSites.callString[effectOps.InState](2)
   val phi =
-    fix.dispatch(isCallOrWhile, Seq(
-      // call
-      fix.iter.topmost(stack, effectOps),
-      // while
-      fix.unwind(steps,
-        fix.iter.innermost(stack, effectOps)
-      )
-    ))
+    fix.log(callSites,
+      fix.dispatch(isCallOrWhile, Seq(
+        // call
+        fix.iter.topmost(context),
+        // while
+        fix.unwind(steps,
+          fix.iter.innermost(context)
+        )
+      ))
+    )
