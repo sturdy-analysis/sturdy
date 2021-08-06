@@ -45,10 +45,14 @@ given DoubleIntervalJoin: JoinValue[DoubleInterval] with
 given IntervalDoubleOps: DoubleOps[DoubleInterval] with
   def numLit(d: Double): DoubleInterval = DoubleInterval(d, d)
   def randomDouble(): DoubleInterval = DoubleInterval(0, 1)
+  def abs(v1: DoubleInterval): DoubleInterval = ???
+  def log(v1: DoubleInterval): DoubleInterval = ???
   def add(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 + v2
   def sub(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 - v2
   def mul(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 * v2
   def div(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 / v2
+  def max(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = ???
+  def min(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = ???
 
 given IntervalCompareOps: CompareOps[DoubleInterval, Topped[Boolean]] with
   def lt(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =

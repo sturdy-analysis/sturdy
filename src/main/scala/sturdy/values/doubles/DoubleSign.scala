@@ -63,7 +63,8 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
     else Zero
 
   def randomDouble(): DoubleSign = ZeroOrPos
-
+  def abs(v1: DoubleSign): DoubleSign = ???
+  def log(v1: DoubleSign): DoubleSign = ???
   def add(v1: DoubleSign, v2: DoubleSign): DoubleSign = (v1, v2) match
     case (TopSign, _) => TopSign
     case (_, TopSign) => TopSign
@@ -131,6 +132,8 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
     case ZeroOrPos => v1
     case NegOrZero => v1.negated
     case _ => mul(v1, v2)
+  def max(v1: DoubleSign, v2: DoubleSign): DoubleSign = ???
+  def min(v1: DoubleSign, v2: DoubleSign): DoubleSign = ???
 
 given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
   def lt(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match
@@ -167,6 +170,7 @@ given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
   def isOdd(v1: DoubleSign): Topped[Boolean] = ???
   def isPositive(v1: DoubleSign): Topped[Boolean] = ???
   def isZero(v1: DoubleSign): Topped[Boolean] = ???
+  def max(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = ???
 
 given SignEqOps: EqOps[DoubleSign, Topped[Boolean]] with
   def equ(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match

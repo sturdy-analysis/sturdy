@@ -3,6 +3,7 @@ package sturdy.values.ints
 import sturdy.effect.failure.{Failure, FailureKind}
 
 import scala.util.Random
+import scala.math.{BigInt, log}
 
 case object IntDivisionByZero extends FailureKind
 
@@ -24,6 +25,16 @@ trait IntOps[V](using Failure):
   def gcd(v1: V, v2: V): V
   def lcm(v1: V, v2: V): V
 
+trait IntDoubleOps[V, D]:
+  def log(i: V): D
+
+trait IntBoolOps[V, B]:
+  def isZero(v1: V): B
+  def isPositive(v1: V): B
+  def isNegative(v1: V): B
+  def isOdd(v1: V): B
+  def isEven(v1: V): B
+
 given ConcreteIntOps(using f: Failure): IntOps[Int] with
   def intLit(i: Int): Int = i
   def randomInt(): Int = Random.nextInt()
@@ -43,5 +54,15 @@ given ConcreteIntOps(using f: Failure): IntOps[Int] with
       f.fail(IntDivisionByZero, s"$v1 / $v2")
     else
       v1 / v2
-  def gcd(v1: Int, v2: Int): Int = if (v1 == 0) v1.abs else gcd(v1, v1%v2)
+  def gcd(v1: Int, v2: Int): Int = BigInt(v1).gcd(BigInt(v2)).toInt
   def lcm(v1: Int, v2: Int): Int = (v1 * v2).abs / gcd(v1,v2)
+
+given ConcreteIntDoubleOps: IntDoubleOps[Int, Double] with
+  override def log(i: Int): Double = math.log(i.toDouble)
+
+given ConcreteIntBoolOps: IntBoolOps[Int, Boolean] with
+  override def isZero(v1: Int): Boolean = v1 == 0
+  override def isPositive(v1: Int): Boolean = v1 >= 0
+  override def isNegative(v1: Int): Boolean = v1 < 0
+  override def isOdd(v1: Int): Boolean = v1 % 2 == 0
+  override def isEven(v1: Int): Boolean = v1 % 2 == 1

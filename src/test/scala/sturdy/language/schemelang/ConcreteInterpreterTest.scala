@@ -2,9 +2,12 @@ package sturdy.language.schemelang
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.effect.failure.CFailureException
 import sturdy.language.schemelang.ConcreteInterpreter.*
 import sturdy.language.schemelang.ConcreteInterpreter.Value.*
 import sturdy.language.schemelang.ConcreteInterpreter.Num.*
+import sturdy.language.schemelang.GenericInterpreter.IllegalArgument
+import sturdy.values.ints.IntDivisionByZero
 import sturdy.language.schemelang.Literal.*
 import sturdy.language.schemelang.Expr.*
 import sturdy.language.schemelang.Op1Kinds.*
@@ -220,6 +223,18 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
       assertResult(BoolVal(false))(res)
   }
 
+  it should "test lt on mixed ints doubles" in {
+    for _ <- 0 until 10 do
+      val res = run(List(
+        OpVar(Smaller, List(
+          Lit(IntLit(1)),
+          Lit(IntLit(2)),
+          Lit(DoubleLit(3.0)),
+          Lit(IntLit(4))))
+      ))
+      assertResult(BoolVal(true))(res)
+  }
+
   it should "test min on multiple ints" in {
     for _ <- 0 until 10 do
       val res = run(List(
@@ -277,11 +292,14 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test modulo on doubles" in {
-    assertThrows[IllegalArgumentException] {
-      val res = run(List(
+    val res = intercept[CFailureException] {
+      run(List(
         Op2(Modulo, Lit(DoubleLit(15)), Lit(IntLit(3)))
       ))
     }
+    assertResult(CFailureException(
+      IllegalArgument,
+      "(withInt2): expected int as first argument but got NumVal(DoubleVal(15.0))"))(res)
   }
 
   it should "test quotient on ints" in {
@@ -293,10 +311,87 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test int division by 0" in {
-    assertThrows[ArithmeticException] {
-      val res = run(List(
+    val thrown = intercept[CFailureException] {
+      run(List(
         OpVar(Div, List(
-          Lit(IntLit(1)), Lit(IntLit(0))))
+        Lit(IntLit(1)), Lit(IntLit(0))))
       ))
     }
+    assertResult(thrown)(CFailureException(IntDivisionByZero, "1 / 0"))
+  }
+
+  it should "test int abs with type dispatch in generic interp" in {
+    for _ <- 0 until 10 do
+      val res = run(List(
+        Op1(Abs, Lit(IntLit(-1)))
+      ))
+      assertResult(NumVal(IntVal(1)))(res)
+  }
+
+  it should "test double abs with type dispatch in generic interp" in {
+    for _ <- 0 until 10 do
+      val res = run(List(
+        Op1(Abs, Lit(DoubleLit(-1.0)))
+      ))
+      assertResult(NumVal(DoubleVal(1.0)))(res)
+  }
+
+  it should "test max on multiple ints" in {
+    val res = run(List(
+      OpVar(Max, List(
+        Lit(IntLit(1)),
+        Lit(IntLit(0)),
+        Lit(IntLit(3))))
+    ))
+    assertResult(NumVal(IntVal(3)))(res)
+  }
+
+  it should "test max on multiple doubles" in {
+    val res = run(List(
+      OpVar(Max, List(
+        Lit(DoubleLit(1)),
+        Lit(DoubleLit(0)),
+        Lit(DoubleLit(3))))
+    ))
+    assertResult(NumVal(DoubleVal(3)))(res)
+  }
+
+  it should "test max on mixed int doubles" in {
+    val res = run(List(
+      OpVar(Max, List(
+        Lit(DoubleLit(1)),
+        Lit(IntLit(0)),
+        Lit(DoubleLit(3))))
+    ))
+    assertResult(NumVal(DoubleVal(3)))(res)
+  }
+
+  it should "test add on rationals" in {
+    val res = run(List(
+      OpVar(Add, List(
+        Lit(RationalLit(1, 7)),
+        Lit(RationalLit(1, 7)),
+        Lit(RationalLit(1, 7))))
+    ))
+    assertResult(NumVal(RatioVal(3, 7)))(res)
+  }
+
+  it should "test add on mixed ints rationals " in {
+    val res = run(List(
+      OpVar(Add, List(
+        Lit(RationalLit(1,6)),
+        Lit(RationalLit(1,6)),
+        Lit(IntLit(4))))
+    ))
+    assertResult(NumVal(RatioVal(13,3)))(res)
+  }
+
+  it should "test mul on mixed ints rationals " in {
+    val res = run(List(
+      OpVar(Mul, List(
+        Lit(RationalLit(1,6)),
+        Lit(RationalLit(1,6)),
+        Lit(IntLit(4))))
+    ))
+    assertResult(NumVal(RatioVal(1,9)))(res)
   }

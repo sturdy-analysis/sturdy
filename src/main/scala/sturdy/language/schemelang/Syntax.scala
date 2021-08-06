@@ -2,11 +2,10 @@ package sturdy.language.schemelang
 
 import sturdy.util.Labeled
 
-
 enum Literal:
   case IntLit(i: Int)
   case DoubleLit(d: Double)
-//  case RationalLit(i1: Int, i2: Int) // TODO: add rational class
+  case RationalLit(i1: Int, i2: Int)
   case BoolLit(b: Boolean)
   case CharLit(c: Char)
   case StringLit(s: String)
