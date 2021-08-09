@@ -79,7 +79,7 @@ object IntervalAnalysis:
   type Store = Map[Addr, Value]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
-      with AEnvironmentStaticScope[String, PowAddr] with CEnvironment[String, PowAddr](initEnvironment)
+      with CEnvironment[String, PowAddr](initEnvironment)
       with AStoreMultiAddrThreadded[Addr, Value](initStore)
       with AAllocationFromContext[AllocationSite, PowAddr](fromAllocationSite)
       with APrintPrefix[Value]
@@ -140,12 +140,13 @@ class IntervalAnalysis(steps: Int)
   implicit var bounds: Set[Int] = Set.empty
 
   type Ctx = List[Exp.Call]
+
   val callSites = fix.context.callSites[FixIn[Value], Exp.Call] {
     case FixIn.Eval(c: Exp.Call) => Some(c)
     case _ => None
   }
   private implicit val contextual: fix.Contextual[Ctx, FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState] =
-    fix.contextual(callSites.callString(2), {case FixIn.Eval(Exp.Call(_, _)) => true; case _ => false})
+    fix.contextual(callSites.callString(2), callSites.isCall)
 
   val phi =
     fix.log(callSites,

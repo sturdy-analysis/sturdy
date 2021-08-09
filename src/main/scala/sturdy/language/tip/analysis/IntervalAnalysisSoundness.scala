@@ -40,8 +40,8 @@ object IntervalAnalysisSoundness:
     def isSound(c: ConcreteInterpreter, a: IntervalAnalysis): IsSound = {
       given CAllocationIntIncrement[AllocationSite] = c.effectOps
 
-      a.effectOps.environmentIsSound(c.effectOps) &&
-//      a.effectOps.storeIsSound(c.effectOps) &&
+      // concrete environment is sound by construction
+      a.effectOps.storeIsSound(c.effectOps) &&
       a.effectOps.printIsSound(c.effectOps)
     }
 
