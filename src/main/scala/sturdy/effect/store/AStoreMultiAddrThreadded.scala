@@ -46,6 +46,17 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
   override def free(xs: Powerset[Addr]): Unit =
     () // nothing
 
+  override def scopedAddresses[A](xss: Iterable[Powerset[Addr]])(f: => A): A =
+    val before = ListBuffer[(Addr, Option[V])]()
+    for (xs <- xss; x <- xs)
+      before += x -> store.get(x)
+    try f finally {
+      for ((x, mv) <- before)
+        dirtyAddrs -= x  
+        mv match
+          case None => store -= x
+          case Some(old) => store += x -> old
+    }
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Powerset[Addr]], vSoundness: Soundness[cV, V]): IsSound = {
     import sturdy.values.given

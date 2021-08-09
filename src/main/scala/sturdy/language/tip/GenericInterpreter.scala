@@ -176,24 +176,21 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         }
 
     def call(fun: Function, args: Seq[V]): V = freshScoped {
-      val localAddrs = ListBuffer[Addr]()
-      fun.params.zip(args).map { case (name, arg) =>
+      val paramAddrs = fun.params.map { name =>
         val addr = alloc(AllocationSite.ParamBinding(fun, name))
         bind(name, addr)
-        write(addr, arg)
-        localAddrs += addr
+        addr
       }
-      fun.locals.map { name =>
+      val localsAddrs = fun.locals.map { name =>
         val addr = alloc(AllocationSite.LocalBinding(fun, name))
         bind(name, addr)
-        localAddrs += addr
+        addr
       }
-      try {
+      scopedAddresses(paramAddrs ++ localsAddrs) {
+        paramAddrs.zip(args).map(write)
         rec(FixIn.EnterFunction(fun)) match
           case FixOut.ExitFunction(v) => v
           case _ => throw new IllegalStateException()
-      } finally {
-        localAddrs.foreach(free(_))
       }
     }
 

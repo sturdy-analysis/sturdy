@@ -117,10 +117,8 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
     val ctx = contextual.getCurrentContext
     val frame = Frame(dom, ctx)
     val entry = stack(frame)
-    stack -= frame
     val newStackHeight = stackHeight - 1
-    stackHeight = newStackHeight
-    if (recurrentCalls.remove(newStackHeight)) {
+    val updatedResult = if (recurrentCalls.remove(newStackHeight)) {
       corecurrentCalls += frame
       val widenedResult = storeCorecurrentOutput(frame, result)
       (widenedResult, true)
@@ -129,6 +127,9 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
         println(s"${stackHeightIndent}POP  $frame <- $result, ${state.getOutState()}")
       (result, false)
     }
+    stack -= frame
+    stackHeight = newStackHeight
+    updatedResult
 
   @inline private def storeRecurrentInput(frame: Frame, in: In): Unit = inCache.get(frame) match
     case None =>

@@ -14,17 +14,17 @@ final class ContextSensitive[Ctx, Dom, Codom, In, Out, Phi <: Combinator[Dom, Co
     context.withContext(phi(f), dom)
 }
 
-def contextual[Ctx, Dom, Codom, In, Out](sensitivity: Sensitivity[Dom, Ctx], switchCall: Dom => Boolean)(using state: AnalysisState[In, Out]): Contextual[Ctx, Dom, Codom, In, Out] =
-  new Contextual(sensitivity, switchCall, state)
+def contextual[Ctx, Dom, Codom, In, Out](sensitivity: Sensitivity[Dom, Ctx], switchCall: Dom => Boolean): Contextual[Ctx, Dom, Codom, In, Out] =
+  new Contextual(sensitivity, switchCall)
 
 def noContextual[Dom, Codom, In, Out]: Contextual[Unit, Dom, Codom, In, Out] =
-  new Contextual(context.none, _ => false, null)
+  new Contextual(context.none, _ => false)
 
-final class Contextual[Ctx, Dom, Codom, In, Out](sensitivity: Sensitivity[Dom, Ctx], switchCall: Dom => Boolean, state: AnalysisState[In, Out]):
+final class Contextual[Ctx, Dom, Codom, In, Out](sensitivity: Sensitivity[Dom, Ctx], switchCall: Dom => Boolean):
   private var currentContext: Ctx = null.asInstanceOf[Ctx]
   def getCurrentContext: Ctx = currentContext
 
-  private var previousContexts: List[(Ctx, Out)] = List()
+  private var previousContexts: List[Ctx] = List()
 
   def withContext(f: Dom => Codom, dom: Dom): Codom =
     if (!switchCall(dom))
@@ -33,16 +33,14 @@ final class Contextual[Ctx, Dom, Codom, In, Out](sensitivity: Sensitivity[Dom, C
     val maybeCtx = sensitivity(dom)
     val contextSwitch = maybeCtx match
       case Some(ctx) if ctx != currentContext =>
-        previousContexts = (currentContext, state.getOutState()) :: previousContexts
+        previousContexts = currentContext :: previousContexts
         currentContext = ctx
         true
       case _ => false
 
     try f(dom) finally {
       if (contextSwitch) {
-        val (previousContext, previousOut) = previousContexts.head
-        currentContext = previousContext
-//        state.setOutState(previousOut)
+        currentContext = previousContexts.head
         previousContexts = previousContexts.tail
       }
     }

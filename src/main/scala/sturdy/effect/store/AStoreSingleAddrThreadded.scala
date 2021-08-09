@@ -6,6 +6,8 @@ import sturdy.effect.JoinComputation
 import sturdy.values.Abstractly
 import sturdy.values.JoinValue
 
+import scala.collection.mutable.ListBuffer
+
 /*
  * An abstract threadded store. The store tracks if an address is definitely bound,
  * maybe bound, or unbound and calls the corresponding continuations upon read.
@@ -33,6 +35,18 @@ trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(
   
   override def free(x: Addr): Unit =
     () // nothing
+
+  override def scopedAddresses[A](xs: Iterable[Addr])(f: => A): A =
+    val before = ListBuffer[(Addr, Option[V])]()
+    for (x <- xs)
+      before += x -> store.get(x)
+    try f finally {
+      for ((x, mv) <- before)
+        dirtyAddrs -= x
+        mv match
+          case None => store -= x
+          case Some(old) => store += x -> old
+    }
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Addr], vSoundness: Soundness[cV, V]): IsSound = {
     val abstractedKeys = c.getStore.keySet.map(varAbstractly.abstractly)

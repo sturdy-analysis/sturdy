@@ -95,9 +95,10 @@ object RunIntervalAnalysis extends App {
       null
     }
 
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/fix4.tip").toURI();
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/mccarthy91.tip").toURI();
   val (res, effects) = runAnalysis(Paths.get(uri), 10)
   println(res)
   println(effects.getEnv)
   println(effects.getStore)
+  println(effects.getPrinted)
 }

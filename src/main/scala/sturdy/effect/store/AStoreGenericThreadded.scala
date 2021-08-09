@@ -27,7 +27,7 @@ trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
     store.get(x) match
       case None => store += x -> v
       case Some(old) => store += x -> j.joinValues(old, v)
-  
+
   override def joinComputations[A](f: => A)(g: => A): Join[A] =
     val snapshot = store
     var snapshotDirtyAddrs = dirtyAddrs

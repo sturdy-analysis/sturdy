@@ -11,6 +11,7 @@ case class Powerset[A](val set: Set[A]) extends AnyVal {
   def pureMap[B](f: A => B): Powerset[B] = Powerset(set.map(f))
   def map[B](f: A => B)(using j: JoinComputation): Powerset[B] =
     j.joinComputationsIterable(set.map(a => () => Powerset(f(a))))
+  def foreach(f: A => Unit): Unit = set.foreach(f)
   override def toString: String = s"Powerset(${set.mkString(", ")})"
 }
 object Powerset {
