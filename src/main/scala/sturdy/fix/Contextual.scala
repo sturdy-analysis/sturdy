@@ -42,7 +42,7 @@ final class Contextual[Ctx, Dom, Codom, In, Out](sensitivity: Sensitivity[Dom, C
       if (contextSwitch) {
         val (previousContext, previousOut) = previousContexts.head
         currentContext = previousContext
-        state.setOutState(previousOut)
+//        state.setOutState(previousOut)
         previousContexts = previousContexts.tail
       }
     }

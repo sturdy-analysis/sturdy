@@ -128,9 +128,9 @@ class SignAnalysis(steps: Int)
     case _ => -1
   }
 
-  type Ctx = (FixIn[Value], effectOps.InState)
+  type Ctx = effectOps.InState
   private implicit val contextual: fix.Contextual[Ctx, FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState] =
-    fix.contextual(fix.context.full, {case FixIn.Eval(Exp.Call(_, _)) => true; case _ => false})
+    fix.contextual(fix.context.full, {case FixIn.EnterFunction(_) => true; case _ => false})
 
   val phi =
     fix.contextSensitive(
