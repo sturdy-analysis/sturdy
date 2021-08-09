@@ -11,6 +11,7 @@ import sturdy.fix
 import sturdy.values.booleans.{_, given}
 import sturdy.values.ints.{_, given}
 import sturdy.values.functions.{_, given}
+import sturdy.values.records.{_, given}
 import sturdy.values.references.{_, given}
 import sturdy.values.relational.{_, given}
 import sturdy.values.given
@@ -22,6 +23,7 @@ object ConcreteInterpreter:
     case IntValue(i: Int)
     case RefValue(addr: Option[Addr])
     case FunValue(fun: Function)
+    case RecValue(rec: Map[String, Value])
 
     def asBoolean: Boolean = this match
       case IntValue(i) => i != 0
@@ -35,6 +37,9 @@ object ConcreteInterpreter:
     def asReference: Option[Addr] = this match
       case RefValue(a) => a
       case _ => throw new IllegalArgumentException(s"Expected Reference but got $this")
+    def asRecord: Map[String, Value] = this match
+      case RecValue(rec) => rec
+      case _ => throw new IllegalArgumentException(s"Expected Record but got $this")
 
   import Value._
 
@@ -56,8 +61,8 @@ object ConcreteInterpreter:
     val effects = new Effects(initEnvironment, initStore, nextInput)
 
     given Failure = effects
-    given IntOps[Value] = new LiftedIntOps[Value, Int](_.asInt, IntValue.apply)
-    given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, Int, Boolean](_.asInt, boolValue)
+    given IntOps[Value] = new LiftedIntOps(_.asInt, IntValue.apply)
+    given CompareOps[Value, Value] = new LiftedCompareOps(_.asInt, boolValue)
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
         case (IntValue(i1), IntValue(i2)) => boolValue(i1 == i2)
@@ -65,8 +70,9 @@ object ConcreteInterpreter:
         case (FunValue(f1), FunValue(f2)) => boolValue(f1 == f2)
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       def neq(v1: Value, v2: Value): Value = IntValue(1 - equ(v1, v2).asInt)
-    given FunctionOps[Function, Value, Value, Value] = new LiftedFunctionOps[Function, Value, Value, Value, Function](_.asFunction, FunValue.apply)
-    given ReferenceOps[Addr, Value] = new LiftedReferenceOps[Value, Addr, Option[Addr]](_.asReference, RefValue.apply)
+    given FunctionOps[Function, Value, Value, Value] = new LiftedFunctionOps(_.asFunction, FunValue.apply)
+    given RecordOps[String, Value, Value] = new LiftedRecordOps(_.asRecord, identity, RecValue.apply, identity)
+    given ReferenceOps[Addr, Value] = new LiftedReferenceOps(_.asReference, RefValue.apply)
 
     new ConcreteInterpreter(using effects)
   }
@@ -76,7 +82,7 @@ import ConcreteInterpreter.*
 class ConcreteInterpreter
   (using effectOps: Effects)
   (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value],
-         functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[Addr, Value])
+         functionOps: FunctionOps[Function, Value, Value, Value], recOps: RecordOps[String, Value, Value], refOps: ReferenceOps[Addr, Value])
   extends GenericInterpreter[Value, Addr, Effects]:
 
   val phi = fix.identity[FixIn[Value], FixOut[Value]]

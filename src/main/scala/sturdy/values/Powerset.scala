@@ -23,10 +23,10 @@ given finitePowerset[T](using Finite[T]): Finite[Powerset[T]] with {}
 given concretePowersetPO[T: Structural]: PartialOrder[Powerset[T]] with
   override def lteq(x: Powerset[T], y: Powerset[T]): Boolean = x.set.subsetOf(y.set)
 
-given PowersetJoin[A]: JoinValue[Powerset[A]] with
+given powersetJoin[A]: JoinValue[Powerset[A]] with
   override def joinValues(v1: Powerset[A], v2: Powerset[A]): Powerset[A] = new Powerset(v1.set ++ v2.set)
 
-given PowersetCertainEqualOps[A](using ops: EqOps[A, Boolean]): EqOps[Powerset[A], Topped[Boolean]] with
+given powersetCertainEqualOps[A] (using ops: EqOps[A, Boolean]): EqOps[Powerset[A], Topped[Boolean]] with
   override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] =
     if (v1.set.size == 1 && v2.set.size == 1)
       Topped.Actual(ops.equ(v1.set.head, v2.set.head))
@@ -39,7 +39,7 @@ given PowersetCertainEqualOps[A](using ops: EqOps[A, Boolean]): EqOps[Powerset[A
 
   override def neq(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] = equ(v1, v2).map(!_)
 
-given PowersetUncertainEqualOps[A](using ops: EqOps[A, Topped[Boolean]]): EqOps[Powerset[A], Topped[Boolean]] with
+given powersetUncertainEqualOps[A] (using ops: EqOps[A, Topped[Boolean]]): EqOps[Powerset[A], Topped[Boolean]] with
   override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] =
     if (v1.set.size == 1 && v2.set.size == 1)
       ops.equ(v1.set.head, v2.set.head)
@@ -54,14 +54,14 @@ given PowersetUncertainEqualOps[A](using ops: EqOps[A, Topped[Boolean]]): EqOps[
   override def neq(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] = equ(v1, v2).map(!_)
 
 
-given PowersetContainsOneSound[C, A](using s: Soundness[C, A]): Soundness[C, Powerset[A]] with
+given powersetContainsOneSound[C, A] (using s: Soundness[C, A]): Soundness[C, Powerset[A]] with
   override def isSound(c: C, as: Powerset[A]): IsSound =
     if (as.set.exists(a => s.isSound(c, a).isSound))
       IsSound.Sound
     else
       IsSound.NotSound(s"$as did not contain any sound abstraction of $c")
 
-given PowersetOptionSound[C, A](using s: Soundness[C, A]): Soundness[Option[C], Powerset[A]] with
+given powersetOptionSound[C, A] (using s: Soundness[C, A]): Soundness[Option[C], Powerset[A]] with
   override def isSound(c: Option[C], as: Powerset[A]): IsSound = c match
       case None => IsSound.Sound
       case Some(c) => Soundness.isSound(c, as)

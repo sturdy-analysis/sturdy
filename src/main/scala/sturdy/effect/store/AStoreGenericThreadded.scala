@@ -68,12 +68,11 @@ object AStoreGenericThreadded:
   case class StoreState[Addr, V](store: Map[Addr, V])(using j: JoinValue[V]) {
     def join(other: StoreState[Addr, V]): StoreState[Addr, V] =
       var joined = this.store
-      for (x <- other.store.keySet)
+      for ((x, v) <- other.store)
         joined.get(x) match
-          case None => joined += x -> other.store(x)
+          case None => joined += x -> v
           case Some(thisV) =>
-            val otherV = other.store(x)
-            val joinedV = j.joinValues(otherV, thisV)
+            val joinedV = j.joinValues(v, thisV)
             joined += x -> joinedV
       StoreState(joined)
   }

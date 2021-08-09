@@ -9,6 +9,7 @@ import sturdy.{*, given}
 import sturdy.util.{Label, given}
 import sturdy.values.{*, given}
 import sturdy.values.ints.{*, given}
+import sturdy.values.records.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.{Topped, given}
@@ -27,6 +28,7 @@ object SignAnalysisSoundness:
         case None => Value.RefValue(Powerset(AllocationSiteRef.Null))
         case Some(ca) => Value.RefValue(Abstractly.abstractly(ca).pureMap(AllocationSiteRef.Addr.apply))
       case ConcreteInterpreter.Value.FunValue(fun) => Value.FunValue(Powerset(fun))
+      case ConcreteInterpreter.Value.RecValue(rec) => Value.RecValue(ARecord(rec.view.mapValues(v => MayMust.Must(abstractly(v))).toMap))
 
   given PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x, y) match
@@ -34,6 +36,7 @@ object SignAnalysisSoundness:
       case (Value.IntValue(i1), Value.IntValue(i2)) => PartialOrder[IntSign].lteq(i1, i2)
       case (Value.RefValue(r1), Value.RefValue(r2)) => PartialOrder[Refs].lteq(r1, r2)
       case (Value.FunValue(f1), Value.FunValue(f2)) => PartialOrder[Powerset[Function]].lteq(f1, f2)
+      case (Value.RecValue(r1), Value.RecValue(r2)) => PartialOrder[ARecord[String, Value]].lteq(r1, r2)
       case _ => false
 
   given Soundness[ConcreteInterpreter, SignAnalysis] with

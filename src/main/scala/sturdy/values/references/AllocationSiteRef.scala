@@ -19,13 +19,16 @@ enum AllocationSiteRef:
 sealed trait AllocationSiteAddr extends ManageableAddr:
   override def toString: String = this match
     case AllocationSiteAddr.Alloc(l) => s"alloc-$l"
+    case AllocationSiteAddr.AllocRelative(l, name) => s"alloc-$l-$name"
     case AllocationSiteAddr.Variable(name) => s"&$name"
   def unmanaged: AllocationSiteAddr = this match
-    case a: AllocationSiteAddr.Alloc => a
+    case AllocationSiteAddr.Alloc(l) => AllocationSiteAddr.Alloc(l)(false)
+    case AllocationSiteAddr.AllocRelative(l, name) => AllocationSiteAddr.AllocRelative(l, name)(false)
     case AllocationSiteAddr.Variable(name) => AllocationSiteAddr.Variable(name)(false)
 
 object AllocationSiteAddr:
   case class Alloc(lab: Label)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
+  case class AllocRelative(lab: Label, name: String)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
   case class Variable(name: String)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
 
 given Structural[AllocationSiteRef] with {}
@@ -36,7 +39,8 @@ given Finite[AllocationSiteAddr] with {}
 
 given AllocationSiteReferenceOps(using f: Failure): ReferenceOps[AllocationSiteAddr, AllocationSiteRef] with
   override def nullValue: AllocationSiteRef = AllocationSiteRef.Null
-  override def refValue(addr: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(addr.unmanaged)
+  override def refValue(addr: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(addr)
+  override def unmanagedRefValue(addr: AllocationSiteAddr): AllocationSiteRef = AllocationSiteRef.Addr(addr.unmanaged)
   override def refAddr(r: AllocationSiteRef): AllocationSiteAddr = r match
     case AllocationSiteRef.Null => f.fail(NullDereference, "")
     case AllocationSiteRef.Addr(a) => a

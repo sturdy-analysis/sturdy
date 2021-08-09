@@ -22,3 +22,10 @@ given joinMayMust[T](using j: JoinValue[T]): JoinValue[MayMust[T]] with
   override def joinValues(v1: MayMust[T], v2: MayMust[T]): MayMust[T] = (v1, v2) match
     case (MayMust.Must(t1), MayMust.Must(t2)) => MayMust.Must(j.joinValues(t1, t2))
     case _ => MayMust.May(j.joinValues(v1.get, v2.get))
+
+given mayMustPO[T](using po: PartialOrder[T]): PartialOrder[MayMust[T]] with
+  override def lteq(x: MayMust[T], y: MayMust[T]): Boolean =
+    if (!x.isMust && y.isMust)
+      false
+    else
+      po.lteq(x.get, y.get)

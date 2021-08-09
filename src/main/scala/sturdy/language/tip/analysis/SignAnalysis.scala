@@ -15,6 +15,7 @@ import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
 import sturdy.values.ints.{*, given}
 import sturdy.values.functions.{*, given}
+import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
@@ -26,6 +27,7 @@ object SignAnalysis:
     case IntValue(i: IntSign)
     case RefValue(addr: Refs)
     case FunValue(fun: Powerset[Function])
+    case RecValue(rec: ARecord[String, Value])
 
     def asBoolean: Topped[Boolean] = this match
       case IntValue(i) => i match
@@ -44,7 +46,12 @@ object SignAnalysis:
       case _ => throw new IllegalArgumentException(s"Expected Function but got $this")
     def asReference: Refs = this match
       case RefValue(a) => a
+      case TopValue => ???
       case _ => throw new IllegalArgumentException(s"Expected Reference but got $this")
+    def asRecord: ARecord[String, Value] = this match
+      case RecValue(rec) => rec
+      case TopValue => ???
+      case _ => throw new IllegalArgumentException(s"Expected Record but got $this")
 
   import Value._
 
@@ -55,6 +62,7 @@ object SignAnalysis:
       case (IntValue(i1), IntValue(i2)) => IntValue(IntSignJoin.joinValues(i1, i2))
       case (FunValue(funs1), FunValue(funs2)) => FunValue(funs1 ++ funs2)
       case (RefValue(addrs1), RefValue(addrs2)) => RefValue(addrs1 ++ addrs2)
+      case (RecValue(rec1), RecValue(rec2)) => RecValue(joinARecord.joinValues(rec1, rec2))
       case _ => TopValue
 
   def boolValue(b: Topped[Boolean]): Value = IntValue(b match
@@ -67,9 +75,10 @@ object SignAnalysis:
   type Addr = AllocationSiteAddr
   type PowAddr = Powerset[AllocationSiteAddr]
   def fromAllocationSite(asite: AllocationSite): PowAddr = Powerset(asite match
-    case AllocationSite.Alloc(ealloc) => AllocationSiteAddr.Alloc(ealloc.label)(true)
+    case AllocationSite.Alloc(e) => AllocationSiteAddr.Alloc(e.label)(true)
     case AllocationSite.ParamBinding(fun, p) => AllocationSiteAddr.Variable(s"${fun.name}:$p")(true)
     case AllocationSite.LocalBinding(fun, v) => AllocationSiteAddr.Variable(s"${fun.name}:$v")(true)
+    case AllocationSite.Record(r) => AllocationSiteAddr.Alloc(r.label)(true)
   )
   type Environment = Map[String, PowAddr]
   type Store = Map[Addr, Value]
@@ -98,8 +107,8 @@ object SignAnalysis:
 
     given JoinComputation = effects
     given Failure = effects
-    given IntOps[Value] = new LiftedIntOps[Value, IntSign](_.asInt, IntValue.apply)
-    given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, IntSign, Topped[Boolean]](_.asInt, boolValue)
+    given IntOps[Value] = new LiftedIntOps(_.asInt, IntValue.apply)
+    given CompareOps[Value, Value] = new LiftedCompareOps(_.asInt, boolValue)
     given EqOps[Function, Boolean] = new EqualsEqOps[Function]
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
@@ -108,8 +117,9 @@ object SignAnalysis:
         case (FunValue(f1), FunValue(f2)) => boolValue(EqOps.equ(f1, f2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       def neq(v1: Value, v2: Value): Value = boolValue(equ(v1, v2).asBoolean.map(!_))
-    given FunctionOps[Function, Value, Value, Value] = new LiftedFunctionOps[Function, Value, Value, Value, Powerset[Function]](_.asFunction, FunValue.apply)
-    given ReferenceOps[PowAddr, Value] = new LiftedReferenceOps[Value, Powerset[AllocationSiteAddr], Powerset[AllocationSiteRef]](_.asReference, RefValue.apply)
+    given FunctionOps[Function, Value, Value, Value] = new LiftedFunctionOps(_.asFunction, FunValue.apply)
+    given RecordOps[String, Value, Value] = new LiftedRecordOps(_.asRecord, identity, RecValue.apply, identity)
+    given ReferenceOps[PowAddr, Value] = new LiftedReferenceOps(_.asReference, RefValue.apply)
 
     new SignAnalysis(steps)(using effects)
   }
@@ -119,7 +129,7 @@ import SignAnalysis.{*, given}
 class SignAnalysis(steps: Int)
   (using effectOps: Effects)
   (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value],
-   functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[PowAddr, Value])
+   functionOps: FunctionOps[Function, Value, Value, Value], recOps: RecordOps[String, Value, Value], refOps: ReferenceOps[PowAddr, Value])
     extends GenericInterpreter[Value, PowAddr, Effects]:
 
   def isCallOrWhile(dom: FixIn[Value]): Int = dom match {

@@ -11,6 +11,7 @@ import sturdy.util.Label
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.ints.IntOps
 import sturdy.values.functions.FunctionOps
+import sturdy.values.records.RecordOps
 import sturdy.values.relational.{EqOps, CompareOps}
 import sturdy.fix
 import sturdy.values.*
@@ -32,6 +33,7 @@ object GenericInterpreter:
     case Alloc(e: Exp.Alloc)
     case ParamBinding(fun: Function, name: String)
     case LocalBinding(fun: Function, name: String)
+    case Record(r: Exp.Record)
 
   case object UnboundVariable extends FailureKind
   case object UnboundAddr extends FailureKind
@@ -73,7 +75,7 @@ import GenericInterpreter.*
 
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   (using val effectOps: Effects)
-  (using intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V])
+  (using intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V], recOps: RecordOps[String, V, V])
   (using effectOps.EnvJoin[V], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
   import intOps._
@@ -81,6 +83,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   import eqOps._
   import effectOps._
   import functionOps._
+  import recOps._
   import refOps._
 
   val phi: GenericPhi[V]
@@ -116,16 +119,22 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         write(addr, eval(e))
         refValue(addr)
       case Exp.VarRef(x) =>
-        lookupOrElseAndThen(x, fail(UnboundVariable, x))(refValue)
+        lookupOrElseAndThen(x, fail(UnboundVariable, x))(unmanagedRefValue)
       case Exp.Deref(e) =>
         val addr = refAddr(eval(e))
         readOrElse(addr, fail(UnboundAddr, addr.toString))
       case Exp.NullRef() =>
         nullValue
-      case Exp.Record(fields) =>
-        ???
+      case r@Exp.Record(fields) =>
+        // represents record as a reference to a record value
+        val fieldVals = fields.map(fe => fe._1 -> eval(fe._2))
+        val rec = makeRecord(fieldVals)
+        val addr = alloc(AllocationSite.Record(r))
+        write(addr, rec)
+        refValue(addr)
       case Exp.FieldAccess(rec, field) =>
-        ???
+        val recVal = eval(Exp.Deref(rec))
+        lookupRecordField(recVal, field)
     }
 
     def run_open(s: Stm): Unit = s match
@@ -151,10 +160,20 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Assignable.ADeref(e) =>
         val addr = refAddr(eval(e))
         write(addr, v)
-      case Assignable.AField(rec, field) =>
-        ???
+      case Assignable.AField(recVar, field) =>
+        val recRef = eval(Exp.Var(recVar))
+        val recAddr = refAddr(recRef)
+        readOrElseAndThen(recAddr, fail(UnboundAddr, recAddr.toString)) { recVal =>
+          val updated = updateRecordField(recVal, field, v)
+          write(recAddr, updated)
+        }
       case Assignable.ADerefField(rec, field) =>
-        ???
+        val recRef = eval(rec)
+        val recAddr = refAddr(recRef)
+        readOrElseAndThen(recAddr, fail(UnboundAddr, recAddr.toString)) { recVal =>
+          val updated = updateRecordField(recVal, field, v)
+          write(recAddr, updated)
+        }
 
     def call(fun: Function, args: Seq[V]): V = freshScoped {
       val localAddrs = ListBuffer[Addr]()

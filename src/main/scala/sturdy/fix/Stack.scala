@@ -54,6 +54,8 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
   /** Current height of the stack. */
   def height: Int = stackHeight
 
+  def stackHeightIndent: String = "  " * (stackHeight - 1)
+
   /** Iterates `f` until the outCache is stable. */
   def repeatUntilStable[A](f: () => A): A = {
     val originalInState = state.getInState()
@@ -96,7 +98,7 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
           loadCorecurrentInput(frame, in)
         }
         if (Fixpoint.DEBUG)
-          println(("  " * stackHeight) + s"PUSH $frame -> ${state.getInState()}")
+          println(s"${stackHeightIndent}PUSH $frame -> ${state.getInState()}")
         None
       case Some(ix) =>
         // call is recurrent
@@ -124,19 +126,19 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
       (widenedResult, true)
     } else {
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  POP  $frame <- $result, ${state.getOutState()}")
+        println(s"${stackHeightIndent}POP  $frame <- $result, ${state.getOutState()}")
       (result, false)
     }
 
   @inline private def storeRecurrentInput(frame: Frame, in: In): Unit = inCache.get(frame) match
     case None =>
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  ## RECURRENT $frame -> $in")
+        println(s"${stackHeightIndent}## RECURRENT $frame -> $in")
       inCache += frame -> in
     case Some(previousIn) =>
       val joinedIn = widenIn.widen(previousIn, in)
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  ## RECURRENT $frame -> $joinedIn")
+        println(s"${stackHeightIndent}## RECURRENT $frame -> $joinedIn")
       inCache += frame -> joinedIn
 
   @inline private def loadCorecurrentInput(frame: Frame, in: In): Unit = inCache.get(frame) match
@@ -153,7 +155,7 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
       val joinedOut = widenOut.widen(previousOut, state.getOutState())
       state.setOutState(joinedOut)
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  ## RECURRENT $frame <- $res, $joinedOut")
+        println(s"${stackHeightIndent}## RECURRENT $frame <- $res, $joinedOut")
       Some(res)
 
   @inline private def storeCorecurrentOutput(frame: Frame, result: Try[Codom]): Try[Codom] = outCache.get(frame) match
@@ -161,7 +163,7 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
       val out = state.getOutState()
       outCache += frame -> (result, out)
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  POP  $frame <- $result, $out")
+        println(s"${stackHeightIndent}POP  $frame <- $result, $out")
       result
     case Some((previousResult, previousOut)) =>
       val joinedResult = (previousResult, result) match
@@ -173,5 +175,5 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
       state.setOutState(joinedOut)
       outCache += frame -> (joinedResult, joinedOut)
       if (Fixpoint.DEBUG)
-        println(("  " * stackHeight) + s"  POP  $frame <- $joinedResult, $joinedOut")
+        println(s"${stackHeightIndent}POP  $frame <- $joinedResult, $joinedOut")
       joinedResult

@@ -3,6 +3,9 @@ package sturdy.values
 trait JoinValue[V]:
   def joinValues(v1: V, v2: V): V
 
+object JoinValue:
+  def join[V](v1: V, v2: V)(using j: JoinValue[V]) = j.joinValues(v1, v2)
+
 given unit: Unit = ()
 given joinUnit: JoinValue[Unit] with
   override def joinValues(v1: Unit, v2: Unit): Unit = v1
