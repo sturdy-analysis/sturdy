@@ -78,6 +78,6 @@ object RunSignAnalysis extends App {
   val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/record3.tip").toURI();
   val (res, effects) = runAnalysis(Paths.get(uri), 10)
   println(res)
-  println(effects.getEnv)
+  println(effects.getCallFrame)
   println(effects.getStore)
 }

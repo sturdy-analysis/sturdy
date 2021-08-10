@@ -2,6 +2,7 @@ package sturdy.language.tip
 
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.branching.BoolBranching
+import sturdy.effect.callframe.CCallFrame
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.print.Print
@@ -15,6 +16,7 @@ import sturdy.values.records.RecordOps
 import sturdy.values.relational.{EqOps, CompareOps}
 import sturdy.fix
 import sturdy.values.*
+import sturdy.values.unit
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
@@ -22,7 +24,7 @@ import scala.collection.mutable.ListBuffer
 object GenericInterpreter:
   type GenericEffects[V, Addr] =
     BoolBranching[V] with
-    Environment[String, Addr] with
+    CCallFrame[Unit, String, Addr] with
     Store[Addr, V] with
     Allocation[Addr, AllocationSite] with
     Print[V] with
@@ -76,7 +78,7 @@ import GenericInterpreter.*
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   (using val effectOps: Effects)
   (using intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V], recOps: RecordOps[String, V, V])
-  (using effectOps.EnvJoin[V], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
+  (using effectOps.StoreJoin[V], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
   import intOps._
   import compareOps._
@@ -100,7 +102,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Exp.Var(x) => functions.get(x) match
         case Some(fun) => funValue(fun)
         case None =>
-          lookupOrElseAndThen(x, fail(UnboundVariable, x)) { addr =>
+          getLocalOrElseAndThen(x, fail(UnboundVariable, x)) { addr =>
             readOrElse(addr, fail(UnboundAddr, s"$addr for variable $x"))
           }
       case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
@@ -119,7 +121,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         write(addr, eval(e))
         refValue(addr)
       case Exp.VarRef(x) =>
-        lookupOrElseAndThen(x, fail(UnboundVariable, x))(unmanagedRefValue)
+        getLocalOrElseAndThen(x, fail(UnboundVariable, x))(unmanagedRefValue)
       case Exp.Deref(e) =>
         val addr = refAddr(eval(e))
         readOrElse(addr, fail(UnboundAddr, addr.toString))
@@ -154,7 +156,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
     def assign(lhs: Assignable, v: V): Unit = lhs match
       case Assignable.AVar(x) =>
-        lookupOrElseAndThen(x, fail(UnboundVariable, x)) { addr =>
+        getLocalOrElseAndThen(x, fail(UnboundVariable, x)) { addr =>
           write(addr, v)
         }
       case Assignable.ADeref(e) =>
@@ -175,24 +177,45 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
           write(recAddr, updated)
         }
 
-    def call(fun: Function, args: Seq[V]): V = freshScoped {
+    def call(fun: Function, args: Seq[V]): V =
+      var locals: Map[String, Addr] = Map()
       val paramAddrs = fun.params.map { name =>
         val addr = alloc(AllocationSite.ParamBinding(fun, name))
-        bind(name, addr)
+        locals += name -> addr
         addr
       }
       val localsAddrs = fun.locals.map { name =>
         val addr = alloc(AllocationSite.LocalBinding(fun, name))
-        bind(name, addr)
+        locals += name -> addr
         addr
       }
-      scopedAddresses(paramAddrs ++ localsAddrs) {
-        paramAddrs.zip(args).map(write)
-        rec(FixIn.EnterFunction(fun)) match
-          case FixOut.ExitFunction(v) => v
-          case _ => throw new IllegalStateException()
+      inNewFrame((), locals) {
+        scopedAddresses(paramAddrs ++ localsAddrs) {
+          paramAddrs.zip(args).map(write)
+          rec(FixIn.EnterFunction(fun)) match
+            case FixOut.ExitFunction(v) => v
+            case _ => throw new IllegalStateException()
+        }
       }
-    }
+
+//      freshScoped {
+//      val paramAddrs = fun.params.map { name =>
+//        val addr = alloc(AllocationSite.ParamBinding(fun, name))
+//        bind(name, addr)
+//        addr
+//      }
+//      val localsAddrs = fun.locals.map { name =>
+//        val addr = alloc(AllocationSite.LocalBinding(fun, name))
+//        bind(name, addr)
+//        addr
+//      }
+//      scopedAddresses(paramAddrs ++ localsAddrs) {
+//        paramAddrs.zip(args).map(write)
+//        rec(FixIn.EnterFunction(fun)) match
+//          case FixOut.ExitFunction(v) => v
+//          case _ => throw new IllegalStateException()
+//      }
+//    }
 
     phi {
       case FixIn.Eval(e) => FixOut.Eval(eval_open(e))

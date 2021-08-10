@@ -1,6 +1,6 @@
 package sturdy.language.wasm.generic
 
-import sturdy.effect.callframe.CCallFrameInt
+import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.failure.{Failure, FailureKind}
 import swam.syntax.*
 import swam.OpCode
@@ -13,7 +13,7 @@ object Interpreter:
 
   type Effects[V] =
     OperandStack[V]
-      with CCallFrameInt[V, Unit]
+      with CMutableCallFrameInt[Unit, V]
       with Failure
 
 import Interpreter.*
