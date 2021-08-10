@@ -4,8 +4,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFailureException
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
-import sturdy.language.whilelang.ConcreteInterpreter.*
-import sturdy.language.whilelang.ConcreteInterpreter.Value.*
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 import Parser.*
 

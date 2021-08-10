@@ -3,8 +3,6 @@ package sturdy.effect.store
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.JoinComputation
-import sturdy.language.whilelang.ConcreteInterpreter
-import sturdy.language.whilelang.analysis.SignAnalysis.Value
 import sturdy.values.*
 
 import scala.collection.mutable.ListBuffer

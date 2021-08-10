@@ -7,8 +7,6 @@ import sturdy.effect.failure.CFailureException
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 import sturdy.language.tip.analysis.SignAnalysisTest
-import sturdy.language.whilelang.ConcreteInterpreter.*
-import sturdy.language.whilelang.ConcreteInterpreter.Value.*
 
 import java.nio.file.Path
 import java.nio.file.{Paths, Files}
