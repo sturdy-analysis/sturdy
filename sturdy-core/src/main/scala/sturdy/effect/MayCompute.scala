@@ -45,6 +45,6 @@ enum AMayComputeMany[A] extends MayCompute[A, JoinValue, JoinComputation]:
   case ComputesNot()
 
   override def withDefault[B](default: => B)(f: A => B)(using j: JoinComputation)(using JoinValue[B]): B = this match
-    case Computes(as) => j.joinComputationsIterable(as.map(a => () => f(a)))
-    case MaybeComputes(as) => j.joinComputationsIterable(as.map(a => () => f(a)) ++ Iterable.single(() => default))
-    case ComputesNot() => default
+    case Computes(as) if as.nonEmpty => j.joinComputationsIterable(as.map(a => () => f(a)))
+    case MaybeComputes(as) if as.nonEmpty => j.joinComputationsIterable(as.map(a => () => f(a)) ++ Iterable.single(() => default))
+    case _ => default
