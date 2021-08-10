@@ -1,5 +1,6 @@
 package sturdy.language.wasm.generic
 
+import sturdy.effect.noJoin
 import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.failure.{Failure, FailureKind}
 import swam.syntax.*
@@ -76,15 +77,14 @@ trait Interpreter[V,Addr,Bytes,Size]
 
   def evalVarInst(inst: VarInst): Unit = inst match
     case LocalGet(ix) =>
-      getLocalOrElseAndThen(ix, fail(UnboundLocal, ix.toString))(
-        stack.push
-      )
+      val v = getLocal(ix).orElse(fail(UnboundLocal, ix.toString))
+      stack.push(v)
     case LocalSet(ix) =>
       val v = stack.pop()
-      setLocal(ix, v, fail(UnboundLocal, ix.toString))
+      setLocal(ix, v).orElse(fail(UnboundLocal, ix.toString))
     case LocalTee(ix) =>
       val v = stack.peek()
-      setLocal(ix, v, fail(UnboundLocal, ix.toString))
+      setLocal(ix, v).orElse(fail(UnboundLocal, ix.toString))
     case _: GlobalGet => ???
     case _: GlobalSet => ???
 

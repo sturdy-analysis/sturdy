@@ -2,8 +2,10 @@ package sturdy.effect.environment
 
 import sturdy.IsSound
 import sturdy.Soundness
+import sturdy.effect.AMayComputeOne
+import sturdy.effect.AMayComputeOne.*
 import sturdy.effect.JoinComputation
-import sturdy.values.{Abstractly, JoinValue, MayMust}
+import sturdy.values.{JoinValue, MayMust, Abstractly}
 
 
 /*
@@ -17,6 +19,7 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, MayMust[V]])(using j: Joi
   extends Environment[Var, V], JoinComputation:
 
   override type EnvJoin[A] = JoinValue[A]
+  override type EnvJoinComp = JoinComputation
 
   protected var env: Map[Var, MayMust[V]] = _init
   protected var dirtyVars: Set[Var] = Set()
@@ -24,11 +27,11 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, MayMust[V]])(using j: Joi
   def getEnv: Map[Var, MayMust[V]] = env
   protected def setEnv(env: Map[Var, MayMust[V]]) = this.env = env
 
-  override def lookup[A](x: Var, found: V => A, notFound: => A): EnvJoined[A] =
+  override def lookup(x: Var): AMayComputeOne[V] =
     env.get(x) match
-      case None => notFound
-      case Some(MayMust.Must(v)) => found(v)
-      case Some(MayMust.May(v)) => joinComputations(found(v))(notFound)
+      case None => ComputesNot()
+      case Some(MayMust.Must(v)) => Computes(v)
+      case Some(MayMust.May(v)) => MaybeComputes(v)
 
   override def bind(x: Var, v: V): Unit =
     dirtyVars += x

@@ -2,6 +2,8 @@ package sturdy.effect.store
 
 import sturdy.IsSound
 import sturdy.Soundness
+import sturdy.effect.AMayComputeOne
+import sturdy.effect.AMayComputeOne.*
 import sturdy.effect.JoinComputation
 import sturdy.values.Abstractly
 import sturdy.values.JoinValue
@@ -20,15 +22,16 @@ trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(
   this.store = _init
   
   override type StoreJoin[A] = JoinValue[A]
+  override type StoreJoinComp = JoinComputation
 
-  override def read[A](x: Addr, found: V => A, notFound: => A): StoreJoined[A] =
+  override def read(x: Addr): AMayComputeOne[V] =
     store.get(x) match
-      case None => notFound
+      case None => ComputesNot()
       case Some(v) =>
         if (x.isManaged)
-          found(v)
+          Computes(v)
         else
-          joinComputations(found(v))(notFound)
+          MaybeComputes(v)
 
   override def write(x: Addr, v: V): Unit =
     weakUpdate(x, v)

@@ -1,17 +1,20 @@
 package sturdy.effect.callframe
 
+import sturdy.effect.CMayCompute
+import sturdy.effect.CMayCompute.*
+import sturdy.effect.NoJoin
+
 trait CCallFrame[Data, Var, V](_data: Data, _vars: Map[Var, V]) extends CallFrame[Data, Var, V]:
-  type CallFrameJoin[A] = Unit
+  type CallFrameJoin[A] = NoJoin[A]
+  type CallFrameJoinComp = Unit
 
   private var data: Data = _data
   protected var vars: Map[Var, V] = _vars
-  
+
   def getFrameData: Data = data
   def getCallFrame: (Data, Map[Var, V]) = (data, vars)
 
-  def getLocal[A](x: Var, found: V => A, notFound: => A): CallFrameJoined[A] = vars.get(x) match
-    case Some(v) => found(v)
-    case None => notFound
+  def getLocal(x: Var): CMayCompute[V] = CMayCompute(vars.get(x))
 
   def inNewFrame[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A =
     val snapshotData = this.data
@@ -24,7 +27,9 @@ trait CCallFrame[Data, Var, V](_data: Data, _vars: Map[Var, V]) extends CallFram
     }
 
 trait CMutableCallFrame[Data, Var, V] extends CCallFrame[Data, Var, V] with MutableCallFrame[Data, Var, V]:
-  override def setLocal[A](x: Var, v: V, notFound: => Unit): CallFrameJoined[Unit] = vars.get(x) match
-    case Some(_) => vars += x -> v
-    case _ => notFound
+  override def setLocal(x: Var, v: V): CMayCompute[Unit] = vars.get(x) match
+    case Some(_) =>
+      vars += x -> v
+      Computes(())
+    case _ => ComputesNot()
 

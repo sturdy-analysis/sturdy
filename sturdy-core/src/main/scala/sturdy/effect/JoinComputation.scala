@@ -32,6 +32,15 @@ trait JoinComputation:
       case (Failure(failA), Failure(failB)) => throw joinFailedComputations(failA, failB)
   }
 
+  def joinWithFailure[A](f: => A)(g: => Nothing): A = {
+    val triedF = Try(f)
+    val failB = Try(g).failed.get
+
+    triedF match
+      case Success(aF) => aF
+      case Failure(failA) => throw joinFailedComputations(failA, failB)
+  }
+
   final def joinComputationsIterable[A](as: IterableOnce[() => A]): Join[A] =
     joinComputationsIt(as.iterator)
     

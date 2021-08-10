@@ -1,16 +1,20 @@
 package sturdy.effect.environment
 
+import sturdy.effect.CMayCompute
+import sturdy.effect.NoJoin
+
 /*
  * A concrete environment.
  */
 trait CEnvironment[Var, V](_init: Map[Var, V] = Map()) extends Environment[Var, V]:
-  override type EnvJoin[_] = Unit
+  override type EnvJoin[A] = NoJoin[A]
+  override type EnvJoinComp = Unit
 
   protected var env: Map[Var, V] = _init
   def getEnv: Map[Var, V] = env
   
-  override def lookup[A](x: Var, found: V => A, notFound: => A): EnvJoined[A] =
-    env.get(x).map(found).getOrElse(notFound)
+  override def lookup(x: Var): CMayCompute[V] =
+    CMayCompute(env.get(x))
 
   override def bind(x: Var, v: V): Unit = env = env + (x -> v)
 

@@ -1,17 +1,14 @@
 package sturdy.effect.callframe
 
+import sturdy.effect.MayCompute
+
 trait CallFrame[Data, Var, V]:
   type CallFrameJoin[A]
-  final type CallFrameJoined[A] = CallFrameJoin[A] ?=> A
+  type CallFrameJoinComp
 
   def getFrameData: Data
-  def getLocal[A](x: Var, found: V => A, notFound: => A): CallFrameJoined[A]
+  def getLocal(x: Var): MayCompute[V, CallFrameJoin, CallFrameJoinComp]
   def inNewFrame[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A
 
-  def getLocalOrElse(x: Var, notFound: => V): CallFrameJoined[V] =
-    getLocal(x, identity, notFound)
-  def getLocalOrElseAndThen[A](x: Var, notFound: => V)(f: V => A): CallFrameJoined[A] =
-    getLocal(x, f, f(notFound))
-
 trait MutableCallFrame[Data, Var, V] extends CallFrame[Data, Var, V]:
-  def setLocal[A](x: Var, v: V, notFound: => Unit): CallFrameJoined[Unit]
+  def setLocal(x: Var, v: V): MayCompute[Unit, CallFrameJoin, CallFrameJoinComp]

@@ -2,6 +2,8 @@ package sturdy.effect.store
 
 import sturdy.IsSound
 import sturdy.Soundness
+import sturdy.effect.AMayComputeMany
+import sturdy.effect.AMayComputeMany.*
 import sturdy.effect.JoinComputation
 import sturdy.values.*
 
@@ -20,20 +22,24 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
   this.store = _init
   
   override type StoreJoin[A] = JoinValue[A]
+  override type StoreJoinComp = JoinComputation
   
-  override def read[A](xs: Powerset[Addr], found: V => A, notFound: => A): StoreJoined[A] = {
+  override def read(xs: Powerset[Addr]): AMayComputeMany[V] = {
     var needsNotFound = false
-    var as = ListBuffer[() => A]()
+    var vs = ListBuffer[V]()
     for (x <- xs.set)
       if (!x.isManaged)
         needsNotFound = true
       store.get(x) match
         case None =>
           needsNotFound = true
-        case Some(v) => as += (() => found(v))
-    if (needsNotFound)
-      as += (() => notFound)
-    joinComputationsIterable(as)
+        case Some(v) => vs += v
+    if (vs.isEmpty)
+      ComputesNot()
+    else if (needsNotFound)
+      MaybeComputes(vs)
+    else
+      Computes(vs)
   }
 
   override def write(xs: Powerset[Addr], v: V): Unit =
@@ -72,7 +78,7 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
       IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else {
       c.getStore.foreachEntry { case (x, v) =>
-        val avs = this.read(varAbstractly.abstractly(x), Powerset(_), Powerset.empty)
+        val avs = this.read(varAbstractly.abstractly(x)).withDefault(Powerset[V]())(Powerset(_))(using this)
         val subSound = Soundness.isSound(v, avs)
         if (subSound.isNotSound)
           return subSound

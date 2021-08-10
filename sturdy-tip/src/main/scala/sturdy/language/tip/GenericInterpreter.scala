@@ -1,5 +1,6 @@
 package sturdy.language.tip
 
+import sturdy.effect.noJoin
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.callframe.CCallFrame
@@ -78,7 +79,7 @@ import GenericInterpreter.*
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   (using val effectOps: Effects)
   (using intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V], recOps: RecordOps[String, V, V])
-  (using effectOps.StoreJoin[V], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
+  (using effectOps.StoreJoin[V], effectOps.StoreJoinComp, effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
   import intOps._
   import compareOps._
@@ -102,9 +103,8 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Exp.Var(x) => functions.get(x) match
         case Some(fun) => funValue(fun)
         case None =>
-          getLocalOrElseAndThen(x, fail(UnboundVariable, x)) { addr =>
-            readOrElse(addr, fail(UnboundAddr, s"$addr for variable $x"))
-          }
+          val addr = getLocal(x).orElse(fail(UnboundVariable, x))
+          read(addr).orElse(fail(UnboundAddr, s"$addr for variable $x"))
       case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
       case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
       case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -121,10 +121,11 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         write(addr, eval(e))
         refValue(addr)
       case Exp.VarRef(x) =>
-        getLocalOrElseAndThen(x, fail(UnboundVariable, x))(unmanagedRefValue)
+        val addr = getLocal(x).orElse(fail(UnboundVariable, x))
+        unmanagedRefValue(addr)
       case Exp.Deref(e) =>
         val addr = refAddr(eval(e))
-        readOrElse(addr, fail(UnboundAddr, addr.toString))
+        read(addr).orElse(fail(UnboundAddr, addr.toString))
       case Exp.NullRef() =>
         nullValue
       case r@Exp.Record(fields) =>
@@ -156,23 +157,22 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
     def assign(lhs: Assignable, v: V): Unit = lhs match
       case Assignable.AVar(x) =>
-        getLocalOrElseAndThen(x, fail(UnboundVariable, x)) { addr =>
-          write(addr, v)
-        }
+        val addr = getLocal(x).orElse(fail(UnboundVariable, x))
+        write(addr, v)
       case Assignable.ADeref(e) =>
         val addr = refAddr(eval(e))
         write(addr, v)
       case Assignable.AField(recVar, field) =>
         val recRef = eval(Exp.Var(recVar))
         val recAddr = refAddr(recRef)
-        readOrElseAndThen(recAddr, fail(UnboundAddr, recAddr.toString)) { recVal =>
+        read(recAddr).orElseAndThen(fail(UnboundAddr, recAddr.toString)) { recVal =>
           val updated = updateRecordField(recVal, field, v)
           write(recAddr, updated)
         }
       case Assignable.ADerefField(rec, field) =>
         val recRef = eval(rec)
         val recAddr = refAddr(recRef)
-        readOrElseAndThen(recAddr, fail(UnboundAddr, recAddr.toString)) { recVal =>
+        read(recAddr).orElseAndThen(fail(UnboundAddr, recAddr.toString)) { recVal =>
           val updated = updateRecordField(recVal, field, v)
           write(recAddr, updated)
         }
