@@ -1,15 +1,20 @@
 package sturdy.language.wasm.generic
 
+import sturdy.effect.callframe.CCallFrameInt
 import sturdy.effect.failure.{Failure, FailureKind}
 import swam.syntax.*
 import swam.OpCode
 import sturdy.effect.operandstack.OperandStack
-
+import sturdy.values.unit
 
 object Interpreter:
   case object UnreachableInstruction extends FailureKind
+  case object UnboundLocal extends FailureKind
 
-  type Effects[V] = OperandStack[V] with Failure
+  type Effects[V] =
+    OperandStack[V]
+      with CCallFrameInt[V, Unit]
+      with Failure
 
 import Interpreter.*
 
@@ -59,9 +64,16 @@ trait Interpreter[V]
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def evalVarInst(inst: VarInst): Unit = inst match
-    case _: LocalGet => ???
-    case _: LocalSet => ???
-    case _: LocalTee => ???
+    case LocalGet(ix) =>
+      getLocalOrElseAndThen(ix, fail(UnboundLocal, ix.toString))(
+        stack.push
+      )
+    case LocalSet(ix) =>
+      val v = stack.pop()
+      setLocal(ix, v, fail(UnboundLocal, ix.toString))
+    case LocalTee(ix) =>
+      val v = stack.peek()
+      setLocal(ix, v, fail(UnboundLocal, ix.toString))
     case _: GlobalGet => ???
     case _: GlobalSet => ???
 

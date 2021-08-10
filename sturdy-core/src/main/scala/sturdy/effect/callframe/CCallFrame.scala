@@ -8,9 +8,13 @@ trait CCallFrame[Var, V, Data](_data: Data, _vars: Map[Var, V]) extends CallFram
 
   def getFrameData: Data = data
 
-  def lookupInFrame[A](x: Var, found: V => A, notFound: => A): CallFrameJoined[A] = vars.get(x) match
+  def getLocal[A](x: Var, found: V => A, notFound: => A): CallFrameJoined[A] = vars.get(x) match
     case Some(v) => found(v)
     case None => notFound
+
+  override def setLocal[A](x: Var, v: V, notFound: => Unit): CallFrameJoined[Unit] = vars.get(x) match
+    case Some(_) => vars += x -> v
+    case _ => notFound
 
   def inNewFrame[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A =
     val snapshotData = this.data
