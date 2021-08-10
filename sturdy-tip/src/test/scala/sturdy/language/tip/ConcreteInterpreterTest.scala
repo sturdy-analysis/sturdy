@@ -54,5 +54,5 @@ object RunConcreteInterpreter extends App:
   val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/interpreter_test.tip").toURI();
   val (res, effects) = runFile(Paths.get(uri))
   println(res)
-  println(effects.getEnv)
+  println(effects.getCallFrame)
   println(effects.getStore)

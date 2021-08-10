@@ -1,27 +1,30 @@
 package sturdy.language.wasm.generic
 
+import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.failure.{Failure, FailureKind}
 import swam.syntax.*
 import swam.OpCode
 import swam.ValType
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.binarymemory.{EffectiveAddress, Memory, Serialize, MemSize}
-
+import sturdy.values.unit
 
 object Interpreter:
   case object UnreachableInstruction extends FailureKind
+  case object UnboundLocal extends FailureKind
 
   type WasmMemory[Addr,Bytes,Size,V] = Memory[Addr,Bytes,Size]
     with EffectiveAddress[V,Int,Addr]
     with MemSize[V,Size]
     with Serialize[V,Bytes,ValType,LoadType,StoreType]
 
-  type Effects[V,Addr,Bytes,Size] = OperandStack[V]
-    with WasmMemory[Addr,Bytes,Size,V]
-    with Failure
+  type Effects[V,Addr,Bytes,Size] =
+    OperandStack[V]
+      with WasmMemory[Addr,Bytes,Size,V]
+      with CMutableCallFrameInt[Unit, V]
+      with Failure
 
   case class Trap() extends FailureKind
-
 
 import Interpreter.*
 
@@ -72,9 +75,16 @@ trait Interpreter[V,Addr,Bytes,Size]
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def evalVarInst(inst: VarInst): Unit = inst match
-    case _: LocalGet => ???
-    case _: LocalSet => ???
-    case _: LocalTee => ???
+    case LocalGet(ix) =>
+      getLocalOrElseAndThen(ix, fail(UnboundLocal, ix.toString))(
+        stack.push
+      )
+    case LocalSet(ix) =>
+      val v = stack.pop()
+      setLocal(ix, v, fail(UnboundLocal, ix.toString))
+    case LocalTee(ix) =>
+      val v = stack.peek()
+      setLocal(ix, v, fail(UnboundLocal, ix.toString))
     case _: GlobalGet => ???
     case _: GlobalSet => ???
 

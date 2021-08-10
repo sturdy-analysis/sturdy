@@ -3,7 +3,7 @@ package sturdy.language.tip.analysis
 import sturdy.effect.{AnalysisState, JoinComputation}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
-import sturdy.effect.environment.{AEnvironmentStaticScope, CEnvironment}
+import sturdy.effect.callframe.CCallFrame
 import sturdy.effect.failure.{AFailureCollect, Failure}
 import sturdy.effect.print.{APrintPrefix, given}
 import sturdy.effect.store.AStoreMultiAddrThreadded
@@ -89,7 +89,7 @@ object IntervalAnalysis:
   type Store = Map[Addr, Value]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
-      with CEnvironment[String, PowAddr](initEnvironment)
+      with CCallFrame[Unit, String, PowAddr]((), initEnvironment)
       with AStoreMultiAddrThreadded[Addr, Value](initStore)
       with AAllocationFromContext[AllocationSite, PowAddr](fromAllocationSite)
       with APrintPrefix[Value]

@@ -2,7 +2,7 @@ package sturdy.language.tip
 
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.branching.CBoolBranching
-import sturdy.effect.environment.CEnvironment
+import sturdy.effect.callframe.CCallFrame
 import sturdy.effect.failure.{Failure, CFailure}
 import sturdy.effect.print.CPrint
 import sturdy.effect.store.CStore
@@ -50,7 +50,7 @@ object ConcreteInterpreter:
   type Store = Map[Int, Value]
   class Effects(initEnvironment: Environment, initStore: Store, nextInput: () => Value)
     extends CBoolBranching[Value]
-      with CEnvironment[String, Int](initEnvironment)
+      with CCallFrame[Unit, String, Int]((), initEnvironment)
       with CStore[Int, Value](initStore)
       with CAllocationIntIncrement[AllocationSite]
       with CPrint[Value]
