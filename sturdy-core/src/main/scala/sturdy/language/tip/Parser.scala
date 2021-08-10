@@ -178,28 +178,3 @@ object Parser:
 
   val program: P0[Program] =
     whitespaces0 *> function.rep0.map(Program.apply) <* P.end
-
-
-//trait Comments { this: Parser =>
-//
-//  var lastBreaks = mutable.MutableList[Int](0)
-//
-//  implicit def offset2Loc(i: Int): Loc = {
-//    val idx = lastBreaks.lastIndexWhere(brk => brk <= i)
-//    Loc(idx + 1, i - lastBreaks(idx) + 1)
-//  }
-//
-//  def NewLine: Rule0 = rule {
-//    (str("\r\n") | str("\n\r") | str("\r") | str("\n")) ~> { () =>
-//      lastBreaks += cursor; ()
-//    }
-//  }
-//
-//  def NonClosing: Rule0 = rule {
-//    zeroOrMore("*" ~ !"/" | noneOf("*\n\r") | NewLine)
-//  }
-//
-//  def BlockComment: Rule0 = rule("/*" ~ (BlockComment | NonClosing) ~ "*/")
-//
-//  def Comment: Rule0 = rule(BlockComment | "//" ~ zeroOrMore(noneOf("\n\r")) ~ NewLine)
-//}
