@@ -80,6 +80,22 @@ given IntervalIntOps(using f: Failure, j: JoinComputation): IntOps[IntInterval] 
       else
         v1 / v2
 
+  def divUnsigned(v1: IntInterval, v2: IntInterval): IntInterval = ???
+  def remainder(v1: IntInterval, v2: IntInterval): IntInterval = ???
+  def remainderUnsigned(v1: IntInterval, v2: IntInterval): IntInterval = ???
+
+  def bitAnd(v1: IntInterval, v2: IntInterval): IntInterval = ???
+  def bitOr(v1: IntInterval, v2: IntInterval): IntInterval = ???
+  def bitXor(v1: IntInterval, v2: IntInterval): IntInterval = ???
+  def shiftLeft(v: IntInterval, shift: IntInterval): IntInterval = ???
+  def shiftRight(v: IntInterval, shift: IntInterval): IntInterval = ???
+  def shiftRightUnsigned(v: IntInterval, shift: IntInterval): IntInterval = ???
+  def rotateLeft(v: IntInterval, shift: IntInterval): IntInterval = ???
+  def rotateRight(v: IntInterval, shift: IntInterval): IntInterval = ???
+  def countLeadingZeros(v: IntInterval): IntInterval = ???
+  def countTrailinZeros(v: IntInterval): IntInterval = ???
+  def nonzeroBitCount(v: IntInterval): IntInterval = ???
+
 given IntIntervalCompareOps: CompareOps[IntInterval, Topped[Boolean]] with
   def lt(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] =
     if iv1.h < iv2.l then Topped.Actual(true)

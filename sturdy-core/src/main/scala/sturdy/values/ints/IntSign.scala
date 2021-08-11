@@ -134,6 +134,22 @@ given SignIntOps(using f: Failure, j: JoinComputation): IntOps[IntSign] with
     case TopSign => j.joinComputations(TopSign)(f.fail(IntDivisionByZero, s"$v1 / $v2"))
     case _ => mul(v1, v2)
 
+  def divUnsigned(v1: IntSign, v2: IntSign): IntSign = ???
+  def remainder(v1: IntSign, v2: IntSign): IntSign = ???
+  def remainderUnsigned(v1: IntSign, v2: IntSign): IntSign = ???
+
+  def bitAnd(v1: IntSign, v2: IntSign): IntSign = ???
+  def bitOr(v1: IntSign, v2: IntSign): IntSign = ???
+  def bitXor(v1: IntSign, v2: IntSign): IntSign = ???
+  def shiftLeft(v: IntSign, shift: IntSign): IntSign = ???
+  def shiftRight(v: IntSign, shift: IntSign): IntSign = ???
+  def shiftRightUnsigned(v: IntSign, shift: IntSign): IntSign = ???
+  def rotateLeft(v: IntSign, shift: IntSign): IntSign = ???
+  def rotateRight(v: IntSign, shift: IntSign): IntSign = ???
+  def countLeadingZeros(v: IntSign): IntSign = ???
+  def countTrailinZeros(v: IntSign): IntSign = ???
+  def nonzeroBitCount(v: IntSign): IntSign = ???
+
 given SignCompareOps: CompareOps[IntSign, Topped[Boolean]] with
   def lt(v1: IntSign, v2: IntSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Actual(true)

@@ -65,6 +65,18 @@ given IntervalDoubleOps: DoubleOps[DoubleInterval] with
   def mul(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 * v2
   def div(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 / v2
 
+  def min(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = ???
+  def max(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = ???
+
+  def absolute(v: DoubleInterval): DoubleInterval = ???
+  def negated(v: DoubleInterval): DoubleInterval = ???
+  def sqrt(v: DoubleInterval): DoubleInterval = ???
+  def ceil(v: DoubleInterval): DoubleInterval = ???
+  def floor(v: DoubleInterval): DoubleInterval = ???
+  def truncate(v: DoubleInterval): DoubleInterval = ???
+  def nearest(v: DoubleInterval): DoubleInterval = ???
+  def copysign(v: DoubleInterval, sign: DoubleInterval): DoubleInterval = ???
+
 given DoubleIntervalCompareOps: CompareOps[DoubleInterval, Topped[Boolean]] with
   def lt(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =
     if iv1.h < iv2.l then Actual(true)

@@ -46,11 +46,11 @@ given Abstractly[Long, LongInterval] with
 given PartialOrder[LongInterval] with
   override def lteq(x: LongInterval, y: LongInterval): Boolean = y.l <= x.l && x.h <= y.h
 
-given intIntervalJoin: JoinValue[LongInterval] with
+given LongIntervalJoin: JoinValue[LongInterval] with
   override def joinValues(v1: LongInterval, v2: LongInterval): LongInterval =
     LongInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
 
-given intIntervalWiden(using bounds: => Set[Long]): Widening[LongInterval] with
+given LongIntervalWiden(using bounds: => Set[Long]): Widening[LongInterval] with
   private lazy val treeSet: TreeSet[Long] = TreeSet.from(bounds)
   override def widen(v1: LongInterval, v2: LongInterval): LongInterval =
     val low =
@@ -80,6 +80,22 @@ given IntervalLongOps(using f: Failure, j: JoinComputation): LongOps[LongInterva
         j.joinComputations(v1 / v2)(f.fail(LongDivisionByZero, s"$v1 / $v2"))
       else
         v1 / v2
+  
+  def divUnsigned(v1: LongInterval, v2: LongInterval): LongInterval = ???
+  def remainder(v1: LongInterval, v2: LongInterval): LongInterval = ???
+  def remainderUnsigned(v1: LongInterval, v2: LongInterval): LongInterval = ???
+
+  def bitAnd(v1: LongInterval, v2: LongInterval): LongInterval = ???
+  def bitOr(v1: LongInterval, v2: LongInterval): LongInterval = ???
+  def bitXor(v1: LongInterval, v2: LongInterval): LongInterval = ???
+  def shiftLeft(v: LongInterval, shift: LongInterval): LongInterval = ???
+  def shiftRight(v: LongInterval, shift: LongInterval): LongInterval = ???
+  def shiftRightUnsigned(v: LongInterval, shift: LongInterval): LongInterval = ???
+  def rotateLeft(v: LongInterval, shift: LongInterval): LongInterval = ???
+  def rotateRight(v: LongInterval, shift: LongInterval): LongInterval = ???
+  def countLeadingZeros(v: LongInterval): LongInterval = ???
+  def countTrailinZeros(v: LongInterval): LongInterval = ???
+  def nonzeroBitCount(v: LongInterval): LongInterval = ???
 
 given LongIntervalCompareOps: CompareOps[LongInterval, Topped[Boolean]] with
   def lt(iv1: LongInterval, iv2: LongInterval): Topped[Boolean] =

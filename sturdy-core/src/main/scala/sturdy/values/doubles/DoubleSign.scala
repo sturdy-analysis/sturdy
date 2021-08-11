@@ -131,6 +131,18 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
     case NegOrZero => v1.negated
     case _ => mul(v1, v2)
 
+  def min(v1: DoubleSign, v2: DoubleSign): DoubleSign = ???
+  def max(v1: DoubleSign, v2: DoubleSign): DoubleSign = ???
+
+  def absolute(v: DoubleSign): DoubleSign = ???
+  def negated(v: DoubleSign): DoubleSign = ???
+  def sqrt(v: DoubleSign): DoubleSign = ???
+  def ceil(v: DoubleSign): DoubleSign = ???
+  def floor(v: DoubleSign): DoubleSign = ???
+  def truncate(v: DoubleSign): DoubleSign = ???
+  def nearest(v: DoubleSign): DoubleSign = ???
+  def copysign(v: DoubleSign, sign: DoubleSign): DoubleSign = ???
+
 given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
   def lt(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Actual(true)

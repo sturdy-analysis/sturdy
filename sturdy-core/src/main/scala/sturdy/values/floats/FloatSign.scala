@@ -131,6 +131,18 @@ given SignFloatOps: FloatOps[FloatSign] with
     case NegOrZero => v1.negated
     case _ => mul(v1, v2)
 
+  def min(v1: FloatSign, v2: FloatSign): FloatSign = ???
+  def max(v1: FloatSign, v2: FloatSign): FloatSign = ???
+
+  def absolute(v: FloatSign): FloatSign = ???
+  def negated(v: FloatSign): FloatSign = ???
+  def sqrt(v: FloatSign): FloatSign = ???
+  def ceil(v: FloatSign): FloatSign = ???
+  def floor(v: FloatSign): FloatSign = ???
+  def truncate(v: FloatSign): FloatSign = ???
+  def nearest(v: FloatSign): FloatSign = ???
+  def copysign(v: FloatSign, sign: FloatSign): FloatSign = ???
+
 given SignCompareOps: CompareOps[FloatSign, Topped[Boolean]] with
   def lt(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Actual(true)
