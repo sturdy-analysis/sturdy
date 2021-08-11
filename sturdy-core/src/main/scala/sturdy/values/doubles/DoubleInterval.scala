@@ -58,7 +58,7 @@ given doubleIntervalWiden: Widening[DoubleInterval] with
     DoubleInterval(low, high)
 
 given IntervalDoubleOps: DoubleOps[DoubleInterval] with
-  def numLit(d: Double): DoubleInterval = DoubleInterval(d, d)
+  def doubleLit(d: Double): DoubleInterval = DoubleInterval(d, d)
   def randomDouble(): DoubleInterval = DoubleInterval(0, 1)
   def add(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 + v2
   def sub(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = v1 - v2

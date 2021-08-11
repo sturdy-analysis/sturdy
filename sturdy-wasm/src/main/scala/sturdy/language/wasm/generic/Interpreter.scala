@@ -7,12 +7,27 @@ import swam.syntax.*
 import swam.OpCode
 import swam.ValType
 import sturdy.effect.operandstack.OperandStack
-import sturdy.effect.binarymemory.{EffectiveAddress, Memory, Serialize, MemSize}
+import sturdy.effect.binarymemory.{Serialize, Memory, MemSize, EffectiveAddress}
+import sturdy.effect.branching.BoolBranching
+import sturdy.values.conversion.ConvertFloatDoubleOps
+import sturdy.values.conversion.ConvertIntDoubleOps
+import sturdy.values.conversion.ConvertIntLongOps
+import sturdy.values.conversion.ConvertLongDoubleOps
+import sturdy.values.conversion.ConvertLongFloatOps
+import sturdy.values.conversion.ConvertIntFloatOps
+import sturdy.values.doubles.DoubleOps
+import sturdy.values.floats.FloatOps
+import sturdy.values.ints.IntCompareOps
+import sturdy.values.ints.IntOps
+import sturdy.values.longs.LongOps
+import sturdy.values.relational.CompareOps
+import sturdy.values.relational.EqOps
 import sturdy.values.unit
 
 object Interpreter:
   case object UnreachableInstruction extends FailureKind
   case object UnboundLocal extends FailureKind
+  case object MemoryAccessOutOfBounds extends FailureKind
 
   type WasmMemory[Addr,Bytes,Size,V] = Memory[Addr,Bytes,Size]
     with EffectiveAddress[V,Int,Addr]
@@ -23,22 +38,22 @@ object Interpreter:
     OperandStack[V]
       with WasmMemory[Addr,Bytes,Size,V]
       with CMutableCallFrameInt[Unit, V]
+      with BoolBranching[V]
       with Failure
 
-  case class Trap() extends FailureKind
 
 import Interpreter.*
 
 trait Interpreter[V,Addr,Bytes,Size]
   (using effectOps: Effects[V,Addr,Bytes,Size])
-  (using valueOps: ValueOps[V])
-  :
+  (using IntOps[V], LongOps[V], FloatOps[V], DoubleOps[V], EqOps[V, V], CompareOps[V, V], IntCompareOps[V, V],
+   ConvertIntLongOps[V, V], ConvertIntDoubleOps[V, V], ConvertLongDoubleOps[V, V], ConvertIntFloatOps[V, V], ConvertLongFloatOps[V, V], ConvertFloatDoubleOps[V, V]
+  )
+  (using effectOps.BoolBranchJoin[Unit]):
 
   import effectOps.*
   val stack = effectOps.asInstanceOf[OperandStack[V]]
   val memory = effectOps.asInstanceOf[WasmMemory[Addr,Bytes,Size,V]]
-
-  import valueOps.*
 
   val numerics = new InterpreterNumerics[V]
   import numerics.*
@@ -59,11 +74,13 @@ trait Interpreter[V,Addr,Bytes,Size]
         evalMiscop(op, v)
       case Drop => stack.pop()
       case Select =>
-        val c = stack.pop()
-        i32NeqZero(c, stack.pop(), {
+        val isZero = evalNumeric(i32.Eqz)
+        boolBranch[Unit](isZero) {
           val (_, v2) = stack.pop2()
           stack.push(v2)
-        })
+        } {
+          stack.pop()
+        }
       case _ => throw new IllegalArgumentException(s"Unexpected instruction $inst")
 
   def evalMemoryInst(inst: Inst): Unit = inst match
@@ -111,8 +128,10 @@ trait Interpreter[V,Addr,Bytes,Size]
         val v = memory.decode(bytes, loadType, valType)
         stack.push(v)
       },
-      () => fail(Trap(), s"Memory access out of bounds: Cannot read $byteSize bytes at address $addr in current memory."))
+      () => fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
 
+// TODO: this should be an enum
+// TODO: the instructions provide sufficient information, no need to duplicate that
 sealed abstract class LoadType
 case class L_I32() extends LoadType
 case class L_I64() extends LoadType

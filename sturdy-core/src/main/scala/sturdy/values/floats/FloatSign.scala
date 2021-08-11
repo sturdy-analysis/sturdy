@@ -1,4 +1,4 @@
-package sturdy.values.doubles
+package sturdy.values.floats
 
 import sturdy.effect.JoinComputation
 import sturdy.values.*
@@ -6,7 +6,7 @@ import sturdy.values.Topped.*
 import sturdy.values.JoinValue
 import sturdy.values.relational.*
 
-enum DoubleSign:
+enum FloatSign:
   case TopSign
   case Neg
   case NegOrZero
@@ -14,13 +14,13 @@ enum DoubleSign:
   case ZeroOrPos
   case Pos
 
-  def <(s2: DoubleSign): Boolean = s2 == TopSign || (this match
+  def <(s2: FloatSign): Boolean = s2 == TopSign || (this match
     case Neg => s2 == NegOrZero
     case Zero => s2 == NegOrZero || s2 == ZeroOrPos
     case Pos => s2 == ZeroOrPos
     case _ => false
   )
-  def negated: DoubleSign = this match
+  def negated: FloatSign = this match
     case TopSign => TopSign
     case Neg => Pos
     case NegOrZero => ZeroOrPos
@@ -29,19 +29,19 @@ enum DoubleSign:
     case Pos => Neg
 
 
-import DoubleSign.*
+import FloatSign.*
 
-given Abstractly[Double, DoubleSign] with
-  override def abstractly(d: Double): DoubleSign =
+given Abstractly[Float, FloatSign] with
+  override def abstractly(d: Float): FloatSign =
     if d < 0 then Neg
     else if d > 0 then Pos
     else Zero
 
-given PartialOrder[DoubleSign] with
-  override def lteq(x: DoubleSign, y: DoubleSign): Boolean = x == y || x < y
+given PartialOrder[FloatSign] with
+  override def lteq(x: FloatSign, y: FloatSign): Boolean = x == y || x < y
 
-given DoubleSignJoin: JoinValue[DoubleSign] with
-  override def joinValues(v1: DoubleSign, v2: DoubleSign): DoubleSign =
+given FloatSignJoin: JoinValue[FloatSign] with
+  override def joinValues(v1: FloatSign, v2: FloatSign): FloatSign =
     if v1 == v2 then v1
     else if v1 < v2 then v2
     else if v2 < v1 then v1
@@ -55,15 +55,15 @@ given DoubleSignJoin: JoinValue[DoubleSign] with
       case _ => TopSign
 
 
-given SignDoubleOps: DoubleOps[DoubleSign] with
-  def doubleLit(d: Double): DoubleSign =
-    if d < 0 then Neg
-    else if d > 0 then Pos
+given SignFloatOps: FloatOps[FloatSign] with
+  def floatLit(f: Float): FloatSign =
+    if f < 0 then Neg
+    else if f > 0 then Pos
     else Zero
 
-  def randomDouble(): DoubleSign = ZeroOrPos
+  def randomFloat(): FloatSign = ZeroOrPos
 
-  def add(v1: DoubleSign, v2: DoubleSign): DoubleSign = (v1, v2) match
+  def add(v1: FloatSign, v2: FloatSign): FloatSign = (v1, v2) match
     case (TopSign, _) => TopSign
     case (_, TopSign) => TopSign
     case (_, Zero) => v1
@@ -89,7 +89,7 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
     case (Pos, ZeroOrPos) => Pos
     case (Pos, Pos) => Pos
 
-  def sub(v1: DoubleSign, v2: DoubleSign): DoubleSign =
+  def sub(v1: FloatSign, v2: FloatSign): FloatSign =
     val negV2 = v2 match
       case TopSign => TopSign
       case Neg => Pos
@@ -99,7 +99,7 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
       case Pos => Neg
     add(v1, negV2)
 
-  def mul(v1: DoubleSign, v2: DoubleSign): DoubleSign = (v1, v2) match
+  def mul(v1: FloatSign, v2: FloatSign): FloatSign = (v1, v2) match
     case (TopSign, _) => TopSign
     case (_, TopSign) => TopSign
     case (_, Zero) => Zero
@@ -125,14 +125,14 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
     case (Pos, ZeroOrPos) => ZeroOrPos
     case (Pos, Pos) => Pos
 
-  def div(v1: DoubleSign, v2: DoubleSign): DoubleSign = v2 match
+  def div(v1: FloatSign, v2: FloatSign): FloatSign = v2 match
     case Zero => v1 // division by zero yields infinity with the sign of v1
     case ZeroOrPos => v1
     case NegOrZero => v1.negated
     case _ => mul(v1, v2)
 
-given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
-  def lt(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match
+given SignCompareOps: CompareOps[FloatSign, Topped[Boolean]] with
+  def lt(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Actual(true)
     case (Neg, ZeroOrPos) => Actual(true)
     case (Neg, Pos) => Actual(true)
@@ -145,7 +145,7 @@ given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
     case (Pos, NegOrZero) => Actual(false)
     case (Pos, Zero) => Actual(false)
     case _ => Top
-  def le(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match
+  def le(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Actual(true)
     case (Neg, ZeroOrPos) => Actual(true)
     case (Neg, Pos) => Actual(true)
@@ -158,11 +158,11 @@ given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
     case (Pos, NegOrZero) => Actual(false)
     case (Pos, Zero) => Actual(false)
     case _ => Top
-  def ge(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = lt(v2, v1)
-  def gt(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = le(v2, v1)
+  def ge(v1: FloatSign, v2: FloatSign): Topped[Boolean] = lt(v2, v1)
+  def gt(v1: FloatSign, v2: FloatSign): Topped[Boolean] = le(v2, v1)
 
-given SignEqOps: EqOps[DoubleSign, Topped[Boolean]] with
-  def equ(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match
+given SignEqOps: EqOps[FloatSign, Topped[Boolean]] with
+  def equ(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Actual(false)
     case (Neg, ZeroOrPos) => Actual(false)
     case (Neg, Pos) => Actual(false)
@@ -175,5 +175,5 @@ given SignEqOps: EqOps[DoubleSign, Topped[Boolean]] with
     case (Pos, NegOrZero) => Actual(false)
     case (Pos, Zero) => Actual(false)
     case _ => Top
-  def neq(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = equ(v1, v2).map(!_)
+  def neq(v1: FloatSign, v2: FloatSign): Topped[Boolean] = equ(v1, v2).map(!_)
 

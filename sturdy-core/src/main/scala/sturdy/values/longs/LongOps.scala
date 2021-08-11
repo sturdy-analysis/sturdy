@@ -1,25 +1,25 @@
-package sturdy.values.ints
+package sturdy.values.longs
 
 import sturdy.effect.failure.Failure
 import sturdy.effect.failure.FailureKind
 
 import scala.util.Random
 
-case object IntDivisionByZero extends FailureKind
+case object LongDivisionByZero extends FailureKind
 
-trait IntOps[V]:
-  def intLit(i: Int): V
-  def randomInt(): V
-  
+trait LongOps[V]:
+  def longLit(l: Long): V
+  def randomLong(): V
+
   def add(v1: V, v2: V): V
   def sub(v1: V, v2: V): V
   def mul(v1: V, v2: V): V
-  
+
   def div(v1: V, v2: V): V
   def divUnsigned(v1: V, v2: V): V = ???
   def remainder(v1: V, v2: V): V = ???
   def remainderUnsigned(v1: V, v2: V): V = ???
-  
+
   def bitAnd(v1: V, v2: V): V = ???
   def bitOr(v1: V, v2: V): V = ???
   def bitXor(v1: V, v2: V): V = ???
@@ -32,14 +32,15 @@ trait IntOps[V]:
   def countTrailinZeros(v: V): V = ???
   def nonzeroBitCount(v: V): V = ???
 
-given ConcreteIntOps(using f: Failure): IntOps[Int] with
-  def intLit(i: Int): Int = i
-  def randomInt(): Int = Random.nextInt()
-  def add(v1: Int, v2: Int): Int = v1 + v2
-  def sub(v1: Int, v2: Int): Int = v1 - v2
-  def mul(v1: Int, v2: Int): Int = v1 * v2
-  def div(v1: Int, v2: Int): Int =
+
+given ConcreteLongOps(using f: Failure): LongOps[Long] with
+  def longLit(l: Long): Long = l
+  def randomLong(): Long = Random.nextLong()
+  def add(v1: Long, v2: Long): Long = v1 + v2
+  def sub(v1: Long, v2: Long): Long = v1 - v2
+  def mul(v1: Long, v2: Long): Long = v1 * v2
+  def div(v1: Long, v2: Long): Long =
     if (v2 == 0)
-      f.fail(IntDivisionByZero, s"$v1 / $v2")
+      f.fail(LongDivisionByZero, s"$v1 / $v2")
     else
       v1 / v2
