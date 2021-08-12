@@ -10,8 +10,6 @@ import sturdy.values.ints.{_, given}
 import sturdy.values.doubles.{_, given}
 import sturdy.values.rationals.{_, given}
 import sturdy.values.booleans.{_, given}
-import sturdy.values.chars.{_, given}
-import sturdy.values.strings.{_, given}
 import sturdy.values.relational.{_, given}
 import sturdy.values.closures.{_, given}
 import sturdy.values.given
@@ -50,7 +48,7 @@ object ConcreteInterpreter:
     case StringVal(str: String)
     case ListVal(cons: Cons)
     case SymbolVal(sym: String)
-    case QuoteVal(qot: Literal)
+    case QuoteVal(qot: Value)
     case VoidVal
     case ClosureVal(closure: (List[String], Environment, List[Expr]))
     case NumVal(num: Num)
@@ -73,7 +71,7 @@ object ConcreteInterpreter:
     def asSymbol: String = this match
       case SymbolVal(sym) => sym
       case _ => throw new IllegalArgumentException(s"Expected Symbol but got $this")
-    def asQuote : Literal = this match
+    def asQuote : Value = this match
       case QuoteVal(qot) => qot
       case _ => throw new IllegalArgumentException(s"Expected Quote but got $this")
     def asClosure : (List[String], Environment, List[Expr]) = this match
@@ -112,8 +110,6 @@ object ConcreteInterpreter:
     given DoubleIntOps[Value, Value] = new LiftedDoubleIntOps[Value, Value, Double, Int](_.asNum.asDouble, x => NumVal(IntVal(x)))
     given DoubleBoolOps[Value, Value] = new LiftedDoubleBoolOps[Value, Value, Double, Boolean](_.asNum.asDouble, BoolVal.apply)
     given BooleanOps[Value] = new LiftedBooleanOps[Value, Boolean](_.asBoolean, BoolVal.apply)
-    given CharOps[Value] = new LiftedCharOps[Value, Char](_.asChar, CharVal.apply)
-    given StringOps[Value] = new LiftedStringOps[Value, String](_.asString, StringVal.apply)
     given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, Double, Boolean](_.asNum.asDouble, BoolVal.apply)
     given ClosureOps[String, Value, List[Expr], Environment, Value, Value] = new LiftedClosureOps[String, Value, List[Expr], Environment, Value, Value, (List[String], Environment, List[Expr])](_.asClosure, ClosureVal.apply)
 
@@ -134,8 +130,8 @@ object ConcreteInterpreter:
         case NumVal(IntVal(_)) => thn
         case _ => els
       def ifIsRatio[A](v: Value, thn: => A, els: => A): A = v match
-      case NumVal(RatioVal(_,_)) => thn
-      case _ => els
+        case NumVal(RatioVal(_,_)) => thn
+        case _ => els
       def ifIsDouble[A](v: Value, thn: => A, els: => A): A = v match
         case NumVal(DoubleVal(_)) => thn
         case _ => els
@@ -143,19 +139,45 @@ object ConcreteInterpreter:
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
         case (BoolVal(b1), BoolVal(b2)) => BoolVal(b1 == b2)
-        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
-      def neq(v1: Value, v2: Value): Value = (v1, v2) match
-        case (BoolVal(b1), BoolVal(b2)) => BoolVal(b1 != b2)
-        case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
+        case (NumVal(IntVal(i1)), NumVal(IntVal(i2))) => BoolVal(i1 == i2)
+        case (NumVal(RatioVal(i11, i12)), NumVal(RatioVal(i21,i22))) => BoolVal(i11 == i21 && i12 == i22)
+        case (NumVal(DoubleVal(d1)), NumVal(DoubleVal(d2))) => BoolVal(d1 == d2)
+        case (CharVal(c1), CharVal(c2)) => BoolVal(c1 == c2)
+        case (StringVal(s1), StringVal(s2)) => BoolVal(s1 == s2)
+        case (QuoteVal(SymbolVal(sym1)), QuoteVal(SymbolVal(sym2))) => BoolVal(sym1 == sym2)
+        case (ListVal(NilVal), ListVal(NilVal)) => BoolVal(true)
+        case _ => BoolVal(false)
+      def neq(v1: Value, v2: Value): Value = throw new IllegalArgumentException("neq does not exist")
 
-    given QuoteOps[Literal, Value] with
-      override def quoteLit(l: Literal): Value = QuoteVal(l)
+    given QuoteOps[Value] with
+      override def quoteLit(l: Value): Value = QuoteVal(l)
 
     given SymbolOps[Value] with
       override def symbolLit(s: String): Value = SymbolVal(s)
 
     given VoidOps[Value] with
       def void:Value = VoidVal
+
+    given CharOps[Value] with
+      override def charLit(c: Char): Value = CharVal(c)
+
+    given StringOps[Value] with
+      override def stringLit(s: String): Value = StringVal(s)
+      override def numberToString(v: Value): Value = v match
+        case NumVal(num) => StringVal(num.toString)
+        case _ => throw new IllegalArgumentException(s"Expected NumVal but got $v")
+      override def stringToSymbol(v: Value): Value = v match
+        case StringVal(s) => QuoteVal(SymbolVal(s))
+        case _ => throw new IllegalArgumentException(s"Expected StringVal but got $v")
+      override def symbolToString(v: Value): Value = v match
+        case QuoteVal(SymbolVal(s)) => StringVal(s)
+        case _ => throw new IllegalArgumentException(s"Expected QuoteVal but got $v")
+      override def stringRef(v1: Value, v2: Value): Value = (v1, v2) match
+        case (StringVal(s), NumVal(IntVal(i))) => CharVal(s.charAt(i))
+        case _ => throw new IllegalArgumentException(s"Expected StringVal and IntVal but got $v1 and $v2")
+      override def stringAppend(v1: Value, v2: Value): Value = (v1, v2) match
+        case (StringVal(s1), StringVal(s2)) => StringVal(s1+s2)
+        case _ => throw new IllegalArgumentException(s"Expected StringVal and IntVal but got $v1 and $v2")
 
     given TypeOps[Value] with
       def isNumber(v: Value) : BoolVal = v match
@@ -167,9 +189,15 @@ object ConcreteInterpreter:
       def isDouble(v:Value ): BoolVal = v match
         case NumVal(DoubleVal(_)) => BoolVal(true)
         case _ => BoolVal(false)
-      def isRational(v: Value): BoolVal = ???
-      def isNull(v: Value): BoolVal = ???
-      def isCons(v: Value): BoolVal = ???
+      def isRational(v: Value): BoolVal = v match
+        case NumVal(RatioVal(_,_)) => BoolVal(true)
+        case _ => BoolVal(false)
+      def isNull(v: Value): BoolVal = v match
+        case ListVal(NilVal) => BoolVal(true)
+        case _ => BoolVal(false)
+      def isCons(v: Value): BoolVal = v match
+        case ListVal(ConsVal(_,_)) => BoolVal(true)
+        case _ => BoolVal(false)
       def isBoolean(v: Value): Value = v match
         case BoolVal(_) => BoolVal(true)
         case _ => BoolVal(false)
@@ -184,12 +212,11 @@ class ConcreteInterpreter
   (using intOps: IntOps[Value], intDoubleOps: IntDoubleOps[Value, Value], intBoolOps: IntBoolOps[Value, Value],
          doubleOps: DoubleOps[Value], doubleIntOps: DoubleIntOps[Value, Value], doubleBoolOps: DoubleBoolOps[Value, Value],
          rationalOps: RationalOps[Value], rationalIntOps: RationalIntOps[Value,Value], rationalDoubleOps: RationalDoubleOps[Value,Value], rationalBoolOps: RationalBoolOps[Value, Value],
-         boolOps: BooleanOps[Value], eqOps: EqOps[Value, Value], compareOps: CompareOps[Value, Value],
-         listOps: ListOps[Value],
-         charOps: CharOps[Value], stringOps: StringOps[Value],
-         symbolOps: SymbolOps[Value], quoteOps: QuoteOps[Literal, Value],
+         boolOps: BooleanOps[Value], listOps: ListOps[Value], charOps: CharOps[Value], stringOps: StringOps[Value],
+         symbolOps: SymbolOps[Value], quoteOps: QuoteOps[Value],voidOps: VoidOps[Value],
+         eqOps: EqOps[Value, Value], compareOps: CompareOps[Value, Value],
          closureOps: ClosureOps[String, Value, List[Expr], Environment, Value, Value],
-         voidOps: VoidOps[Value], typeOps: TypeOps[Value], isTypeOps: IfIsTypeOps[Value])
+         typeOps: TypeOps[Value], isTypeOps: IfIsTypeOps[Value])
   extends GenericInterpreter[Value, Addr, Environment, Effects]:
 
   val phi = fix.identity[FixIn[Value], FixOut[Value]]

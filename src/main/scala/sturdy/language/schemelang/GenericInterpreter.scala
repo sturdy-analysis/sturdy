@@ -17,10 +17,8 @@ import sturdy.values.ints.{IntOps, IntDoubleOps, IntBoolOps}
 import sturdy.values.rationals.{RationalOps, RationalIntOps, RationalDoubleOps, RationalBoolOps}
 import sturdy.values.doubles.{DoubleOps, DoubleIntOps, DoubleBoolOps}
 import sturdy.values.booleans.BooleanOps
-import sturdy.values.chars.CharOps
-import sturdy.values.strings.StringOps
 import sturdy.values.closures.ClosureOps
-import sturdy.values.relational.*
+import sturdy.values.relational.{CompareOps, EqOps}
 
 object GenericInterpreter:
   type GenericEffects[V, Addr, Env] =
@@ -75,8 +73,19 @@ trait VoidOps[V]:
 trait SymbolOps[V]:
   def symbolLit(s: String): V
 
-trait QuoteOps[L, V]:
-  def quoteLit(l: L): V
+trait QuoteOps[V]:
+  def quoteLit(v: V): V
+
+trait StringOps[V]:
+  def stringLit(s: String): V
+  def numberToString(v: V): V
+  def stringToSymbol(v: V): V
+  def symbolToString(v: V): V
+  def stringRef(v1: V, v2: V): V
+  def stringAppend(v1: V, v2: V): V
+
+trait CharOps[V]:
+  def charLit(c: Char): V
 
 import GenericInterpreter.*
 
@@ -86,11 +95,10 @@ trait GenericInterpreter[V, Addr, Env, Effects <: GenericEffects[V, Addr, Env]]
              rationalOps: RationalOps[V], rationalIntOps: RationalIntOps[V,V], rationalDoubleOps: RationalDoubleOps[V,V], rationalBoolOps: RationalBoolOps[V, V],
              doubleOps: DoubleOps[V], doubleIntOps: DoubleIntOps[V, V], doubleBoolOps: DoubleBoolOps[V, V],
              boolOps: BooleanOps[V], charOps: CharOps[V], stringOps: StringOps[V],
-             listOps: ListOps[V],
+             listOps: ListOps[V], symbolOps: SymbolOps[V], quoteOps: QuoteOps[V], voidOps: VoidOps[V],
+             typeOps: TypeOps[V], ifIsTypeOps: IfIsTypeOps[V],
              eqOps: EqOps[V, V], compareOps: CompareOps[V, V],
-             symbolOps: SymbolOps[V], quoteOps: QuoteOps[Literal, V],
-             closureOps: ClosureOps[String, V, List[Expr], Env, V, V],
-             voidOps: VoidOps[V], typeOps: TypeOps[V], ifIsTypeOps: IfIsTypeOps[V])
+             closureOps: ClosureOps[String, V, List[Expr], Env, V, V])
   (using effectOps.EnvJoin[V], effectOps.EnvJoin[Addr], effectOps.StoreJoin[V], effectOps.EnvJoin[Unit],
    effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[V]):
 
@@ -189,7 +197,7 @@ trait GenericInterpreter[V, Addr, Env, Effects <: GenericEffects[V, Addr, Env]]
       case CharLit(c) => charLit(c)
       case StringLit(str) => stringLit(str)
       case SymbolLit(sym) => symbolLit(sym)
-      case QuoteLit(qot) => quoteLit(qot)
+      case QuoteLit(qot) => quoteLit(eval(Lit(qot)))
     }
 
     def op1(op: Op1Kinds, v: V): V = { op match
@@ -221,25 +229,25 @@ trait GenericInterpreter[V, Addr, Env, Effects <: GenericEffects[V, Addr, Env]]
       case Caddr => listOps.car(listOps.cdr(listOps.cdr(v)))
       case Cadddr => listOps.car(listOps.cdr(listOps.cdr(listOps.cdr(v))))
 
-      case NumberToString => ???
-      case StringToSymbol => ???
-      case SymbolToString => ???
+      case NumberToString => numberToString(v)
+      case StringToSymbol => stringToSymbol(v)
+      case SymbolToString => symbolToString(v)
 
       case Random => ???
     }
 
     def op2(op: Op2Kinds, v1: V, v2: V): V = { op match
-      case Eqv => ???
+      case Eqv => eqOps.equ(v1,v2)
 
       case Quotient => withInt2(v1,v2)(intOps.quotient)
       case Remainder => withInt2(v1,v2)(intOps.remainder)
       case Modulo => withInt2(v1,v2)(intOps.modulo)
 
-      case StringRef => ???
+      case StringRef => stringRef(v1,v2)
     }
 
     def opVar(op: OpVarKinds, vs: List[V]): V = { op match
-      case Equal => ???
+      case Equal => vs.init.zip(vs.tail).map(equiv).reduce(and)
       case Smaller => vs.init.zip(vs.tail).map(lt).reduce(and)
       case Greater => vs.init.zip(vs.tail).map(gt).reduce(and)
       case SmallerEqual => vs.init.zip(vs.tail).map(ge).reduce(and)
@@ -252,7 +260,7 @@ trait GenericInterpreter[V, Addr, Env, Effects <: GenericEffects[V, Addr, Env]]
       case Div => vs.reduce { case (x1, x2) => withNum2(x1,x2)(intOps.div)(rationalOps.div)(doubleOps.div) }
       case Gcd => vs.reduce { case (x1, x2) => withInt2(x1,x2)(intOps.gcd) }
       case Lcm => vs.reduce { case (x1, x2) => withInt2(x1,x2)(intOps.lcm) }
-      case StringAppend => ???
+      case StringAppend => vs.reduce(stringAppend)
     }
 
     def applyClosure(vars: List[String], body: List[Expr], args: List[V], env: Env): V = {

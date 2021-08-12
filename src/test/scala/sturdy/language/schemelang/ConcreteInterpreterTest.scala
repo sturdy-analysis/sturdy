@@ -419,3 +419,13 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
               ListVal(ConsVal(NumVal(IntVal(3)),
                 ListVal(NilVal))))))))(res)
   }
+
+  it should "test appending of string " in {
+    val res = run(List(
+      (OpVar(StringAppend, List(
+        Lit(StringLit("1")),
+          Lit(StringLit("2")),
+            Lit(StringLit("3")))))
+    ))
+    assertResult(StringVal("123"))(res)
+  }

@@ -55,6 +55,7 @@ given IntervalDoubleOps: DoubleOps[DoubleInterval] with
   def min(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval = ???
 
 given IntervalCompareOps: CompareOps[DoubleInterval, Topped[Boolean]] with
+  def equiv(v1: DoubleInterval, v2: DoubleInterval): Topped[Boolean] = ???
   def lt(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =
     if iv1.h < iv2.l then Actual(true)
     else if iv2.h <= iv1.l then Actual(false)

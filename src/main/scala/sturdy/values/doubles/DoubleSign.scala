@@ -136,6 +136,7 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
   def min(v1: DoubleSign, v2: DoubleSign): DoubleSign = ???
 
 given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
+  def equiv(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = ???
   def lt(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Actual(true)
     case (Neg, ZeroOrPos) => Actual(true)

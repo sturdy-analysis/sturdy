@@ -146,6 +146,7 @@ given SignIntOps(using f: Failure, j: JoinComputation): IntOps[IntSign] with
   def remainder(v1: IntSign, v2: IntSign): IntSign = ???
 
 given SignCompareOps: CompareOps[IntSign, Topped[Boolean]] with
+  def equiv(v1: IntSign, v2: IntSign): Topped[Boolean] = ???
   def lt(v1: IntSign, v2: IntSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Actual(true)
     case (Neg, ZeroOrPos) => Actual(true)

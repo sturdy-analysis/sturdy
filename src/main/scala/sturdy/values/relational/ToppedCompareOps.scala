@@ -5,6 +5,7 @@ import sturdy.values.Topped
 import sturdy.values.Topped._
 
 given ToppedCertainCompareOps[V, B](using ops: CompareOps[V, B]): CompareOps[Topped[V], Topped[B]] with
+  override def equiv(v1: Topped[V], v2: Topped[V]): Topped[B] = ???
   override def lt(v1: Topped[V], v2: Topped[V]): Topped[B] =
     for (d1 <- v1; d2 <- v2) yield ops.lt(d1, d2)
   override def le(v1: Topped[V], v2: Topped[V]): Topped[B] =
@@ -20,6 +21,7 @@ given ToppedCertainCompareOps[V, B](using ops: CompareOps[V, B]): CompareOps[Top
   def isEven(v1: Topped[V]): Topped[B] = ???
 
 given ToppedUncertainCompareOps[V, B](using ops: CompareOps[V, Topped[B]]): CompareOps[Topped[V], Topped[B]] with
+  override def equiv(v1: Topped[V], v2: Topped[V]): Topped[B] = ???
   override def lt(v1: Topped[V], v2: Topped[V]): Topped[B] =
     for (d1 <- v1; d2 <- v2; r <- ops.lt(d1, d2)) yield r
   override def le(v1: Topped[V], v2: Topped[V]): Topped[B] =
