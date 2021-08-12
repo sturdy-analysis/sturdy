@@ -4,9 +4,9 @@ import sturdy.values.JoinValue
 
 trait MayCompute[A, Join[_], JoinComp]:
   def withDefault[B](default: => B)(f: A => B)(using JoinComp)(using Join[B]): B
-  final def orElse(default: => A)(using JoinComp)(using Join[A]): A =
+  inline final def orElse(default: => A)(using JoinComp)(using Join[A]): A =
     withDefault(default)(identity)
-  final def orElseAndThen[B](default: => A)(f: A => B)(using JoinComp)(using Join[B]): B =
+  inline final def orElseAndThen[B](default: => A)(f: A => B)(using JoinComp)(using Join[B]): B =
     withDefault(f(default))(f)
 
 

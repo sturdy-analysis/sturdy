@@ -1,11 +1,19 @@
 package sturdy.language.wasm.generic
 
+import swam.LabelIdx
+
 import scala.collection.mutable.ArrayBuffer
 
 class LabelStack:
-  private val labelReturnArities: ArrayBuffer[Int] = ArrayBuffer()
-  inline def lookupLabel(lableIndex: Int): Int = labelReturnArities(lableIndex)
-  inline def pushLabel(returnArity: Int): Unit =
+  private var labelReturnArities: ArrayBuffer[LabelIdx] = ArrayBuffer()
+  inline def lookupLabel(lableIndex: LabelIdx): LabelIdx = labelReturnArities(lableIndex)
+  inline def pushLabel(returnArity: LabelIdx): Unit =
     labelReturnArities += returnArity
   inline def popLabel(): Unit =
     labelReturnArities.remove(labelReturnArities.size - 1)
+  
+  def withFresh[A](f: => A): A =
+    val snapshot = labelReturnArities
+    labelReturnArities = ArrayBuffer()
+    try f finally 
+      labelReturnArities = snapshot

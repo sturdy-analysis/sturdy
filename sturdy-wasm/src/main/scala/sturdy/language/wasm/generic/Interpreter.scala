@@ -48,9 +48,9 @@ import Interpreter.*
 trait Interpreter[V,Addr,Bytes,Size]
   (using effectOps: Effects[V,Addr,Bytes,Size])
   (using IntOps[V], LongOps[V], FloatOps[V], DoubleOps[V], EqOps[V, V], CompareOps[V, V], IntCompareOps[V, V],
-   ConvertIntLongOps[V, V], ConvertIntDoubleOps[V, V], ConvertLongDoubleOps[V, V], ConvertIntFloatOps[V, V], ConvertLongFloatOps[V, V], ConvertFloatDoubleOps[V, V]
-  )
-  (using effectOps.BoolBranchJoin[Unit]):
+   ConvertIntLongOps[V, V], ConvertIntDoubleOps[V, V], ConvertLongDoubleOps[V, V], ConvertIntFloatOps[V, V], ConvertLongFloatOps[V, V], ConvertFloatDoubleOps[V, V])
+  (using wasmOps: WasmOperations[V])
+  (using effectOps.BoolBranchJoin[Unit], wasmOps.WasmOpsJoin[Unit], wasmOps.WasmOpsJoinComp):
 
   import effectOps.*
   val stack = effectOps.asInstanceOf[OperandStack[V]]
@@ -58,20 +58,13 @@ trait Interpreter[V,Addr,Bytes,Size]
 
   val numerics = new InterpretNumerics[V]
   import numerics.*
+  import wasmOps.*
 
   val labelStack = new LabelStack
 
+  inline private def fail(k: FailureKind, what: String) = effectOps.fail(k, s"$what in $module")
+
   def module: ModuleInstance = getFrameData.module
-  def returnArity(bt: BlockType): Int =
-    val returnArity = bt.arity(module.functionTypes)
-    if (returnArity < 0)
-      fail(UnboundFunctionType, bt.toString)
-    else
-      returnArity
-  def paramsArity(bt: BlockType): Int =
-    bt.params(module.functionTypes) match
-      case Some(params) => params.size
-      case None => fail(UnboundFunctionType, bt.toString)
 
   def eval(inst: Inst): Unit =
     val opcode = inst.opcode
@@ -98,15 +91,6 @@ trait Interpreter[V,Addr,Bytes,Size]
           stack.pop()
         }
       case _ => throw new IllegalArgumentException(s"Unexpected instruction $inst")
-
-  def evalMemoryInst(inst: Inst): Unit = inst match
-    case i32.Load(align, offset) => ???
-    case _: LoadNInst => ???
-    case _: StoreInst => ???
-    case _: StoreNInst => ???
-    case MemorySize => ???
-    case MemoryGrow => ???
-    case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def evalVarInst(inst: VarInst): Unit = inst match
     case LocalGet(ix) =>
@@ -144,10 +128,27 @@ trait Interpreter[V,Addr,Bytes,Size]
       } {
         branch(labelIndex)
       }
-//    case _: BrTable => ???
-//    case _: Return => ???
-//    case _: Call => ???
-//    case _: CallIndirect => ???
+    case BrTable(labels, defaultLabel) =>
+      val ix = stack.pop()
+      indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
+    case Return =>
+      val operands = stack.popN(getFrameData.returnArity)
+      throws(WasmException.Return(operands))
+    case Call(funcIx) =>
+      val func = module.functions(funcIx)
+      invoke(func)
+    case CallIndirect(typeIx) =>
+      val table = module.tables(0)
+      val ftExpected = module.functionTypes(typeIx)
+      val funcIx = stack.pop()
+      indexLookup(funcIx, table.functions).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
+        if (func == null)
+          fail(UninitializedFunction, funcIx.toString)
+        val ftActual = func.funcType
+        if (ftExpected != ftActual)
+          fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
+        invoke(func)
+      }
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
 
@@ -175,6 +176,43 @@ trait Interpreter[V,Addr,Bytes,Size]
       labelStack.popLabel()
     }
 
+  def invoke(func: FunctionInstance): Unit = func match
+    case FunctionInstance.Wasm(mod, func, funcType) =>
+      val args = stack.popN(funcType.params.size)
+      val frameData = FrameData(funcType.t.size, mod)
+      val vars = args.view.reverse ++ func.locals.map(defaultValue)
+      withFreshOperandStack(labelStack.withFresh(inNewFrame(frameData, vars) {
+        label(funcType.t.size, func.body, None)
+      }))
+
+
+  private def defaultValue(ty: ValType): V = ty match
+    case ValType.I32 => evalNumeric(i32.Const(0))
+    case ValType.I64 => evalNumeric(i64.Const(0))
+    case ValType.F32 => evalNumeric(f32.Const(0))
+    case ValType.F64 => evalNumeric(f64.Const(0))
+
+  private def returnArity(bt: BlockType): Int =
+    val returnArity = bt.arity(module.functionTypes)
+    if (returnArity < 0)
+      fail(UnboundFunctionType, bt.toString)
+    else
+      returnArity
+
+  private def paramsArity(bt: BlockType): Int =
+    bt.params(module.functionTypes) match
+      case Some(params) => params.size
+      case None => fail(UnboundFunctionType, bt.toString)
+
+
+  def evalMemoryInst(inst: Inst): Unit = inst match
+    case i32.Load(align, offset) => ???
+    case _: LoadNInst => ???
+    case _: StoreInst => ???
+    case _: StoreNInst => ???
+    case MemorySize => ???
+    case MemoryGrow => ???
+    case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def load(byteSize: Int, loadType: LoadType, valType: ValType, offset: Int): Unit =
     val base = stack.pop()

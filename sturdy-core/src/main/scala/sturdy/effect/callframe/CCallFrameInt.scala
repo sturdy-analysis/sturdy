@@ -5,6 +5,7 @@ import sturdy.effect.CMayCompute.*
 import sturdy.effect.NoJoin
 
 import scala.reflect.ClassTag
+import scala.annotation.targetName
 
 trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V]) extends CallFrame[Data, Int, V]:
   type CallFrameJoin[A] = NoJoin[A]
@@ -27,6 +28,17 @@ trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V])
     val snapshotVars = this.vars
     this.data = d
     this.vars = vars.map(_._2).toArray
+    try f finally {
+      this.data = snapshotData
+      this.vars = snapshotVars
+    }
+
+  @targetName("inNewFrame_noindex")
+  def inNewFrame[A](d: Data, vars: Iterable[V])(f: => A): A =
+    val snapshotData = this.data
+    val snapshotVars = this.vars
+    this.data = d
+    this.vars = vars.toArray
     try f finally {
       this.data = snapshotData
       this.vars = snapshotVars
