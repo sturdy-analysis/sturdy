@@ -11,5 +11,8 @@ trait Except[E]:
   final def catches[A](f: => A)(fail: E => A): A =
     tries(f)(identity)(fail)
 
-  final def finalizes[A](f: => A)(g: => Any): A =
+  final def finalizes[A](f: => A)(g: => Unit): A =
     tries(f)(a => {g; a})(e => {g; throws(e)})
+
+  final def catchFinally[A](f: => A)(fail: E => A)(g: => Unit): A =
+    tries(f)(a => {g; a})(e => try fail(e) finally g)

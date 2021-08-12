@@ -2,6 +2,7 @@ package sturdy.language.wasm.generic
 
 import sturdy.effect.noJoin
 import sturdy.effect.callframe.CMutableCallFrameInt
+import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import swam.syntax.*
 import swam.OpCode
@@ -9,12 +10,7 @@ import swam.ValType
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.binarymemory.{Serialize, Memory, MemSize, EffectiveAddress}
 import sturdy.effect.branching.BoolBranching
-import sturdy.values.conversion.ConvertFloatDoubleOps
-import sturdy.values.conversion.ConvertIntDoubleOps
-import sturdy.values.conversion.ConvertIntLongOps
-import sturdy.values.conversion.ConvertLongDoubleOps
-import sturdy.values.conversion.ConvertLongFloatOps
-import sturdy.values.conversion.ConvertIntFloatOps
+import sturdy.values.conversion.*
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import sturdy.values.ints.IntCompareOps
@@ -24,25 +20,26 @@ import sturdy.values.relational.CompareOps
 import sturdy.values.relational.EqOps
 import sturdy.values.unit
 import swam.BlockType
+import swam.LabelIdx
 
 object Interpreter:
-  case object UnreachableInstruction extends FailureKind
-  case object UnboundLocal extends FailureKind
-  case object UnboundFunctionType extends FailureKind
-  case object MemoryAccessOutOfBounds extends FailureKind
+  case class FrameData(returnArity: Int, module: ModuleInstance)
+
+  enum WasmException[V]:
+    case Jump(labelIndex: LabelIdx, operands: List[V])
+    case Return(operands: List[V])
 
   type WasmMemory[Addr,Bytes,Size,V] = Memory[Addr,Bytes,Size]
     with EffectiveAddress[V,Int,Addr]
     with MemSize[V,Size]
     with Serialize[V,Bytes,ValType,LoadType,StoreType]
 
-  case class FrameData(returnArity: Int, module: ModuleInstance)
-
   type Effects[V,Addr,Bytes,Size] =
     OperandStack[V]
       with WasmMemory[Addr,Bytes,Size,V]
       with CMutableCallFrameInt[FrameData, V]
       with BoolBranching[V]
+      with Except[WasmException[V]]
       with Failure
 
 
@@ -61,6 +58,8 @@ trait Interpreter[V,Addr,Bytes,Size]
 
   val numerics = new InterpretNumerics[V]
   import numerics.*
+
+  val labelStack = new LabelStack
 
   def module: ModuleInstance = getFrameData.module
   def returnArity(bt: BlockType): Int =
@@ -136,8 +135,15 @@ trait Interpreter[V,Addr,Bytes,Size]
       } {
         label(rt, thnInsts, None)
       }
-//    case _: Br => ???
-//    case _: BrIf => ???
+    case Br(labelIndex) => branch(labelIndex)
+    case BrIf(labelIndex) =>
+      val isZero = evalNumeric(i32.Eqz)
+      boolBranch[Unit](isZero) {
+        // v == 0: else branch
+        // do nothing
+      } {
+        branch(labelIndex)
+      }
 //    case _: BrTable => ???
 //    case _: Return => ???
 //    case _: Call => ???
@@ -145,7 +151,29 @@ trait Interpreter[V,Addr,Bytes,Size]
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
 
-  def label(returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit = ???
+  def branch(labelIndex: LabelIdx): Unit =
+    val returnArity: Int = labelStack.lookupLabel(labelIndex)
+    val operands = stack.popN(returnArity)
+    throws(WasmException.Jump(labelIndex, operands))
+
+  def label(returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
+    catchFinally {
+      labelStack.pushLabel(returnArity)
+      stack.restoreAfter {
+        insts.foreach(eval)
+      }
+    } { // catch
+      case WasmException.Jump(labelIndex, operands) =>
+        if (labelIndex == 0) {
+          stack.pushN(operands)
+          branchTarget.foreach(eval)
+        } else {
+          throws(WasmException.Jump(labelIndex - 1, operands))
+        }
+      case ex => throws(ex)
+    } { // finally
+      labelStack.popLabel()
+    }
 
 
   def load(byteSize: Int, loadType: LoadType, valType: ValType, offset: Int): Unit =
