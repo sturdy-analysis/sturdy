@@ -23,10 +23,12 @@ import sturdy.values.longs.LongOps
 import sturdy.values.relational.CompareOps
 import sturdy.values.relational.EqOps
 import sturdy.values.unit
+import swam.BlockType
 
 object Interpreter:
   case object UnreachableInstruction extends FailureKind
   case object UnboundLocal extends FailureKind
+  case object UnboundFunctionType extends FailureKind
   case object MemoryAccessOutOfBounds extends FailureKind
 
   type WasmMemory[Addr,Bytes,Size,V] = Memory[Addr,Bytes,Size]
@@ -34,10 +36,12 @@ object Interpreter:
     with MemSize[V,Size]
     with Serialize[V,Bytes,ValType,LoadType,StoreType]
 
+  case class FrameData(returnArity: Int, module: ModuleInstance)
+
   type Effects[V,Addr,Bytes,Size] =
     OperandStack[V]
       with WasmMemory[Addr,Bytes,Size,V]
-      with CMutableCallFrameInt[Unit, V]
+      with CMutableCallFrameInt[FrameData, V]
       with BoolBranching[V]
       with Failure
 
@@ -55,8 +59,20 @@ trait Interpreter[V,Addr,Bytes,Size]
   val stack = effectOps.asInstanceOf[OperandStack[V]]
   val memory = effectOps.asInstanceOf[WasmMemory[Addr,Bytes,Size,V]]
 
-  val numerics = new InterpreterNumerics[V]
+  val numerics = new InterpretNumerics[V]
   import numerics.*
+
+  def module: ModuleInstance = getFrameData.module
+  def returnArity(bt: BlockType): Int =
+    val returnArity = bt.arity(module.functionTypes)
+    if (returnArity < 0)
+      fail(UnboundFunctionType, bt.toString)
+    else
+      returnArity
+  def paramsArity(bt: BlockType): Int =
+    bt.params(module.functionTypes) match
+      case Some(params) => params.size
+      case None => fail(UnboundFunctionType, bt.toString)
 
   def eval(inst: Inst): Unit =
     val opcode = inst.opcode
@@ -76,6 +92,7 @@ trait Interpreter[V,Addr,Bytes,Size]
       case Select =>
         val isZero = evalNumeric(i32.Eqz)
         boolBranch[Unit](isZero) {
+          // v == 0: else branch
           val (_, v2) = stack.pop2()
           stack.push(v2)
         } {
@@ -108,9 +125,17 @@ trait Interpreter[V,Addr,Bytes,Size]
   def evalControlInst(inst: Inst): Unit = inst match
     case Nop => // nothing
     case Unreachable => fail(UnreachableInstruction, inst.toString)
-//    case _: Block => ???
-//    case _: Loop => ???
-//    case _: If => ???
+    case Block(bt, insts) => label(returnArity(bt), insts, None)
+    case Loop(bt, insts) => label(paramsArity(bt), insts, Some(inst))
+    case If(bt, thnInsts, elsInsts) =>
+      val isZero = evalNumeric(i32.Eqz)
+      val rt = returnArity(bt)
+      boolBranch[Unit](isZero) {
+        // v == 0: else branch
+        label(rt, elsInsts, None)
+      } {
+        label(rt, thnInsts, None)
+      }
 //    case _: Br => ???
 //    case _: BrIf => ???
 //    case _: BrTable => ???
@@ -118,6 +143,10 @@ trait Interpreter[V,Addr,Bytes,Size]
 //    case _: Call => ???
 //    case _: CallIndirect => ???
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
+
+
+  def label(returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit = ???
+
 
   def load(byteSize: Int, loadType: LoadType, valType: ValType, offset: Int): Unit =
     val base = stack.pop()
