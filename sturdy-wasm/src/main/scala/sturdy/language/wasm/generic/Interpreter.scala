@@ -23,7 +23,7 @@ import swam.BlockType
 import swam.LabelIdx
 
 object Interpreter:
-  case class FrameData(returnArity: Int, module: ModuleInstance)
+  case class FrameData[V](returnArity: Int, module: ModuleInstance[V])
 
   enum WasmException[V]:
     case Jump(labelIndex: LabelIdx, operands: List[V])
@@ -37,7 +37,7 @@ object Interpreter:
   type Effects[V,Addr,Bytes,Size] =
     OperandStack[V]
       with WasmMemory[Addr,Bytes,Size,V]
-      with CMutableCallFrameInt[FrameData, V]
+      with CMutableCallFrameInt[FrameData[V], V]
       with BoolBranching[V]
       with Except[WasmException[V]]
       with Failure
@@ -64,7 +64,7 @@ trait Interpreter[V,Addr,Bytes,Size]
 
   inline private def fail(k: FailureKind, what: String) = effectOps.fail(k, s"$what in $module")
 
-  def module: ModuleInstance = getFrameData.module
+  def module: ModuleInstance[V] = getFrameData.module
 
   def eval(inst: Inst): Unit =
     val opcode = inst.opcode
@@ -102,8 +102,13 @@ trait Interpreter[V,Addr,Bytes,Size]
     case LocalTee(ix) =>
       val v = stack.peek()
       setLocal(ix, v).orElse(fail(UnboundLocal, ix.toString))
-    case _: GlobalGet => ???
-    case _: GlobalSet => ???
+    case GlobalGet(globalIx) =>
+      val global = module.globals.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
+      stack.push(global.value)
+    case GlobalSet(globalIx) =>
+      val global = module.globals.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
+      val v = stack.pop()
+      global.value = v
 
   def evalControlInst(inst: Inst): Unit = inst match
     case Nop => // nothing
@@ -135,7 +140,7 @@ trait Interpreter[V,Addr,Bytes,Size]
       val operands = stack.popN(getFrameData.returnArity)
       throws(WasmException.Return(operands))
     case Call(funcIx) =>
-      val func = module.functions(funcIx)
+      val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func)
     case CallIndirect(typeIx) =>
       val table = module.tables(0)
@@ -176,7 +181,7 @@ trait Interpreter[V,Addr,Bytes,Size]
       labelStack.popLabel()
     }
 
-  def invoke(func: FunctionInstance): Unit = func match
+  def invoke(func: FunctionInstance[V]): Unit = func match
     case FunctionInstance.Wasm(mod, func, funcType) =>
       val args = stack.popN(funcType.params.size)
       val frameData = FrameData(funcType.t.size, mod)
