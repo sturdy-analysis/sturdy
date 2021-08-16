@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.effect.{AnalysisState, JoinComputation}
+import sturdy.effect.{AnalysisState, JoinComputation, noJoin}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.callframe.CCallFrame
@@ -132,15 +132,18 @@ class SignAnalysis(steps: Int)
    functionOps: FunctionOps[Function, Value, Value, Value], recOps: RecordOps[String, Value, Value], refOps: ReferenceOps[PowAddr, Value])
     extends GenericInterpreter[Value, PowAddr, Effects]:
 
-  def isCallOrWhile(dom: FixIn[Value]): Int = dom match {
+  def isCallOrWhile(dom: FixIn): Int = dom match {
     case FixIn.EnterFunction(_) => 0
     case FixIn.Run(Stm.While(_, _)) => 1
     case _ => -1
   }
 
-  type Ctx = effectOps.InState
-  private implicit val contextual: fix.Contextual[Ctx, FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState] =
-    fix.contextual(fix.context.full, {case FixIn.EnterFunction(_) => true; case _ => false})
+  type Ctx = Map[PowAddr, Value]
+  private implicit val contextual: fix.Contextual[Ctx, FixIn, FixOut[Value], effectOps.InState, effectOps.OutState] =
+    fix.contextual(fix.context.parametersFromStore {
+      case FixIn.EnterFunction(f) => Some(f.params.map(p => effectOps.getLocal(p).get))
+      case _ => None
+    })
 
   val phi =
     fix.contextSensitive(

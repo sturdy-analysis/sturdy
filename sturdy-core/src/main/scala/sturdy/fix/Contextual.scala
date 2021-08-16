@@ -14,29 +14,30 @@ final class ContextSensitive[Ctx, Dom, Codom, In, Out, Phi <: Combinator[Dom, Co
     context.withContext(phi(f), dom)
 }
 
-def contextual[Ctx, Dom, Codom, In, Out](sensitivity: Sensitivity[Dom, Ctx], switchCall: Dom => Boolean): Contextual[Ctx, Dom, Codom, In, Out] =
-  new Contextual(sensitivity, switchCall)
+def contextual[Ctx, Dom, Codom, In, Out](sensitivity: Sensitivity[Dom, Ctx]): Contextual[Ctx, Dom, Codom, In, Out] =
+  new Contextual(sensitivity)
 
-def noContextual[Dom, Codom, In, Out]: Contextual[Unit, Dom, Codom, In, Out] =
-  new Contextual(context.none, _ => false)
+def noContextual[Dom, Codom, In, Out]: Contextual[Unit, Dom, Codom, In, Out] = new Contextual(context.none)
 
-final class Contextual[Ctx, Dom, Codom, In, Out](sensitivity: Sensitivity[Dom, Ctx], switchCall: Dom => Boolean):
-  private var currentContext: Ctx = null.asInstanceOf[Ctx]
+final class Contextual[Ctx, Dom, Codom, In, Out](sensitivity: Sensitivity[Dom, Ctx]):
+  private var currentContext: Ctx = sensitivity.emptyContext
   def getCurrentContext: Ctx = currentContext
 
   private var previousContexts: List[Ctx] = List()
 
   def withContext(f: Dom => Codom, dom: Dom): Codom =
-    if (!switchCall(dom))
+    if (!sensitivity.switchCall(dom))
       return f(dom)
 
-    val maybeCtx = sensitivity(dom)
-    val contextSwitch = maybeCtx match
-      case Some(ctx) if ctx != currentContext =>
+    val ctx = sensitivity(dom)
+    val contextSwitch =
+      if (ctx != currentContext) {
         previousContexts = currentContext :: previousContexts
         currentContext = ctx
         true
-      case _ => false
+      } else {
+        false
+      }
 
     try f(dom) finally {
       if (contextSwitch) {

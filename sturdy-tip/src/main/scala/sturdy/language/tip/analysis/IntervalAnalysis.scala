@@ -138,7 +138,7 @@ class IntervalAnalysis(steps: Int)
                    functionOps: FunctionOps[Function, Value, Value, Value], recOps: RecordOps[String, Value, Value], refOps: ReferenceOps[PowAddr, Value])
   extends GenericInterpreter[Value, PowAddr, Effects]:
 
-  def isCallOrWhile(dom: FixIn[Value]): Int = dom match {
+  def isCallOrWhile(dom: FixIn): Int = dom match {
     case FixIn.EnterFunction(_) => 0
     case FixIn.Run(Stm.While(_, _)) => 1
     case _ => -1
@@ -152,12 +152,12 @@ class IntervalAnalysis(steps: Int)
 
   type Ctx = List[Exp.Call]
 
-  val callSites = fix.context.callSites[FixIn[Value], Exp.Call] {
+  val callSites = fix.context.callSites[FixIn, Exp.Call] {
     case FixIn.Eval(c: Exp.Call) => Some(c)
     case _ => None
   }
-  private implicit val contextual: fix.Contextual[Ctx, FixIn[Value], FixOut[Value], effectOps.InState, effectOps.OutState] =
-    fix.contextual(callSites.callString(2), callSites.isCall)
+  private implicit val contextual: fix.Contextual[Ctx, FixIn, FixOut[Value], effectOps.InState, effectOps.OutState] =
+    fix.contextual(callSites.callString(2))
 
   val phi =
     fix.log(callSites,

@@ -86,5 +86,5 @@ class ConcreteInterpreter
          functionOps: FunctionOps[Function, Value, Value, Value], recOps: RecordOps[String, Value, Value], refOps: ReferenceOps[Addr, Value])
   extends GenericInterpreter[Value, Addr, Effects]:
 
-  val phi = fix.identity[FixIn[Value], FixOut[Value]]
+  val phi = fix.identity[FixIn, FixOut[Value]]
 

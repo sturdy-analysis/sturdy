@@ -42,7 +42,7 @@ object GenericInterpreter:
   case object UnboundAddr extends FailureKind
   case object UserError extends FailureKind
 
-  enum FixIn[V]:
+  enum FixIn:
     case Eval(e: Exp)
     case Run(s: Stm)
     case EnterFunction(f: Function)
@@ -72,7 +72,7 @@ object GenericInterpreter:
       case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => FixOut.ExitFunction(w.widen(v1, v2))
       case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
 
-  type GenericPhi[V] = fix.Combinator[FixIn[V], FixOut[V]]
+  type GenericPhi[V] = fix.Combinator[FixIn, FixOut[V]]
 
 import GenericInterpreter.*
 
@@ -93,7 +93,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
   private var functions: Map[String, Function] = Map()
 
-  private lazy val fixed = fix.Fixpoint { (rec: FixIn[V] => FixOut[V]) =>
+  private lazy val fixed = fix.Fixpoint { (rec: FixIn => FixOut[V]) =>
     def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
     def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case v => throw new IllegalStateException()}
 
@@ -165,17 +165,15 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Assignable.AField(recVar, field) =>
         val recRef = eval(Exp.Var(recVar))
         val recAddr = refAddr(recRef)
-        read(recAddr).orElseAndThen(fail(UnboundAddr, recAddr.toString)) { recVal =>
-          val updated = updateRecordField(recVal, field, v)
-          write(recAddr, updated)
-        }
+        val recVal = read(recAddr).orElse(fail(UnboundAddr, recAddr.toString))
+        val updated = updateRecordField(recVal, field, v)
+        write(recAddr, updated)
       case Assignable.ADerefField(rec, field) =>
         val recRef = eval(rec)
         val recAddr = refAddr(recRef)
-        read(recAddr).orElseAndThen(fail(UnboundAddr, recAddr.toString)) { recVal =>
-          val updated = updateRecordField(recVal, field, v)
-          write(recAddr, updated)
-        }
+        val recVal = read(recAddr).orElse(fail(UnboundAddr, recAddr.toString))
+        val updated = updateRecordField(recVal, field, v)
+        write(recAddr, updated)
 
     def call(fun: Function, args: Seq[V]): V =
       var locals: Map[String, Addr] = Map()
@@ -197,25 +195,6 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
             case _ => throw new IllegalStateException()
         }
       }
-
-//      freshScoped {
-//      val paramAddrs = fun.params.map { name =>
-//        val addr = alloc(AllocationSite.ParamBinding(fun, name))
-//        bind(name, addr)
-//        addr
-//      }
-//      val localsAddrs = fun.locals.map { name =>
-//        val addr = alloc(AllocationSite.LocalBinding(fun, name))
-//        bind(name, addr)
-//        addr
-//      }
-//      scopedAddresses(paramAddrs ++ localsAddrs) {
-//        paramAddrs.zip(args).map(write)
-//        rec(FixIn.EnterFunction(fun)) match
-//          case FixOut.ExitFunction(v) => v
-//          case _ => throw new IllegalStateException()
-//      }
-//    }
 
     phi {
       case FixIn.Eval(e) => FixOut.Eval(eval_open(e))

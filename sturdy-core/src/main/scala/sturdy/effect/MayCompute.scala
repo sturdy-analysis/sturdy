@@ -8,6 +8,7 @@ trait MayCompute[A, Join[_], JoinComp]:
     withDefault(default)(identity)
   final def orElseAndThen[B](default: => A)(f: A => B)(using JoinComp)(using Join[B]): B =
     withDefault(f(default))(f)
+  final def get(using JoinComp)(using Join[A]): A = withDefault(throw new MatchError(this))(identity)
 
 
 private final class NoJoin[A]
