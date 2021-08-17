@@ -50,11 +50,13 @@ trait Interpreter[V,Addr,Bytes,Size]
   (using IntOps[V], LongOps[V], FloatOps[V], DoubleOps[V], EqOps[V, V], CompareOps[V, V], IntCompareOps[V, V],
    ConvertIntLongOps[V, V], ConvertIntDoubleOps[V, V], ConvertLongDoubleOps[V, V], ConvertIntFloatOps[V, V], ConvertLongFloatOps[V, V], ConvertFloatDoubleOps[V, V])
   (using wasmOps: WasmOperations[V])
-  (using effectOps.BoolBranchJoin[Unit], wasmOps.WasmOpsJoin[Unit], wasmOps.WasmOpsJoinComp):
+  (using effectOps.BoolBranchJoin[Unit],
+   effectOps.MemoryJoin[Unit], effectOps.MemoryJoin[V], effectOps.MemoryJoinComp,
+   wasmOps.WasmOpsJoin[Unit], wasmOps.WasmOpsJoinComp):
 
   import effectOps.*
   val stack = effectOps.asInstanceOf[OperandStack[V]]
-  val memory = effectOps.asInstanceOf[WasmMemory[Addr,Bytes,Size,V]]
+  //val memory = effectOps.asInstanceOf[WasmMemory[Addr,Bytes,Size,V]]
 
   val numerics = new InterpretNumerics[V]
   import numerics.*
@@ -212,43 +214,65 @@ trait Interpreter[V,Addr,Bytes,Size]
 
 
   def evalMemoryInst(inst: Inst): Unit = inst match
-    case i32.Load(align, offset) => ???
-    case _: LoadNInst => ???
-    case _: StoreInst => ???
-    case _: StoreNInst => ???
-    case MemorySize => ???
-    case MemoryGrow => ???
+    case i32.Load(align, offset) => load(4, LoadType.L_I32, ValType.I32, offset)
+    case i64.Load(align, offset) => load(8, LoadType.L_I64, ValType.I64, offset)
+    case f32.Load(align, offset) => load(4, LoadType.L_F32, ValType.F32, offset)
+    case f64.Load(align, offset) => load(8, LoadType.L_F64, ValType.F64, offset)
+    case i32.Load8S(align, offset) => load(1, LoadType.L_I8S, ValType.I32, offset)
+    case i32.Load8U(align, offset) => load(1, LoadType.L_I8U, ValType.I32, offset)
+    case i32.Load16S(align, offset) => load(2, LoadType.L_I16S, ValType.I32, offset)
+    case i32.Load16U(align, offset) => load(2, LoadType.L_I16U, ValType.I32, offset)
+    case i64.Load8S(align, offset) => load(1, LoadType.L_I8S, ValType.I64, offset)
+    case i64.Load8U(align, offset) => load(1, LoadType.L_I8U, ValType.I64, offset)
+    case i64.Load16S(align, offset) => load(2, LoadType.L_I16S, ValType.I64, offset)
+    case i64.Load16U(align, offset) => load(2, LoadType.L_I16U, ValType.I64, offset)
+    case i64.Load32S(align, offset) => load(4, LoadType.L_I32S, ValType.I64, offset)
+    case i64.Load32U(align, offset) => load(4, LoadType.L_I32U, ValType.I64, offset)
+
+    case i32.Store(align, offset) => store(StoreType.S_I32, ValType.I32, offset)
+    case i64.Store(align, offset) => store(StoreType.S_I64, ValType.I64, offset)
+    case f32.Store(align, offset) => store(StoreType.S_F32, ValType.F32, offset)
+    case f64.Store(align, offset) => store(StoreType.S_F64, ValType.F64, offset)
+    case i32.Store8(align, offset) => store(StoreType.S_I8, ValType.I32, offset)
+    case i32.Store16(align, offset) => store(StoreType.S_I16, ValType.I32, offset)
+    case i64.Store8(align, offset) => store(StoreType.S_I8, ValType.I64, offset)
+    case i64.Store16(align, offset) => store(StoreType.S_I16, ValType.I64, offset)
+    case i64.Store32(align, offset) => store(StoreType.S_I32, ValType.I64, offset)
+
+    case MemorySize =>
+      val memIdx = 0 //TODO: memoryIndex()
+      stack.push(sizeToVal(memSize(memIdx)))
+    case MemoryGrow =>
+      val delta = valToSize(stack.pop())
+      val memIdx = 0 //TODO: memoryIndex()
+      val res = memGrow(memIdx, delta).withDefault
+        (evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
+        {sizeToVal(_)}
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def load(byteSize: Int, loadType: LoadType, valType: ValType, offset: Int): Unit =
     val base = stack.pop()
-    val addr = memory.effectiveAddress(base, offset)
+    val addr = effectiveAddress(base, offset)
     val memIdx = 0 //TODO: memoryIndex()
-    memory.memRead(memIdx,addr,byteSize,
-      bytes => {
-        val v = memory.decode(bytes, loadType, valType)
-        stack.push(v)
-      },
-      () => fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
+    val bytes = memRead(memIdx,addr,byteSize).withDefault
+      (fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
+      {(b: Bytes) =>
+        val v = decode(b, loadType, valType)
+        stack.push(v)}
 
-// TODO: this should be an enum
+  def store(storeType: StoreType, valType: ValType, offset: Int): Unit =
+    val v = stack.pop()
+    val bytes = encode(v, valType, storeType)
+    val base = stack.pop()
+    val addr = effectiveAddress(base, offset)
+    val memIdx = 0 //TODO: memoryIndex()
+    memStore(memIdx, addr, bytes).orElse(
+      fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
+    )
+
 // TODO: the instructions provide sufficient information, no need to duplicate that
-sealed abstract class LoadType
-case class L_I32() extends LoadType
-case class L_I64() extends LoadType
-case class L_F32() extends LoadType
-case class L_F64() extends LoadType
-case class L_I8S() extends LoadType
-case class L_I8U() extends LoadType
-case class L_I16S() extends LoadType
-case class L_I16U() extends LoadType
-case class L_I32S() extends LoadType
-case class L_I32U() extends LoadType
+enum LoadType:
+  case L_I32, L_I64, L_F32, L_F64, L_I8S, L_I8U, L_I16S, L_I16U, L_I32S, L_I32U
 
-sealed abstract class StoreType
-case class S_I32() extends StoreType
-case class S_I64() extends StoreType
-case class S_F32() extends StoreType
-case class S_F64() extends StoreType
-case class S_I8() extends StoreType
-case class S_I16() extends StoreType
+enum StoreType:
+  case S_I32, S_I64, S_F32, S_F64, S_I8, S_I16
