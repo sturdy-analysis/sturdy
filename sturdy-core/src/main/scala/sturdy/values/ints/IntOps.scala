@@ -14,12 +14,21 @@ trait IntOps[V]:
   def add(v1: V, v2: V): V
   def sub(v1: V, v2: V): V
   def mul(v1: V, v2: V): V
-  
+
+  def max(v1: V, v2: V): V
+  def min(v1: V, v2: V): V
+
   def div(v1: V, v2: V): V
   def divUnsigned(v1: V, v2: V): V
+  /** Maintains the sign of v1 */
   def remainder(v1: V, v2: V): V
   def remainderUnsigned(v1: V, v2: V): V
-  
+  /** Yields positive remainder of v1/v2 */
+  def modulo(v1: V, v2: V): V
+  def gcd(v1: V, v2: V): V
+  final def lcm(v1: V, v2: V): V = mul(div(absolute(v1), gcd(v1, v2)), absolute(v2))
+
+  def absolute(v: V): V
   def bitAnd(v1: V, v2: V): V
   def bitOr(v1: V, v2: V): V
   def bitXor(v1: V, v2: V): V
@@ -39,6 +48,9 @@ given concreteIntOps(using f: Failure): IntOps[Int] with
   def add(v1: Int, v2: Int): Int = v1 + v2
   def sub(v1: Int, v2: Int): Int = v1 - v2
   def mul(v1: Int, v2: Int): Int = v1 * v2
+
+  def max(v1: Int, v2: Int): Int = v1.max(v2)
+  def min(v1: Int, v2: Int): Int = v1.min(v2)
 
   def div(v1: Int, v2: Int): Int =
     if (v2 == 0)
@@ -60,7 +72,19 @@ given concreteIntOps(using f: Failure): IntOps[Int] with
       f.fail(IntDivisionByZero, s"$v1 / $v2")
     else
       Integer.remainderUnsigned(v1, v2)
+  def modulo(v1: Int, v2: Int): Int =
+    if (v2 == 0)
+      f.fail(IntDivisionByZero, s"$v1 / $v2")
+    else {
+      val r = v1 % v2
+      if (r < 0)
+        r + v2
+      else
+        r
+    }
+  def gcd(v1: Int, v2: Int): Int = BigInt(v1).gcd(BigInt(v2)).toInt
 
+  def absolute(v: Int): Int = v.abs
   def bitAnd(v1: Int, v2: Int): Int = v1 & v2
   def bitOr(v1: Int, v2: Int): Int = v1 | v2
   def bitXor(v1: Int, v2: Int): Int = v1 ^ v2

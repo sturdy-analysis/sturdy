@@ -127,6 +127,9 @@ given SignIntOps(using f: Failure, j: JoinComputation): IntOps[IntSign] with
     case (Pos, ZeroOrPos) => ZeroOrPos
     case (Pos, Pos) => Pos
 
+  def max(v1: IntSign, v2: IntSign): IntSign = ???
+  def min(v1: IntSign, v2: IntSign): IntSign = ???
+
   def div(v1: IntSign, v2: IntSign): IntSign = v2 match
     case Zero => f.fail(IntDivisionByZero, s"$v1 / $v2")
     case ZeroOrPos => j.joinComputations(v1)(f.fail(IntDivisionByZero, s"$v1 / $v2"))
@@ -137,7 +140,10 @@ given SignIntOps(using f: Failure, j: JoinComputation): IntOps[IntSign] with
   def divUnsigned(v1: IntSign, v2: IntSign): IntSign = ???
   def remainder(v1: IntSign, v2: IntSign): IntSign = ???
   def remainderUnsigned(v1: IntSign, v2: IntSign): IntSign = ???
+  def modulo(v1: IntSign, v2: IntSign): IntSign = ???
+  def gcd(v1: IntSign, v2: IntSign): IntSign = ???
 
+  def absolute(v: IntSign): IntSign = ???
   def bitAnd(v1: IntSign, v2: IntSign): IntSign = ???
   def bitOr(v1: IntSign, v2: IntSign): IntSign = ???
   def bitXor(v1: IntSign, v2: IntSign): IntSign = ???

@@ -22,6 +22,8 @@ trait DoubleOps[V]:
   def truncate(v: V): V
   def nearest(v: V): V
   def copysign(v: V, sign: V): V
+  
+  def logNatural(v: V): V
 
 given ConcreteDoubleOps: DoubleOps[Double] with
   def doubleLit(d: Double): Double = d
@@ -47,3 +49,5 @@ given ConcreteDoubleOps: DoubleOps[Double] with
     else
       Math.copySign((Math.round(v / 2) * 2).toDouble, v)
   def copysign(v: Double, sign: Double): Double = Math.copySign(v, sign)
+
+  def logNatural(v: Double): Double = Math.log(v)

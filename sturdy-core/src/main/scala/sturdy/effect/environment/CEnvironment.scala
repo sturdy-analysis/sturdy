@@ -6,7 +6,7 @@ import sturdy.effect.NoJoin
 /*
  * A concrete environment.
  */
-trait CEnvironment[Var, V](_init: Map[Var, V] = Map()) extends Environment[Var, V]:
+trait CEnvironment[Var, V](_init: Map[Var, V] = Map()) extends Environment[Var, V], ClosableEnvironment[Map[Var, V]]:
   override type EnvJoin[A] = NoJoin[A]
   override type EnvJoinComp = Unit
 
@@ -26,3 +26,7 @@ trait CEnvironment[Var, V](_init: Map[Var, V] = Map()) extends Environment[Var, 
 
   override def clear(): Unit =
     env = Map()
+
+  override def closeEnvironment: Map[Var, V] = env
+  override def loadClosedEnvironment(env: Map[Var, V]): Unit = this.env = env
+  

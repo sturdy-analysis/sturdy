@@ -143,6 +143,8 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
   def nearest(v: DoubleSign): DoubleSign = ???
   def copysign(v: DoubleSign, sign: DoubleSign): DoubleSign = ???
 
+  def logNatural(v: DoubleSign): DoubleSign = ???
+
 given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
   def lt(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Actual(true)

@@ -80,10 +80,16 @@ given IntervalIntOps(using f: Failure, j: JoinComputation): IntOps[IntInterval] 
       else
         v1 / v2
 
+  def max(v1: IntInterval, v2: IntInterval): IntInterval = ???
+  def min(v1: IntInterval, v2: IntInterval): IntInterval = ???
+
   def divUnsigned(v1: IntInterval, v2: IntInterval): IntInterval = ???
   def remainder(v1: IntInterval, v2: IntInterval): IntInterval = ???
   def remainderUnsigned(v1: IntInterval, v2: IntInterval): IntInterval = ???
+  def modulo(v1: IntInterval, v2: IntInterval): IntInterval = ???
+  def gcd(v1: IntInterval, v2: IntInterval): IntInterval = ???
 
+  def absolute(v: IntInterval): IntInterval = ???
   def bitAnd(v1: IntInterval, v2: IntInterval): IntInterval = ???
   def bitOr(v1: IntInterval, v2: IntInterval): IntInterval = ???
   def bitXor(v1: IntInterval, v2: IntInterval): IntInterval = ???

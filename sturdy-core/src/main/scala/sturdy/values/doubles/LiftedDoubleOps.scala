@@ -19,3 +19,5 @@ class LiftedDoubleOps[V, D](extract: V => D, inject: D => V)(using ops: DoubleOp
   def truncate(v: V): V = inject(ops.truncate(extract(v)))
   def nearest(v: V): V = inject(ops.nearest(extract(v)))
   def copysign(v: V, sign: V): V = inject(ops.copysign(extract(v), extract(sign)))
+
+  def logNatural(v: V): V = inject(ops.logNatural(extract(v)))

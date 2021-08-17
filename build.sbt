@@ -35,6 +35,18 @@ lazy val sturdy_tip = (project in file("sturdy-tip"))
     )
   )
 
+lazy val sturdy_scheme = (project in file("sturdy-scheme"))
+  .dependsOn(sturdy_core % "compile->compile;test->test")
+  .settings(
+    name := "sturdy-scheme",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-parse" % "0.3.4",
+      // test
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+    )
+  )
+
+
 lazy val sturdy_minijava = (project in file("sturdy-minijava"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
   .settings(

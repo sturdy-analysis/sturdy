@@ -110,6 +110,7 @@ trait Interpreter[V,Addr,Bytes,Size]
       val v = stack.pop()
       global.value = v
 
+
   def evalControlInst(inst: Inst): Unit = inst match
     case Nop => // nothing
     case Unreachable => fail(UnreachableInstruction, inst.toString)

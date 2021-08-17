@@ -77,6 +77,8 @@ given IntervalDoubleOps: DoubleOps[DoubleInterval] with
   def nearest(v: DoubleInterval): DoubleInterval = ???
   def copysign(v: DoubleInterval, sign: DoubleInterval): DoubleInterval = ???
 
+  def logNatural(v: DoubleInterval): DoubleInterval = ???
+
 given DoubleIntervalCompareOps: CompareOps[DoubleInterval, Topped[Boolean]] with
   def lt(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =
     if iv1.h < iv2.l then Actual(true)

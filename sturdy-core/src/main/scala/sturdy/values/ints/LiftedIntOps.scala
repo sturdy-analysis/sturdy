@@ -9,11 +9,17 @@ class LiftedIntOps[V, I](extract: V => I, inject: I => V)(using ops: IntOps[I]) 
   def sub(v1: V, v2: V): V = inject(ops.sub(extract(v1), extract(v2)))
   def mul(v1: V, v2: V): V = inject(ops.mul(extract(v1), extract(v2)))
 
+  def max(v1: V, v2: V): V = inject(ops.max(extract(v1), extract(v2)))
+  def min(v1: V, v2: V): V = inject(ops.min(extract(v1), extract(v2)))
+
   def div(v1: V, v2: V): V = inject(ops.div(extract(v1), extract(v2)))
   def divUnsigned(v1: V, v2: V): V = inject(ops.divUnsigned(extract(v1), extract(v2)))
   def remainder(v1: V, v2: V): V = inject(ops.remainder(extract(v1), extract(v2)))
   def remainderUnsigned(v1: V, v2: V): V = inject(ops.remainderUnsigned(extract(v1), extract(v2)))
+  def modulo(v1: V, v2: V): V = inject(ops.modulo(extract(v1), extract(v2)))
+  def gcd(v1: V, v2: V): V = inject(ops.gcd(extract(v1), extract(v2)))
 
+  def absolute(v: V): V = inject(ops.absolute(extract(v)))
   def bitAnd(v1: V, v2: V): V = inject(ops.bitAnd(extract(v1), extract(v2)))
   def bitOr(v1: V, v2: V): V = inject(ops.bitOr(extract(v1), extract(v2)))
   def bitXor(v1: V, v2: V): V = inject(ops.bitXor(extract(v1), extract(v2)))
