@@ -23,13 +23,11 @@ final class ParametersFromLookup[Dom, P, V](getParams: Dom => Option[Iterable[P]
 
   private var params: Iterable[P] = null
 
-  /** Indicates a context switch may appear at `dom`, only then `apply` will be called. */
   override def switchCall(dom: Dom): Boolean = getParams(dom) match
     case None => false
     case Some(params) =>
       this.params = params
       true
 
-  /** Returns `None` if the context is definitely unchanged, returns `Some(ctx)` if `ctx` may be new. */
   override def apply(dom: Dom): Map[P, V] =
     Map() ++ params.map(p => p -> lookup(p))

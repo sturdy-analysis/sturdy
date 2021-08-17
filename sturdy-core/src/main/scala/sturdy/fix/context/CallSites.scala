@@ -16,7 +16,6 @@ class CallSiteLogger[Dom, Call](getCall: Dom => Option[Call]) extends Logger[Dom
 
   def callString[In](k: Int) = new Sensitivity[Dom, List[Call]] {
     override def emptyContext: List[Call] = List()
-    /** Indicates a context switch may appear at `dom`, only then `apply` will be called. */
     override def switchCall(dom: Dom): Boolean = getCall(dom).isDefined
     override def apply(dom: Dom) = calls.take(k)
   }
