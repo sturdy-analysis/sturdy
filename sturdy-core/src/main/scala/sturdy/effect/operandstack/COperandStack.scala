@@ -25,3 +25,8 @@ trait COperandStack[V] extends OperandStack[V]:
     stack = Nil
     try f finally
       stack = snapshot
+
+  def restoreAfter[A](f: => A): A =
+    val snapshot = stack
+    try f finally
+      stack = snapshot
