@@ -221,11 +221,11 @@ trait Interpreter[V,Addr,Bytes,Size]
     case i: StoreNInst => store(i)
 
     case MemorySize =>
-      val memIdx = 0 //TODO: memoryIndex()
+      val memIdx = memoryIndex
       stack.push(sizeToVal(memSize(memIdx)))
     case MemoryGrow =>
       val delta = valToSize(stack.pop())
-      val memIdx = 0 //TODO: memoryIndex()
+      val memIdx = memoryIndex
       val res = memGrow(memIdx, delta).withDefault
         (evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
         {sizeToVal(_)}
@@ -234,7 +234,7 @@ trait Interpreter[V,Addr,Bytes,Size]
   def load(inst: MemoryInst): Unit =
     val base = stack.pop()
     val addr = effectiveAddress(base, inst.offset)
-    val memIdx = 0 //TODO: memoryIndex()
+    val memIdx = memoryIndex
     val byteSize = getBytesToRead(inst)
     val bytes = memRead(memIdx,addr,byteSize).withDefault
       (fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
@@ -247,7 +247,7 @@ trait Interpreter[V,Addr,Bytes,Size]
     val bytes = encode(v, inst)
     val base = stack.pop()
     val addr = effectiveAddress(base, inst.offset)
-    val memIdx = 0 //TODO: memoryIndex()
+    val memIdx = memoryIndex
     memStore(memIdx, addr, bytes).orElse(
       fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
     )
@@ -256,3 +256,6 @@ trait Interpreter[V,Addr,Bytes,Size]
     case Load(tpe,_,_) => tpe.width / 4
     case LoadN(_,n,_,_) => n / 4
     case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $inst")
+
+  def memoryIndex: Int =
+    module.memoryAddrs(0)
