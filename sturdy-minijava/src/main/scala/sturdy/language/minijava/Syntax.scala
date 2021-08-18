@@ -41,20 +41,20 @@ enum Exp extends Labeled:
 
   // Wie modelliert man Array expressions?
   // Irgendwie arrays allokieren nach new int[EXP], wie funktionieren static types in der syntax?
-  case allocArray(e: Exp)
+  case AllocArray(e: Exp)
   // Access auf array?
-  case accessArray(e1: Exp, e2: Exp)
+  case AccessArray(e1: Exp, e2: Exp)
   // Array length?
-  case arrayLength(e: Exp)
+  case ArrayLength(e: Exp)
 
   // Bool constant expressions?
-  case boolLit(b: Boolean)
+  case BoolLit(b: Boolean)
 
   // this expression???
 
   // NOT and AND Expressions?
-  case not (e: Exp)
-  case and (e1: Exp, e2: Exp)
+  case Not (e: Exp)
+  case And (e1: Exp, e2: Exp)
 
   // Was bedeutet (Expression) ? Auch in TIP
 
@@ -74,16 +74,16 @@ enum Exp extends Labeled:
     case FieldAccess(rec: Exp, field: String) => rec.intLiterals
 
     // Array syntax
-    case allocArray(e: Exp) => e.intLiterals
-    case accessArray(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
-    case arrayLength(e: Exp) => e.intLiterals
+    case AllocArray(e: Exp) => e.intLiterals
+    case AccessArray(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
+    case ArrayLength(e: Exp) => e.intLiterals
     case _ => Set()
 
   // Brauchen wir das gleiche für bool Literals? oder geht das expliziter mit true und false?
   def boolLiterals: Set[Boolean] = this match
-    case boolLit(b: Boolean) => Set(b)
-    case not(e: Exp) => e.boolLiterals
-    case and(e1: Exp, e2: Exp) => e1.boolLiterals ++ e2.boolLiterals
+    case BoolLit(b: Boolean) => Set(b)
+    case Not(e: Exp) => e.boolLiterals
+    case And(e1: Exp, e2: Exp) => e1.boolLiterals ++ e2.boolLiterals
     case _ => Set()
 
   override def toString: String = this match
@@ -106,13 +106,13 @@ enum Exp extends Labeled:
     case FieldAccess(rec: Exp, field: String) => s"FieldAccess@${this.label}"
 
     // Gleicher Stuff hier
-    case allocArray(e) => s"allocArray@${this.label}"
-    case accessArray(e1,e2) => s"accessArray@${this.label}"
-    case arrayLength(e) => s"arrayLength@${this.label}"
+    case AllocArray(e) => s"allocArray@${this.label}"
+    case AccessArray(e1,e2) => s"accessArray@${this.label}"
+    case ArrayLength(e) => s"arrayLength@${this.label}"
 
-    case boolLit(b) => s"$b@${this.label}"
-    case not(e) => s"logicalNOT@${this.label}"
-    case and(e1,e2) => s"logicalAND@${this.label}"
+    case BoolLit(b) => s"$b@${this.label}"
+    case Not(e) => s"logicalNOT@${this.label}"
+    case And(e1,e2) => s"logicalAND@${this.label}"
 
 // Müssen wir hier bei den Statements darauf achten das miniJava einen expliziten Boolean Typ hat?
 enum Stm extends Labeled:
@@ -163,7 +163,7 @@ case class Program(main: mainClass, classes: Seq[classDeclaration])
   //def intLiterals: Set[Int] = mainClass.intLiterals ++ classes.flatMap(_.intLiterals).toSet
 // Main Class mit Identifier, psvm, String[args] und statements
 case class mainClass()
-  
+
 // Class declarations haben identifier, können erben, mehrere varDeclarations und MethodDeclarations
 case class classDeclaration()
 
