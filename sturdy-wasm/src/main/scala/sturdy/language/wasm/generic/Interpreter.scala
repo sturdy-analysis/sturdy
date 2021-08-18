@@ -8,7 +8,7 @@ import swam.syntax.*
 import swam.OpCode
 import swam.ValType
 import sturdy.effect.operandstack.OperandStack
-import sturdy.effect.binarymemory.{Serialize, Memory, MemSize, EffectiveAddress}
+import sturdy.effect.binarymemory.{EffectiveAddress, MemSize, Memory, WasmSerialize}
 import sturdy.effect.branching.BoolBranching
 import sturdy.values.conversion.*
 import sturdy.values.doubles.DoubleOps
@@ -32,7 +32,7 @@ object Interpreter:
   type WasmMemory[Addr,Bytes,Size,V] = Memory[Addr,Bytes,Size]
     with EffectiveAddress[V,Int,Addr]
     with MemSize[V,Size]
-    with Serialize[V,Bytes,ValType,LoadType,StoreType]
+    with WasmSerialize[V,Bytes,MemoryInst,MemoryInst]
 
   type Effects[V,Addr,Bytes,Size] =
     OperandStack[V]
@@ -214,30 +214,11 @@ trait Interpreter[V,Addr,Bytes,Size]
 
 
   def evalMemoryInst(inst: Inst): Unit = inst match
-    case i32.Load(align, offset) => load(4, LoadType.L_I32, ValType.I32, offset)
-    case i64.Load(align, offset) => load(8, LoadType.L_I64, ValType.I64, offset)
-    case f32.Load(align, offset) => load(4, LoadType.L_F32, ValType.F32, offset)
-    case f64.Load(align, offset) => load(8, LoadType.L_F64, ValType.F64, offset)
-    case i32.Load8S(align, offset) => load(1, LoadType.L_I8S, ValType.I32, offset)
-    case i32.Load8U(align, offset) => load(1, LoadType.L_I8U, ValType.I32, offset)
-    case i32.Load16S(align, offset) => load(2, LoadType.L_I16S, ValType.I32, offset)
-    case i32.Load16U(align, offset) => load(2, LoadType.L_I16U, ValType.I32, offset)
-    case i64.Load8S(align, offset) => load(1, LoadType.L_I8S, ValType.I64, offset)
-    case i64.Load8U(align, offset) => load(1, LoadType.L_I8U, ValType.I64, offset)
-    case i64.Load16S(align, offset) => load(2, LoadType.L_I16S, ValType.I64, offset)
-    case i64.Load16U(align, offset) => load(2, LoadType.L_I16U, ValType.I64, offset)
-    case i64.Load32S(align, offset) => load(4, LoadType.L_I32S, ValType.I64, offset)
-    case i64.Load32U(align, offset) => load(4, LoadType.L_I32U, ValType.I64, offset)
+    case i: LoadInst => load(i)
+    case i: LoadNInst => load(i)
 
-    case i32.Store(align, offset) => store(StoreType.S_I32, ValType.I32, offset)
-    case i64.Store(align, offset) => store(StoreType.S_I64, ValType.I64, offset)
-    case f32.Store(align, offset) => store(StoreType.S_F32, ValType.F32, offset)
-    case f64.Store(align, offset) => store(StoreType.S_F64, ValType.F64, offset)
-    case i32.Store8(align, offset) => store(StoreType.S_I8, ValType.I32, offset)
-    case i32.Store16(align, offset) => store(StoreType.S_I16, ValType.I32, offset)
-    case i64.Store8(align, offset) => store(StoreType.S_I8, ValType.I64, offset)
-    case i64.Store16(align, offset) => store(StoreType.S_I16, ValType.I64, offset)
-    case i64.Store32(align, offset) => store(StoreType.S_I32, ValType.I64, offset)
+    case i: StoreInst => store(i)
+    case i: StoreNInst => store(i)
 
     case MemorySize =>
       val memIdx = 0 //TODO: memoryIndex()
@@ -250,29 +231,28 @@ trait Interpreter[V,Addr,Bytes,Size]
         {sizeToVal(_)}
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
-  def load(byteSize: Int, loadType: LoadType, valType: ValType, offset: Int): Unit =
+  def load(inst: MemoryInst): Unit =
     val base = stack.pop()
-    val addr = effectiveAddress(base, offset)
+    val addr = effectiveAddress(base, inst.offset)
     val memIdx = 0 //TODO: memoryIndex()
+    val byteSize = getBytesToRead(inst)
     val bytes = memRead(memIdx,addr,byteSize).withDefault
       (fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
       {(b: Bytes) =>
-        val v = decode(b, loadType, valType)
+        val v = decode(b, inst)
         stack.push(v)}
 
-  def store(storeType: StoreType, valType: ValType, offset: Int): Unit =
+  def store(inst: MemoryInst): Unit =
     val v = stack.pop()
-    val bytes = encode(v, valType, storeType)
+    val bytes = encode(v, inst)
     val base = stack.pop()
-    val addr = effectiveAddress(base, offset)
+    val addr = effectiveAddress(base, inst.offset)
     val memIdx = 0 //TODO: memoryIndex()
     memStore(memIdx, addr, bytes).orElse(
       fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
     )
 
-// TODO: the instructions provide sufficient information, no need to duplicate that
-enum LoadType:
-  case L_I32, L_I64, L_F32, L_F64, L_I8S, L_I8U, L_I16S, L_I16U, L_I32S, L_I32U
-
-enum StoreType:
-  case S_I32, S_I64, S_F32, S_F64, S_I8, S_I16
+  def getBytesToRead(inst: MemoryInst): Int = inst match
+    case Load(tpe,_,_) => tpe.width / 4
+    case LoadN(_,n,_,_) => n / 4
+    case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $inst")
