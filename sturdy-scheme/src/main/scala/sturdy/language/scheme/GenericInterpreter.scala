@@ -13,10 +13,10 @@ import Op2Kinds.*
 import OpVarKinds.*
 import sturdy.util.Label
 import sturdy.values.unit
-import sturdy.values.conversion.ConvertIntDoubleOps
-import sturdy.values.ints.IntOps
-import sturdy.values.rationals.{RationalOps, ConvertDoubleRationalOps}
-import sturdy.values.doubles.DoubleOps
+import sturdy.values.config
+import sturdy.values.ints.*
+import sturdy.values.rationals.*
+import sturdy.values.doubles.*
 import sturdy.values.booleans.BooleanOps
 import sturdy.values.closures.ClosureOps
 import sturdy.values.relational.{EqOps, CompareOps}
@@ -38,6 +38,8 @@ object GenericInterpreter:
   case object UnboundAddr extends FailureKind
   case object UserError extends FailureKind
   case object TypeError extends FailureKind
+  case object NullDeconstruct extends FailureKind
+  case object ClosureComparison extends FailureKind
 
   enum FixIn[V]:
     case Eval(e: Expr)
@@ -87,8 +89,8 @@ import GenericInterpreter.*
 
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   (using val effectOps: Effects)
-  (using val intOps: IntOps[V], intDoubleOps: ConvertIntDoubleOps[V, V],
-             rationalOps: RationalOps[V], doubleRationalOps: ConvertDoubleRationalOps[V, V],
+  (using val intOps: IntOps[V], intDouble: ConvertIntDouble[V, V],
+             rationalOps: RationalOps[V], rationalDouble: ConvertRationalDouble[V, V],
              doubleOps: DoubleOps[V],
              boolOps: BooleanOps[V], charOps: CharOps[V], stringOps: StringOps[V],
              listOps: ListOps[V], symbolOps: SymbolOps[V], quoteOps: QuoteOps[V], voidOps: VoidOps[V],
@@ -111,8 +113,6 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   import closureOps._
   import compareOps._
   import typeOps._
-  import intDoubleOps.*
-  import doubleRationalOps.*
 
   val phi: GenericPhi[V]
 
@@ -216,7 +216,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Floor => numTypeDispatch(v)(v, rationalOps.floor(v), doubleOps.floor(v), fail(TypeError, s"Cannot compute floor on $v"))
       case Ceiling => numTypeDispatch(v)(v, rationalOps.ceil(v), doubleOps.ceil(v), fail(TypeError, s"Cannot compute ceiling on $v"))
       case Log =>
-        val doubleV = numTypeDispatch(v)(intToDouble(v), rationalToDouble(v), v, fail(TypeError, s"Cannot compute log on $v"))
+        val doubleV = numTypeDispatch(v)(intDouble(v, config.Bits.Signed), rationalDouble(v, ()), v, fail(TypeError, s"Cannot compute log on $v"))
         doubleOps.logNatural(doubleV)
 
       case Not => not(v)

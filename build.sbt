@@ -19,6 +19,7 @@ lazy val sturdy_core = (project in file("sturdy-core"))
   .settings(
     name := "sturdy-core",
     libraryDependencies ++= Seq(
+      "org.apache.commons" % "commons-math3" % "3.6.1",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
