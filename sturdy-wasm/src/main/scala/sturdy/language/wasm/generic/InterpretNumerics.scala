@@ -1,17 +1,11 @@
 package sturdy.language.wasm.generic
 
 import sturdy.effect.operandstack.OperandStack
-import sturdy.values.conversion.ConvertFloatDoubleOps
-import sturdy.values.conversion.ConvertIntDoubleOps
-import sturdy.values.conversion.ConvertIntFloatOps
-import sturdy.values.conversion.ConvertIntLongOps
-import sturdy.values.conversion.ConvertLongDoubleOps
-import sturdy.values.conversion.ConvertLongFloatOps
-import sturdy.values.doubles.DoubleOps
-import sturdy.values.floats.FloatOps
-import sturdy.values.ints.IntCompareOps
-import sturdy.values.ints.IntOps
-import sturdy.values.longs.LongOps
+import sturdy.values.config
+import sturdy.values.doubles.*
+import sturdy.values.floats.*
+import sturdy.values.ints.*
+import sturdy.values.longs.*
 import sturdy.values.relational.CompareOps
 import sturdy.values.relational.EqOps
 import swam.syntax.*
@@ -20,8 +14,10 @@ class InterpretNumerics[V]
   (using stack: OperandStack[V],
    ints: IntOps[V], longs: LongOps[V], floats: FloatOps[V], doubles: DoubleOps[V],
    eqOps: EqOps[V, V], compareOps: CompareOps[V, V], intCompareOps: IntCompareOps[V, V],
-   intLong: ConvertIntLongOps[V, V], intDouble: ConvertIntDoubleOps[V, V], longDouble: ConvertLongDoubleOps[V, V],
-   intFloat: ConvertIntFloatOps[V, V], longFloat: ConvertLongFloatOps[V, V], floatDouble: ConvertFloatDoubleOps[V, V]
+   intLong: ConvertIntLong[V, V], intFloat: ConvertIntFloat[V, V], intDouble: ConvertIntDouble[V, V],
+   longInt: ConvertLongInt[V, V], longFloat: ConvertLongFloat[V, V], longDouble: ConvertLongDouble[V, V],
+   floatInt: ConvertFloatInt[V, V], floatLong: ConvertFloatLong[V, V], floatDouble: ConvertFloatDouble[V, V],
+   doubleInt: ConvertDoubleInt[V, V], doubleLong: ConvertDoubleLong[V, V], doubleFloat: ConvertDoubleFloat[V, V]
   ):
 
   import eqOps.*
@@ -202,40 +198,40 @@ class InterpretNumerics[V]
     case f64.Ge => ge(v1, v2)
 
   inline def evalConvertop(op: Convertop, v: V): V = op match
-    case i32.WrapI64 => longToInt(v)
-    case i32.TruncSF32 => floatToIntExact(v)
-    case i32.TruncUF32 => floatToIntExactUnsigned(v)
-    case i32.TruncSF64 => doubleToIntExact(v)
-    case i32.TruncUF64 => doubleToIntExactUnsigned(v)
-    case i32.ReinterpretF32 => floatToRawInt(v)
-    case i64.ExtendSI32 => intToLong(v)
-    case i64.ExtendUI32 => intToLongUnsigned(v)
-    case i64.TruncSF32 => floatToLongExact(v)
-    case i64.TruncUF32 => floatToLongExactUnsigned(v)
-    case i64.TruncSF64 => doubleToLongExact(v)
-    case i64.TruncUF64 => doubleToLongExactUnsigned(v)
-    case i64.ReinterpretF64 => doubleToRawLong(v)
+    case i32.WrapI64 => longInt(v, ())
+    case i32.TruncSF32 => floatInt(v, (config.Overflow.Fail, config.Bits.Signed))
+    case i32.TruncUF32 => floatInt(v, (config.Overflow.Fail, config.Bits.Unsigned))
+    case i32.TruncSF64 => doubleInt(v, (config.Overflow.Fail, config.Bits.Signed))
+    case i32.TruncUF64 => doubleInt(v, (config.Overflow.Fail, config.Bits.Unsigned))
+    case i32.ReinterpretF32 => floatInt(v, (config.Overflow.Allow, config.Bits.Raw))
+    case i64.ExtendSI32 => intLong(v, config.Bits.Signed)
+    case i64.ExtendUI32 => intLong(v, config.Bits.Unsigned)
+    case i64.TruncSF32 => floatLong(v, (config.Overflow.Fail, config.Bits.Signed))
+    case i64.TruncUF32 => floatLong(v, (config.Overflow.Fail, config.Bits.Unsigned))
+    case i64.TruncSF64 => doubleLong(v, (config.Overflow.Fail, config.Bits.Signed))
+    case i64.TruncUF64 => doubleLong(v, (config.Overflow.Fail, config.Bits.Unsigned))
+    case i64.ReinterpretF64 => doubleLong(v, (config.Overflow.Allow, config.Bits.Raw))
 
-    case f32.DemoteF64 => doubleToFloat(v)
-    case f32.ConvertSI32 => intToFloat(v)
-    case f32.ConvertUI32 => intToFloatUnsigned(v)
-    case f32.ConvertSI64 => longToFloat(v)
-    case f32.ConvertUI64 => longToFloatUnsigned(v)
-    case f32.ReinterpretI32 => intToRawFloat(v)
-    case f64.PromoteF32 => floatToDouble(v)
-    case f64.ConvertSI32 => intToDouble(v)
-    case f64.ConvertUI32 => intToDoubleUnsigned(v)
-    case f64.ConvertSI64 => longToDouble(v)
-    case f64.ConvertUI64 => longToDoubleUnsigned(v)
-    case f64.ReinterpretI64 => longToRawDoulbe(v)
+    case f32.DemoteF64 => doubleFloat(v, ())
+    case f32.ConvertSI32 => intFloat(v, config.Bits.Signed)
+    case f32.ConvertUI32 => intFloat(v, config.Bits.Unsigned)
+    case f32.ConvertSI64 => longFloat(v, config.Bits.Signed)
+    case f32.ConvertUI64 => longFloat(v, config.Bits.Unsigned)
+    case f32.ReinterpretI32 => intFloat(v, config.Bits.Raw)
+    case f64.PromoteF32 => floatDouble(v, ())
+    case f64.ConvertSI32 => intDouble(v, config.Bits.Signed)
+    case f64.ConvertUI32 => intDouble(v, config.Bits.Unsigned)
+    case f64.ConvertSI64 => longDouble(v, config.Bits.Signed)
+    case f64.ConvertUI64 => longDouble(v, config.Bits.Unsigned)
+    case f64.ReinterpretI64 => longDouble(v, config.Bits.Raw)
 
   inline def evalMiscop(op: Miscop, v: V): V = op match
-    case i32.TruncSatSF32 => floatToIntSaturating(v)
-    case i32.TruncSatUF32 => floatToIntSaturatingUnsigned(v)
-    case i32.TruncSatSF64 => doubleToIntSaturating(v)
-    case i32.TruncSatUF64 => doubleToIntSaturatingUnsigned(v)
-    case i64.TruncSatSF32 => floatToLongSaturating(v)
-    case i64.TruncSatUF32 => floatToLongSaturatingUnsigned(v)
-    case i64.TruncSatSF64 => doubleToLongSaturating(v)
-    case i64.TruncSatUF64 => doubleToLongSaturatingUnsigned(v)
+    case i32.TruncSatSF32 => floatInt(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
+    case i32.TruncSatUF32 => floatInt(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
+    case i32.TruncSatSF64 => doubleInt(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
+    case i32.TruncSatUF64 => doubleInt(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
+    case i64.TruncSatSF32 => floatLong(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
+    case i64.TruncSatUF32 => floatLong(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
+    case i64.TruncSatSF64 => doubleLong(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
+    case i64.TruncSatUF64 => doubleLong(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
 
