@@ -3,7 +3,7 @@ package sturdy.values.rationals
 import sturdy.effect.failure.FailureKind
 import sturdy.values.convert.Convert
 
-case object RatioDivisionByZero extends FailureKind
+case object RationalDivisionByZero extends FailureKind
 
 trait RationalOps[V]:
   def rationalLit(i1: Int, i2: Int): V

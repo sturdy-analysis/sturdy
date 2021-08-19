@@ -4,7 +4,9 @@ import sturdy.effect.failure.Failure
 import org.apache.commons.math3.exception.MathArithmeticException
 import org.apache.commons.math3.fraction.Fraction
 
-final class Rational(val f: Fraction) extends AnyVal
+final class Rational(val f: Fraction) extends AnyVal:
+  def isZero: Boolean = f == Fraction.ZERO
+  override def toString: String = f.toString
 
 object Rational:
   inline def apply(f: Fraction): Rational = new Rational(f)
@@ -13,7 +15,7 @@ object Rational:
   def apply(i1: Int, i2: Int)(using f: Failure): Rational =
     try new Rational(new Fraction(i1, i2))
     catch {
-      case _: MathArithmeticException => f.fail(RatioDivisionByZero, s"$i1 / $i2")
+      case _: MathArithmeticException => f.fail(RationalDivisionByZero, s"$i1 / $i2")
     }
 
 given concreteRationalOps(using f: Failure): RationalOps[Rational] with

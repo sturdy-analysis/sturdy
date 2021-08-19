@@ -20,17 +20,18 @@ import sturdy.values.given
 import sturdy.util
 import GenericInterpreter.*
 
+
 object ConcreteInterpreter:
   enum Num:
     case IntVal(i: Int)
     case RationalVal(r: Rational)
     case DoubleVal(d: Double)
 
-    def asInt: Int = this match
+    def asInt(using f: Failure): Int = this match
       case IntVal(i: Int) => i
       case RationalVal(r) if r.f.getDenominator == 1 => r.f.intValue()
       case DoubleVal(d) if Math.rint(d) == d => d.toInt
-      case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
+      case _ => f.fail(TypeError, s"Expected Int but got $this")
     def asRational: Rational = this match
       case IntVal(i1) => Rational(new Fraction(i1))
       case RationalVal(r) => r
@@ -39,6 +40,10 @@ object ConcreteInterpreter:
       case IntVal(i: Int) => i.toDouble
       case RationalVal(r: Rational) => r.f.doubleValue()
       case DoubleVal(d: Double) => d
+    def asBoolean: Boolean = this match
+      case IntVal(i: Int) => i != 0
+      case RationalVal(r: Rational) => !r.isZero
+      case DoubleVal(d: Double) => d != 0.0
 
   enum Value:
     import Num._
@@ -50,34 +55,33 @@ object ConcreteInterpreter:
     case SymbolVal(sym: String)
     case QuoteVal(qot: Value)
     case VoidVal
-    case ClosureVal(closure: (List[String], Environment, List[Expr]))
+    case ClosureVal(cl: Closure[String, List[Expr], Environment])
     case NumVal(num: Num)
 
-    def asNum: Num = this match
+    def asNum(using f: Failure): Num = this match
       case NumVal(num) => num
-      case _ => throw new IllegalArgumentException(s"Expected Num but got $this")
+      case _ => f.fail(TypeError, s"Expected Num but got $this")
     def asBoolean: Boolean = this match
       case BoolVal(b) => b
-      case _ => throw new IllegalArgumentException(s"Expected Boolean but got $this")
-    def asChar: Char = this match
+      case _ => true
+    def asChar(using f: Failure): Char = this match
       case CharVal(c) => c
-      case _ => throw new IllegalArgumentException(s"Expected Char but got $this")
-    def asString: String = this match
+      case _ => f.fail(TypeError, s"Expected Char but got $this")
+    def asString(using f: Failure): String = this match
       case StringVal(str) => str
-      case _ => throw new IllegalArgumentException(s"Expected String but got $this")
-    def asList: List[Value] = this match
+      case _ => f.fail(TypeError, s"Expected String but got $this")
+    def asList(using f: Failure): List[Value] = this match
       case ListVal(cons) => cons
-      case _ => throw new IllegalArgumentException(s"Expected List but got $this")
-    def asSymbol: String = this match
+      case _ => f.fail(TypeError, s"Expected List but got $this")
+    def asSymbol(using f: Failure): String = this match
       case SymbolVal(sym) => sym
-      case _ => throw new IllegalArgumentException(s"Expected Symbol but got $this")
-    def asQuote : Value = this match
+      case _ => f.fail(TypeError, s"Expected Symbol but got $this")
+    def asQuote(using f: Failure): Value = this match
       case QuoteVal(qot) => qot
-      case _ => throw new IllegalArgumentException(s"Expected Quote but got $this")
-    def asClosure : (List[String], Environment, List[Expr]) = this match
-      case ClosureVal(cls) => cls
-      case _ => throw new IllegalArgumentException(s"Expected Closure but got $this")
-
+      case _ => f.fail(TypeError, s"Expected Quote but got $this")
+    def asClosure(using f: Failure) : Closure[String, List[Expr], Environment] = this match
+      case ClosureVal(cl) => cl
+      case _ => f.fail(TypeError, s"Expected Closure but got $this")
 
   import Value._
   import Num._
@@ -98,28 +102,28 @@ object ConcreteInterpreter:
 
     given Failure = effects
 
-    given IntOps[Value] = new LiftedIntOps[Value, Int](_.asNum.asInt, x => NumVal(IntVal(x)))
-    given RationalOps[Value] = new LiftedRationalOps[Value, Rational](_.asNum.asRational, r => NumVal(RationalVal(r)))
-    given DoubleOps[Value] = new LiftedDoubleOps[Value, Double](_.asNum.asDouble, x => NumVal(DoubleVal(x)))
-    given BooleanOps[Value] = new LiftedBooleanOps[Value, Boolean](_.asBoolean, BoolVal.apply)
-    given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, Double, Boolean](_.asNum.asDouble, BoolVal.apply)
-    given ClosureOps[String, Value, List[Expr], Environment, Value, Value] = new LiftedClosureOps[String, Value, List[Expr], Environment, Value, Value, (List[String], Environment, List[Expr])](_.asClosure, ClosureVal.apply)
+    given IntOps[Value] = new LiftedIntOps(_.asNum.asInt, x => NumVal(IntVal(x)))
+    given RationalOps[Value] = new LiftedRationalOps(_.asNum.asRational, r => NumVal(RationalVal(r)))
+    given DoubleOps[Value] = new LiftedDoubleOps(_.asNum.asDouble, x => NumVal(DoubleVal(x)))
+    given BooleanOps[Value] = new LiftedBooleanOps(_.asBoolean, BoolVal.apply)
+    given CompareOps[Value, Value] = new LiftedCompareOps(_.asNum.asDouble, BoolVal.apply)
+    given ClosureOps[String, Value, List[Expr], Environment, Value, Value] = new LiftedClosureOps(_.asClosure, ClosureVal.apply)
 
     given concreteListOps(using f: Failure): ListOps[Value] with
       override def cons(v1: Value, v2: Value): Value = v2 match
         case ListVal(vs) => ListVal(v1 :: vs)
-        case _ => throw new IllegalArgumentException(s"Expected ListVal but got $v2")
+        case _ => f.fail(TypeError, s"Expected ListVal but got $v2")
       override def nil: Value = ListVal(Nil)
       override def car(v: Value): Value = v match
         case ListVal(vs) => vs match
           case Nil => f.fail(NullDeconstruct, s"(car $v)")
           case head::_ => head
-        case _ => throw new IllegalArgumentException(s"Expected ListVal but got $v")
+        case _ => f.fail(TypeError, s"Expected ListVal but got $v")
       override def cdr(v: Value): Value = v match
         case ListVal(vs) => vs match
           case Nil => f.fail(NullDeconstruct, s"(cdr $v)")
           case _::tail => ListVal(tail)
-        case _ => throw new IllegalArgumentException(s"Expected ListVal but got $v")
+        case _ => f.fail(TypeError, s"Expected ListVal but got $v")
 
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
@@ -148,23 +152,23 @@ object ConcreteInterpreter:
     given CharOps[Value] with
       override def charLit(c: Char): Value = CharVal(c)
 
-    given StringOps[Value] with
+    given strings(using f: Failure): StringOps[Value] with
       override def stringLit(s: String): Value = StringVal(s)
       override def numberToString(v: Value): Value = v match
         case NumVal(num) => StringVal(num.toString)
-        case _ => throw new IllegalArgumentException(s"Expected NumVal but got $v")
+        case _ => f.fail(TypeError, s"Expected NumVal but got $v")
       override def stringToSymbol(v: Value): Value = v match
         case StringVal(s) => QuoteVal(SymbolVal(s))
-        case _ => throw new IllegalArgumentException(s"Expected StringVal but got $v")
+        case _ => f.fail(TypeError, s"Expected StringVal but got $v")
       override def symbolToString(v: Value): Value = v match
         case QuoteVal(SymbolVal(s)) => StringVal(s)
-        case _ => throw new IllegalArgumentException(s"Expected QuoteVal but got $v")
+        case _ => f.fail(TypeError, s"Expected QuoteVal but got $v")
       override def stringRef(v1: Value, v2: Value): Value = (v1, v2) match
         case (StringVal(s), NumVal(IntVal(i))) => CharVal(s.charAt(i))
-        case _ => throw new IllegalArgumentException(s"Expected StringVal and IntVal but got $v1 and $v2")
+        case _ => f.fail(TypeError, s"Expected StringVal and IntVal but got $v1 and $v2")
       override def stringAppend(v1: Value, v2: Value): Value = (v1, v2) match
         case (StringVal(s1), StringVal(s2)) => StringVal(s1+s2)
-        case _ => throw new IllegalArgumentException(s"Expected StringVal and IntVal but got $v1 and $v2")
+        case _ => f.fail(TypeError, s"Expected StringVal and IntVal but got $v1 and $v2")
 
     given TypeOps[Value] with
       def isNumber(v: Value) : BoolVal = v match
@@ -174,10 +178,10 @@ object ConcreteInterpreter:
         case NumVal(IntVal(_)) => BoolVal(true)
         case _ => BoolVal(false)
       def isDouble(v:Value ): BoolVal = v match
-        case NumVal(DoubleVal(_)) => BoolVal(true)
+        case NumVal(DoubleVal(_)) => BoolVal(true) // all numbers can be used as doubles
         case _ => BoolVal(false)
       def isRational(v: Value): BoolVal = v match
-        case NumVal(RationalVal(_,_)) => BoolVal(true)
+        case NumVal(RationalVal(_)) => BoolVal(true) // all numbers can be used as rationals
         case _ => BoolVal(false)
       def isNull(v: Value): BoolVal = v match
         case ListVal(Nil) => BoolVal(true)
@@ -198,14 +202,14 @@ object ConcreteInterpreter:
 import ConcreteInterpreter.*
 
 class ConcreteInterpreter
-  (using effectOps: Effects)
-  (using IntOps[Value], ConvertIntDouble[Value, Value],
-         RationalOps[Value], ConvertRationalDouble[Value, Value],
-         DoubleOps[Value],
-         BooleanOps[Value], CharOps[Value], StringOps[Value],
-         ListOps[Value], SymbolOps[Value], QuoteOps[Value], VoidOps[Value],
-         TypeOps[Value], EqOps[Value, Value], CompareOps[Value, Value],
-         ClosureOps[String, Value, List[Expr], effectOps.Env, Value, Value])
+(using effectOps: Effects)
+(using IntOps[Value], ConvertIntDouble[Value, Value],
+ RationalOps[Value], ConvertRationalDouble[Value, Value],
+ DoubleOps[Value],
+ BooleanOps[Value], CharOps[Value], StringOps[Value],
+ ListOps[Value], SymbolOps[Value], QuoteOps[Value], VoidOps[Value],
+ TypeOps[Value], EqOps[Value, Value], CompareOps[Value, Value],
+ ClosureOps[String, Value, List[Expr], effectOps.Env, Value, Value])
   extends GenericInterpreter[Value, Addr, Effects]:
 
   val phi = fix.identity[FixIn[Value], FixOut[Value]]

@@ -125,11 +125,10 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Nil_ => listOps.nil
       case Cons_(e1, e2) => listOps.cons(eval(e1), eval(e2))
       case Begin(es) => run(es)
-      case AppFoo(e1, args) =>
+      case Apply(e1, args) =>
         val clsVal = eval(e1)
         val argVals = args.map(arg => eval(arg))
         invokeClosure(clsVal, argVals) { applyClosure }
-      case Apply(es) => run(es)
       case Var(x) =>
         val addr = lookup(x).orElse(fail(UnboundVariable, x))
         read(addr).orElse(fail(UnboundAddr, s"$addr for variable $x"))
@@ -278,6 +277,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         loadClosedEnvironment(env)
         vars.zip(args).foreach { case (x, arg) =>
           val addr = alloc(AllocationSite.ClosureParam(body, x))
+          bind(x, addr)
           write(addr, arg)
         }
         run(body)
