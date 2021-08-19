@@ -38,6 +38,8 @@ object GenericInterpreter:
   case object UnboundAddr extends FailureKind
   case object UserError extends FailureKind
   case object TypeError extends FailureKind
+  case object NullDeconstruct extends FailureKind
+  case object ClosureComparison extends FailureKind
 
   enum FixIn[V]:
     case Eval(e: Expr)

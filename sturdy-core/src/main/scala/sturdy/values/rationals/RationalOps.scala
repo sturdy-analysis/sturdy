@@ -1,10 +1,8 @@
 package sturdy.values.rationals
 
+import org.apache.commons.math3.exception.MathArithmeticException
 import sturdy.effect.failure.{Failure, FailureKind}
-
-import scala.math.Numeric.BigDecimalIsFractional
-import scala.util.Random
-import scala.math.{log, BigInt}
+import org.apache.commons.math3.fraction.Fraction
 
 case object RatioDivisionByZero extends FailureKind
 
@@ -22,66 +20,50 @@ trait RationalOps[V]:
   def floor(v: V): V
   def ceil(v: V): V
 
-given concreteRationalOps(using f: Failure): RationalOps[(Int,Int)] with
-  override def rationalLit(i1: Int, i2: Int): (Int, Int) =
-    if (i2 == 0) f.fail(RatioDivisionByZero, s"$i1 / $i2")
-    else reduceFraction(i1, i2)
-  override def add(i1: (Int, Int), i2: (Int, Int)): (Int,Int) =
-    val numer = (i1._1 * i2._2 + i2._1 * i1._2)
-    val denom = (i1._2 * i2._2)
-    reduceFraction(numer, denom)
-  override def sub(i1: (Int, Int), i2: (Int, Int)): (Int,Int) =
-    val numer = (i1._1 * i2._2 - i2._1 * i1._2)
-    val denom = (i1._2 * i2._2)
-    reduceFraction(numer, denom)
-  override def mul(i1: (Int, Int), i2: (Int, Int)): (Int,Int) =
-    val numer = (i1._1 * i2._1)
-    val denom = (i1._2 * i2._2)
-    reduceFraction(numer, denom)
-  override def div(i1: (Int, Int), i2: (Int, Int)): (Int,Int) =
-    val numer = (i1._1 * i2._2)
-    val denom = (i1._2 * i2._1)
-    reduceFraction(numer, denom)
-  override def max(i1: (Int, Int), i2: (Int, Int)): (Int,Int) =
-    if i1._1/i1._2 >= i2._1/i2._2 then i1 else i2
-  override def min(i1: (Int, Int), i2: (Int, Int)): (Int,Int) =
-    if i1._1/i1._2 <= i2._1/i2._2 then i1 else i2
+object Rational:
+  def apply(i1: Int, i2: Int)(using f: Failure): Fraction =
+    try new Fraction(i1, i2)
+    catch {
+      case _: MathArithmeticException => f.fail(RatioDivisionByZero, s"$i1 / $i2")
+    }
 
-  override def absolute(i1: (Int, Int)): (Int, Int) =
-    (i1._1.abs, i1._2.abs)
-  override def floor(v: (Int, Int)): (Int, Int) =
-    if (v._2 == 1)
+given concreteRationalOps(using f: Failure): RationalOps[Fraction] with
+  def rationalLit(i1: Int, i2: Int): Fraction = Rational(i1, i2)
+  def add(v1: Fraction, v2: Fraction): Fraction = v1.add(v2)
+  def sub(v1: Fraction, v2: Fraction): Fraction = v1.subtract(v2)
+  def mul(v1: Fraction, v2: Fraction): Fraction = v1.multiply(v2)
+  def div(v1: Fraction, v2: Fraction): Fraction = v1.divide(v2)
+  def max(v1: Fraction, v2: Fraction): Fraction = if (v1.compareTo(v2) >= 0) v1 else v2
+  def min(v1: Fraction, v2: Fraction): Fraction = if (v1.compareTo(v2) <= 0) v1 else v2
+  def absolute(v: Fraction): Fraction = v.abs()
+  override def floor(v: Fraction): Fraction =
+    if (v.getDenominator == 1)
       v
     else
-      (Math.floorDiv(v._1, v._2), 1)
-  override def ceil(v: (Int, Int)): (Int, Int) =
-    val (x, y) = v
-    if (y == 1)
+      new Fraction(Math.floorDiv(v.getNumerator, v.getDenominator))
+  override def ceil(v: Fraction): Fraction = {
+    val denom = v.getDenominator
+    if (denom == 1)
       v
     else {
-      var r = v._1 / v._2
+      val num = v.getNumerator
+      var r = num / denom
       // if the signs are different and modulo not zero, round up
-      if ((x ^ y) < 0 && (r * y != x)) r += 1
-      (r, 1)
+      if ((num ^ denom) < 0 && (r * denom != num)) r += 1
+      new Fraction(r)
     }
+  }
 
 trait ConvertIntRationalOps[I, R]:
   def intToRational(i: I): R
   def rationalToInt(r: R): I
-given concreteConvertIntRationalOps: ConvertIntRationalOps[Int, (Int, Int)] with
-  def intToRational(i: Int): (Int, Int) = (i, 1)
-  def rationalToInt(r: (Int, Int)): Int = r._1 / r._2
+given concreteConvertIntRationalOps: ConvertIntRationalOps[Int, Fraction] with
+  def intToRational(i: Int): Fraction = new Fraction(i)
+  def rationalToInt(r: Fraction): Int = r.intValue()
 
 trait ConvertDoubleRationalOps[D, R]:
   def doubleToRational(d: D): R
   def rationalToDouble(r: R): D
-given concreteConvertDoubleRationalOps: ConvertDoubleRationalOps[Double, (Int, Int)] with
-  def doubleToRational(d: Double): (Int, Int) = ???
-  def rationalToDouble(r: (Int, Int)): Double = r._1.toDouble / r._2
-
-
-def reduceFraction(i1: Int, i2: Int): (Int, Int) =
-  val gcd = BigInt(i1).gcd(BigInt(i2))
-  val r1 = (i1/gcd).toInt
-  val r2 = (i2/gcd).toInt
-  (r1,r2)
+given concreteConvertDoubleRationalOps: ConvertDoubleRationalOps[Double, Fraction] with
+  def doubleToRational(d: Double): Fraction = new Fraction(d)
+  def rationalToDouble(r: Fraction): Double = r.doubleValue()
