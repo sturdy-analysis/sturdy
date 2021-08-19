@@ -10,12 +10,11 @@ import swam.ValType
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.binarymemory.{EffectiveAddress, MemSize, Memory, WasmSerialize}
 import sturdy.effect.branching.BoolBranching
-import sturdy.values.conversion.*
-import sturdy.values.doubles.DoubleOps
-import sturdy.values.floats.FloatOps
-import sturdy.values.ints.IntCompareOps
-import sturdy.values.ints.IntOps
-import sturdy.values.longs.LongOps
+import sturdy.values.convert.*
+import sturdy.values.doubles.*
+import sturdy.values.floats.*
+import sturdy.values.ints.*
+import sturdy.values.longs.*
 import sturdy.values.relational.CompareOps
 import sturdy.values.relational.EqOps
 import sturdy.values.unit
@@ -48,7 +47,11 @@ import Interpreter.*
 trait Interpreter[V,Addr,Bytes,Size]
   (using effectOps: Effects[V,Addr,Bytes,Size])
   (using IntOps[V], LongOps[V], FloatOps[V], DoubleOps[V], EqOps[V, V], CompareOps[V, V], IntCompareOps[V, V],
-   ConvertIntLongOps[V, V], ConvertIntDoubleOps[V, V], ConvertLongDoubleOps[V, V], ConvertIntFloatOps[V, V], ConvertLongFloatOps[V, V], ConvertFloatDoubleOps[V, V])
+   ConvertIntLong[V, V], ConvertIntFloat[V, V], ConvertIntDouble[V, V],
+   ConvertLongInt[V, V], ConvertLongFloat[V, V], ConvertLongDouble[V, V],
+   ConvertFloatInt[V, V], ConvertFloatLong[V, V], ConvertFloatDouble[V, V],
+   ConvertDoubleInt[V, V], ConvertDoubleLong[V, V], ConvertDoubleFloat[V, V]
+  )
   (using wasmOps: WasmOperations[V])
   (using effectOps.BoolBranchJoin[Unit],
    effectOps.MemoryJoin[Unit], effectOps.MemoryJoin[V], effectOps.MemoryJoinComp,

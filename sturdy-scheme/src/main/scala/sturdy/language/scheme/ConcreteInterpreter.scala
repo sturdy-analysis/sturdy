@@ -1,11 +1,15 @@
 //package sturdy.language.scheme
 //
+//import org.apache.commons.math3.fraction.Fraction
+//
+//import sturdy.effect.noJoin
 //import sturdy.effect.allocation.CAllocationIntIncrement
 //import sturdy.effect.branching.CBoolBranching
 //import sturdy.effect.environment.CEnvironment
 //import sturdy.effect.store.CStore
 //import sturdy.effect.failure.{CFailure, Failure}
 //import sturdy.fix
+//import sturdy.values.conversion.ConvertIntDoubleOps
 //import sturdy.values.ints.{_, given}
 //import sturdy.values.doubles.{_, given}
 //import sturdy.values.rationals.{_, given}
@@ -14,31 +18,28 @@
 //import sturdy.values.closures.{_, given}
 //import sturdy.values.given
 //import sturdy.util
-//import GenericInterpreter.{AllocationSite, FixIn, FixOut}
+//import GenericInterpreter.*
 //
 //object ConcreteInterpreter:
 //  enum Num:
 //    case IntVal(i: Int)
-//    case RatioVal(i1: Int, i2: Int)
+//    case RationalVal(r: Fraction)
 //    case DoubleVal(d: Double)
 //
 //    def asInt: Int = this match
 //      case IntVal(i: Int) => i
+//      case RationalVal(r) if r.getDenominator == 1 => r.intValue()
+//      case DoubleVal(d) if Math.rint(d) == d => d.toInt
 //      case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
-//    def asRatio: (Int, Int) = this match
-//      case IntVal(i1: Int) => (i1, 1)
-//      case RatioVal(i1: Int, i2: Int) => (i1, i2)
-//      case _ => throw new IllegalArgumentException(s"Expected IntVal or RatioVal but got $this")
+//    def asRational: Fraction = this match
+//      case IntVal(i1) => new Fraction(i1)
+//      case RationalVal(r) => r
+//      case DoubleVal(d) => ???
+//      case _ => throw new IllegalArgumentException(s"Expected IntVal or RationalVal but got $this")
 //    def asDouble: Double = this match
 //      case IntVal(i: Int) => i.toDouble
-//      case RatioVal(i1: Int, i2: Int) => (i1 / i2).toDouble
+//      case RationalVal(i1: Int, i2: Int) => (i1 / i2).toDouble
 //      case DoubleVal(d: Double) => d
-//
-//  enum Cons:
-//    import Value._
-//
-//    case ConsVal(head: Value, tail: Value.ListVal)
-//    case NilVal
 //
 //  enum Value:
 //    import Num._
@@ -46,7 +47,7 @@
 //    case BoolVal(b: Boolean)
 //    case CharVal(c: Char)
 //    case StringVal(str: String)
-//    case ListVal(cons: Cons)
+//    case ListVal(li: List[Value])
 //    case SymbolVal(sym: String)
 //    case QuoteVal(qot: Value)
 //    case VoidVal
@@ -65,7 +66,7 @@
 //    def asString: String = this match
 //      case StringVal(str) => str
 //      case _ => throw new IllegalArgumentException(s"Expected String but got $this")
-//    def asList: Cons = this match
+//    def asList: List[Value] = this match
 //      case ListVal(cons) => cons
 //      case _ => throw new IllegalArgumentException(s"Expected List but got $this")
 //    def asSymbol: String = this match
@@ -81,7 +82,6 @@
 //
 //  import Value._
 //  import Num._
-//  import Cons._
 //
 //  type Addr = Int
 //  type Environment = Map[String, Addr]
@@ -100,54 +100,42 @@
 //    given Failure = effects
 //
 //    given IntOps[Value] = new LiftedIntOps[Value, Int](_.asNum.asInt, x => NumVal(IntVal(x)))
-//    given IntDoubleOps[Value, Value] = new LiftedIntDoubleOps[Value, Value, Int, Double](_.asNum.asInt, x => NumVal(DoubleVal(x)))
-//    given IntBoolOps[Value, Value] = new LiftedIntBoolOps[Value, Value, Int, Boolean](_.asNum.asInt, BoolVal.apply)
-//    given RationalOps[Value] = new LiftedRationalOps[Value, (Int,Int)](_.asNum.asRatio, (x1,x2) => NumVal(RatioVal(x1,x2)))
-//    given RationalIntOps[Value, Value] = new LiftedRationalIntOps[Value, Value, (Int,Int), Int](_.asNum.asRatio, x => NumVal(IntVal(x)))
-//    given RationalDoubleOps[Value, Value] = new LiftedRationalDoubleOps[Value, Value, (Int,Int), Double](_.asNum.asRatio, x => NumVal(DoubleVal(x)))
-//    given RationalBoolOps[Value, Value] = new LiftedRationalBoolOps[Value, Value, (Int,Int), Boolean](_.asNum.asRatio, BoolVal.apply)
+//    given RationalOps[Value] = new LiftedRationalOps[Value, Fraction](_.asNum.asRational, r => NumVal(RationalVal(r)))
 //    given DoubleOps[Value] = new LiftedDoubleOps[Value, Double](_.asNum.asDouble, x => NumVal(DoubleVal(x)))
-//    given DoubleIntOps[Value, Value] = new LiftedDoubleIntOps[Value, Value, Double, Int](_.asNum.asDouble, x => NumVal(IntVal(x)))
-//    given DoubleBoolOps[Value, Value] = new LiftedDoubleBoolOps[Value, Value, Double, Boolean](_.asNum.asDouble, BoolVal.apply)
 //    given BooleanOps[Value] = new LiftedBooleanOps[Value, Boolean](_.asBoolean, BoolVal.apply)
 //    given CompareOps[Value, Value] = new LiftedCompareOps[Value, Value, Double, Boolean](_.asNum.asDouble, BoolVal.apply)
 //    given ClosureOps[String, Value, List[Expr], Environment, Value, Value] = new LiftedClosureOps[String, Value, List[Expr], Environment, Value, Value, (List[String], Environment, List[Expr])](_.asClosure, ClosureVal.apply)
 //
-//    given ListOps[Value] with
+//    given concreteListOps(using f: Failure): ListOps[Value] with
 //      override def cons(v1: Value, v2: Value): Value = v2 match
-//        case lv@ListVal(x) => ListVal(ConsVal(v1, lv))
+//        case ListVal(vs) => ListVal(v1 :: vs)
 //        case _ => throw new IllegalArgumentException(s"Expected ListVal but got $v2")
-//      override def nil: Value = ListVal(NilVal)
+//      override def nil: Value = ListVal(Nil)
 //      override def car(v: Value): Value = v match
-//        case ListVal(ConsVal(head,_)) => head
+//        case ListVal(vs) => vs match
+//          case Nil => f.fail(NullDeconstruct, s"(car $v)")
+//          case head::_ => head
 //        case _ => throw new IllegalArgumentException(s"Expected ListVal but got $v")
 //      override def cdr(v: Value): Value = v match
-//        case ListVal(ConsVal(_,tail)) => tail
+//        case ListVal(vs) => vs match
+//          case Nil => f.fail(NullDeconstruct, s"(cdr $v)")
+//          case _::tail => ListVal(tail)
 //        case _ => throw new IllegalArgumentException(s"Expected ListVal but got $v")
-//
-//    given IfIsTypeOps[Value] with
-//      def ifIsInt[A](v: Value, thn: => A, els: => A): A = v match
-//        case NumVal(IntVal(_)) => thn
-//        case _ => els
-//      def ifIsRatio[A](v: Value, thn: => A, els: => A): A = v match
-//        case NumVal(RatioVal(_,_)) => thn
-//        case _ => els
-//      def ifIsDouble[A](v: Value, thn: => A, els: => A): A = v match
-//        case NumVal(DoubleVal(_)) => thn
-//        case _ => els
 //
 //    given EqOps[Value, Value] with
 //      def equ(v1: Value, v2: Value): Value = (v1, v2) match
 //        case (BoolVal(b1), BoolVal(b2)) => BoolVal(b1 == b2)
 //        case (NumVal(IntVal(i1)), NumVal(IntVal(i2))) => BoolVal(i1 == i2)
-//        case (NumVal(RatioVal(i11, i12)), NumVal(RatioVal(i21,i22))) => BoolVal(i11 == i21 && i12 == i22)
+//        case (NumVal(RationalVal(r1)), NumVal(RationalVal(r2))) => BoolVal(r1 == r2)
 //        case (NumVal(DoubleVal(d1)), NumVal(DoubleVal(d2))) => BoolVal(d1 == d2)
 //        case (CharVal(c1), CharVal(c2)) => BoolVal(c1 == c2)
 //        case (StringVal(s1), StringVal(s2)) => BoolVal(s1 == s2)
-//        case (QuoteVal(SymbolVal(sym1)), QuoteVal(SymbolVal(sym2))) => BoolVal(sym1 == sym2)
-//        case (ListVal(NilVal), ListVal(NilVal)) => BoolVal(true)
+//        case (QuoteVal(q1), QuoteVal(q2)) => equ(q1, q2)
+//        case (ListVal(vs1), ListVal(vs2)) if vs1.size == vs2.size =>
+//          BoolVal(vs1.zip(vs2).forall((v1, v2) => equ(v1, v2).asBoolean))
+//        case (_:ClosureVal, _) | (_, _:ClosureVal) => effects.fail(ClosureComparison, s"Cannot compute (= $v1 $v2)")
 //        case _ => BoolVal(false)
-//      def neq(v1: Value, v2: Value): Value = throw new IllegalArgumentException("neq does not exist")
+//      def neq(v1: Value, v2: Value): Value = BoolVal(!equ(v1, v2).asBoolean)
 //
 //    given QuoteOps[Value] with
 //      override def quoteLit(l: Value): Value = QuoteVal(l)
@@ -190,13 +178,13 @@
 //        case NumVal(DoubleVal(_)) => BoolVal(true)
 //        case _ => BoolVal(false)
 //      def isRational(v: Value): BoolVal = v match
-//        case NumVal(RatioVal(_,_)) => BoolVal(true)
+//        case NumVal(RationalVal(_,_)) => BoolVal(true)
 //        case _ => BoolVal(false)
 //      def isNull(v: Value): BoolVal = v match
-//        case ListVal(NilVal) => BoolVal(true)
+//        case ListVal(Nil) => BoolVal(true)
 //        case _ => BoolVal(false)
 //      def isCons(v: Value): BoolVal = v match
-//        case ListVal(ConsVal(_,_)) => BoolVal(true)
+//        case ListVal(_::_) => BoolVal(true)
 //        case _ => BoolVal(false)
 //      def isBoolean(v: Value): Value = v match
 //        case BoolVal(_) => BoolVal(true)
@@ -209,14 +197,14 @@
 //
 //class ConcreteInterpreter
 //  (using effectOps: Effects)
-//  (using intOps: IntOps[Value], intDoubleOps: IntDoubleOps[Value, Value], intBoolOps: IntBoolOps[Value, Value],
-//         doubleOps: DoubleOps[Value], doubleIntOps: DoubleIntOps[Value, Value], doubleBoolOps: DoubleBoolOps[Value, Value],
-//         rationalOps: RationalOps[Value], rationalIntOps: RationalIntOps[Value,Value], rationalDoubleOps: RationalDoubleOps[Value,Value], rationalBoolOps: RationalBoolOps[Value, Value],
-//         boolOps: BooleanOps[Value], listOps: ListOps[Value], charOps: CharOps[Value], stringOps: StringOps[Value],
-//         symbolOps: SymbolOps[Value], quoteOps: QuoteOps[Value],voidOps: VoidOps[Value],
-//         eqOps: EqOps[Value, Value], compareOps: CompareOps[Value, Value],
-//         closureOps: ClosureOps[String, Value, List[Expr], Environment, Value, Value],
-//         typeOps: TypeOps[Value], isTypeOps: IfIsTypeOps[Value])
-//  extends GenericInterpreter[Value, Addr, Environment, Effects]:
+//  (using val intOps: IntOps[Value], intDoubleOps: ConvertIntDoubleOps[Value, Value],
+//             rationalOps: RationalOps[Value], doubleRationalOps: ConvertDoubleRationalOps[Value, Value],
+//             doubleOps: DoubleOps[Value],
+//             boolOps: BooleanOps[Value], charOps: CharOps[Value], stringOps: StringOps[Value],
+//             listOps: ListOps[Value], symbolOps: SymbolOps[Value], quoteOps: QuoteOps[Value], voidOps: VoidOps[Value],
+//             typeOps: TypeOps[Value],
+//             eqOps: EqOps[Value, Value], compareOps: CompareOps[Value, Value],
+//             closureOps: ClosureOps[String, Value, List[Expr], effectOps.Env, Value, Value])
+//  extends GenericInterpreter[Value, Addr, Effects]:
 //
 //  val phi = fix.identity[FixIn[Value], FixOut[Value]]
