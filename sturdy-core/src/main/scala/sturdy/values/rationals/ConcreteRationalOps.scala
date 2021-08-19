@@ -8,6 +8,8 @@ final class Rational(val f: Fraction) extends AnyVal
 
 object Rational:
   inline def apply(f: Fraction): Rational = new Rational(f)
+  inline def apply(i: Int): Rational = new Rational(new Fraction(i))
+  inline def apply(d: Double): Rational = new Rational(new Fraction(d))
   def apply(i1: Int, i2: Int)(using f: Failure): Rational =
     try new Rational(new Fraction(i1, i2))
     catch {
@@ -27,7 +29,7 @@ given concreteRationalOps(using f: Failure): RationalOps[Rational] with
     if (v.f.getDenominator == 1)
       v
     else
-      Rational(new Fraction(Math.floorDiv(v.f.getNumerator, v.f.getDenominator)))
+      Rational(Math.floorDiv(v.f.getNumerator, v.f.getDenominator))
   override def ceil(v: Rational): Rational = {
     val denom = v.f.getDenominator
     if (denom == 1)
@@ -37,12 +39,12 @@ given concreteRationalOps(using f: Failure): RationalOps[Rational] with
       var r = num / denom
       // if the signs are different and modulo not zero, round up
       if ((num ^ denom) < 0 && (r * denom != num)) r += 1
-      Rational(new Fraction(r))
+      Rational(r)
     }
   }
 
 given ConcreteConvertIntRational: ConvertIntRational[Int, Rational] with
-  override def apply(i: Int, conf: Unit): Rational = Rational(new Fraction(i))
+  override def apply(i: Int, conf: Unit): Rational = Rational(i)
 given ConcreteConvertRationalInt: ConvertRationalInt[Rational, Int] with
   override def apply(r: Rational, conf: Unit): Int = r.f.intValue()
 
