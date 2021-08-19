@@ -6,55 +6,55 @@ import sturdy.values.Structural
 // Expressions
 enum Exp extends Labeled:
   // Integer Literal
-  case NumLit(n: Int)
+  case NumLit(n: Int)                   // <INTEGER_LITERAL>
   // Input doesnt exist?
   //case Input()
   // Variable Identifier
-  case Var(name: String)
+  case Var(name: String)                // Identifier
   // Addition
-  case Add(e1: Exp, e2: Exp)
+  case Add(e1: Exp, e2: Exp)            // Expression ("+") Expression
   // Subtraction
-  case Sub(e1: Exp, e2: Exp)
+  case Sub(e1: Exp, e2: Exp)            // Expression ("-") Expression
   // Multiplication
-  case Mul(e1: Exp, e2: Exp)
+  case Mul(e1: Exp, e2: Exp)            // Expression ("*") Expression
   // Division, ??? is it there?
-  case Div(e1: Exp, e2: Exp)
-  // Greater Than; miniJava Syntax shows a LT, is this an issue?
-  case Gt(e1: Exp, e2: Exp)
+  case Div(e1: Exp, e2: Exp)            // Expression ("/") Expression
+  // Greater Than
+  case Gt(e1: Exp, e2: Exp)             // Expression ("<") Expression
   // Equals doesnt exist?
-  //case Eq(e1: Exp, e2: Exp)
+  case Eq(e1: Exp, e2: Exp)
   // Funktioniert call genau so? In TIP ID(EXP...) in miniJava Exp.Id(EXP...)?
-  case Call(fun: Exp, args: Seq[Exp])
+  case Call(fun: Exp, args: Seq[Exp])   // Expression.Identifier((Expression(,Expression)*)?)
   // Alloc in miniJava? vllt new Identifier ()? braucht aber identifier nicht expression
   //case Alloc(e: Exp)
-  case Alloc(name: String) //Das scheint nicht richtig....
+  case Alloc(name: String) //Das scheint nicht richtig.... new Identifier() ?
   // reference variable names doesnt exist I think
   //case VarRef(name: String)
   // same for dereference?
   //case Deref(e: Exp)
   // and for nullref?
   //case NullRef()
-  // Existieren records so? Classes sind praktisch records?
-  case Record(fields: Seq[(String, Exp)])
+  // Existieren records so? Classes sind praktisch records? Glaube nicht
+  //case Record(fields: Seq[(String, Exp)])
   // Class functions sind field accesses?
-  case FieldAccess(rec: Exp, field: String)
+  //case FieldAccess(rec: Exp, field: String)
 
   // Wie modelliert man Array expressions?
   // Irgendwie arrays allokieren nach new int[EXP], wie funktionieren static types in der syntax?
-  case AllocArray(e: Exp)
+  case AllocArray(e: Exp)                 // new int [Expression]
   // Access auf array?
-  case AccessArray(e1: Exp, e2: Exp)
+  case AccessArray(e1: Exp, e2: Exp)      // Expression[Expression]
   // Array length?
-  case ArrayLength(e: Exp)
+  case ArrayLength(e: Exp)                // Expression.length
 
   // Bool constant expressions?
-  case BoolLit(b: Boolean)
+  case BoolLit(b: Boolean)                // true und false?
 
-  // this expression???
+  // this expression???                   // "this" ?????
 
   // NOT and AND Expressions?
-  case Not (e: Exp)
-  case And (e1: Exp, e2: Exp)
+  case Not (e: Exp)                       // !Expression
+  case And (e1: Exp, e2: Exp)             // Expression && Expression
 
   // Was bedeutet (Expression) ? Auch in TIP
 
@@ -66,12 +66,11 @@ enum Exp extends Labeled:
     case Mul(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
     case Div(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
     case Gt(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
-    //case Eq(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
     case Call(fun: Exp, args: Seq[Exp]) => fun.intLiterals ++ args.flatMap(_.intLiterals)
     //case Alloc(e: Exp) => e.intLiterals
     //case Deref(e: Exp) => e.intLiterals
-    case Record(fields: Seq[(String, Exp)]) => fields.flatMap(f => f._2.intLiterals).toSet
-    case FieldAccess(rec: Exp, field: String) => rec.intLiterals
+    //case Record(fields: Seq[(String, Exp)]) => fields.flatMap(f => f._2.intLiterals).toSet
+    //case FieldAccess(rec: Exp, field: String) => rec.intLiterals
 
     // Array syntax
     case AllocArray(e: Exp) => e.intLiterals
@@ -84,6 +83,7 @@ enum Exp extends Labeled:
     case BoolLit(b: Boolean) => Set(b)
     case Not(e: Exp) => e.boolLiterals
     case And(e1: Exp, e2: Exp) => e1.boolLiterals ++ e2.boolLiterals
+    case Eq(e1: Exp, e2: Exp) => e1.boolLiterals ++ e2.boolLiterals
     case _ => Set()
 
   override def toString: String = this match
@@ -102,8 +102,8 @@ enum Exp extends Labeled:
     //case VarRef(name: String) => s"&$name@${this.label}"
     //case Deref(e) => s"Deref@${this.label}"
     //case NullRef() => s"Null@${this.label}"
-    case Record(fields: Seq[(String, Exp)]) => s"Record@${this.label}"
-    case FieldAccess(rec: Exp, field: String) => s"FieldAccess@${this.label}"
+    //case Record(fields: Seq[(String, Exp)]) => s"Record@${this.label}"
+    //case FieldAccess(rec: Exp, field: String) => s"FieldAccess@${this.label}"
 
     // Gleicher Stuff hier
     case AllocArray(e) => s"allocArray@${this.label}"
@@ -135,6 +135,13 @@ enum Stm extends Labeled:
     case Output(e) => e.intLiterals
     //case Error(e) => e.intLiterals
 
+  def boolLiterals: Set[Boolean] = this match
+    case Assign(_, e) => e.boolLiterals
+    case If(c, t, e) => c.boolLiterals ++ t.boolLiterals ++ e.map(_.boolLiterals).getOrElse(Set())
+    case While(c, b) => c.boolLiterals ++ b.boolLiterals
+    case Block(body) => body.flatMap(_.boolLiterals).toSet
+    case Output(e) => e.boolLiterals;
+
   override def toString: String = this match
     case Assign(x, _) => s"Assign(x)@${this.label}"
     case If(c, t, e) => s"If(c)@${this.label}"
@@ -148,7 +155,7 @@ enum Assignable:
   //case ADeref(e: Exp)
   // Wie genau funktionieren Fields und dereferences in miniJava? Wir haben keine expliziten Pointer
   // Funktioniert das hier für memberVariablen von Klassen?
-  case AField(rec: String, field: String)
+  //case AField(rec: String, field: String)
   //case ADerefField(rec: Exp, field: String)
   // Wir brauchen noch ein Array assignable oder? Array sind ja an variables gebunden
   // aber wir müssen auch eine Expression für den offset evaluieren?
@@ -159,17 +166,29 @@ enum Assignable:
 
 
 // Program besteht aus MainClass und ClassDeclarations
-case class Program(main: mainClass, classes: Seq[classDeclaration])
-  //def intLiterals: Set[Int] = mainClass.intLiterals ++ classes.flatMap(_.intLiterals).toSet
+case class Program(main: mainClass, classes: Seq[classDeclaration]):
+  def intLiterals: Set[Int] = main.intLiterals ++ classes.flatMap(_.intLiterals).toSet
+  def boolLiterals: Set[Boolean] = main.boolLiterals ++ classes.flatMap(_.boolLiterals).toSet
+
+
 // Main Class mit Identifier, psvm, String[args] und statements
-case class mainClass()
+// Nur ein statement?
+case class mainClass(params: Seq[String], body: Stm):
+  def intLiterals: Set[Int] = body.intLiterals
+  def boolLiterals: Set[Boolean] = body.boolLiterals
 
 // Class declarations haben identifier, können erben, mehrere varDeclarations und MethodDeclarations
-case class classDeclaration()
+case class classDeclaration(name: String, extend: String, locals: Seq[varDeclaration], funs: Seq[Function]):
+  def intLiterals: Set[Int] = funs.flatMap(_.intLiterals).toSet
+  def boolLiterals: Set[Boolean] = funs.flatMap(_.boolLiterals).toSet
+  // Wie wird mit der Vererbung umgegangen?
 
 // varDeclarations haben identifier und type
+// Wie wird mit den Typen umgegangen?
 case class varDeclaration()
 
 // methodDeclarations haben identifier, type, mehrere Identifier,Type paare für arguments
 // außerdem mehrere varDeclarations und statements und eine return EXP
-case class Function()
+case class Function(name: String, params: Seq[String], locals: Seq[varDeclaration], body: Stm, ret: Exp):
+  def intLiterals: Set[Int] = body.intLiterals ++ ret.intLiterals
+  def boolLiterals: Set[Boolean] = body.boolLiterals ++ ret.boolLiterals
