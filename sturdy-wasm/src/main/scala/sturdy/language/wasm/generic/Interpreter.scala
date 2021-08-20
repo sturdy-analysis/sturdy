@@ -210,23 +210,28 @@ trait Interpreter[V,Addr,Bytes,Size]
       case WasmException.Jump(_,_) => fail(InvalidModule, s"Tried to jump through a function boundary.")
     }
 
+  def invokeWithArguments(args: List[V], rtLength: Int, func: FunctionInstance[V]): List[V] =
+    stack.pushN(args.reverse)
+    invoke(func)
+    val res = stack.popN(rtLength)
+    res.reverse
 
-  def invokeExported(funcName: String, args: List[V]): List[V] =
-    // lookup funcName in module's exports
-    module.exports.find(((name,_) => name == funcName)) match
-      case Some((_,ExternalValue.Function(funcIx))) =>
-        val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-        val paramTys = func.funcType.params
-        if (paramTys.length != args.length)
-          fail(InvocationError,
-            s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}")
-        paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
-        val rtLength = func.funcType.t.length
-        stack.pushN(args.reverse)
-        invoke(func)
-        val res = stack.popN(rtLength)
-        res.reverse
-      case _ => fail(InvocationError,s"Function with name $funcName was not found in module's exports.")
+//  def invokeExported(funcName: String, args: List[V]): List[V] =
+//    // lookup funcName in module's exports
+//    module.exports.find(((name,_) => name == funcName)) match
+//      case Some((_,ExternalValue.Function(funcIx))) =>
+//        val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+//        val paramTys = func.funcType.params
+//        if (paramTys.length != args.length)
+//          fail(InvocationError,
+//            s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}")
+//        paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
+//        val rtLength = func.funcType.t.length
+//        stack.pushN(args.reverse)
+//        invoke(func)
+//        val res = stack.popN(rtLength)
+//        res.reverse
+//      case _ => fail(InvocationError,s"Function with name $funcName was not found in module's exports.")
 
   private def defaultValue(ty: ValType): V = ty match
     case ValType.I32 => evalNumeric(i32.Const(0))
