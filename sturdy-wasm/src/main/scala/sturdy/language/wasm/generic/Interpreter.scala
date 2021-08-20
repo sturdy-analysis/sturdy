@@ -119,16 +119,22 @@ trait Interpreter[V,Addr,Bytes,Size]
   def evalControlInst(inst: Inst): Unit = inst match
     case Nop => // nothing
     case Unreachable => fail(UnreachableInstruction, inst.toString)
-    case Block(bt, insts) => label(returnArity(bt), insts, None)
-    case Loop(bt, insts) => label(paramsArity(bt), insts, Some(inst))
+    case Block(bt, insts) =>
+      val params = stack.popN(paramsArity(bt))
+      label(params, returnArity(bt), insts, None)
+    case Loop(bt, insts) =>
+      val pt = paramsArity(bt)
+      val params = stack.popN(pt)
+      label(params, pt, insts, Some(inst))
     case If(bt, thnInsts, elsInsts) =>
       val isZero = evalNumeric(i32.Eqz)
       val rt = returnArity(bt)
+      val params = stack.popN(paramsArity(bt))
       boolBranch[Unit](isZero) {
         // v == 0: else branch
-        label(rt, elsInsts, None)
+        label(params, rt, elsInsts, None)
       } {
-        label(rt, thnInsts, None)
+        label(params, rt, thnInsts, None)
       }
     case Br(labelIndex) => branch(labelIndex)
     case BrIf(labelIndex) =>
@@ -168,10 +174,11 @@ trait Interpreter[V,Addr,Bytes,Size]
     val operands = stack.popN(returnArity)
     throws(WasmException.Jump(labelIndex, operands))
 
-  def label(returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
+  def label(params: List[V], returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
     catchFinally {
       labelStack.pushLabel(returnArity)
       stack.restoreAfter {
+        stack.pushN(params)
         insts.foreach(eval)
       }
     } { // catch
@@ -195,7 +202,7 @@ trait Interpreter[V,Addr,Bytes,Size]
           val frameData = FrameData(funcType.t.size, mod)
           val vars = args.view.reverse ++ func.locals.map(defaultValue)
           withFreshOperandStack(labelStack.withFresh(inNewFrame(frameData, vars) {
-            label(funcType.t.size, func.body, None)
+            label(List.empty, funcType.t.size, func.body, None)
           }))
     } {
       case WasmException.Return(operands) =>
