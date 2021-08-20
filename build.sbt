@@ -19,8 +19,8 @@ lazy val sturdy_core = (project in file("sturdy-core"))
     name := "sturdy-core",
     libraryDependencies ++= Seq(
       "org.apache.commons" % "commons-math3" % "3.6.1",
+      // TODO: Add Apron Library 
       // test
-      // TODO: Add Apron Library test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
   )
