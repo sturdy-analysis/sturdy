@@ -132,10 +132,9 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Var(x) =>
         val addr = lookup(x).orElse(fail(UnboundVariable, x))
         read(addr).orElse(fail(UnboundAddr, s"$addr for variable $x"))
-      case e@Lam(names, body) => {
-        val env = getEnv
+      case e@Lam(names, body) =>
+        val env = closeEnvironment
         closureValue(names, body, env)
-      }
       case expr@Let(bnds, body) =>
         scoped {
           bnds.foreach { case (x,e) =>
@@ -275,6 +274,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
     def applyClosure(vars: List[String], body: List[Expr], args: List[V], env: Env): V = {
       scoped {
         loadClosedEnvironment(env)
+        // TODO compare size of vars and args
         vars.zip(args).foreach { case (x, arg) =>
           val addr = alloc(AllocationSite.ClosureParam(body, x))
           bind(x, addr)

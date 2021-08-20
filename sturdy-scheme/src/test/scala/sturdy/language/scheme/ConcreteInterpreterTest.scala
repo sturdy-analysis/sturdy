@@ -416,7 +416,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
           Cons_(Lit(IntLit(2)),
             Cons_(Lit(IntLit(3)), Nil_)))
     ))
-    assertResult(ListVal(List(NumVal(IntVal(1)), NumVal(IntVal(2)), NumVal(IntVal(3)))))(res)
+    assertResult(ConsVal(NumVal(IntVal(1)), ConsVal(NumVal(IntVal(2)), ConsVal(NumVal(IntVal(3)), NilVal))))(res)
   }
 
   it should "test appending of string " in {

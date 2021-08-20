@@ -40,10 +40,6 @@ object ConcreteInterpreter:
       case IntVal(i: Int) => i.toDouble
       case RationalVal(r: Rational) => r.f.doubleValue()
       case DoubleVal(d: Double) => d
-    def asBoolean: Boolean = this match
-      case IntVal(i: Int) => i != 0
-      case RationalVal(r: Rational) => !r.isZero
-      case DoubleVal(d: Double) => d != 0.0
 
   enum Value:
     import Num._
@@ -51,7 +47,8 @@ object ConcreteInterpreter:
     case BoolVal(b: Boolean)
     case CharVal(c: Char)
     case StringVal(str: String)
-    case ListVal(li: List[Value])
+    case NilVal
+    case ConsVal(car: Value, cdr: Value)
     case SymbolVal(sym: String)
     case QuoteVal(qot: Value)
     case VoidVal
@@ -70,9 +67,6 @@ object ConcreteInterpreter:
     def asString(using f: Failure): String = this match
       case StringVal(str) => str
       case _ => f.fail(TypeError, s"Expected String but got $this")
-    def asList(using f: Failure): List[Value] = this match
-      case ListVal(cons) => cons
-      case _ => f.fail(TypeError, s"Expected List but got $this")
     def asSymbol(using f: Failure): String = this match
       case SymbolVal(sym) => sym
       case _ => f.fail(TypeError, s"Expected Symbol but got $this")
@@ -110,20 +104,14 @@ object ConcreteInterpreter:
     given ClosureOps[String, Value, List[Expr], Environment, Value, Value] = new LiftedClosureOps(_.asClosure, ClosureVal.apply)
 
     given concreteListOps(using f: Failure): ListOps[Value] with
-      override def cons(v1: Value, v2: Value): Value = v2 match
-        case ListVal(vs) => ListVal(v1 :: vs)
-        case _ => f.fail(TypeError, s"Expected ListVal but got $v2")
-      override def nil: Value = ListVal(Nil)
+      override def cons(v1: Value, v2: Value): Value = ConsVal(v1, v2)
+      override def nil: Value = NilVal
       override def car(v: Value): Value = v match
-        case ListVal(vs) => vs match
-          case Nil => f.fail(NullDeconstruct, s"(car $v)")
-          case head::_ => head
-        case _ => f.fail(TypeError, s"Expected ListVal but got $v")
+        case ConsVal(car, _) => car
+        case _ => f.fail(TypeError, s"Expected ConsVal but got $v")
       override def cdr(v: Value): Value = v match
-        case ListVal(vs) => vs match
-          case Nil => f.fail(NullDeconstruct, s"(cdr $v)")
-          case _::tail => ListVal(tail)
-        case _ => f.fail(TypeError, s"Expected ListVal but got $v")
+        case ConsVal(_, cdr) => cdr
+        case _ => f.fail(TypeError, s"Expected ConsVal but got $v")
 
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
@@ -134,8 +122,8 @@ object ConcreteInterpreter:
         case (CharVal(c1), CharVal(c2)) => BoolVal(c1 == c2)
         case (StringVal(s1), StringVal(s2)) => BoolVal(s1 == s2)
         case (QuoteVal(q1), QuoteVal(q2)) => equ(q1, q2)
-        case (ListVal(vs1), ListVal(vs2)) if vs1.size == vs2.size =>
-          BoolVal(vs1.zip(vs2).forall((v1, v2) => equ(v1, v2).asBoolean))
+        case (NilVal, NilVal) => BoolVal(true)
+        case (ConsVal(car1, cdr1), ConsVal(car2, cdr2)) => BoolVal(equ(car1, car2).asBoolean && equ(cdr1, cdr2).asBoolean)
         case (_:ClosureVal, _) | (_, _:ClosureVal) => effects.fail(ClosureComparison, s"Cannot compute (= $v1 $v2)")
         case _ => BoolVal(false)
       def neq(v1: Value, v2: Value): Value = BoolVal(!equ(v1, v2).asBoolean)
@@ -183,11 +171,9 @@ object ConcreteInterpreter:
       def isRational(v: Value): BoolVal = v match
         case NumVal(RationalVal(_)) => BoolVal(true) // all numbers can be used as rationals
         case _ => BoolVal(false)
-      def isNull(v: Value): BoolVal = v match
-        case ListVal(Nil) => BoolVal(true)
-        case _ => BoolVal(false)
+      def isNull(v: Value): BoolVal = BoolVal(v == NilVal)
       def isCons(v: Value): BoolVal = v match
-        case ListVal(_::_) => BoolVal(true)
+        case _: ConsVal => BoolVal(true)
         case _ => BoolVal(false)
       def isBoolean(v: Value): Value = v match
         case BoolVal(_) => BoolVal(true)
