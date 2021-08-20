@@ -1,4 +1,3 @@
-
 ThisBuild / organization := "de.uni-mainz.informatik.pl"
 ThisBuild / version := "0.1"
 ThisBuild / scalaVersion := "3.0.1"
@@ -21,6 +20,7 @@ lazy val sturdy_core = (project in file("sturdy-core"))
     libraryDependencies ++= Seq(
       "org.apache.commons" % "commons-math3" % "3.6.1",
       // test
+      // TODO: Add Apron Library test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )
   )
