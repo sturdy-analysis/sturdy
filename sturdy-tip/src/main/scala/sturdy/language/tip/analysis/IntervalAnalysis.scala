@@ -113,7 +113,7 @@ object IntervalAnalysis:
 
     given JoinComputation = effects
     given Failure = effects
-    given IntOps[Value] = new LiftedIntOps(_.asInt, IntValue.apply)
+    given IntOps[Value] = new LiftedIntOps(_.asInt, IntValue.apply) // TODO: add Apron-using interface for intOPs
     given CompareOps[Value, Value] = new LiftedCompareOps(_.asInt, boolValue)
     given EqOps[Function, Boolean] = new EqualsEqOps[Function]
     given EqOps[Value, Value] with
