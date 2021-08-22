@@ -8,7 +8,7 @@ import swam.syntax.*
 import swam.OpCode
 import swam.ValType
 import sturdy.effect.operandstack.OperandStack
-import sturdy.effect.binarymemory.{Serialize, Memory, MemSize, EffectiveAddress}
+import sturdy.effect.binarymemory.{EffectiveAddress, MemSize, Memory, WasmSerialize}
 import sturdy.effect.branching.BoolBranching
 import sturdy.values.convert.*
 import sturdy.values.doubles.*
@@ -31,7 +31,7 @@ object Interpreter:
   type WasmMemory[Addr,Bytes,Size,V] = Memory[Addr,Bytes,Size]
     with EffectiveAddress[V,Int,Addr]
     with MemSize[V,Size]
-    with Serialize[V,Bytes,ValType,LoadType,StoreType]
+    with WasmSerialize[V,Bytes,MemoryInst,MemoryInst]
 
   type Effects[V,Addr,Bytes,Size] =
     OperandStack[V]
@@ -53,11 +53,13 @@ trait Interpreter[V,Addr,Bytes,Size]
    ConvertDoubleInt[V, V], ConvertDoubleLong[V, V], ConvertDoubleFloat[V, V]
   )
   (using wasmOps: WasmOperations[V])
-  (using effectOps.BoolBranchJoin[Unit], wasmOps.WasmOpsJoin[Unit], wasmOps.WasmOpsJoinComp):
+  (using effectOps.BoolBranchJoin[Unit],
+   effectOps.MemoryJoin[Unit], effectOps.MemoryJoin[V], effectOps.MemoryJoinComp,
+   wasmOps.WasmOpsJoin[Unit], wasmOps.WasmOpsJoinComp):
 
   import effectOps.*
   val stack = effectOps.asInstanceOf[OperandStack[V]]
-  val memory = effectOps.asInstanceOf[WasmMemory[Addr,Bytes,Size,V]]
+  //val memory = effectOps.asInstanceOf[WasmMemory[Addr,Bytes,Size,V]]
 
   val numerics = new InterpretNumerics[V]
   import numerics.*
@@ -215,43 +217,48 @@ trait Interpreter[V,Addr,Bytes,Size]
 
 
   def evalMemoryInst(inst: Inst): Unit = inst match
-    case i32.Load(align, offset) => ???
-    case _: LoadNInst => ???
-    case _: StoreInst => ???
-    case _: StoreNInst => ???
-    case MemorySize => ???
-    case MemoryGrow => ???
+    case i: LoadInst => load(i)
+    case i: LoadNInst => load(i)
+
+    case i: StoreInst => store(i)
+    case i: StoreNInst => store(i)
+
+    case MemorySize =>
+      val memIdx = memoryIndex
+      stack.push(sizeToVal(memSize(memIdx)))
+    case MemoryGrow =>
+      val delta = valToSize(stack.pop())
+      val memIdx = memoryIndex
+      val res = memGrow(memIdx, delta).withDefault
+        (evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
+        {sizeToVal(_)}
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
-  def load(byteSize: Int, loadType: LoadType, valType: ValType, offset: Int): Unit =
+  def load(inst: MemoryInst): Unit =
     val base = stack.pop()
-    val addr = memory.effectiveAddress(base, offset)
-    val memIdx = 0 //TODO: memoryIndex()
-    memory.memRead(memIdx,addr,byteSize,
-      bytes => {
-        val v = memory.decode(bytes, loadType, valType)
-        stack.push(v)
-      },
-      () => fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
+    val addr = effectiveAddress(base, inst.offset)
+    val memIdx = memoryIndex
+    val byteSize = getBytesToRead(inst)
+    val bytes = memRead(memIdx,addr,byteSize).withDefault
+      (fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
+      {(b: Bytes) =>
+        val v = decode(b, inst)
+        stack.push(v)}
 
-// TODO: this should be an enum
-// TODO: the instructions provide sufficient information, no need to duplicate that
-sealed abstract class LoadType
-case class L_I32() extends LoadType
-case class L_I64() extends LoadType
-case class L_F32() extends LoadType
-case class L_F64() extends LoadType
-case class L_I8S() extends LoadType
-case class L_I8U() extends LoadType
-case class L_I16S() extends LoadType
-case class L_I16U() extends LoadType
-case class L_I32S() extends LoadType
-case class L_I32U() extends LoadType
+  def store(inst: MemoryInst): Unit =
+    val v = stack.pop()
+    val bytes = encode(v, inst)
+    val base = stack.pop()
+    val addr = effectiveAddress(base, inst.offset)
+    val memIdx = memoryIndex
+    memStore(memIdx, addr, bytes).orElse(
+      fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
+    )
 
-sealed abstract class StoreType
-case class S_I32() extends StoreType
-case class S_I64() extends StoreType
-case class S_F32() extends StoreType
-case class S_F64() extends StoreType
-case class S_I8() extends StoreType
-case class S_I16() extends StoreType
+  def getBytesToRead(inst: MemoryInst): Int = inst match
+    case Load(tpe,_,_) => tpe.width / 4
+    case LoadN(_,n,_,_) => n / 4
+    case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $inst")
+
+  def memoryIndex: Int =
+    module.memoryAddrs(0)

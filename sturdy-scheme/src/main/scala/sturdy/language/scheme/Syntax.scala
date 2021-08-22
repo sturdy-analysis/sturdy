@@ -84,8 +84,8 @@ enum Expr extends Labeled:
   case Nil_
   case Cons_(e1: Expr, e2: Expr)
   case Begin(es: List[Expr])
-  case AppFoo(foo: Expr, args: List[Expr])
-  case Apply(body: List[Expr])
+  case Apply(foo: Expr, args: List[Expr])
+//  case Apply(body: List[Expr])
   case Var(name: String)
   case Set_(name: String, e: Expr)
   case Define(name: String, e: Expr)

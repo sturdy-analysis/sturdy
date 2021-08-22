@@ -10,8 +10,9 @@ trait ClosureOps[Var, Arg, Body, Env, R, V] {
   def invokeClosure(closure: V, args: List[Arg])(invoke: (List[Var], Body, List[Arg], Env) => R): R
 }
 
-given ConcreteClosureOps[Var, Arg, Body, Env, V]: ClosureOps[Var, Arg, Body, Env, V, (List[Var], Env, Body)] with
-  override def closureValue(params: List[Var], body: Body, env: Env): (List[Var], Env, Body) = (params, env, body)
-  override def invokeClosure(closure: (List[Var], Env, Body), args: List[Arg])(invoke: (List[Var], Body, List[Arg], Env) => V): V =
-    val (params, env, body) = closure
-    invoke(params, body, args, env)
+case class Closure[Var, Body, Env](params: List[Var], body: Body, env: Env)
+
+given ConcreteClosureOps[Var, Arg, Body, Env, V]: ClosureOps[Var, Arg, Body, Env, V, Closure[Var, Body, Env]] with
+  override def closureValue(params: List[Var], body: Body, env: Env): Closure[Var, Body, Env] = Closure(params, body, env)
+  override def invokeClosure(closure: Closure[Var, Body, Env], args: List[Arg])(invoke: (List[Var], Body, List[Arg], Env) => V): V =
+    invoke(closure.params, closure.body, args, closure.env)
