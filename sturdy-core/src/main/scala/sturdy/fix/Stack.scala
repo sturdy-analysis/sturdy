@@ -24,7 +24,7 @@ case object RecurrentCall extends Exception:
  *  This can be achieved by making sure that each call chain repeats a previous context after
  *  finitely many calls. This property holds in particular if the set of contexts is finite.
  */
-final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], contextual: Contextual[Ctx, Dom, Codom, In, Out])
+final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], contextual: Contextual[Ctx, Dom, Codom])
   (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation):
 
