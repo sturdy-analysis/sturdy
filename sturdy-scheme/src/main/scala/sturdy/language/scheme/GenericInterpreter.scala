@@ -132,13 +132,14 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         closureValue(names, body, env)
       case let@Exp.Let(bnds, body) =>
         scoped {
-          bnds.foreach { case (x, e) =>
-            val addr = alloc(AllocationSite.LetBinding(let, x))
+          val addrs = bnds.map(xe => alloc(AllocationSite.LetBinding(let, xe._1)))
+          bnds.zip(addrs).foreach { case ((x,e), addr) =>
             val v = eval(e)
             bind(x, addr)
             write(addr, v)
           }
-          runBody(body)
+          try runBody(body)
+          finally addrs.foreach(free)
         }
       case let@Exp.LetRec(bnds, body, star) =>
         val (envbnds, storebnds) = bnds.map { case (x,e) =>
@@ -156,7 +157,8 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
             val vals = storebnds.map(ae => eval(ae._2))
             storebnds.zip(vals).foreach { case ((addr, _), v) => write(addr, v) }
           }
-          runBody(body)
+          try runBody(body)
+          finally storebnds.foreach(b => free(b._1))
         }
       case s@Exp.Set_(x, e) =>
         val addr = lookup(x).orElse(fail(UnboundVariable, x))
@@ -170,17 +172,6 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         opVar(op, vs)
       case Exp.Error(err) => fail(UserError, err)
     }
-
-//    def run(ds: Seq[Def]): Seq[Addr] = ds match
-//      case Nil => Vector()
-//      case d::rest => d match
-//        case define@Def.Define(x, e) =>
-//          val addr = alloc(AllocationSite.Define(define))
-//          bind(x, addr)
-//          write(addr, eval(e))
-//          addr +: run(rest)
-//        case Def.Begin(defs) =>
-//          run(defs) ++ run(rest)
 
     def runBody(body: Body): V =
       if (body.defs.isEmpty) {
@@ -290,7 +281,8 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
           bind(x, addr)
           write(addr, arg)
         }
-        runBody(body)
+        try runBody(body)
+        finally addrs.foreach(free)
       }
     }
 
