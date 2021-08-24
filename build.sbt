@@ -1,9 +1,73 @@
-name := "sturdy.scala"
 
-version := "0.1"
+ThisBuild / organization := "de.uni-mainz.informatik.pl"
+ThisBuild / version := "0.1"
+ThisBuild / scalaVersion := "3.0.1"
+ThisBuild / licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
-scalaVersion := "3.0.0"
+Test / parallelExecution := false
+Test / fork := false
 
-libraryDependencies += "org.typelevel" %% "cats-parse" % "0.3.4"
+lazy val root = (project in file("."))
+  .settings(name := "sturdy")
+  .aggregate(
+    sturdy_core,
+    sturdy_tip,
+    sturdy_scheme
+  )
+  .settings(skip / publish := true)
 
-libraryDependencies += "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+lazy val sturdy_core = (project in file("sturdy-core"))
+  .settings(
+    name := "sturdy-core",
+    libraryDependencies ++= Seq(
+      "org.apache.commons" % "commons-math3" % "3.6.1",
+      // test
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+    )
+  )
+
+lazy val sturdy_tip = (project in file("sturdy-tip"))
+  .dependsOn(sturdy_core % "compile->compile;test->test")
+  .settings(
+    name := "sturdy-tip",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-parse" % "0.3.4",
+      // test
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+    )
+  )
+
+lazy val sturdy_scheme = (project in file("sturdy-scheme"))
+  .dependsOn(sturdy_core % "compile->compile;test->test")
+  .settings(
+    name := "sturdy-scheme",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-parse" % "0.3.4",
+      // test
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+    )
+  )
+
+
+lazy val sturdy_minijava = (project in file("sturdy-minijava"))
+  .dependsOn(sturdy_core % "compile->compile;test->test")
+  .settings(
+    name := "sturdy-minijava",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-parse" % "0.3.4",
+      // test
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+    )
+  )
+
+lazy val sturdy_wasm = (project in file("sturdy-wasm"))
+  .dependsOn(sturdy_core % "compile->compile;test->test")
+  .settings(
+    name := "sturdy-wasm",
+    libraryDependencies ++= Seq(
+      ("org.gnieh" % "swam-core" % "0.6.0-RC4").cross(CrossVersion.for3Use2_13),
+      // test
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test",
+      ("org.gnieh" % "swam-text" % "0.6.0-RC4").cross(CrossVersion.for3Use2_13) % "test"
+    )
+  )
