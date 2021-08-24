@@ -25,7 +25,7 @@ enum Exp extends Labeled:
   case Call(fun: Exp, name: String, args: Seq[Exp])   // Expression.Identifier((Expression(,Expression)*)?)
   // Alloc in miniJava? vllt new Identifier ()? braucht aber identifier nicht expression
   //case Alloc(e: Exp)
-  case Alloc(name: String) //Das scheint nicht richtig... new Identifier() ?
+  //Das scheint nicht richtig... new Identifier() ?
 
   // Wie modelliert man Array expressions?
   // Irgendwie arrays allokieren nach new int[EXP], wie funktionieren static types in der syntax?
@@ -39,10 +39,11 @@ enum Exp extends Labeled:
   case BoolLit(b: Boolean)                // true und false?
 
   // this expression???                   // "this" ?????
-
+  case NullRef()
   // NOT and AND Expressions?
   case Not (e: Exp)                       // !Expression
   case And (e1: Exp, e2: Exp)             // Expression ("&&") Expression
+
 
   // Was bedeutet (Expression) ? Auch in TIP
 
@@ -53,7 +54,6 @@ enum Exp extends Labeled:
   // same for dereference?
   //case Deref(e: Exp)
   // and for nullref?
-  //case NullRef()
   // Existieren records so? Classes sind praktisch records? Glaube nicht
   //case Record(fields: Seq[(String, Exp)])
   // keine records?
@@ -78,7 +78,8 @@ enum Exp extends Labeled:
     case _ => Set()
 
     //case Alloc(e: Exp) => e.intLiterals
-    //case Deref(e: Exp) => e.intLiterals
+
+  //case Deref(e: Exp) => e.intLiterals
     //case Record(fields: Seq[(String, Exp)]) => fields.flatMap(f => f._2.intLiterals).toSet
     //case FieldAccess(rec: Exp, field: String) => rec.intLiterals
 
@@ -102,7 +103,7 @@ enum Exp extends Labeled:
     case Eq(e1, e2) => s"Eq@${this.label}"
     case Call(Var(fun), name, args) => s"Call($fun)@${this.label}"
     case Call(fun, name, args) => s"Call@${this.label}"
-    case Alloc(name) => s"$name@${this.label}"
+    //case Alloc(name) => s"$name@${this.label}"
 
     // Gleicher Stuff hier
     case AllocArray(e) => s"allocArray@${this.label}"
@@ -112,8 +113,9 @@ enum Exp extends Labeled:
     case BoolLit(b) => s"$b@${this.label}"
     case Not(e) => s"logicalNOT@${this.label}"
     case And(e1,e2) => s"logicalAND@${this.label}"
+    case NullRef() => s"Null@${this.label}"
 
-    //case Input() => s"Input@${this.label}"
+//case Input() => s"Input@${this.label}"
     //case VarRef(name: String) => s"&$name@${this.label}"
     //case Deref(e) => s"Deref@${this.label}"
     //case NullRef() => s"Null@${this.label}"
@@ -199,5 +201,9 @@ case class varDeclaration()
 // methodDeclarations haben identifier, type, mehrere Identifier,Type paare für arguments
 // außerdem mehrere varDeclarations und statements und eine return EXP
 case class Function(name: String, params: Seq[String], locals: Seq[varDeclaration], body: Stm, ret: Exp):
+  override def toString: String = s"function $name"
+
   def intLiterals: Set[Int] = body.intLiterals ++ ret.intLiterals
   def boolLiterals: Set[Boolean] = body.boolLiterals ++ ret.boolLiterals
+
+
