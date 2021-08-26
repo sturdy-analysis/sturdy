@@ -2,7 +2,7 @@ package sturdy.language.minijava
 
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 
-import scala.collection.*
+import scala.collection._
 import scala.language.implicitConversions
 
 
@@ -14,7 +14,7 @@ package object Parser {
       case Left(err) => throw new IllegalArgumentException(err.toString)
 
 
-   //LEXICAL
+  //LEXICAL
   // comments
   val lineComment: P[Unit] = P.string("//") *> P.charsWhile0(c => c != '\n' && c != '\r').void
   val blockComment: P[Unit] = P.string("") *> P.recursive[Unit](rec =>
@@ -28,16 +28,16 @@ package object Parser {
     p <* whitespaces0
 
   object LanguageKeywords {
-    val KALLOC = "new"
+    val KNEW = "new"
     val KWHILE = "while"
     val KIF = "if"
     val KELSE = "else"
     val KVAR = "var"
     val KRETURN = "return"
-    val KNULL = "null"
     val KVOID = "void"
-    val KBOOLEAN = "boolean"
     val KINT = "int"
+    val KBOOLEAN = "boolean"
+    val KINTARR = "int[]"
     val KCLASS = "class"
     val KEXT = "extends"
     val KSTATIC = "static"
@@ -45,28 +45,34 @@ package object Parser {
     val KPUBLIC = "public"
     val KTHIS = "this"
     val KPRINTLINE = "System.out.println"
+    val KTRUE = "true"
+    val KFALSE = "false"
+    val KLEN = "length"
   }
+
   import LanguageKeywords.*
 
   val keywords = Set(
-    KALLOC,
+    KNEW,
+    KINT,
+    KBOOLEAN,
+    KINTARR,
     KWHILE,
     KIF,
     KELSE,
     KVAR,
     KRETURN,
-    KNULL,
-    KNULL,
     KVOID,
-    KBOOLEAN,
-    KINT,
     KCLASS,
     KEXT,
     KSTATIC,
     KPRIVATE,
     KPUBLIC,
     KTHIS,
-    KPRINTLINE
+    KPRINTLINE,
+    KTRUE,
+    KFALSE,
+    KLEN
   )
 
   def keyword(s: String): P[Unit] =
@@ -75,6 +81,10 @@ package object Parser {
   val letter: P[Unit] = P.ignoreCaseCharIn('a' to 'z').void
   val digit: P[Unit] = P.charIn('0' to '9').void
   val letterDigit: P[Unit] = P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).void
+  val True: P[Unit] = P.string("true")
+  val False: P[Unit] = P.string("false")
+//  val int_type: P[Unit] = P.string("int")
+//  val boolean_type = P.string("boolean")
 
   val id: P[String] =
     (letter ~ letterDigit.rep0)
@@ -84,6 +94,18 @@ package object Parser {
   val identifier: P[String] =
     spaced(id)
 
+  val bool_val: P[String] =
+    True.string.filter(s => !keywords.contains(s)).backtrack | False.string.filter(s => !keywords.contains(s)).backtrack
+
+  val bool: P[String] =
+    spaced(bool_val)
+
+
+ /* val type_val : P[String] =
+    int_type.string.filter(s => !keywords.contains(s)).backtrack | boolean_type.string.filter(s => !keywords.contains(s)).backtrack
+
+  val types : P[String] =
+    spaced(type_val)*/
 
   //Klammern, Kommas und Semikolons werden seperat geparst
 
@@ -92,6 +114,9 @@ package object Parser {
 
   def inBraces[A](p: P0[A]): P[A] =
     op('{') *> p <* op('}')
+
+  def inBrackets[A](p: P0[A]): P[A] =
+    op('[') *> p <* op(']')
 
   def list0[A](p: P[A]): P0[List[A]] =
     p.repSep0(op(','))
@@ -122,32 +147,43 @@ package object Parser {
 
   val variable: P[Exp] = identifier.map(Exp.Var.apply)
 
+  val boolean: P[Exp] = bool.map(Exp.BoolLit.apply)
+
+  val typed : P[Type] =
+      keyword(KINT).map(_ => Type.Int()) |  // int
+      keyword(KBOOLEAN).map(_ => Type.Boolean()) |  // boolean
+      keyword(KINTARR).map(_ => Type.IntArray()) | // int[]
+      (Type.Identifier.apply <* variable)   // id x
 
   lazy val atom: P[Exp] =
-    ((variable | inParens(recExpression)) ~ inParens(list0(recExpression))).backtrack.map(Exp.Call.apply) |
-      (keyword(KALLOC) *> recExpression.map(Exp.AllocArray.apply)) |
-      keyword(KNULL).map(_ => Exp.NullRef.apply) |
-      spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) |
-      inParens(recExpression) |
-      inBraces(list0((identifier <* op(':')) ~ recExpression)).map(Exp.Record.apply) |
-      variable
+    (keyword(KNEW) *> variable) | // new identifier
+      spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //<INTEGER_LITERAL>
+      inParens(recExpression) | //"(" Expressions ")"
+      variable | //Variablen
+      boolean | //BoolLit
+      (keyword(KNEW) *> (keyword(KINT) *> inBrackets(Exp.AllocArray.apply))) | // new int Exp] x
+      ((keyword(KNEW) *> Exp.Alloc.apply)) ~ (op("(") *> list0(recExpression) <* op(")")) | // new Identifier ()
+      (identifier | inParens(recExpression) <* op('.') <* keyword(KLEN)) | // Expression.length
+      (op('!') *> identifier).map(Exp.Not.apply) // Logical Not
+      // "This" fehlt noch
 
-  val access: P[Exp] =
-    ((variable  | inParens(recExpression)) ~ (op('.') *> identifier).rep)
-      .map { case (e, fields) => fields.foldLeft(e)(Exp.FieldAccess.apply) }
-      .backtrack
+  val access: P[Exp] = null
+      // class.member
+
 
   val term: P[Exp] =
     access |
       (atom ~ (
         (op('*') *> recExpression).map(e2 => Exp.Mul(_, e2)) |
           (op('/') *> recExpression).map(e2 => Exp.Div(_, e2))
+
         ).?).map(maybeBinOp)
 
   val operation: P[Exp] =
     (term ~ (
-      (op('+') *> recExpression).map(e2 => Exp.Add(_, e2)) |
-        (op('-') *> recExpression).map(e2 => Exp.Sub(_, e2))
+      (op('+') *> recExpression).map(e2 => Exp.Add(_, e2)) | // + operation
+        (op('-') *> recExpression).map(e2 => Exp.Sub(_, e2)) | // - operation
+        (op("&&") *> recExpression).map(e2 => Exp.And(_, e2))
       ).?).map(maybeBinOp)
 
   lazy val expression: P[Exp] =
@@ -157,32 +193,44 @@ package object Parser {
       ).?).map(maybeBinOp)
 
   val assignable: P[Assignable] =
-      (identifier ~ (op('.') *> identifier).?)
-        .map {
-          case (x, None) => Assignable.AVar(x)
-          case (x, Some(y)) => Assignable.AField(x, y)
+        identifier.map {
+          case (x, None) => Assignable.AVar(x) //AVar
+          case (x : String, Exp) => Assignable.AArray(x, Exp) //AArray
         }
 
   lazy val statement: P[Stm] =
     (keyword(KIF) *> inParens(recExpression) ~ recStatement ~ (keyword(KELSE) *> recStatement).?)
-      .map { case ((c, t), e) => Stm.If(c, t, e) } |
-      (keyword(KWHILE) *> inParens(recExpression) ~ recStatement).map(Stm.While.apply) |
-      inBraces(recStatement.rep0).map(Stm.Block.apply) |
-      ((assignable <* op('=')) ~ recExpression <* semi).map(Stm.Assign.apply)
+      .map { case ((c, t), e) => Stm.If(c, t, e) } | // If-Else
+      (keyword(KWHILE) *> inParens(recExpression) ~ recStatement).map(Stm.While.apply) | //While
+      inBraces(recStatement.rep0).map(Stm.Block.apply) | //Block
+      (keyword(KPRINTLINE) *> inParens(recExpression).map(Stm.Output.apply)) | //PrintLine
+      ((assignable <* op('=')) ~ recExpression <* semi).map(Stm.Assign.apply) //id = Exp
+  //Fall id[Exp] = Exp fehlt noch? oder ist das schon mit bei assignable mitenthalten
 
-  val varDecl: P[List[String]] =
-    keyword(KVAR) *> list(identifier) <* semi
+  
+  
+  
+  
+  val varDecl: P[List[String]] = null // Da müssen wir noch schauen, wie wir das mit der Klasse varDeclaration zusammenbringen können
 
+  //MethodDecl -> public Type id ( FormalList ) { VarDecl* Statement* return Exp ; }
+  // FormalList = ( Type1 id1, Type2 id2 ,....)
   val function: P[Function] =
-    (identifier ~ inParens(list0(identifier)) ~
+    (keyword((KPUBLIC))|keyword(KPRIVATE) *> keyword(KSTATIC) *> ( typed ~ identifier ~ inParens(list0(typed) ~ list0(identifier)) ~
       inBraces(
-        varDecl.rep0 ~
+       /* varDecl.rep0 ~ */
           statement.rep0 ~
           (keyword(KRETURN) *> expression <* semi)
       )
-      ).map { case ((name, params), ((locals, body), ret)) =>
-      Function(name, params, locals.flatten, Stm.Block(body), ret)
-    }
+      )).map { case ((name, returnType, params), ((locals, body), ret)) =>
+    Function(name, params, locals.flatten, Stm.Block(body), ret)
+  }
 
+  //Klassen
+  
+  ////
+  
   val program: P0[Program] =
     whitespaces0 *> function.rep0.map(Program.apply) <* P.end
+
+}

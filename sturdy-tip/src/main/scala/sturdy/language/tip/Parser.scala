@@ -112,22 +112,23 @@ object Parser:
     (op('*') *> recAtom).map(Exp.Deref.apply)
 
   lazy val atom: P[Exp] =
-    ((variable | inParens(recExpression)) ~ inParens(list0(recExpression))).backtrack.map(Exp.Call.apply) |
-    (keyword(KALLOC) *> recExpression.map(Exp.Alloc.apply)) |
-    keyword(KINPUT).map(_ => Exp.Input()) |
-    keyword(KNULL).map(_ => Exp.NullRef()) |
-    (op('&') *> identifier).map(Exp.VarRef.apply) |
-    deref |
-    spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) |
-    inParens(recExpression) |
-    inBraces(list0((identifier <* op(':')) ~ recExpression)).map(Exp.Record.apply) |
-    variable
+    ((variable | inParens(recExpression)) ~ inParens(list0(recExpression))).backtrack.map(Exp.Call.apply) | //Call
+    (keyword(KALLOC) *> recExpression.map(Exp.Alloc.apply)) | //Alloc
+    keyword(KINPUT).map(_ => Exp.Input()) | //Input
+    keyword(KNULL).map(_ => Exp.NullRef()) | //NullRef
+    (op('&') *> identifier).map(Exp.VarRef.apply) | //VarRef
+    deref | //Deref
+    spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //Pure Numbers
+    inParens(recExpression) | //Expressions in parenthesis
+    inBraces(list0((identifier <* op(':')) ~ recExpression)).map(Exp.Record.apply) | //Records (Key:value)
+    variable //Variablen
 
+  // Zugriffe auf Variablen/Derefenzierungen/FieldAccess
   val access: P[Exp] =
     ((variable | deref | inParens(recExpression)) ~ (op('.') *> identifier).rep)
       .map { case (e, fields) => fields.foldLeft(e)(Exp.FieldAccess.apply) }
       .backtrack
-
+  //Ein Term ist entweder ein Access, ein Atom komkatiniert mit * bzw / und einem 
   val term: P[Exp] =
     access |
     (atom ~ (
