@@ -9,7 +9,7 @@ import scala.language.implicitConversions
 package object Parser {
 
   def parse(source: String): Program =
-    program.parseAll(source) match
+    Program.parseAll(source) match
       case Right(p) => p
       case Left(err) => throw new IllegalArgumentException(err.toString)
 
@@ -39,6 +39,7 @@ package object Parser {
     val KBOOLEAN = "boolean"
     val KINTARR = "int[]"
     val KCLASS = "class"
+    val KMAIN = "main"
     val KEXT = "extends"
     val KSTATIC = "static"
     val KPRIVATE = "private"
@@ -64,6 +65,7 @@ package object Parser {
     KRETURN,
     KVOID,
     KCLASS,
+    KMAIN,
     KEXT,
     KSTATIC,
     KPRIVATE,
@@ -153,22 +155,24 @@ package object Parser {
       keyword(KINT).map(_ => Type.Int()) |  // int
       keyword(KBOOLEAN).map(_ => Type.Boolean()) |  // boolean
       keyword(KINTARR).map(_ => Type.IntArray()) | // int[]
-      (Type.Identifier.apply <* variable)   // id x
+      (identifier.map(s => Type.Identifier(s)) <* variable)   // id x
 
   lazy val atom: P[Exp] =
+
     (keyword(KNEW) *> variable) | // new identifier
       spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //<INTEGER_LITERAL>
       inParens(recExpression) | //"(" Expressions ")"
       variable | //Variablen
       boolean | //BoolLit
-      (keyword(KNEW) *> (keyword(KINT) *> inBrackets(Exp.AllocArray.apply))) | // new int Exp] x
+      (keyword(KNEW) *> (keyword(KINT) *> inBrackets(Exp.AllocArray.apply))) | // new int [Exp] x
       ((keyword(KNEW) *> Exp.Alloc.apply)) ~ (op("(") *> list0(recExpression) <* op(")")) | // new Identifier ()
       (identifier | inParens(recExpression) <* op('.') <* keyword(KLEN)) | // Expression.length
       (op('!') *> identifier).map(Exp.Not.apply) // Logical Not
       // "This" fehlt noch
+      // Funktionsaufruf fehlt noch
 
-  val access: P[Exp] = null
-      // class.member
+  val access: P[Exp] =
+    (variable| inParens(recExpression)|expression) ~ inParens(recExpression)   // Exp[Exp]
 
 
   val term: P[Exp] =
@@ -176,7 +180,6 @@ package object Parser {
       (atom ~ (
         (op('*') *> recExpression).map(e2 => Exp.Mul(_, e2)) |
           (op('/') *> recExpression).map(e2 => Exp.Div(_, e2))
-
         ).?).map(maybeBinOp)
 
   val operation: P[Exp] =
@@ -194,8 +197,8 @@ package object Parser {
 
   val assignable: P[Assignable] =
         identifier.map {
-          case (x, None) => Assignable.AVar(x) //AVar
-          case (x : String, Exp) => Assignable.AArray(x, Exp) //AArray
+          case (x : String) => Assignable.AVar(x) //AVar
+          case (x : String,e: Exp) => Assignable.AArray(x, e) //AArray
         }
 
   lazy val statement: P[Stm] =
@@ -207,11 +210,10 @@ package object Parser {
       ((assignable <* op('=')) ~ recExpression <* semi).map(Stm.Assign.apply) //id = Exp
   //Fall id[Exp] = Exp fehlt noch? oder ist das schon mit bei assignable mitenthalten
 
-  
-  
-  
-  
-  val varDecl: P[List[String]] = null // Da müssen wir noch schauen, wie wir das mit der Klasse varDeclaration zusammenbringen können
+
+  val varDecl: P[varDeclaration] =
+    (((typed ~ identifier) <* op('=')) ~ expression).map{case (t : Type, name : String) => varDeclaration(t,name)} //
+
 
   //MethodDecl -> public Type id ( FormalList ) { VarDecl* Statement* return Exp ; }
   // FormalList = ( Type1 id1, Type2 id2 ,....)
@@ -222,15 +224,31 @@ package object Parser {
           statement.rep0 ~
           (keyword(KRETURN) *> expression <* semi)
       )
-      )).map { case ((name, returnType, params), ((locals, body), ret)) =>
-    Function(name, params, locals.flatten, Stm.Block(body), ret)
+      )).map { case (name : String, returnType : Type, params : Seq[Tuple2[Type,String]], locals : Seq[sturdy.language.minijava.varDeclaration], body : Stm, ret : Exp) =>
+    Function(name, returnType, params, locals, body, ret)
   }
 
-  //Klassen
-  
-  ////
-  
-  val program: P0[Program] =
-    whitespaces0 *> function.rep0.map(Program.apply) <* P.end
+  //main class
+  val MainClass : P[mainClass] =
+    (keyword(KCLASS) *> identifier ~ (keyword(KPUBLIC) *> keyword(KSTATIC) *> keyword(KVOID) *> keyword(KMAIN) *> inParens(op("String []") ~ identifier)) ~inBraces(statement)).map{
+      case (name : String, params: Seq[String], body : Stm) => mainClass(name, params, body)  //class id { public static void main ( String [] id ) { Statement } }
 
-}
+
+  //class
+  val Class : P[classDeclaration] =
+    keyword(KCLASS) *> identifier ~ ( keyword(KEXT) *> list(identifier) ~ inBraces(list0(varDecl) ~ list0(function))).map{
+      case (name : String, extend: Option[String], locals: Seq[varDeclaration],funs: Seq[Function])
+            => classDeclaration(name, extend, locals, funs)
+    } //class id extends id { VarDecl* MethodDecl* }
+
+
+//Program fehlt noch
+
+/*
+  val program: P0[Program] =
+    whitespaces0 *> function.rep0.map{
+      case (name : String, extend: Option[String], locals: Seq[varDeclaration],funs: Seq[Function])
+      => classDeclaration(name, extend, locals, funs)}
+    } <* P.end
+
+}*/
