@@ -12,6 +12,9 @@ import sturdy.values.relational.*
 
 import scala.collection.immutable.TreeSet
 
+//import apron in this file
+import de.poiu.apron
+
 
 object IntInterval:
   val Top = IntInterval(Int.MinValue, Int.MaxValue)
@@ -66,6 +69,7 @@ given intIntervalWiden(using bounds: => Set[Int]): Widening[IntInterval] with
 
 given IntervalIntOps(using f: Failure, j: JoinComputation): IntOps[IntInterval] with
   def intLit(i: Int): IntInterval = IntInterval(i, i)
+  //def intLit(i: Int): de.poiu.apron.Interval
   def randomInt(): IntInterval = IntInterval.Top
   def add(v1: IntInterval, v2: IntInterval): IntInterval = v1 + v2
   def sub(v1: IntInterval, v2: IntInterval): IntInterval = v1 - v2
