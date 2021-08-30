@@ -156,12 +156,10 @@ class IntervalAnalysis(steps: Int)
     case FixIn.Eval(c: Exp.Call) => Some(c)
     case _ => None
   }
-  private implicit val contextual: fix.Contextual[Ctx, FixIn, FixOut[Value], effectOps.InState, effectOps.OutState] =
-    fix.contextual(callSites.callString(2))
 
   val phi =
     fix.log(callSites,
-      fix.contextSensitive(
+      fix.contextSensitive(callSites.callString(2),
         fix.dispatch(isCallOrWhile, Seq(
           // call
           fix.iter.topmost,

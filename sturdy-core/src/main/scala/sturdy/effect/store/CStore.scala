@@ -27,12 +27,3 @@ trait CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V]:
   override def free(x: Addr): Unit =
     store -= x
 
-  override def scopedAddresses[A](xs: Iterable[Addr])(f: => A): A =
-    val before = ListBuffer[(Addr, Option[V])]()
-    for (x <- xs)
-      before += x -> store.get(x)
-    try f finally {
-      for ((x, mv) <- before) mv match
-        case None => store -= x
-        case Some(old) => store += x -> old
-    }
