@@ -138,15 +138,12 @@ class SignAnalysis(steps: Int)
     case _ => -1
   }
 
-  type Ctx = Map[PowAddr, Value]
-  private implicit val contextual: fix.Contextual[Ctx, FixIn, FixOut[Value], effectOps.InState, effectOps.OutState] =
-    fix.contextual(fix.context.parametersFromStore {
-      case FixIn.EnterFunction(f) => Some(f.params.map(p => effectOps.getLocal(p).get))
-      case _ => None
-    })
-
+  val parameters: fix.context.Sensitivity[FixIn, Map[PowAddr, Value]] = fix.context.parametersFromStore {
+    case FixIn.EnterFunction(f) => Some(f.params.map(p => effectOps.getLocal(p).get))
+    case _ => None
+  }
   val phi =
-    fix.contextSensitive(
+    fix.contextSensitive(parameters,
       fix.dispatch(isCallOrWhile, Seq(
         // call
         fix.iter.topmost,

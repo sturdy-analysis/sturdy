@@ -188,11 +188,14 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         addr
       }
       inNewFrame((), locals) {
-        scopedAddresses(paramAddrs ++ localsAddrs) {
-          paramAddrs.zip(args).map(write)
+        paramAddrs.zip(args).map(write)
+        try
           rec(FixIn.EnterFunction(fun)) match
             case FixOut.ExitFunction(v) => v
             case _ => throw new IllegalStateException()
+        finally {
+          paramAddrs.foreach(free)
+          localsAddrs.foreach(free)
         }
       }
 
