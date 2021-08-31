@@ -16,31 +16,34 @@ import scala.jdk.StreamConverters.*
 
 class ConcreteScalaAM extends AnyFlatSpec, Matchers:
 
+  behavior of "Scheme concrete Scala-AM benchmarks"
 
-  "parse + concrete interpret" should "scala-am/collatz" in {
-    val res = ConcreteInterpreterFilesTest().run("scala-am/collatz.scm", false)
+  def runFile(f: String, debug: Boolean = false) = Utils().runFile("scala-am/"++f)
+
+  it should "collatz" in {
+    val res = runFile("collatz")
     assertResult(NumVal(IntVal(5)))(res)
   }
 
-  it should "scala-am/gcipd" in {
-    val res = ConcreteInterpreterFilesTest().run("scala-am/gcipd.scm", false)
+  it should "gcipd" in {
+    val res = runFile("gcipd")
     assertResult(NumVal(IntVal(36)))(res)
   }
 
-  it should "scala-am/nqueens" in {
-    val res = ConcreteInterpreterFilesTest().run("scala-am/nqueens.scm", false)
+  it should "nqueens" in {
+    val res = runFile("nqueens")
     assertResult(NumVal(IntVal(92)))(res)
   }
 
   // also not working haskell
-  it should "scala-am/primtest" in {
+  it should "primtest" in {
     pending
-    val res = ConcreteInterpreterFilesTest().run("scala-am/primtest.scm", false)
+    val res = runFile("primtest")
     assertResult(BoolVal(false))(res)
   }
 
-  it should "scala-am/rsa" in {
-    val res = ConcreteInterpreterFilesTest().run("scala-am/rsa.scm", false)
+  it should "rsa" in {
+    val res = runFile("rsa")
     assertResult(BoolVal(true))(res)
   }
 

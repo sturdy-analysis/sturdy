@@ -16,67 +16,70 @@ import scala.jdk.StreamConverters.*
 
 class ConcreteGabriel extends AnyFlatSpec, Matchers:
 
+  behavior of "Scheme concrete gabriel benchmarks"
+
+  def runFile(f: String, debug: Boolean = false) = Utils().runFile("gabriel/"++f, debug)
 
   // also not working in haskell
-  "parse + concrete interpret" should "gabriel/boyer" in {
+  it should "boyer" in {
     pending
-    val res = ConcreteInterpreterFilesTest().run("gabriel/boyer.scm", false)
+    val res = runFile("boyer")
     assertResult(NumVal(IntVal(5)))(res)
   }
 
   // also not working in haskell
-  it should "gabriel/browse" in {
+  it should "browse" in {
     pending
-    val res = ConcreteInterpreterFilesTest().run("gabriel/browse.scm", false)
+    val res = runFile("browse")
     assertResult(NumVal(IntVal(36)))(res)
   }
 
   // only modified version passes
   // cannot resolve stackoverflow for full version
-  it should "gabriel/cpstak" in {
-    val res = ConcreteInterpreterFilesTest().run("gabriel/cpstak.scm", false)
+  it should "cpstak" in {
+    val res = runFile("cpstak")
     assertResult(NumVal(IntVal(3)))(res)
   }
 
   // does not work yet
-  it should "gabriel/dderiv" in {
+  it should "dderiv" in {
     pending
-    val res = ConcreteInterpreterFilesTest().run("gabriel/dderiv.scm", false)
+    val res = runFile("dderiv")
     assertResult(BoolVal(false))(res)
   }
 
   // does not work yet
-  it should "gabriel/deriv" in {
+  it should "deriv" in {
     pending
-    val res = ConcreteInterpreterFilesTest().run("gabriel/deriv.scm", false)
+    val res = runFile("deriv")
     assertResult(BoolVal(false))(res)
   }
 
   // also not working haskell
   // requires change to body s.t. it can be empty
   // returns false
-  it should "gabriel/destruc" in {
+  it should "destruc" in {
     pending
-    val res = ConcreteInterpreterFilesTest().run("gabriel/destruc.scm", false)
+    val res = runFile("destruc")
     assertResult(BoolVal(true))(res)
   }
 
   // only modified version passes
   // cannot resolve stackoverflow for full version
-  it should "gabriel/diviter" in {
-    val res = ConcreteInterpreterFilesTest().run("gabriel/diviter.scm", false)
+  it should "diviter" in {
+    val res = runFile("diviter")
     assertResult(BoolVal(true))(res)
   }
 
   // only modified version passes
   // cannot resolve stackoverflow for full version
   // also changed cond to if in source file!
-  it should "gabriel/divrec" in {
-    val res = ConcreteInterpreterFilesTest().run("gabriel/divrec.scm", false)
+  it should "divrec" in {
+    val res = runFile("divrec")
     assertResult(BoolVal(true))(res)
   }
 
-  it should "gabriel/takl" in {
-    val res = ConcreteInterpreterFilesTest().run("gabriel/takl.scm", false)
+  it should "takl" in {
+    val res = runFile("takl")
     assertResult(BoolVal(true))(res)
   }

@@ -1,11 +1,10 @@
 package sturdy.language.scheme
 
-import sturdy.language.scheme.Literal.*
 import sturdy.language.scheme.Exp.*
-import sturdy.util.Labeled
+import sturdy.language.scheme.*
 
 object Examples:
-  
+
   /*
   (define (fac n)
     (if (= n 1)
@@ -33,4 +32,3 @@ object Examples:
     )),
     Form.Expression(Apply(Var("fac"), List(Lit(Literal.IntLit(10)))))
   ))
-

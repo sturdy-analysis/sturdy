@@ -63,7 +63,7 @@ object ConcreteInterpreter:
 
     given Failure = effects
     given IntOps[Value] = new LiftedIntOps(_.asInt, IntValue.apply)
-    given CompareOps[Value, Value] = new LiftedCompareOps(_.asInt, boolValue)
+    given CompareOps[Value, Value] = ???
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
         case (IntValue(i1), IntValue(i2)) => boolValue(i1 == i2)

@@ -7,182 +7,152 @@ import sturdy.effect.failure.CFailureException
 import sturdy.language.scheme.ConcreteInterpreter.*
 import sturdy.language.scheme.ConcreteInterpreter.Num.*
 import sturdy.language.scheme.ConcreteInterpreter.Value.*
-import sturdy.language.scheme.SchemeExpParser.*
 import sturdy.language.scheme.Program.*
+import sturdy.language.scheme.SchemeExpParser.*
+import sturdy.language.scheme.{ConcreteInterpreter, SExpParser}
 
 import java.nio.file.{Files, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 
-class ConcreteInterpreterFilesTest extends AnyFlatSpec, Matchers:
+class ConcreteMiscellaneousFiles extends AnyFlatSpec, Matchers:
 
-  def run(f: String, debug: Boolean): Value =
-    var uri = classOf[ConcreteInterpreterFilesTest].getResource("/sturdy/language/scheme/"++f).toURI();
-    var file = Source.fromURI(uri)
-    val sourceCode = file.getLines().mkString("\n")
-    file.close()
-    uri = classOf[ConcreteInterpreterFilesTest].getResource("/sturdy/language/scheme/macros_modified.scm").toURI();
-    file = Source.fromURI(uri)
-    val macrosCode = file.getLines().mkString("\n")
-    file.close()
+  behavior of "Scheme miscellaneous file tests"
 
-    if debug then
-      println(s"input: \n$sourceCode")
-      println(s"macros: \n$macrosCode")
-    if debug then
-      val sexp = SExpParser.parse(sourceCode)
-      println(s"sparse: \n$sexp")
-      val sexpmacro = SExpParser.parse(macrosCode)
-      println(s"smacroparse: \n$sexpmacro")
-    val tree = parse(sourceCode)
-    val treemacro = parse(macrosCode+sourceCode)
-    if debug then
-      println(s"parse: \n$tree")
-      println(s"parsemacro: \n$treemacro")
-    val interp = ConcreteInterpreter(Map(), Map())
+  def runFile(f: String, debug: Boolean = false): Value = Utils().runFile("miscellaneous/"++f, debug)
 
-    interp.execute(treemacro)
-
-
-
-
-  "parse + concrete interpret" should "test_binops" in {
-      val res = run("test_binops.scm", false)
+  it should "test_binops" in {
+      val res = runFile("test_binops")
       assertResult(NumVal(IntVal(1)))(res)
   }
 
   it should "test_random" in {
     pending
-    val res = run("test_random.scm", true)
+    val res = runFile("test_random")
     assertResult(NumVal(IntVal(1)))(res)
   }
 
-  it should "parse macros" in {
-    val res = run("macros_modified.scm", false)
-    assertResult(VoidVal)(res)
-  }
-
   it should "test_car" in {
-    val res = run("test_car.scm", false)
+    val res = runFile("test_car", false)
     assertResult(NumVal(IntVal(1)))(res)
   }
 
   it should "test_cdr" in {
-    val res = run("test_cdr.scm", false)
+    val res = runFile("test_cdr", false)
     assertResult(NumVal(IntVal(3)))(res)
   }
 
   it should "test_closure_gc" in {
-    val res = run("test_closure_gc.scm", false)
+    val res = runFile("test_closure_gc", false)
     assertResult(NumVal(IntVal(16)))(res)
   }
 
   it should "test_cons" in {
-    val res = run("test_cons.scm", false)
+    val res = runFile("test_cons", false)
     assertResult(BoolVal(true))(res)
   }
 
   it should "test_eq" in {
-    val res = run("test_eq.scm", false)
+    val res = runFile("test_eq", false)
     assertResult(BoolVal(false))(res)
   }
 
   it should "test_equal" in {
-    val res = run("test_equal.scm", false)
+    val res = runFile("test_equal", false)
     assertResult(BoolVal(true))(res)
   }
 
   it should "test_factorial" in {
-    val res = run("test_factorial.scm", false)
+    val res = runFile("test_factorial", false)
     assertResult(NumVal(IntVal(3628800)))(res)
   }
 
   it should "test_faulty_list" in {
-    val res = run("test_faulty_list.scm", false)
+    val res = runFile("test_faulty_list", false)
     assertResult(BoolVal(false))(res)
   }
 
   it should "test_if" in {
-    val res = run("test_if.scm", false)
+    val res = runFile("test_if", false)
     assertResult(BoolVal(false))(res)
   }
 
   it should "test_inner_define" in {
-    val res = run("test_inner_define.scm", false)
+    val res = runFile("test_inner_define", false)
     assertResult(NumVal(IntVal(10)))(res)
   }
 
   it should "test_list" in {
-    val res = run("test_list.scm", false)
+    val res = runFile("test_list", false)
     assertResult(QuoteVal(SymbolVal("+")))(res)
   }
 
   it should "test_lits" in {
-    val res = run("test_lits.scm", false)
+    val res = runFile("test_lits", false)
     assertResult(NumVal(IntVal(3)))(res)
   }
 
   it should "test_null" in {
-    val res = run("test_null.scm", false)
+    val res = runFile("test_null", false)
     assertResult(BoolVal(true))(res)
   }
 
   it should "test_opvar_boolbool" in {
-    val res = run("test_opvar_boolbool.scm", false)
+    val res = runFile("test_opvar_boolbool", false)
     assertResult(BoolVal(true))(res)
   }
 
   it should "test_opvar_numbool" in {
-    val res = run("test_opvar_numbool.scm", false)
+    val res = runFile("test_opvar_numbool", false)
     assertResult(BoolVal(false))(res)
   }
 
   it should "test_opvar_numnum" in {
-    val res = run("test_opvar_numnum.scm", false)
+    val res = runFile("test_opvar_numnum", false)
     assertResult(NumVal(IntVal(3)))(res)
   }
 
   it should "test_opvars" in {
-    val res = run("test_opvars.scm", false)
+    val res = runFile("test_opvars", false)
     assertResult(NumVal(IntVal(10)))(res)
   }
 
   it should "test_rec_defines" in {
-    val res = run("test_rec_defines.scm", false)
+    val res = runFile("test_rec_defines", false)
     assertResult(NumVal(IntVal(720)))(res)
   }
 
   it should "test_rec_empty" in {
-    val res = run("test_rec_empty.scm", false)
+    val res = runFile("test_rec_empty", false)
     assertResult(NilVal)(res)
   }
 
   it should "test_rec_nonempty" in {
-    val res = run("test_rec_nonempty.scm", false)
+    val res = runFile("test_rec_nonempty", false)
     assertResult(NumVal(IntVal(1)))(res)
   }
 
   it should "test_simple_floats" in {
-    val res = run("test_simple_floats.scm", false)
+    val res = runFile("test_simple_floats", false)
     assertResult(BoolVal(false))(res)
   }
 
   it should "test_simple_list" in {
-    val res = run("test_simple_list.scm", false)
+    val res = runFile("test_simple_list", false)
     assertResult(NumVal(IntVal(3)))(res)
   }
 
   it should "test_subtraction" in {
-    val res = run("test_subtraction.scm", false)
+    val res = runFile("test_subtraction", false)
     assertResult(NumVal(IntVal(-4)))(res)
   }
 
   it should "test_symbols" in {
-    val res = run("test_symbols.scm", false)
+    val res = runFile("test_symbols", false)
     assertResult(QuoteVal(SymbolVal("sym3")))(res)
   }
 
   it should "test_unops" in {
-    val res = run("test_unops.scm", false)
+    val res = runFile("test_unops", false)
     assertResult(BoolVal(false))(res)
   }
