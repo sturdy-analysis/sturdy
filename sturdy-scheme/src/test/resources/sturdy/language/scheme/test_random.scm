@@ -1,7 +1,9 @@
-(define (fac n)
-    (if (= n 1)
-        1
-        (* n (fac (- n 1)))))
+(define (map f l)
+  (if (null? l)
+      l
+      (if (pair? l)
+          (cons (f (car l)) (map f (cdr l)))
+          (error "Cannot map over a non-list"))))
 
-(fac 10)
 
+(map (lambda (x) (+ x x)) '(3 3))

@@ -97,7 +97,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test simple LetRec" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         LetRec(List(("y", Lit(IntLit(1)))),
           Body(Var("y")))
@@ -106,7 +105,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test need for stepwise evaluation of LetRec bindings" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         LetRec(List(("x", Lit(IntLit(4))),
           ("y", Var("x"))),
@@ -116,7 +114,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test closure creation" in {
-    for _ <- 0 until 10 do
       val body = Body(Var("x"))
       val res = runAny(List(
         Lam(List("x"), body)
@@ -126,7 +123,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test simple closure application" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         Apply(
           Lam(List("x"), Body(Var("x"))),
@@ -136,7 +132,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test LetRec with lambda body" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         LetRec(
           List(("y", Lam(List("y"), Body(Var("y"))))),
@@ -146,7 +141,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test let with lambda body" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         Let(
           List(("y", Lam(List("y"), Body(Var("y"))))),
@@ -156,7 +150,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test define with lambda body" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         Define("y", Lam(List("y"), Body(Var("y")))),
         Apply(Var("y"), List(Lit(IntLit(3))))
@@ -165,7 +158,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "illustrate necessity of store " in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         Define("x", Lit(IntLit(2))),
         Apply(Lam(List(), Body(Set_("x", Lit(IntLit(3))))), List()),
@@ -175,7 +167,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test self referencing LetRec" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         LetRec(
           List(("y", Lam(List(), Body(Var("x")))),
@@ -186,7 +177,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test addition of multiple ints" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         OpVar(Add, List(
           Lit(IntLit(1)),
@@ -198,7 +188,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test < on multiple ints #t (< checks wether the elements are in ascending order) " in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         OpVar(Smaller, List(
           Lit(IntLit(1)),
@@ -210,7 +199,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test < on multiple ints #f (< checks wether the elements are in ascending order) " in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         OpVar(Smaller, List(
           Lit(IntLit(1)),
@@ -222,7 +210,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test lt on mixed ints doubles" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         OpVar(Smaller, List(
           Lit(IntLit(1)),
@@ -234,7 +221,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test min on multiple ints" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         OpVar(Min, List(
           Lit(IntLit(1)),
@@ -246,7 +232,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test add on multiple doubles" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         OpVar(Add, List(
           Lit(DoubleLit(1.1)),
@@ -258,7 +243,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test add on multiple ints" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         OpVar(Add, List(
           Lit(IntLit(1)),
@@ -270,7 +254,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test add on mixed ints and doubles" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         OpVar(Add, List(
           Lit(IntLit(1)),
@@ -282,7 +265,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test modulo on ints" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         Op2(Modulo, Lit(IntLit(15)), Lit(IntLit(3)))
       ))
@@ -299,7 +281,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test quotient on ints" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         Op2(Quotient, Lit(IntLit(1)), Lit(IntLit(3)))
       ))
@@ -317,7 +298,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test int abs with type dispatch in generic interp" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         Op1(Abs, Lit(IntLit(-1)))
       ))
@@ -325,7 +305,6 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   }
 
   it should "test double abs with type dispatch in generic interp" in {
-    for _ <- 0 until 10 do
       val res = runAny(List(
         Op1(Abs, Lit(DoubleLit(-1.3)))
       ))

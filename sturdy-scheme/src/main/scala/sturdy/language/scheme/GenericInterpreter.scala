@@ -115,11 +115,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Exp.Lit(l) => lit(l)
       case Exp.Nil_ => listOps.nil
       case Exp.Cons_(e1, e2) => listOps.cons(eval(e1), eval(e2))
-      case Exp.Begin(es) => es match
-        case Nil => void
-        case _ =>
-          es.init.foreach(eval)
-          eval(es.last)
+      case Exp.Begin(body) => runBody(body)
       case Exp.Apply(e1, args) =>
         val clsVal = eval(e1)
         val argVals = args.map(arg => eval(arg))
@@ -175,8 +171,12 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
     def runBody(body: Body): V =
       if (body.defs.isEmpty) {
-        body.exps.init.foreach(eval)
-        eval(body.exps.last)
+        // necessary for destruc benchmark, however benchmark does not pass
+        if (body.exps.isEmpty)
+          void
+        else
+          body.exps.init.foreach(eval)
+          eval(body.exps.last)
       } else {
         val letrec = Exp.LetRec(
           body.defs.map(d => d.name -> d.e),
@@ -247,8 +247,8 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Equal => vs.init.zip(vs.tail).map(equ).reduce(and)
       case Smaller => vs.init.zip(vs.tail).map(lt).reduce(and)
       case Greater => vs.init.zip(vs.tail).map(gt).reduce(and)
-      case SmallerEqual => vs.init.zip(vs.tail).map(ge).reduce(and)
-      case GreaterEqual => vs.init.zip(vs.tail).map(le).reduce(and)
+      case SmallerEqual => vs.init.zip(vs.tail).map(le).reduce(and)
+      case GreaterEqual => vs.init.zip(vs.tail).map(ge).reduce(and)
       case Max => vs.reduce { case (x1, x2) => withNum2(x1,x2)(intOps.max)(rationalOps.max)(doubleOps.max) }
       case Min => vs.reduce { case (x1, x2) => withNum2(x1,x2)(intOps.min)(rationalOps.min)(doubleOps.min) }
       case Add => vs.reduce { case (x1, x2) => withNum2(x1,x2)(intOps.add)(rationalOps.add)(doubleOps.add) }

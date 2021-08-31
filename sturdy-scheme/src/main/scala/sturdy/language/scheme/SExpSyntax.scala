@@ -7,4 +7,5 @@ enum SExp:
   case double(d: Double)
   case string(str: String)
   case boolean(b: Boolean)
+  case quoted(se: SExp)
   case sexpr(exprs: List[SExp])

@@ -78,8 +78,9 @@ enum OpVarKinds:
   // String operations
   case StringAppend
 
-case class Body(defs: List[Define], exps: List[Exp]):
-  require(exps.nonEmpty)
+case class Body(defs: List[Define], exps: List[Exp])
+// necessary for destruc benchmark, however benchmark does not pass
+//  require(exps.nonEmpty)
 object Body:
   def apply(exps: List[Exp]): Body = Body(List(), exps)
   def apply(e: Exp): Body = Body(List(), List(e))
@@ -88,7 +89,7 @@ enum Exp extends Labeled:
   case Lit(l: Literal)
   case Nil_
   case Cons_(e1: Exp, e2: Exp)
-  case Begin(es: List[Exp])
+  case Begin(body: Body)
   case Apply(foo: Exp, args: List[Exp])
   case Var(name: String)
   case Set_(name: String, e: Exp)
