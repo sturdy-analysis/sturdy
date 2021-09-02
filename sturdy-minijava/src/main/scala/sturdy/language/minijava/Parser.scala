@@ -155,24 +155,24 @@ package object Parser {
       keyword(KINT).map(_ => Type.Int()) |  // int
       keyword(KBOOLEAN).map(_ => Type.Boolean()) |  // boolean
       keyword(KINTARR).map(_ => Type.IntArray()) | // int[]
-      (identifier.map(s => Type.Identifier(s)) <* variable)   // id x
+      (identifier.map(s => Type.Identifier(s)) <* variable) //  Identifier x
 
   lazy val atom: P[Exp] =
 
-    (keyword(KNEW) *> variable) | // new identifier
+    //keyword(KNEW) *> variable | // new identifier
       spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //<INTEGER_LITERAL>
       inParens(recExpression) | //"(" Expressions ")"
       variable | //Variablen
-      boolean | //BoolLit
+      boolean | //BoolLiterals
       (keyword(KNEW) *> (keyword(KINT) *> inBrackets(atom).map(e => Exp.AllocArray(e)))) | // new int [Exp] x
-      (keyword(KNEW) *> identifier) ~  inParens(list0(recExpression)) | // new Identifier ()
-      (identifier | inParens(recExpression) <* op('.') <* keyword(KLEN)) | // Expression.length
-        (op('!') *> variable).map(e => Exp.Not(e)) // Logical Not
-      // "This" fehlt noch
-      // Funktionsaufruf fehlt noch
+      //(keyword(KNEW) *> identifier) ~  inParens(recExpression.map(e => Exp.Alloc(e))) | // new Identifier ()
+      //((identifier | inParens(recExpression)).map(Exp.ArrayLength.apply) <* op('.') <* keyword(KLEN)) | // Expression.length
+      (op('!') *> variable).map(e => Exp.Not(e)) // Logical Not
 
   val access: P[Exp] =
-    (variable| inParens(recExpression)|expression) ~ inParens(recExpression)   // Exp[Exp]
+    ((variable| inParens(recExpression)|expression) ~ inParens(recExpression).rep).map{
+        case (e, fields) => fields.foldLeft(e)(Exp.AccessArray.apply) }
+    .backtrack  // Exp[Exp]
 
 
   val term: P[Exp] =
@@ -193,7 +193,9 @@ package object Parser {
     (operation ~ (
       (op('>') *> operation).map(e2 => Exp.Gt(_, e2)) |
         (op("==") *> operation).map(e2 => Exp.Eq(_, e2))
-      ).?).map(maybeBinOp)
+      ).?).map(maybeBinOp) |
+    (((expression|recExpression) <* op(".")) ~ identifier ~ inParens(list0(expression|recExpression))).map{
+      case( (fun, name), args) => Exp.Call(fun, name, args)}  //Funktionsaufruf Expression.Identifier((Expression(,Expression)*)?)
 
   val assignable: P[Assignable] =
         identifier.map {
@@ -207,9 +209,9 @@ package object Parser {
     (keyword(KIF) *> inParens(recExpression) ~ recStatement ~ (keyword(KELSE) *> recStatement).?)
       .map { case ((c, t), e) => Stm.If(c, t, e) } | // If-Else
       (keyword(KWHILE) *> inParens(recExpression) ~ recStatement).map(Stm.While.apply) | //While
-      inBraces(recStatement.rep0).map(Stm.Block.apply) | //Block
-      (keyword(KPRINTLINE) *> inParens(recExpression).map(Stm.Output.apply)) | //PrintLine
-      ((assignable <* op('=')) ~ recExpression <* semi).map(Stm.Assign.apply) //id = Exp
+      inBraces(recStatement.rep0).map(Stm.Block.apply) | // Block
+      (keyword(KPRINTLINE) *> inParens(recExpression <* semi).map(Stm.Output.apply)) | //"System.out.println" "(" Expression ")" ";"
+    ((assignable <* op('=')) ~ recExpression <* semi).map(Stm.Assign.apply) // Identifier	::=	<IDENTIFIER>
   //Fall id[Exp] = Exp fehlt noch? oder ist das schon mit bei assignable mitenthalten
 
 
@@ -220,15 +222,20 @@ package object Parser {
   //MethodDecl -> public Type id ( FormalList ) { VarDecl* Statement* return Exp ; }
   // FormalList = ( Type1 id1, Type2 id2 ,....)
   val function: P[Function] =
-    (keyword((KPUBLIC))|keyword(KPRIVATE) *> keyword(KSTATIC) *> ( typed ~ identifier ~ inParens(list0(typed) ~ list0(identifier)) ~
-      inBraces(
+  (keyword(KPUBLIC)|keyword(KPRIVATE) *> keyword(KSTATIC) *> ( (typed ~ identifier) ~ inParens(list0( typed ~ identifier)) ~
+  //(identifier ~ inParens(list0(identifier)) ~
+    inBraces(
         varDecl.rep0 ~
           statement.rep0 ~
           (keyword(KRETURN) *> expression <* semi)
       )
-      )).map { case ((name : String, returnType : Type, params : Seq[Tuple2[Type,String]]), ((locals : Seq[sturdy.language.minijava.varDeclaration], body : Stm), ret : Exp)) =>
-    Function(name, returnType, params, locals.flatten, body, ret)
-  }
+      )).map { case ( ((returnType, name), params), ((locals, body), ret)) =>
+      Function(name, params.flatten, locals.toSeq(), body, ret)
+    }
+
+//    { case ((name : String, returnType : Type, params : Seq[Tuple2[Type,String]]), ((locals : Seq[sturdy.language.minijava.varDeclaration], body : Stm), ret : Exp)) =>
+//    Function(name, returnType, params, locals, body, ret)
+//  }
 
   //main class
   val MainClass : P[mainClass] =
@@ -250,3 +257,4 @@ package object Parser {
     whitespaces0 *> MainClass.map{case (main : mainClass, classes :Seq[classDeclaration]) => Program(main, classes) } <* P.end
 
     }
+}
