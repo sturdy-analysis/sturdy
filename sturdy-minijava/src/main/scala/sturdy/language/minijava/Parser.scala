@@ -256,8 +256,8 @@ package object Parser {
   //Programm
   //	MainClass ( ClassDeclaration )* <EOF>
   val program: P0[Program] =
-    whitespaces0 *> MainClass.map{
-      case (main , classes) => Program(main, classes)
+    whitespaces0 *> (MainClass ~ list0(Class)).map{
+      case( (main, cl)) => Program(main, cl)
     } <* P.end
 
     }
