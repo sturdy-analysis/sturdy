@@ -159,14 +159,13 @@ package object Parser {
 
   lazy val atom: P[Exp] =
 
-    //keyword(KNEW) *> variable | // new identifier
+      keyword(KNEW) *> variable | // new identifier
       spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //<INTEGER_LITERAL>
       inParens(recExpression) | //"(" Expressions ")"
       variable | //Variablen
       boolean | //BoolLiterals
       (keyword(KNEW) *> (keyword(KINT) *> inBrackets(atom).map(e => Exp.AllocArray(e)))) | // new int [Exp] x
-      //(keyword(KNEW) *> identifier) ~  inParens(recExpression.map(e => Exp.Alloc(e))) | // new Identifier ()
-      //((identifier | inParens(recExpression)).map(Exp.ArrayLength.apply) <* op('.') <* keyword(KLEN)) | // Expression.length
+      (keyword(KNEW) *> identifier).map(e => Exp.Alloc(e)) | // new Identifier ()
       (op('!') *> variable).map(e => Exp.Not(e)) // Logical Not
 
   val access: P[Exp] =
@@ -194,6 +193,7 @@ package object Parser {
       (op('>') *> operation).map(e2 => Exp.Gt(_, e2)) |
         (op("==") *> operation).map(e2 => Exp.Eq(_, e2))
       ).?).map(maybeBinOp) |
+      ((expression| inParens(recExpression)).map(Exp.ArrayLength.apply) <* op('.') <* keyword(KLEN)) | // Expression.length
     (((expression|recExpression) <* op(".")) ~ identifier ~ inParens(list0(expression|recExpression))).map{
       case( (fun, name), args) => Exp.Call(fun, name, args)}  //Funktionsaufruf Expression.Identifier((Expression(,Expression)*)?)
 
@@ -203,7 +203,6 @@ package object Parser {
           case (x : String,e: Exp) => Assignable.AArray(x, e) //AArray
         }
 
-        // Fall var[X] = y
 
   lazy val statement: P[Stm] =
     (keyword(KIF) *> inParens(recExpression) ~ recStatement ~ (keyword(KELSE) *> recStatement).?)
@@ -222,39 +221,43 @@ package object Parser {
   //MethodDecl -> public Type id ( FormalList ) { VarDecl* Statement* return Exp ; }
   // FormalList = ( Type1 id1, Type2 id2 ,....)
   val function: P[Function] =
-  (keyword(KPUBLIC)|keyword(KPRIVATE) *> keyword(KSTATIC) *> ( (typed ~ identifier) ~ inParens(list0( typed ~ identifier)) ~
-  //(identifier ~ inParens(list0(identifier)) ~
+   ( keyword(KPUBLIC) *> typed ~ identifier ~ inParens(list0( typed ~ identifier)) ~
     inBraces(
         varDecl.rep0 ~
           statement.rep0 ~
           (keyword(KRETURN) *> expression <* semi)
       )
-      )).map { case ( ((returnType, name), params), ((locals, body), ret)) =>
-      Function(name, params.flatten, locals.toSeq(), body, ret)
+      ).map { case (((returnType, name), params), ((locals, body), ret)) =>
+      Function(returnType, name, params, locals, Stm.Block(body), ret)
     }
 
-//    { case ((name : String, returnType : Type, params : Seq[Tuple2[Type,String]]), ((locals : Seq[sturdy.language.minijava.varDeclaration], body : Stm), ret : Exp)) =>
-//    Function(name, returnType, params, locals, body, ret)
-//  }
 
   //main class
+  // "class" Identifier "{" "public" "static" "void" "main" "(" "String" "[" "]" Identifier ")" "{" Statement "}" "}"
   val MainClass : P[mainClass] =
-    (keyword(KCLASS) *> identifier ~ (keyword(KPUBLIC) *> keyword(KSTATIC) *> keyword(KVOID) *> keyword(KMAIN) *> inParens(op("String []") ~ identifier)) ~inBraces(statement)).map {
-      case (name: String, params: Seq[String], body: Stm) => mainClass(name, params, body) //class id { public static void main ( String [] id ) { Statement } }
+    (keyword(KCLASS) *> identifier ~ inBraces(
+      keyword(KPUBLIC) *> keyword(KSTATIC) *> keyword(KVOID) *> keyword(KMAIN) *>
+        inParens(op("String []") ~ list0(identifier)) ~ inBraces(statement))).map {
+      case( (name, ((kw, params), body))) => mainClass(name, params, body)
+    }
 
 
-        //class
+  //class
+  // "class" Identifier ( "extends" Identifier )? "{" ( VarDeclaration )* ( MethodDeclaration )* "}"
   val Class: P[classDeclaration] =
-    keyword(KCLASS) *> identifier ~ (keyword(KEXT) *> list(identifier) ~ inBraces(list0(varDecl) ~ list0(function))).map {
-      case (name: String, extend: Option[String], locals: Seq[varDeclaration], funs: Seq[Function])
+    ((keyword(KCLASS) *> identifier) ~ inParens(keyword(KEXT) *> list0(identifier)) ~ inBraces(
+        varDecl.rep0 ~
+        function.rep0 )).map {
+      case ((name, extend), (locals, funs))
       => classDeclaration(name, extend, locals, funs)
-    } //class id extends id { VarDecl* MethodDecl* }
+    }
 
 
-      //Program fehlt noch
-
+  //Programm
+  //	MainClass ( ClassDeclaration )* <EOF>
   val program: P0[Program] =
-    whitespaces0 *> MainClass.map{case (main : mainClass, classes :Seq[classDeclaration]) => Program(main, classes) } <* P.end
+    whitespaces0 *> MainClass.map{
+      case (main , classes) => Program(main, classes)
+    } <* P.end
 
     }
-}

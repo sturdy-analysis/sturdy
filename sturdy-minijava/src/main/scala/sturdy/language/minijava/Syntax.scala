@@ -111,7 +111,7 @@ case class mainClass(name: String, params: Seq[String], body: Stm):
   def intLiterals: Set[Int] = body.intLiterals
 
 // Class declarations haben identifier, können erben, mehrere varDeclarations und MethodDeclarations
-case class classDeclaration(name: String, extend: Option[String], locals: Seq[varDeclaration], funs: Seq[Function]):
+case class classDeclaration(name: String, extend: Seq[String], locals: Seq[varDeclaration], funs: Seq[Function]):
   def intLiterals: Set[Int] = funs.flatMap(_.intLiterals).toSet
 
 // varDeclarations haben identifier und type
@@ -119,5 +119,5 @@ case class varDeclaration(t: Type, name: String)
 
 // methodDeclarations haben identifier, return type, mehrere Identifier,Type paare für arguments
 // außerdem mehrere varDeclarations und statements und eine return EXP
-case class Function(name: String, returnType: Type, params: Seq[Tuple2[Type,String]], locals: Seq[varDeclaration], body: Stm, ret: Exp):
+case class Function(returnType: Type, name: String,  params: Seq[Tuple2[Type,String]], locals: Seq[varDeclaration], body: Stm, ret: Exp):
   def intLiterals: Set[Int] = body.intLiterals ++ ret.intLiterals
