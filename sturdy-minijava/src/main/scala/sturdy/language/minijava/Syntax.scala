@@ -94,7 +94,7 @@ enum Stm extends Labeled:
 
 enum Assignable:
   case AVar(name: String)
-  case AArray(name: String, e: Exp)
+  case AArray(name: String, e1: Exp, e2:Exp) 
 
 enum Type:
   case Int() // case Int(n: Int)

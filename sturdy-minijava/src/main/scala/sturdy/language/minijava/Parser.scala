@@ -2,6 +2,7 @@ package sturdy.language.minijava
 
 import cats.parse.{Numbers, Parser as P, Parser0 as P0}
 
+import java.lang.reflect.AnnotatedTypeVariable
 import scala.collection.*
 import scala.language.implicitConversions
 
@@ -165,8 +166,8 @@ package object Parser {
       variable | //Variablen
       boolean | //BoolLiterals
       (keyword(KNEW) *> (keyword(KINT) *> inBrackets(atom).map(e => Exp.AllocArray(e)))) | // new int [Exp] x
-      (keyword(KNEW) *> identifier).map(e => Exp.Alloc(e)) | // new Identifier ()
-      (op('!') *> variable).map(e => Exp.Not(e)) // Logical Not
+      (keyword(KNEW) *> identifier).map(e => Exp.Alloc(e))  // new Identifier ()
+
 
   val access: P[Exp] =
     ((variable| inParens(recExpression)|expression) ~ inParens(recExpression).rep).map{
@@ -177,8 +178,8 @@ package object Parser {
   val term: P[Exp] =
     access |
       (atom ~ (
-        (op('*') *> recExpression).map(e2 => Exp.Mul(_, e2)) |
-          (op('/') *> recExpression).map(e2 => Exp.Div(_, e2))
+        (op('*') *> recExpression).map(e2 => Exp.Mul(_, e2)) | // * operation
+          (op('/') *> recExpression).map(e2 => Exp.Div(_, e2)) // / operation
         ).?).map(maybeBinOp)
 
   val operation: P[Exp] =
@@ -193,16 +194,16 @@ package object Parser {
       (op('>') *> operation).map(e2 => Exp.Gt(_, e2)) |
         (op("==") *> operation).map(e2 => Exp.Eq(_, e2))
       ).?).map(maybeBinOp) |
+      (op('!') *> (expression| inParens(recExpression))).map(e => Exp.Not(e)) | // Logical Not
       ((expression| inParens(recExpression)).map(Exp.ArrayLength.apply) <* op('.') <* keyword(KLEN)) | // Expression.length
     (((expression|recExpression) <* op(".")) ~ identifier ~ inParens(list0(expression|recExpression))).map{
       case( (fun, name), args) => Exp.Call(fun, name, args)}  //Funktionsaufruf Expression.Identifier((Expression(,Expression)*)?)
 
   val assignable: P[Assignable] =
-        identifier.map {
-          case (x : String) => Assignable.AVar(x) //AVar
-          case (x : String,e: Exp) => Assignable.AArray(x, e) //AArray
-        }
-
+    ((identifier <* op("=")) ~ variable).map( (s,v) => Assignable.AVar(s)) | //Avar
+      (((identifier ~ inBraces(expression|recExpression)) <* op("=")) ~ (expression|recExpression)).map{
+        case ((s, exp1), exp2) => Assignable.AArray(s,exp1,exp2)
+      } // AArray Ist das sowas wie id[Exp] = Exp ??
 
   lazy val statement: P[Stm] =
     (keyword(KIF) *> inParens(recExpression) ~ recStatement ~ (keyword(KELSE) *> recStatement).?)
@@ -211,7 +212,6 @@ package object Parser {
       inBraces(recStatement.rep0).map(Stm.Block.apply) | // Block
       (keyword(KPRINTLINE) *> inParens(recExpression <* semi).map(Stm.Output.apply)) | //"System.out.println" "(" Expression ")" ";"
     ((assignable <* op('=')) ~ recExpression <* semi).map(Stm.Assign.apply) // Identifier	::=	<IDENTIFIER>
-  //Fall id[Exp] = Exp fehlt noch? oder ist das schon mit bei assignable mitenthalten
 
 
   val varDecl: P[varDeclaration] =
