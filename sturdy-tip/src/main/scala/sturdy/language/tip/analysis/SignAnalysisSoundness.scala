@@ -39,8 +39,8 @@ object SignAnalysisSoundness:
       case (Value.RecValue(r1), Value.RecValue(r2)) => PartialOrder[ARecord[String, Value]].lteq(r1, r2)
       case _ => false
 
-  given Soundness[ConcreteInterpreter, SignAnalysis] with
-    def isSound(c: ConcreteInterpreter, a: SignAnalysis): IsSound = {
+  given Soundness[ConcreteInterpreter.Instance, SignAnalysis] with
+    def isSound(c: ConcreteInterpreter.Instance, a: SignAnalysis): IsSound = {
       given CAllocationIntIncrement[AllocationSite] = c.effectOps
 
       // concrete environment is sound by construction

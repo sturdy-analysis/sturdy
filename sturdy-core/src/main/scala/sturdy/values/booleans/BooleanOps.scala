@@ -1,5 +1,7 @@
 package sturdy.values.booleans
 
+import sturdy.values.Structural
+
 trait BooleanOps[V]:
   def boolLit(b: Boolean): V
   def and(v1: V, v2: V): V
@@ -13,3 +15,4 @@ given ConcreteBooleanOps: BooleanOps[Boolean] with
   def not(v: Boolean): Boolean = !v
   def or(v1: Boolean, v2: Boolean): Boolean = v1 || v2
 
+given Structural[Boolean] with {}

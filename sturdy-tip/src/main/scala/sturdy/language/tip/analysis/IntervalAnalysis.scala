@@ -22,6 +22,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.GenericInterpreter.{*, given}
+import sturdy.language.tip.given
 
 object IntervalAnalysis:
   enum Value:
@@ -115,7 +116,6 @@ object IntervalAnalysis:
     given Failure = effects
     given IntOps[Value] = new LiftedIntOps(_.asInt, IntValue.apply)
     given CompareOps[Value, Value] = new LiftedCompareOps(_.asInt, boolValue)
-    given EqOps[Function, Boolean] = new EqualsEqOps[Function]
     given EqOps[Value, Value] with
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
         case (IntValue(i1), IntValue(i2)) => boolValue(EqOps.equ(i1, i2))

@@ -39,8 +39,8 @@ object IntervalAnalysisSoundness:
       case (Value.RecValue(r1), Value.RecValue(r2)) => PartialOrder[ARecord[String, Value]].lteq(r1, r2)
       case _ => false
 
-  given Soundness[ConcreteInterpreter, IntervalAnalysis] with
-    def isSound(c: ConcreteInterpreter, a: IntervalAnalysis): IsSound = {
+  given Soundness[ConcreteInterpreter.Instance, IntervalAnalysis] with
+    def isSound(c: ConcreteInterpreter.Instance, a: IntervalAnalysis): IsSound = {
       given CAllocationIntIncrement[AllocationSite] = c.effectOps
 
       // concrete environment is sound by construction
