@@ -3,7 +3,6 @@
 //import sturdy.effect.failure.Failure
 //import sturdy.values.JoinValue
 //import sturdy.values.Topped
-//import sturdy.values.Topped.*
 //
 //given ToppedIntOps[V] (using ops: IntOps[V])(using Failure): IntOps[Topped[V]] with
 //  def intLit(i: Int): Topped[V] = Actual(ops.intLit(i))

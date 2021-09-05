@@ -7,7 +7,6 @@ import sturdy.values.Abstractly
 import sturdy.values.JoinValue
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
-import sturdy.values.Topped.*
 import sturdy.values.relational.*
 
 object DoubleInterval:
@@ -81,22 +80,22 @@ given IntervalDoubleOps: DoubleOps[DoubleInterval] with
 
 given DoubleIntervalCompareOps: CompareOps[DoubleInterval, Topped[Boolean]] with
   def lt(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =
-    if iv1.h < iv2.l then Actual(true)
-    else if iv2.h <= iv1.l then Actual(false)
-    else Top
+    if iv1.h < iv2.l then Topped.Actual(true)
+    else if iv2.h <= iv1.l then Topped.Actual(false)
+    else Topped.Top
   def le(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =
-    if iv1.h <= iv2.l then Actual(true)
-    else if iv2.h < iv1.l then Actual(false)
-    else Top
+    if iv1.h <= iv2.l then Topped.Actual(true)
+    else if iv2.h < iv1.l then Topped.Actual(false)
+    else Topped.Top
   def ge(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] = lt(iv2, iv1)
   def gt(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] = le(iv2, iv1)
 
 given DoubleIntervalEqOps: EqOps[DoubleInterval, Topped[Boolean]] with
   override def equ(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =
-    if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Actual(true)
-    else if iv1.h < iv2.l || iv2.h < iv1.l then Actual(false)
-    else Top
+    if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Topped.Actual(true)
+    else if iv1.h < iv2.l || iv2.h < iv1.l then Topped.Actual(false)
+    else Topped.Top
   override def neq(iv1: DoubleInterval, iv2: DoubleInterval): Topped[Boolean] =
-    if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Actual(false)
-    else if iv1.h < iv2.l || iv2.h < iv1.l then Actual(true)
-    else Top
+    if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Topped.Actual(false)
+    else if iv1.h < iv2.l || iv2.h < iv1.l then Topped.Actual(true)
+    else Topped.Top
