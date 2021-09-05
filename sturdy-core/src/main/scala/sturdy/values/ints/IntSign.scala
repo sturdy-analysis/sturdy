@@ -2,11 +2,8 @@ package sturdy.values.ints
 
 import sturdy.effect.JoinComputation
 import sturdy.effect.failure.Failure
-import sturdy.values.Abstractly
-import sturdy.values.Topped
+import sturdy.values.{Abstractly, JoinValue, PartialOrder, Topped, Finite}
 import sturdy.values.Topped.*
-import sturdy.values.JoinValue
-import sturdy.values.PartialOrder
 import sturdy.values.relational.*
 
 enum IntSign:
@@ -32,7 +29,7 @@ enum IntSign:
     case Pos => Neg
 
 
-import IntSign.*
+import sturdy.values.ints.IntSign.*
 
 given Abstractly[Int, IntSign] with
   override def abstractly(i: Int): IntSign =
@@ -202,3 +199,4 @@ given SignEqOps: EqOps[IntSign, Topped[Boolean]] with
     case _ => Top
   def neq(v1: IntSign, v2: IntSign): Topped[Boolean] = equ(v1, v2).map(!_)
 
+given FiniteIntSign: Finite[IntSign] with {}

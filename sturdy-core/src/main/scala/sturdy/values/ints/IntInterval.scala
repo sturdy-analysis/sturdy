@@ -45,11 +45,11 @@ given Abstractly[Int, IntInterval] with
 given PartialOrder[IntInterval] with
   override def lteq(x: IntInterval, y: IntInterval): Boolean = y.l <= x.l && x.h <= y.h
 
-given intIntervalJoin: JoinValue[IntInterval] with
+given IntIntervalJoin: JoinValue[IntInterval] with
   override def joinValues(v1: IntInterval, v2: IntInterval): IntInterval =
     IntInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
 
-given intIntervalWiden(using bounds: => Set[Int]): Widening[IntInterval] with
+class IntIntervalWiden(bounds: => Set[Int]) extends Widening[IntInterval]:
   private lazy val treeSet: TreeSet[Int] = TreeSet.from(bounds)
   override def widen(v1: IntInterval, v2: IntInterval): IntInterval =
     val low =

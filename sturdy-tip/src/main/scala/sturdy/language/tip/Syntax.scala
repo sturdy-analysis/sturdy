@@ -1,7 +1,7 @@
 package sturdy.language.tip
 
 import sturdy.util.Labeled
-import sturdy.values.Structural
+import sturdy.values.{Structural, Finite}
 
 enum Exp extends Labeled:
   case NumLit(n: Int)
@@ -94,4 +94,5 @@ case class Program(funs: Seq[Function]):
   def intLiterals: Set[Int] = funs.flatMap(_.intLiterals).toSet
 
 
-given Structural[Function] with {}
+given StructuralFunction: Structural[Function] with {}
+given FiniteFunction: Finite[Function] with {}
