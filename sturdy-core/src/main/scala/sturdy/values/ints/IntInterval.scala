@@ -13,7 +13,6 @@ import sturdy.values.relational.*
 import scala.collection.immutable.TreeSet
 
 //import apron in this file
-import de.poiu.apron
 
 
 object IntInterval:
