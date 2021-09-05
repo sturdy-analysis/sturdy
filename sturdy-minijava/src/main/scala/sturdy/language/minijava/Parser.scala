@@ -103,13 +103,6 @@ package object Parser {
   val bool: P[String] =
     spaced(bool_val)
 
-
- /* val type_val : P[String] =
-    int_type.string.filter(s => !keywords.contains(s)).backtrack | boolean_type.string.filter(s => !keywords.contains(s)).backtrack
-
-  val types : P[String] =
-    spaced(type_val)*/
-
   //Klammern, Kommas und Semikolons werden seperat geparst
 
   def inParens[A](p: P0[A]): P[A] =
@@ -186,7 +179,7 @@ package object Parser {
     (term ~ (
       (op('+') *> recExpression).map(e2 => Exp.Add(_, e2)) | // + operation
         (op('-') *> recExpression).map(e2 => Exp.Sub(_, e2)) | // - operation
-        (op("&&") *> recExpression).map(e2 => Exp.And(_, e2))
+        (op("&&") *> recExpression).map(e2 => Exp.And(_, e2)) //Logical And
       ).?).map(maybeBinOp)
 
   lazy val expression: P[Exp] =
@@ -200,10 +193,10 @@ package object Parser {
       case( (fun, name), args) => Exp.Call(fun, name, args)}  //Funktionsaufruf Expression.Identifier((Expression(,Expression)*)?)
 
   val assignable: P[Assignable] =
-    ((identifier <* op("=")) ~ variable).map( (s,v) => Assignable.AVar(s)) | //Avar
-      (((identifier ~ inBraces(expression|recExpression)) <* op("=")) ~ (expression|recExpression)).map{
-        case ((s, exp1), exp2) => Assignable.AArray(s,exp1,exp2)
-      } // AArray Ist das sowas wie id[Exp] = Exp ??
+    (identifier <* op("=")).map( s => Assignable.AVar(s)) | //Avar: x = ...
+      ((identifier ~ inBraces(expression|recExpression)) <* op("=")).map{
+        case (s, exp) => Assignable.AArray(s,exp)
+      } // AArray : id[Exp] = ...
 
   lazy val statement: P[Stm] =
     (keyword(KIF) *> inParens(recExpression) ~ recStatement ~ (keyword(KELSE) *> recStatement).?)
@@ -215,7 +208,7 @@ package object Parser {
 
 
   val varDecl: P[varDeclaration] =
-    (((typed ~ identifier) <* op('=')) ~ expression).map{case (t : Type, name : String) => varDeclaration(t,name)} // type id
+    ((typed ~ identifier) <* op('=')).map{case (t , name) => varDeclaration(t,name)} // type id = ...
 
 
   //MethodDecl -> public Type id ( FormalList ) { VarDecl* Statement* return Exp ; }
