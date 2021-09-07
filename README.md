@@ -5,3 +5,9 @@ JAVA_HOME=$JAVA_HOME ./configure -no-ppl
  ```
  apt install mlocate openjdk-11-jdk
  ```
+ apron:
+sudo make install
+
+
+ -Djava.library.path=/usr/local/lib   // für apron/japron
+

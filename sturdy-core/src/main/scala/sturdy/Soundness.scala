@@ -21,7 +21,7 @@ enum IsSound:
       other
     else
       this
-
+// C := Concrete; A := Abstract
 trait Soundness[C, A]:
   def isSound(c: C, a: A): IsSound
 //documentation on using clauses: https://docs.scala-lang.org/scala3/reference/contextual/using-clauses.html

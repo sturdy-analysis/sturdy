@@ -17,7 +17,7 @@ lazy val root = (project in file("."))
 lazy val sturdy_core = (project in file("sturdy-core"))
   .settings(
     name := "sturdy-core",
-    cd ..++= Seq(
+    libraryDependencies ++= Seq(
       "org.apache.commons" % "commons-math3" % "3.6.1",
       // TODO: Add Apron Library done
       //"apron" % "apron" % "0.9.13" at "lib/apron.jar",
