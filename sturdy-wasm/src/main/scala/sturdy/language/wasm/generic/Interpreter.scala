@@ -298,3 +298,29 @@ trait Interpreter[V,Addr,Bytes,Size]
 
   def memoryIndex: Int =
     module.memoryAddrs(0)
+
+  def evalInstructionSequence(instructions: Expr, mod: ModuleInstance[V]): V =
+    val frameData = FrameData(1,mod)
+    // TODO
+//    inNewFrame(frameData, Vector.empty){
+//      stack.pop()
+//    }
+    ???
+
+  // we assume a valid module here
+  def initializeModule(module: Module): ModuleInstance[V] =
+    // we ignore imports an imports checking for now -> start with the empty module instance
+    val modInst = new Object with ModuleInstance[V]
+    // compute the initilization values for globals
+    val globValues = module.globals.map(glob => evalInstructionSequence(glob.init, modInst))
+    // in the current swam version reference vectors are already provided via the elem fields of the module
+    // -> we don't have to compute anything here for now
+
+    // allocate structures for the new module
+    // types
+    modInst.functionTypes = module.types
+    // functions
+    modInst.functions = module.funcs.map(func => FunctionInstance.Wasm(modInst,func,module.types(func.tpe)))
+    // TODO tables, mems, globals, elems, data, exports
+
+    modInst

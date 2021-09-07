@@ -4,14 +4,15 @@ import swam.*
 import swam.syntax.Func
 
 trait ModuleInstance[V]:
-  val functionTypes: Vector[FuncType]
-  val functions: Vector[FunctionInstance[V]]
-  val tables: Vector[TableInstance[V]]
-  val memoryAddrs: Vector[Int]
-  val globals: Vector[GlobalInstance[V]]
-  val elementAddrs: Vector[Int]
-  val dataAddrs: Vector[Int]
-  val exports: Vector[(String, ExternalValue)]
+  var functionTypes: Vector[FuncType] = Vector.empty
+  var functions: Vector[FunctionInstance[V]] = Vector.empty
+  var tables: Vector[TableInstance[V]] = Vector.empty
+  var memoryAddrs: Vector[Int] = Vector.empty
+  var globals: Vector[GlobalInstance[V]] = Vector.empty
+  var elementAddrs: Vector[Int] = Vector.empty
+  var dataAddrs: Vector[Int] = Vector.empty
+  var exports: Vector[(String, ExternalValue)] = Vector.empty
+
 
   def invokeExported[Addr,Bytes,Size](funcName: String, args: List[V])(using interp: Interpreter[V,Addr,Bytes,Size]): List[V] =
     exports.find((name,_) => name == funcName) match
