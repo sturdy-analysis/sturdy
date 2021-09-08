@@ -5,8 +5,7 @@ import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import swam.syntax.*
-import swam.OpCode
-import swam.ValType
+import swam.{BlockType, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.binarymemory.{EffectiveAddress, MemSize, Memory, WasmSerialize}
 import sturdy.effect.branching.BoolBranching
@@ -18,8 +17,6 @@ import sturdy.values.longs.*
 import sturdy.values.relational.CompareOps
 import sturdy.values.relational.EqOps
 import sturdy.values.unit
-import swam.BlockType
-import swam.LabelIdx
 
 object Interpreter:
   case class FrameData[V](returnArity: Int, module: ModuleInstance[V])
@@ -299,13 +296,23 @@ trait Interpreter[V,Addr,Bytes,Size]
   def memoryIndex: Int =
     module.memoryAddrs(0)
 
+  // placeholder for the (not yet present in swam) memory.init instruction
+  def memoryInit(dataIdx: Int): Unit =
+    val dataInstance = module.data(dataIdx)
+    val cnt = stack.pop() // i32
+    val src = stack.pop() // i32
+    val dst = stack.pop() // i32
+    // check ranges TODO
+    //if (src + cnt > dataInstance.data.size)
+    // TODO WIP
+    ???
+
   def evalInstructionSequence(instructions: Expr, mod: ModuleInstance[V]): V =
     val frameData = FrameData(1,mod)
-    // TODO
-//    inNewFrame(frameData, Vector.empty){
-//      stack.pop()
-//    }
-    ???
+    withFreshOperandStack(labelStack.withFresh(inNewFrame(frameData, Vector.empty[V]){
+      instructions.foreach(eval)
+      stack.pop()
+    }))
 
   // we assume a valid module here
   def initializeModule(module: Module): ModuleInstance[V] =
@@ -321,6 +328,70 @@ trait Interpreter[V,Addr,Bytes,Size]
     modInst.functionTypes = module.types
     // functions
     modInst.functions = module.funcs.map(func => FunctionInstance.Wasm(modInst,func,module.types(func.tpe)))
-    // TODO tables, mems, globals, elems, data, exports
+    // tables
+    modInst.tables = module.tables.map {
+      tab =>
+        tab match
+          case TableType(elemtype, Limits(min, max)) => TableInstance(tab,Vector.iterate(null,min)(identity))
+    }
+    // memory
+    modInst.memoryAddrs = module.mems.map {
+      mem =>
+        mem match
+          case MemType(Limits(min, max)) => addEmptyMemory(min,max)
+    }
+    // globals
+    modInst.globals = module.globals.zip(globValues).map {
+      glob =>
+        glob match
+          case (Global(GlobalType(tpe,_),_),value) => GlobalInstance(tpe,value)
+    }
+    // data
+    modInst.data = module.data.map {
+      data =>
+        data match
+          case Data(_,_,init) => DataInstance(init.toByteVector)
+    }
+    // TODO elems
+    // exports
+    modInst.exports = module.exports.map {
+      exp =>
+        exp match
+          case Export(fieldName, kind, index) =>
+            kind match {
+              case ExternalKind.Function => (fieldName,ExternalValue.Function(index))
+              case ExternalKind.Global => (fieldName,ExternalValue.Global(index))
+              case ExternalKind.Memory => (fieldName,ExternalValue.Memory(index))
+              case ExternalKind.Table => (fieldName,ExternalValue.Table(index))
+            }
+    }
+
+    // initialize tables and memories
+    val frameData = FrameData(1,modInst)
+    // TODO: do we need a fresh stack and label stack here?
+    inNewFrame(frameData, Vector.empty[V]){
+      // memory
+      module.data.zipWithIndex.foreach {
+        data =>
+          data match
+            case (Data(memIdx, off, init),i) =>
+              assert(memIdx == 0)
+              off.foreach(eval)
+              val base = stack.pop()
+              val bytes = init.toByteVector.toIterable
+              bytes.zipWithIndex.foreach { (byte,byteIdx) =>
+                stack.push(base)
+                eval(i32.Const(byte.toInt))
+                eval(i32.Store8(0, byteIdx))
+              }
+              // in case we want to use memory.init here:
+              //eval(i32.Const(0))
+              //eval(i32.Const((init.size / 8).toInt)) //is it ok to convert long to int here?
+              //memoryInit(i)
+              // memoryDrop(i) for the current wasm version
+      }
+      // TODO tables
+    }
+
 
     modInst

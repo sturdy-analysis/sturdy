@@ -14,3 +14,5 @@ trait Memory[Addr,Bytes,Size]:
   def memSize(memIdx: Int): Size
   //def memGrow[A](memIdx: Int, size: Size, ok: Size => A, notOk: => A): A
   def memGrow(memIdx: Int, delta: Size): MayCompute[Size, MemoryJoin, MemoryJoinComp]
+
+  def addEmptyMemory(min: Int, max: Option[Int]): Int

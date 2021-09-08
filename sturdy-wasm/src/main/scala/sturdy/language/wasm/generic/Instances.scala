@@ -1,5 +1,6 @@
 package sturdy.language.wasm.generic
 
+import scodec.bits.ByteVector
 import swam.*
 import swam.syntax.Func
 
@@ -10,7 +11,7 @@ trait ModuleInstance[V]:
   var memoryAddrs: Vector[Int] = Vector.empty
   var globals: Vector[GlobalInstance[V]] = Vector.empty
   var elementAddrs: Vector[Int] = Vector.empty
-  var dataAddrs: Vector[Int] = Vector.empty
+  var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
 
@@ -33,8 +34,9 @@ enum FunctionInstance[V]:
   def funcType: FuncType = this match
     case Wasm(_, _ , ft) => ft
 
-case class TableInstance[V](functions: Vector[FunctionInstance[V]])
-case class GlobalInstance[V](var value: V)
+case class TableInstance[V](tableType: TableType, functions: Vector[FunctionInstance[V]])
+case class GlobalInstance[V](tpe: ValType, var value: V)
+case class DataInstance(data: ByteVector)
 
 enum ExternalValue:
   case Function(addr: Int)
