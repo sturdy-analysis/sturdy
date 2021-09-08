@@ -352,7 +352,7 @@ trait Interpreter[V,Addr,Bytes,Size]
         data match
           case Data(_,_,init) => DataInstance(init.toByteVector)
     }
-    // TODO elems
+    // we don't need elems currently
     // exports
     modInst.exports = module.exports.map {
       exp =>
@@ -390,8 +390,21 @@ trait Interpreter[V,Addr,Bytes,Size]
               //memoryInit(i)
               // memoryDrop(i) for the current wasm version
       }
-      // TODO tables
+      module.elem.zipWithIndex.foreach {
+        elem =>
+          elem match
+            case (Elem(tableIdx, off, init), i) =>
+              off.foreach(eval)
+              val base = stack.pop()
+              // TODO: base is of type V - we can't use is as is as index into a table
+              // maybe we waste precision here, because off consists only of constant expressions
+
+      }
     }
 
+    // invoke the start function
+    module.start.foreach {
+      funcIdx => eval(Call(funcIdx))
+    }
 
     modInst

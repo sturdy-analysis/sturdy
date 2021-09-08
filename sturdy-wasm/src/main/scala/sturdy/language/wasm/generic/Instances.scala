@@ -10,7 +10,7 @@ trait ModuleInstance[V]:
   var tables: Vector[TableInstance[V]] = Vector.empty
   var memoryAddrs: Vector[Int] = Vector.empty
   var globals: Vector[GlobalInstance[V]] = Vector.empty
-  var elementAddrs: Vector[Int] = Vector.empty
+  var elems: Vector[ElemInstance[V]] = Vector.empty
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
@@ -37,6 +37,7 @@ enum FunctionInstance[V]:
 case class TableInstance[V](tableType: TableType, functions: Vector[FunctionInstance[V]])
 case class GlobalInstance[V](tpe: ValType, var value: V)
 case class DataInstance(data: ByteVector)
+case class ElemInstance[V](functions: Vector[FunctionInstance[V]])
 
 enum ExternalValue:
   case Function(addr: Int)
