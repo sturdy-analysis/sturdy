@@ -10,5 +10,6 @@ case object UnboundFunctionIndex extends FailureKind
 case object UninitializedFunction extends FailureKind
 case object IndirectCallTypeMismatch extends FailureKind
 case object MemoryAccessOutOfBounds extends FailureKind
+case object TableAccessOutOfBounds extends FailureKind
 case object InvocationError extends FailureKind
 case object InvalidModule extends FailureKind

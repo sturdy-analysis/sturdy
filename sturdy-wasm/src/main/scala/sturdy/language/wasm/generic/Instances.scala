@@ -7,7 +7,7 @@ import swam.syntax.Func
 trait ModuleInstance[V]:
   var functionTypes: Vector[FuncType] = Vector.empty
   var functions: Vector[FunctionInstance[V]] = Vector.empty
-  var tables: Vector[TableInstance[V]] = Vector.empty
+  var tableAddrs: Vector[Int] = Vector.empty
   var memoryAddrs: Vector[Int] = Vector.empty
   var globals: Vector[GlobalInstance[V]] = Vector.empty
   var elems: Vector[ElemInstance[V]] = Vector.empty

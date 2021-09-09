@@ -9,6 +9,7 @@ import swam.{BlockType, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.binarymemory.{EffectiveAddress, MemSize, Memory, WasmSerialize}
 import sturdy.effect.branching.BoolBranching
+import sturdy.effect.table.Table
 import sturdy.values.convert.*
 import sturdy.values.doubles.*
 import sturdy.values.floats.*
@@ -33,6 +34,7 @@ object Interpreter:
   type Effects[V,Addr,Bytes,Size] =
     OperandStack[V]
       with WasmMemory[Addr,Bytes,Size,V]
+      with Table[V,FunctionInstance[V]]
       with CMutableCallFrameInt[FrameData[V], V]
       with BoolBranching[V]
       with Except[WasmException[V]]
@@ -52,6 +54,7 @@ trait Interpreter[V,Addr,Bytes,Size]
   (using wasmOps: WasmOperations[V])
   (using effectOps.BoolBranchJoin[Unit],
    effectOps.MemoryJoin[Unit], effectOps.MemoryJoin[V], effectOps.MemoryJoinComp,
+   effectOps.TableJoin[Unit], effectOps.TableJoinComp,
    wasmOps.WasmOpsJoin[Unit], wasmOps.WasmOpsJoinComp):
 
   import effectOps.*
@@ -152,10 +155,11 @@ trait Interpreter[V,Addr,Bytes,Size]
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func)
     case CallIndirect(typeIx) =>
-      val table = module.tables(0)
+      //val table = module.tables(0)
       val ftExpected = module.functionTypes(typeIx)
       val funcIx = stack.pop()
-      indexLookup(funcIx, table.functions).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
+      tableGet(tableIndex, funcIx).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
+      //indexLookup(funcIx, table.functions).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
         if (func == null)
           fail(UninitializedFunction, funcIx.toString)
         val ftActual = func.funcType
@@ -296,6 +300,9 @@ trait Interpreter[V,Addr,Bytes,Size]
   def memoryIndex: Int =
     module.memoryAddrs(0)
 
+  def tableIndex: Int =
+    module.tableAddrs(0)
+
   // placeholder for the (not yet present in swam) memory.init instruction
   def memoryInit(dataIdx: Int): Unit =
     val dataInstance = module.data(dataIdx)
@@ -329,10 +336,10 @@ trait Interpreter[V,Addr,Bytes,Size]
     // functions
     modInst.functions = module.funcs.map(func => FunctionInstance.Wasm(modInst,func,module.types(func.tpe)))
     // tables
-    modInst.tables = module.tables.map {
+    modInst.tableAddrs = module.tables.map {
       tab =>
         tab match
-          case TableType(elemtype, Limits(min, max)) => TableInstance(tab,Vector.iterate(null,min)(identity))
+          case TableType(_, Limits(min,max)) => addEmptyTable(min,max)
     }
     // memory
     modInst.memoryAddrs = module.mems.map {
@@ -390,16 +397,23 @@ trait Interpreter[V,Addr,Bytes,Size]
               //memoryInit(i)
               // memoryDrop(i) for the current wasm version
       }
+      // tables
       module.elem.zipWithIndex.foreach {
         elem =>
           elem match
             case (Elem(tableIdx, off, init), i) =>
               off.foreach(eval)
               val base = stack.pop()
-              // TODO: base is of type V - we can't use is as is as index into a table
-              // maybe we waste precision here, because off consists only of constant expressions
-
-      }
+              init.zipWithIndex.foreach { (funcIx,i) =>
+                stack.push(base)
+                eval(i32.Const(i))
+                eval(i32.Add) // adds index to base
+                val idx = stack.pop() // stack is empty
+                tableSet(tableIdx, idx, modInst.functions(funcIx)).orElse(
+                  fail(TableAccessOutOfBounds, s"Cannot write at index $idx in current table.")
+                ) // funcIx is valid due to validation
+              }
+     }
     }
 
     // invoke the start function
