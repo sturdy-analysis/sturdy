@@ -4,7 +4,10 @@ ThisBuild / scalaVersion := "3.0.1"
 ThisBuild / licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
 Test / parallelExecution := false
-Test / fork := false
+Test / fork := true
+Test / javaOptions ++= Seq(
+  "-Djava.library.path=/usr/local/lib"
+)
 
 lazy val root = (project in file("."))
   .settings(name := "sturdy")
@@ -19,8 +22,6 @@ lazy val sturdy_core = (project in file("sturdy-core"))
     name := "sturdy-core",
     libraryDependencies ++= Seq(
       "org.apache.commons" % "commons-math3" % "3.6.1",
-      // TODO: Add Apron Library done
-      //"apron" % "apron" % "0.9.13" at "lib/apron.jar",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )

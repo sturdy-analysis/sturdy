@@ -1,5 +1,6 @@
 package sturdy.values.ints
 
+
 import sturdy.effect.JoinComputation
 import sturdy.effect.failure.Failure
 import sturdy.fix.Widening
@@ -12,7 +13,13 @@ import sturdy.values.relational.*
 
 import scala.collection.immutable.TreeSet
 
+import apron.Abstract0
+//import apron.Manager
+import apron.Box
 
+val x = apron.Box()
+
+/* 
 object IntInterval:
   val Top = IntInterval(Int.MinValue, Int.MaxValue)
   def bounded(l: Long, h: Long): IntInterval =
@@ -123,4 +130,4 @@ given IntIntervalEqOps: EqOps[IntInterval, Topped[Boolean]] with
   override def neq(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] =
     if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Actual(false)
     else if iv1.h < iv2.l || iv2.h < iv1.l then Actual(true)
-    else Top
+    else Top */
