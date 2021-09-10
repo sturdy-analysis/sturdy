@@ -7,7 +7,7 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import swam.syntax.*
 import swam.{BlockType, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
 import sturdy.effect.operandstack.OperandStack
-import sturdy.effect.binarymemory.{EffectiveAddress, MemSize, Memory, WasmSerialize}
+import sturdy.effect.binarymemory.{EffectiveAddress, MemSize, Memory, Serialize}
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.table.Table
 import sturdy.values.convert.*
@@ -29,7 +29,7 @@ object Interpreter:
   type WasmMemory[Addr,Bytes,Size,V] = Memory[Addr,Bytes,Size]
     with EffectiveAddress[V,Int,Addr]
     with MemSize[V,Size]
-    with WasmSerialize[V,Bytes,MemoryInst,MemoryInst]
+    with Serialize[V,Bytes,MemoryInst,MemoryInst]
 
   type Effects[V,Addr,Bytes,Size] =
     OperandStack[V]
@@ -339,7 +339,7 @@ trait Interpreter[V,Addr,Bytes,Size]
     modInst.tableAddrs = module.tables.map {
       tab =>
         tab match
-          case TableType(_, Limits(min,max)) => addEmptyTable(min,max)
+          case TableType(_, Limits(min,max)) => addEmptyTable(min,max,null)
     }
     // memory
     modInst.memoryAddrs = module.mems.map {
