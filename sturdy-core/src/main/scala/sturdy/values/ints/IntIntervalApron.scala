@@ -13,12 +13,28 @@ import sturdy.values.relational.*
 
 import scala.collection.immutable.TreeSet
 
-import apron.Abstract0
-//import apron.Manager
+import apron.Abstract0 //default; for domains without environments
 import apron.Box
 
-val x = apron.Box()
+val ourAbstractDomain = apron.Box()
 
+object IntIntervalApron:
+  var Top = apron.Interval().setTop()
+  def bounded(l: Long, h: Long): IntIntervalApron =
+    IntIntervalApron(Math.max(l, Int.MinValue).toInt, Math.min(h, Int.MaxValue).toInt)
+
+case class IntIntervalApron(l: Int, h: Int):
+  if (l > h)
+    throw new IllegalArgumentException(s"Empty intervals are illegal $this")
+  def join(other: IntIntervalApron): IntIntervalApron =
+    //problem: die join-Funktion erwartet abstract0 Objekte aber die apron Intervalle sind keine abstract0 Objekte sondern Coeff
+    var abstract0Object = Abstract0(ourAbstractDomain, 2, 0)
+    abstract0Object.toBox(ourAbstractDomain) //gibt überaproximierendes Intervall-Array um das abstracte objekt herum zurück
+    //oder direkt: Abstract0(Manager man, int intdim, int realdim, Interval[] box) - Creates a new abstract element from a box.
+    //var intervalArray: Seq[Abstract0] = Array(this, other)
+    apron.Abstract0.join(ourAbstractDomain,intervalArray)
+
+     
 /* 
 object IntInterval:
   val Top = IntInterval(Int.MinValue, Int.MaxValue)
