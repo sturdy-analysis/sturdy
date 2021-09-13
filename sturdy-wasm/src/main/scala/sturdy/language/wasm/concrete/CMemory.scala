@@ -1,7 +1,9 @@
-package sturdy.effect.binarymemory
+package sturdy.language.wasm.concrete
 
+import sturdy.effect.binarymemory.Memory
 import sturdy.effect.{CMayCompute, MayCompute, NoJoin}
 
+import java.nio.ByteBuffer
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
@@ -14,28 +16,31 @@ object CMemory:
 
 import CMemory.*
 
-trait CMemory extends Memory[Long, Vector[Byte], Int]:
+trait CMemory extends Memory[Long, ByteBuffer, Int]:
   override type MemoryJoin[A] = NoJoin[A]
   override type MemoryJoinComp = Unit
 
   protected val memories: ArrayBuffer[Mem] = ArrayBuffer.empty
 
-  override def memRead(memIdx: Int, addr: Long, length: Int): CMayCompute[Vector[Byte]] =
+  override def memRead(memIdx: Int, addr: Long, length: Int): CMayCompute[ByteBuffer] =
     val Mem(_,_,size,mem) = memories(memIdx)
     val upper = addr + length
     if (upper < size)
-      val bytes = for (i <- Vector.range(addr,upper))
-        yield mem.getOrElse[Byte](i,0x00)
-      CMayCompute.Computes(bytes)
+      val buf = Interpreter.allocByteBuffer(length)
+      Vector.range(addr,upper).zipWithIndex.foreach {
+        (addr,i) => buf.put(i,mem.getOrElse[Byte](addr, 0x00))
+      }
+      CMayCompute.Computes(buf)
     else
       CMayCompute.ComputesNot()
 
 
-  override def memStore(memIdx: Int, addr: Long, bytes: Vector[Byte]): CMayCompute[Unit] =
+  override def memStore(memIdx: Int, addr: Long, bytes: ByteBuffer): CMayCompute[Unit] =
+    val arr = bytes.array()
     val Mem(_,_,size,mem) = memories(memIdx)
-    val upper: Long = addr + bytes.length
+    val upper: Long = addr + arr.length
     if (upper < size)
-      bytes.zipWithIndex.foreach { (byte,i) =>
+      arr.zipWithIndex.foreach { (byte,i) =>
         mem(addr+i) = byte
       }
       CMayCompute.Computes(())

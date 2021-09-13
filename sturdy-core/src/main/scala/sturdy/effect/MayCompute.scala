@@ -11,7 +11,7 @@ trait MayCompute[A, Join[_], JoinComp]:
   final def get(using JoinComp)(using Join[A]): A = withDefault(throw new MatchError(this))(identity)
 
 
-private final class NoJoin[A]
+final class NoJoin[A]
 given noJoin[A]: NoJoin[A] = new NoJoin
 
 enum CMayCompute[A] extends MayCompute[A, NoJoin, Unit]:

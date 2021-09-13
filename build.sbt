@@ -65,7 +65,6 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
     name := "sturdy-wasm",
     libraryDependencies ++= Seq(
       ("org.gnieh" % "swam-core" % "0.6.0-RC4").cross(CrossVersion.for3Use2_13),
-      ("org.gnieh" % "swam-runtime" % "0.6.0-RC4").cross(CrossVersion.for3Use2_13),
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
       ("org.gnieh" % "swam-text" % "0.6.0-RC4").cross(CrossVersion.for3Use2_13) % "test"
