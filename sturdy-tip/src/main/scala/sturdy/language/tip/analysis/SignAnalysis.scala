@@ -24,7 +24,7 @@ import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.GenericInterpreter.{AllocationSite, GenericPhi, FixIn, FixOut, given}
 import sturdy.language.tip.abstractions.*
-
+import Fix.*
 
 object SignAnalysis extends Interpreter,
   Ints.Sign, Functions.Powerset, References.AllocationSites, Records.PreciseFieldsOrTop:
@@ -69,24 +69,7 @@ object SignAnalysis extends Interpreter,
     final val vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final val vrecOps: RecordOps[String, Value, VRecord] = implicitly
 
-    given fix.Widening[VRecord] = new ARecordWidening(using lazily(liftedWidening))
-
-    def isCallOrWhile(dom: FixIn): Int = dom match
-      case FixIn.EnterFunction(_) => 0
-      case FixIn.Run(Stm.While(_, _)) => 1
-      case _ => -1
-
-
-    type Ctx = List[Exp.Call]
-    val callSites = fix.context.callSites[FixIn, Exp.Call] {
-      case FixIn.Eval(c: Exp.Call) => Some(c)
-      case _ => None
-    }
-
-    val parameters: fix.context.Sensitivity[FixIn, Map[Addr, Value]] = fix.context.parametersFromStore {
-      case FixIn.EnterFunction(f) => Some(f.params.map(p => effects.getLocal(p).get))
-      case _ => None
-    }
+    given Lazy[fix.Widening[Value]] = lazily(liftedWidening)
 
     val phi =
       fix.contextSensitive(parameters,

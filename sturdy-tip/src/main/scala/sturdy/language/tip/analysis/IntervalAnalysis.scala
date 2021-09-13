@@ -23,6 +23,7 @@ import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.GenericInterpreter.{FixIn, GenericPhi, AllocationSite, FixOut}
 import sturdy.language.tip.abstractions.*
+import Fix.*
 
 object IntervalAnalysis extends Interpreter,
   Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites:
@@ -68,23 +69,13 @@ object IntervalAnalysis extends Interpreter,
 
     var bounds: Set[Int] = Set.empty
     given fix.Widening[IntInterval] = new IntIntervalWiden(bounds)
-    given fix.Widening[VRecord] = new ARecordWidening(using lazily(liftedWidening))
+    given Lazy[fix.Widening[Value]] = lazily(liftedWidening)
 
     override def execute(p: Program): Value =
       bounds = p.intLiterals
       super.execute(p)
 
-    def isCallOrWhile(dom: FixIn): Int = dom match
-      case FixIn.EnterFunction(_) => 0
-      case FixIn.Run(Stm.While(_, _)) => 1
-      case _ => -1
-
-
-    type Ctx = List[Exp.Call]
-    val callSites = fix.context.callSites[FixIn, Exp.Call] {
-      case FixIn.Eval(c: Exp.Call) => Some(c)
-      case _ => None
-    }
+    val callSites = callSitesLogger()
 
     val phi =
       fix.log(callSites,
