@@ -23,46 +23,14 @@ import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.GenericInterpreter.{AllocationSite, GenericPhi, FixIn, FixOut, given}
+import sturdy.language.tip.abstractions.*
 
-object SignAnalysis extends Interpreter:
-  override type VBool = Topped[Boolean]
-  override type VInt = IntSign
-  override type VRef = Powerset[AllocationSiteRef]
-  override type VFun = Powerset[Function]
-  override type VRecord = ARecord[String, Value]
 
-  given JoinValue[VRecord] = new ARecordJoin(using lazily(liftedJoinValue))
+object SignAnalysis extends Interpreter,
+  Ints.Sign, Functions.Powerset, References.AllocationSites, Records.PreciseFieldsOrTop:
 
-  override def topInt(using Interpreter): IntSign = IntSign.TopSign
-  override def topReference(using self: Interpreter): Powerset[AllocationSiteRef] =
-    val addrs = self.effects.getStore.keySet
-    Powerset(addrs.map(AllocationSiteRef.Addr.apply) + AllocationSiteRef.Null)
-  override def topFun(using self: Interpreter): Powerset[Function] = Powerset(self.getFunctions.toSet)
-  override def topRecord(using Interpreter): ARecord[String, Value] = ARecord.Top()
+  given Lazy[JoinValue[Value]] = lazily(liftedJoinValue)
 
-  override def asBoolean(v: Value): VBool = v match
-    case Value.IntValue(i) => i match
-      case IntSign.Zero => Topped.Actual(false)
-      case IntSign.Pos | IntSign.Neg => Topped.Actual(true)
-      case _ => Topped.Top
-    case Value.TopValue => Topped.Top
-    case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
-
-  def boolean(b: Topped[Boolean]): Value = Value.IntValue(b match
-    case Topped.Top => IntSign.ZeroOrPos
-    case Topped.Actual(true) => IntSign.Pos
-    case Topped.Actual(false) => IntSign.Zero
-  )
-
-  override type Addr = Powerset[AllocationSiteAddr]
-  def fromAllocationSite(asite: AllocationSite): Addr = Powerset(asite match
-    case AllocationSite.Alloc(e) => AllocationSiteAddr.Alloc(e.label)(true)
-    case AllocationSite.ParamBinding(fun, p) => AllocationSiteAddr.Variable(s"${fun.name}:$p")(true)
-    case AllocationSite.LocalBinding(fun, v) => AllocationSiteAddr.Variable(s"${fun.name}:$v")(true)
-    case AllocationSite.Record(r) => AllocationSiteAddr.Alloc(r.label)(true)
-  )
-  type Environment = Map[String, Addr]
-  type Store = Map[AllocationSiteAddr, Value]
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
       with CCallFrame[Unit, String, Addr]((), initEnvironment)

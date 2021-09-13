@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.effect.{AnalysisState, JoinComputation}
+import sturdy.effect.{JoinComputation, AnalysisState}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.callframe.CCallFrame
@@ -21,46 +21,14 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.GenericInterpreter.{AllocationSite, GenericPhi, FixIn, FixOut, given}
+import sturdy.language.tip.GenericInterpreter.{FixIn, GenericPhi, AllocationSite, FixOut}
+import sturdy.language.tip.abstractions.*
 
-object IntervalAnalysis extends Interpreter:
-  override type VBool = Topped[Boolean]
-  override type VInt = IntInterval
-  override type VRef = Powerset[AllocationSiteRef]
-  override type VFun = Powerset[Function]
-  override type VRecord = ARecord[String, Value]
+object IntervalAnalysis extends Interpreter,
+  Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites:
 
-  given JoinValue[VRecord] = new ARecordJoin(using lazily(liftedJoinValue))
+  given Lazy[JoinValue[Value]] = lazily(liftedJoinValue)
 
-  override def topInt(using Interpreter): IntInterval = IntInterval.Top
-  override def topReference(using self: Interpreter): Powerset[AllocationSiteRef] =
-    val addrs = self.effects.getStore.keySet
-    Powerset(addrs.map(AllocationSiteRef.Addr.apply) + AllocationSiteRef.Null)
-  override def topFun(using self: Interpreter): Powerset[Function] = Powerset(self.getFunctions.toSet)
-  override def topRecord(using Interpreter): ARecord[String, Value] = ARecord.Top()
-
-  override def asBoolean(v: Value): VBool = v match
-    case Value.IntValue(i) => EqOps.equ(i, IntInterval(0, 0)).map(!_)
-    case Value.TopValue => Topped.Top
-    case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
-
-  override def boolean(b: VBool): Value = Value.IntValue(b match
-    case Topped.Top => IntInterval(0, 1)
-    case Topped.Actual(true) => IntInterval(1, 1)
-    case Topped.Actual(false) => IntInterval(0, 0)
-  )
-
-  override type Addr = Powerset[AllocationSiteAddr]
-  def fromAllocationSite(asite: AllocationSite): Addr = Powerset(asite match
-    case AllocationSite.Alloc(e) => AllocationSiteAddr.Alloc(e.label)(true)
-    case AllocationSite.ParamBinding(fun, p) => AllocationSiteAddr.Variable(s"${fun.name}:$p")(true)
-    case AllocationSite.LocalBinding(fun, v) => AllocationSiteAddr.Variable(s"${fun.name}:$v")(true)
-    case AllocationSite.Record(r) => AllocationSiteAddr.Alloc(r.label)(true)
-  )
-  type Environment = Map[String, Addr]
-  type Store = Map[AllocationSiteAddr, Value]
-  type In = Store
-  type Out = (Store, APrintPrefix.PrintResult[Value])
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
       with CCallFrame[Unit, String, Addr]((), initEnvironment)
@@ -69,7 +37,7 @@ object IntervalAnalysis extends Interpreter:
       with APrintPrefix[Value]
       with AUserInput[Value](Value.IntValue(IntInterval.Top))
       with AFailureCollect
-      with AnalysisState[In, Out]:
+      with AnalysisState[Store, (Store, APrintPrefix.PrintResult[Value])]:
     override def getInState(): InState = getStore
     override def setInState(in: InState): Unit = setStore(in)
     override def getOutState(): OutState = (getStore, getPrinted)
