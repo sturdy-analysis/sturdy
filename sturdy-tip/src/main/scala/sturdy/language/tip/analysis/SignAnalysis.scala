@@ -31,13 +31,14 @@ object SignAnalysis extends Interpreter:
   override type VFun = Powerset[Function]
   override type VRecord = ARecord[String, Value]
 
-  given Lazy[JoinValue[Value]] = lazily(liftedJoinValue)
-  given Lazy[EqOps[Value, Value]] = lazily(liftedEqOps)
+  given JoinValue[VRecord] = new ARecordJoin(using lazily(liftedJoinValue))
 
-  override def topInt: IntSign = IntSign.TopSign
-  override def topReference: Powerset[AllocationSiteRef] = ???
-  override def topFun: Powerset[Function] = ???
-  override def topRecord: ARecord[String, Value] = ARecord.Top()
+  override def topInt(using Interpreter): IntSign = IntSign.TopSign
+  override def topReference(using self: Interpreter): Powerset[AllocationSiteRef] =
+    val addrs = self.effects.getStore.keySet
+    Powerset(addrs.map(AllocationSiteRef.Addr.apply) + AllocationSiteRef.Null)
+  override def topFun(using self: Interpreter): Powerset[Function] = Powerset(self.getFunctions.toSet)
+  override def topRecord(using Interpreter): ARecord[String, Value] = ARecord.Top()
 
   override def asBoolean(v: Value): VBool = v match
     case Value.IntValue(i) => i match
@@ -79,45 +80,55 @@ object SignAnalysis extends Interpreter:
       setPrinted(out._2)
     override def isOutStateStable(old: OutState, now: OutState): Boolean = old._1 == now._1
 
-  def apply(initEnvironment: Environment, initStore: Store, steps: Int): SignAnalysis =
+  def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
     val effects = new Effects(initEnvironment, initStore)
     given Failure = effects
     given JoinComputation = effects
-    new SignAnalysis(steps)(using effects)
+    new Instance(effects, steps)
 
-import SignAnalysis.{*, given}
-class SignAnalysis(steps: Int)(using effects: Effects)
-                  (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value], functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[Addr, Value], recOps: RecordOps[String, Value, Value])
-                  (using JoinComputation)
-  extends GenericInterpreter[Value, Addr, Effects](effects):
+  class Instance(effects: Effects, steps: Int)(using Failure, JoinComputation)
+    extends Interpreter with GenericInterpreter[Value, Addr, Effects](effects):
 
-  given fix.Widening[VRecord] = new ARecordWidening(using lazily(liftedWidening))
+    given Effects = effects
 
-  def isCallOrWhile(dom: FixIn): Int = dom match
-    case FixIn.EnterFunction(_) => 0
-    case FixIn.Run(Stm.While(_, _)) => 1
-    case _ => -1
+    final val vintOps: IntOps[VInt] = implicitly
+    final val vcompareOps: CompareOps[VInt, VBool] = implicitly
+    final val vintEqOps: EqOps[VInt, VBool] = implicitly
+    final val vrefEqOps: EqOps[VRef, VBool] = implicitly
+    final val vfunEqOps: EqOps[VFun, VBool] = implicitly
+    final val vrecEqOps: EqOps[VRecord, VBool] = new ARecordEqOps(using lazily(eqOps))
+    final val vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
+    final val vrefOps: ReferenceOps[Addr, VRef] = implicitly
+    final val vrecOps: RecordOps[String, Value, VRecord] = implicitly
+
+    given fix.Widening[VRecord] = new ARecordWidening(using lazily(liftedWidening))
+
+    def isCallOrWhile(dom: FixIn): Int = dom match
+      case FixIn.EnterFunction(_) => 0
+      case FixIn.Run(Stm.While(_, _)) => 1
+      case _ => -1
 
 
-  type Ctx = List[Exp.Call]
-  val callSites = fix.context.callSites[FixIn, Exp.Call] {
-    case FixIn.Eval(c: Exp.Call) => Some(c)
-    case _ => None
-  }
+    type Ctx = List[Exp.Call]
+    val callSites = fix.context.callSites[FixIn, Exp.Call] {
+      case FixIn.Eval(c: Exp.Call) => Some(c)
+      case _ => None
+    }
 
-  val parameters: fix.context.Sensitivity[FixIn, Map[Addr, Value]] = fix.context.parametersFromStore {
-    case FixIn.EnterFunction(f) => Some(f.params.map(p => effects.getLocal(p).get))
-    case _ => None
-  }
+    val parameters: fix.context.Sensitivity[FixIn, Map[Addr, Value]] = fix.context.parametersFromStore {
+      case FixIn.EnterFunction(f) => Some(f.params.map(p => effects.getLocal(p).get))
+      case _ => None
+    }
 
-  val phi =
-    fix.contextSensitive(parameters,
-      fix.dispatch(isCallOrWhile, Seq(
-        // call
-        fix.iter.topmost,
-        // while
-        fix.unwind(steps,
-          fix.iter.innermost
-        )
-      ))
-    )
+    val phi =
+      fix.contextSensitive(parameters,
+        fix.dispatch(isCallOrWhile, Seq(
+          // call
+          fix.iter.topmost,
+          // while
+          fix.unwind(steps,
+            fix.iter.innermost
+          )
+        ))
+      )
+

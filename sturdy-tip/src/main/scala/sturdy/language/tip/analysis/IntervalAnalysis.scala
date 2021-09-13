@@ -31,12 +31,13 @@ object IntervalAnalysis extends Interpreter:
   override type VRecord = ARecord[String, Value]
 
   given JoinValue[VRecord] = new ARecordJoin(using lazily(liftedJoinValue))
-  given EqOps[VRecord, VBool] = new ARecordEqOps(using lazily(liftedEqOps))
 
-  override def topInt: IntInterval = IntInterval.Top
-  override def topReference: Powerset[AllocationSiteRef] = ???
-  override def topFun: Powerset[Function] = ???
-  override def topRecord: ARecord[String, Value] = ARecord.Top()
+  override def topInt(using Interpreter): IntInterval = IntInterval.Top
+  override def topReference(using self: Interpreter): Powerset[AllocationSiteRef] =
+    val addrs = self.effects.getStore.keySet
+    Powerset(addrs.map(AllocationSiteRef.Addr.apply) + AllocationSiteRef.Null)
+  override def topFun(using self: Interpreter): Powerset[Function] = Powerset(self.getFunctions.toSet)
+  override def topRecord(using Interpreter): ARecord[String, Value] = ARecord.Top()
 
   override def asBoolean(v: Value): VBool = v match
     case Value.IntValue(i) => EqOps.equ(i, IntInterval(0, 0)).map(!_)
@@ -58,6 +59,8 @@ object IntervalAnalysis extends Interpreter:
   )
   type Environment = Map[String, Addr]
   type Store = Map[AllocationSiteAddr, Value]
+  type In = Store
+  type Out = (Store, APrintPrefix.PrintResult[Value])
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
       with CCallFrame[Unit, String, Addr]((), initEnvironment)
@@ -66,7 +69,7 @@ object IntervalAnalysis extends Interpreter:
       with APrintPrefix[Value]
       with AUserInput[Value](Value.IntValue(IntInterval.Top))
       with AFailureCollect
-      with AnalysisState[Map[AllocationSiteAddr, Value], (Map[AllocationSiteAddr, Value], APrintPrefix.PrintResult[Value])]:
+      with AnalysisState[In, Out]:
     override def getInState(): InState = getStore
     override def setInState(in: InState): Unit = setStore(in)
     override def getOutState(): OutState = (getStore, getPrinted)
@@ -75,48 +78,56 @@ object IntervalAnalysis extends Interpreter:
       setPrinted(out._2)
     override def isOutStateStable(old: OutState, now: OutState): Boolean = old._1 == now._1
 
-  def apply(initEnvironment: Environment, initStore: Store, steps: Int): IntervalAnalysis =
+  def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
     val effects = new Effects(initEnvironment, initStore)
-    given Failure = effects
-    given JoinComputation = effects
-    new IntervalAnalysis(steps)(using effects)
+    given Effects = effects
+    new Instance(effects, steps)
 
-import IntervalAnalysis.{*, given}
-class IntervalAnalysis(steps: Int)(using effects: Effects)
-    (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value], functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[Addr, Value], recOps: RecordOps[String, Value, Value])
-    (using JoinComputation)
-  extends GenericInterpreter[Value, Addr, Effects](effects):
+  class Instance(effects: Effects, steps: Int)(using Failure, JoinComputation)
+    extends Interpreter with GenericInterpreter[Value, Addr, Effects](effects):
 
-  var bounds: Set[Int] = Set.empty
-  given fix.Widening[IntInterval] = new IntIntervalWiden(bounds)
-  given fix.Widening[VRecord] = new ARecordWidening(using lazily(liftedWidening))
+    given Effects = effects
 
-  override def execute(p: Program): Value =
-    bounds = p.intLiterals
-    super.execute(p)
+    final val vintOps: IntOps[VInt] = implicitly
+    final val vcompareOps: CompareOps[VInt, VBool] = implicitly
+    final val vintEqOps: EqOps[VInt, VBool] = implicitly
+    final val vrefEqOps: EqOps[VRef, VBool] = implicitly
+    final val vfunEqOps: EqOps[VFun, VBool] = implicitly
+    final val vrecEqOps: EqOps[VRecord, VBool] = new ARecordEqOps(using lazily(eqOps))
+    final val vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
+    final val vrefOps: ReferenceOps[Addr, VRef] = implicitly
+    final val vrecOps: RecordOps[String, Value, VRecord] = implicitly
 
-  def isCallOrWhile(dom: FixIn): Int = dom match
-    case FixIn.EnterFunction(_) => 0
-    case FixIn.Run(Stm.While(_, _)) => 1
-    case _ => -1
+    var bounds: Set[Int] = Set.empty
+    given fix.Widening[IntInterval] = new IntIntervalWiden(bounds)
+    given fix.Widening[VRecord] = new ARecordWidening(using lazily(liftedWidening))
+
+    override def execute(p: Program): Value =
+      bounds = p.intLiterals
+      super.execute(p)
+
+    def isCallOrWhile(dom: FixIn): Int = dom match
+      case FixIn.EnterFunction(_) => 0
+      case FixIn.Run(Stm.While(_, _)) => 1
+      case _ => -1
 
 
-  type Ctx = List[Exp.Call]
-  val callSites = fix.context.callSites[FixIn, Exp.Call] {
-    case FixIn.Eval(c: Exp.Call) => Some(c)
-    case _ => None
-  }
+    type Ctx = List[Exp.Call]
+    val callSites = fix.context.callSites[FixIn, Exp.Call] {
+      case FixIn.Eval(c: Exp.Call) => Some(c)
+      case _ => None
+    }
 
-  val phi =
-    fix.log(callSites,
-      fix.contextSensitive(callSites.callString(2),
-        fix.dispatch(isCallOrWhile, Seq(
-          // call
-          fix.iter.topmost,
-          // while
-          fix.unwind(steps,
-            fix.iter.innermost
-          )
-        ))
+    val phi =
+      fix.log(callSites,
+        fix.contextSensitive(callSites.callString(2),
+          fix.dispatch(isCallOrWhile, Seq(
+            // call
+            fix.iter.topmost,
+            // while
+            fix.unwind(steps,
+              fix.iter.innermost
+            )
+          ))
+        )
       )
-    )

@@ -79,20 +79,21 @@ import GenericInterpreter.*
 
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   (val effects: Effects)
-  (using intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V], recOps: RecordOps[String, V, V])
   (using effects.StoreJoin[V], effects.StoreJoinComp, effects.StoreJoin[Unit], effects.BoolBranchJoin[Unit]):
 
-  import intOps._
-  import compareOps._
-  import eqOps._
   import effects._
-  import functionOps._
-  import recOps._
-  import refOps._
-
+  
+  val intOps: IntOps[V]; import intOps._
+  val compareOps: CompareOps[V, V]; import compareOps._
+  val eqOps: EqOps[V, V]; import eqOps._
+  val functionOps: FunctionOps[Function, V, V, V]; import functionOps._
+  val refOps: ReferenceOps[Addr, V]; import refOps._
+  val recOps: RecordOps[String, V, V]; import recOps._
+  
   val phi: GenericPhi[V]
 
   protected var functions: Map[String, Function] = Map()
+  def getFunctions: Iterable[Function] = functions.values
 
   private lazy val fixed = fix.Fixpoint { (rec: FixIn => FixOut[V]) =>
     def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}

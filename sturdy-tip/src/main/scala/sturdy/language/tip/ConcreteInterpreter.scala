@@ -27,10 +27,10 @@ object ConcreteInterpreter extends Interpreter:
   override type VFun = Function
   override type VRecord = Map[String, Value]
 
-  override def topInt: VInt = throw new UnsupportedOperationException
-  override def topReference: VRef = throw new UnsupportedOperationException
-  override def topFun: VFun = throw new UnsupportedOperationException
-  override def topRecord: VRecord = throw new UnsupportedOperationException
+  override def topInt(using Interpreter): VInt = throw new UnsupportedOperationException
+  override def topReference(using Interpreter): VRef = throw new UnsupportedOperationException
+  override def topFun(using Interpreter): VFun = throw new UnsupportedOperationException
+  override def topRecord(using Interpreter): VRecord = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value): Boolean = v match
     case Value.IntValue(i) => i != 0
@@ -52,14 +52,22 @@ object ConcreteInterpreter extends Interpreter:
       with CUserInput[Value](nextInput)
       with CFailure
 
-  def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): ConcreteInterpreter =
+  def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): Instance =
     val effects = new Effects(initEnvironment, initStore, nextInput)
     given Failure = effects
-    new ConcreteInterpreter(effects)
+    new Instance(effects)
 
-import ConcreteInterpreter.*
-class ConcreteInterpreter(effects: Effects)
-    (using intOps: IntOps[Value], compareOps: CompareOps[Value, Value], eqOps: EqOps[Value, Value], functionOps: FunctionOps[Function, Value, Value, Value], refOps: ReferenceOps[Addr, Value], recOps: RecordOps[String, Value, Value])
-  extends GenericInterpreter[Value, Addr, Effects](effects):
+  class Instance(effects: Effects)(using Failure)
+    extends Interpreter with GenericInterpreter(effects):
 
-  override val phi: GenericPhi[Value] = fix.identity[FixIn, FixOut[Value]]
+    final val vintOps: IntOps[VInt] = implicitly
+    final val vcompareOps: CompareOps[VInt, VBool] = implicitly
+    final val vintEqOps: EqOps[VInt, VBool] = implicitly
+    final val vrefEqOps: EqOps[VRef, VBool] = implicitly
+    final val vfunEqOps: EqOps[VFun, VBool] = implicitly
+    final val vrecEqOps: EqOps[VRecord, VBool] = implicitly
+    final val vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
+    final val vrefOps: ReferenceOps[Addr, VRef] = implicitly
+    final val vrecOps: RecordOps[String, Value, VRecord] = implicitly
+
+    override val phi: GenericPhi[Value] = fix.identity[FixIn, FixOut[Value]]

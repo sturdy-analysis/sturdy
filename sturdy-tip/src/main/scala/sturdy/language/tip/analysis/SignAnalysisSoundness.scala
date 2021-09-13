@@ -41,8 +41,8 @@ object SignAnalysisSoundness:
       case _ => false
   given Lazy[PartialOrder[Value]] = lazily(po)
 
-  given Soundness[ConcreteInterpreter, SignAnalysis] with
-    def isSound(c: ConcreteInterpreter, a: SignAnalysis): IsSound = {
+  given Soundness[ConcreteInterpreter.Instance, SignAnalysis.Instance] with
+    def isSound(c: ConcreteInterpreter.Instance, a: SignAnalysis.Instance): IsSound = {
       given CAllocationIntIncrement[AllocationSite] = c.effects
 
       // concrete environment is sound by construction

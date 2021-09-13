@@ -41,7 +41,7 @@ given ARecordJoin[F, V](using Lazy[JoinValue[V]]): JoinValue[ARecord[F, V]] with
         joined.get(f) match
           case None => return ARecord.Top()
           case Some(v1) =>
-            val joinedV = JoinValue.join(v1, v2)
+            val joinedV = JoinValue.join(v1, v2)(using force)
             joined += f -> joinedV
       ARecord.Map(joined)
 
@@ -56,7 +56,7 @@ given ARecordWidening[F, V](using Lazy[Widening[V]]): Widening[ARecord[F, V]] wi
         joined.get(f) match
           case None => return ARecord.Top()
           case Some(v1) =>
-            val joinedV = Widening.widen(v1, v2)
+            val joinedV = Widening.widen(v1, v2)(using force)
             joined += f -> joinedV
       ARecord.Map(joined)
 
@@ -71,7 +71,7 @@ given ARecordPartialOrder[F, V](using Lazy[PartialOrder[V]]): PartialOrder[AReco
       // all entries e1 of rec1 have a corresponding e2 in rec2 that s.t. e1 <= e2
       for ((f, v1) <- m1) {
         val v2 = m2.get(f).getOrElse(return false)
-        if (!PartialOrder[V].lteq(v1, v2))
+        if (!PartialOrder[V](using force).lteq(v1, v2))
           return false
       }
       true
@@ -86,7 +86,7 @@ given ARecordEqOps[F, V, B <: {def asBoolean: Topped[Boolean]}](using Lazy[EqOps
 
       for ((f, v1) <- m1) {
         val v2 = m2.get(f).getOrElse(return Topped.Actual(false))
-        EqOps.equ(v1, v2).asBoolean match
+        EqOps.equ(v1, v2)(using force).asBoolean match
           case Topped.Top => return Topped.Top
           case Topped.Actual(false) => return Topped.Actual(false)
           case _ => // nothing
