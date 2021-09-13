@@ -1,13 +1,16 @@
 package sturdy.language.wasm
 
+import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFailureException
 
-import java.nio.file.Files
-import java.nio.file.Paths
+import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
+import swam.syntax.Module
+import swam.text.*
+
 
 class ParserTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm parser"
@@ -16,14 +19,17 @@ class ParserTest extends AnyFlatSpec, Matchers:
 
   Files.list(Paths.get(uri)).toScala(List).sorted.filter(p => p.toString.endsWith(".wast")).foreach { p =>
     it must s"execute ${p.getFileName}" in {
-      // TODO: use swam.text Parser to parse textual Wasm files
-//      val file = Source.fromURI(p.toUri)
-//      val sourceCode = file.getLines().mkString("\n")
-//      file.close()
-//      val tree = parse(sourceCode)
-//      assert(tree.isRight)
+      val path = Path.of(p.toUri)
+      parse(path)
+      //print(mod)
     }
   }
 
-//  def parse(s: String): Either[P.Error, Program] =
-//    Parser.program.parseAll(s)
+def parse(path: Path): Module =
+  implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
+  Blocker[IO].use { blocker =>
+    for {
+      compiler <- Compiler[IO](blocker)
+      mod <- compiler.compile(path, blocker)
+    } yield mod
+  }.unsafeRunSync()

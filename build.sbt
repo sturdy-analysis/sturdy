@@ -11,7 +11,8 @@ lazy val root = (project in file("."))
   .settings(name := "sturdy")
   .aggregate(
     sturdy_core,
-    sturdy_tip
+    sturdy_tip,
+    sturdy_wasm
   )
   .settings(skip / publish := true)
 
