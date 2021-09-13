@@ -27,7 +27,7 @@ import sturdy.language.tip.abstractions.*
 import Fix.*
 
 object SignAnalysis extends Interpreter,
-  Ints.Sign, Functions.Powerset, References.AllocationSites, Records.PreciseFieldsOrTop:
+  Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites:
 
   given Lazy[JoinValue[Value]] = lazily(liftedJoinValue)
 
