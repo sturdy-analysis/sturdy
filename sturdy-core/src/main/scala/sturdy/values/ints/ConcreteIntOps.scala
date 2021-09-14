@@ -1,13 +1,13 @@
 package sturdy.values.ints
 
 import sturdy.effect.failure.Failure
+import sturdy.values.Structural
 import sturdy.values.convert.Convert
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
 
 import scala.util.Random
-
-import java.lang.{Float => JFloat}
+import java.lang.Float as JFloat
 
 given ConcreteIntOps(using f: Failure): IntOps[Int] with
   def intLit(i: Int): Int = i
@@ -64,6 +64,8 @@ given ConcreteIntOps(using f: Failure): IntOps[Int] with
   def countLeadingZeros(v: Int): Int = Integer.numberOfLeadingZeros(v)
   def countTrailinZeros(v: Int): Int = Integer.numberOfTrailingZeros(v)
   def nonzeroBitCount(v: Int): Int = Integer.bitCount(v)
+
+given Structural[Int] with {}
 
 given ConcreteConvertIntLong: ConvertIntLong[Int, Long] with
   /*

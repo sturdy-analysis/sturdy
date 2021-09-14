@@ -2,7 +2,7 @@ package sturdy.values.floats
 
 import sturdy.effect.JoinComputation
 import sturdy.values.*
-import sturdy.values.Topped.*
+import sturdy.values.Topped
 import sturdy.values.JoinValue
 import sturdy.values.relational.*
 
@@ -145,47 +145,47 @@ given SignFloatOps: FloatOps[FloatSign] with
 
 given SignCompareOps: CompareOps[FloatSign, Topped[Boolean]] with
   def lt(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
-    case (Neg, Zero) => Actual(true)
-    case (Neg, ZeroOrPos) => Actual(true)
-    case (Neg, Pos) => Actual(true)
-    case (NegOrZero, Pos) => Actual(true)
-    case (Zero, Neg) => Actual(false)
-    case (Zero, Zero) => Actual(false)
-    case (Zero, Pos) => Actual(true)
-    case (ZeroOrPos, Neg) => Actual(false)
-    case (Pos, Neg) => Actual(false)
-    case (Pos, NegOrZero) => Actual(false)
-    case (Pos, Zero) => Actual(false)
-    case _ => Top
+    case (Neg, Zero) => Topped.Actual(true)
+    case (Neg, ZeroOrPos) => Topped.Actual(true)
+    case (Neg, Pos) => Topped.Actual(true)
+    case (NegOrZero, Pos) => Topped.Actual(true)
+    case (Zero, Neg) => Topped.Actual(false)
+    case (Zero, Zero) => Topped.Actual(false)
+    case (Zero, Pos) => Topped.Actual(true)
+    case (ZeroOrPos, Neg) => Topped.Actual(false)
+    case (Pos, Neg) => Topped.Actual(false)
+    case (Pos, NegOrZero) => Topped.Actual(false)
+    case (Pos, Zero) => Topped.Actual(false)
+    case _ => Topped.Top
   def le(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
-    case (Neg, Zero) => Actual(true)
-    case (Neg, ZeroOrPos) => Actual(true)
-    case (Neg, Pos) => Actual(true)
-    case (NegOrZero, ZeroOrPos) => Actual(true)
-    case (NegOrZero, Pos) => Actual(true)
-    case (Zero, Neg) => Actual(false)
-    case (Zero, Zero) => Actual(true)
-    case (Zero, Pos) => Actual(true)
-    case (Pos, Neg) => Actual(false)
-    case (Pos, NegOrZero) => Actual(false)
-    case (Pos, Zero) => Actual(false)
-    case _ => Top
+    case (Neg, Zero) => Topped.Actual(true)
+    case (Neg, ZeroOrPos) => Topped.Actual(true)
+    case (Neg, Pos) => Topped.Actual(true)
+    case (NegOrZero, ZeroOrPos) => Topped.Actual(true)
+    case (NegOrZero, Pos) => Topped.Actual(true)
+    case (Zero, Neg) => Topped.Actual(false)
+    case (Zero, Zero) => Topped.Actual(true)
+    case (Zero, Pos) => Topped.Actual(true)
+    case (Pos, Neg) => Topped.Actual(false)
+    case (Pos, NegOrZero) => Topped.Actual(false)
+    case (Pos, Zero) => Topped.Actual(false)
+    case _ => Topped.Top
   def ge(v1: FloatSign, v2: FloatSign): Topped[Boolean] = lt(v2, v1)
   def gt(v1: FloatSign, v2: FloatSign): Topped[Boolean] = le(v2, v1)
 
 given SignEqOps: EqOps[FloatSign, Topped[Boolean]] with
   def equ(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
-    case (Neg, Zero) => Actual(false)
-    case (Neg, ZeroOrPos) => Actual(false)
-    case (Neg, Pos) => Actual(false)
-    case (NegOrZero, Pos) => Actual(false)
-    case (Zero, Neg) => Actual(false)
-    case (Zero, Zero) => Actual(true)
-    case (Zero, Pos) => Actual(false)
-    case (ZeroOrPos, Neg) => Actual(false)
-    case (Pos, Neg) => Actual(false)
-    case (Pos, NegOrZero) => Actual(false)
-    case (Pos, Zero) => Actual(false)
-    case _ => Top
+    case (Neg, Zero) => Topped.Actual(false)
+    case (Neg, ZeroOrPos) => Topped.Actual(false)
+    case (Neg, Pos) => Topped.Actual(false)
+    case (NegOrZero, Pos) => Topped.Actual(false)
+    case (Zero, Neg) => Topped.Actual(false)
+    case (Zero, Zero) => Topped.Actual(true)
+    case (Zero, Pos) => Topped.Actual(false)
+    case (ZeroOrPos, Neg) => Topped.Actual(false)
+    case (Pos, Neg) => Topped.Actual(false)
+    case (Pos, NegOrZero) => Topped.Actual(false)
+    case (Pos, Zero) => Topped.Actual(false)
+    case _ => Topped.Top
   def neq(v1: FloatSign, v2: FloatSign): Topped[Boolean] = equ(v1, v2).map(!_)
 

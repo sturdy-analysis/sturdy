@@ -7,7 +7,6 @@ import sturdy.effect.environment.CEnvironment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.store.Store
 import sturdy.fix
-import Expr.*
 import Op1Kinds.*
 import Op2Kinds.*
 import OpVarKinds.*
@@ -30,9 +29,9 @@ object GenericInterpreter:
     Failure
 
   enum AllocationSite:
-    case LetBinding(let: Expr, x: String)
-    case Define(d: Expr.Define)
-    case ClosureParam(body: List[Expr], x: String)
+    case LetBinding(let: Exp, x: String)
+    case Toplevel(d: Define)
+    case ClosureParam(body: Body, x: String)
 
   case object UnboundVariable extends FailureKind
   case object UnboundAddr extends FailureKind
@@ -41,14 +40,7 @@ object GenericInterpreter:
   case object NullDeconstruct extends FailureKind
   case object ClosureComparison extends FailureKind
 
-  enum FixIn[V]:
-    case Eval(e: Expr)
-    case Run(es: List[Expr])
-  enum FixOut[V]:
-    case Eval(v: V)
-    case Run(v: V)
-
-  type GenericPhi[V] = fix.Combinator[FixIn[V], FixOut[V]]
+  type GenericPhi[V] = fix.Combinator[Exp, V]
 
 trait TypeOps[V]:
   def isNumber(v: V): V
@@ -96,7 +88,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
              listOps: ListOps[V], symbolOps: SymbolOps[V], quoteOps: QuoteOps[V], voidOps: VoidOps[V],
              typeOps: TypeOps[V],
              eqOps: EqOps[V, V], compareOps: CompareOps[V, V],
-             closureOps: ClosureOps[String, V, List[Expr], effectOps.Env, V, V])
+             closureOps: ClosureOps[String, V, Body, effectOps.Env, V, V])
   (using effectOps.StoreJoin[V], effectOps.StoreJoinComp, effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[V]):
 
   import intOps.intLit
@@ -116,76 +108,83 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
   val phi: GenericPhi[V]
 
-  private lazy val fixed = fix.Fixpoint { (rec: FixIn[V] => FixOut[V]) =>
-    def eval(e: Expr): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
-    def run(es: List[Expr]): V = rec(FixIn.Run(es)) match {case FixOut.Run(v) => v; case _ => throw new IllegalStateException()}
+  private lazy val fixed = fix.Fixpoint { (rec: Exp => V) =>
+    def eval(e: Exp): V = rec(e)
 
-    def eval_open(e: Expr): V = { e match
-      case Lit(l) => lit(l)
-      case Nil_ => listOps.nil
-      case Cons_(e1, e2) => listOps.cons(eval(e1), eval(e2))
-      case Begin(es) => run(es)
-      case AppFoo(e1, args) =>
+    def eval_open(e: Exp): V = { e match
+      case Exp.Lit(l) => lit(l)
+      case Exp.Nil_ => listOps.nil
+      case Exp.Cons_(e1, e2) => listOps.cons(eval(e1), eval(e2))
+      case Exp.Begin(es) => es match
+        case Nil => void
+        case _ =>
+          es.init.foreach(eval)
+          eval(es.last)
+      case Exp.Apply(e1, args) =>
         val clsVal = eval(e1)
         val argVals = args.map(arg => eval(arg))
         invokeClosure(clsVal, argVals) { applyClosure }
-      case Apply(es) => run(es)
-      case Var(x) =>
+      case Exp.Var(x) =>
         val addr = lookup(x).orElse(fail(UnboundVariable, x))
         read(addr).orElse(fail(UnboundAddr, s"$addr for variable $x"))
-      case e@Lam(names, body) => {
-        val env = getEnv
+      case Exp.Lam(names, body) =>
+        val env = closeEnvironment
         closureValue(names, body, env)
-      }
-      case expr@Let(bnds, body) =>
+      case let@Exp.Let(bnds, body) =>
         scoped {
-          bnds.foreach { case (x,e) =>
-            val addr = alloc(AllocationSite.LetBinding(expr, x))
+          val addrs = bnds.map(xe => alloc(AllocationSite.LetBinding(let, xe._1)))
+          bnds.zip(addrs).foreach { case ((x,e), addr) =>
             val v = eval(e)
             bind(x, addr)
             write(addr, v)
           }
-          run(body)
+          try runBody(body)
+          finally addrs.foreach(free)
         }
-      case expr@LetRec(bnds, body) =>
+      case let@Exp.LetRec(bnds, body, star) =>
         val (envbnds, storebnds) = bnds.map { case (x,e) =>
-          val addr = alloc(AllocationSite.LetBinding(expr, x))
+          val addr = alloc(AllocationSite.LetBinding(let, x))
           ((x,addr),(addr,e))
         }.unzip
         scoped {
           envbnds.foreach(bind)
-          storebnds.foreach { case (addr, e) =>
-            val v = eval(e)
-            write(addr, v)
+          if (star)
+            storebnds.foreach { case (addr, e) =>
+              val v = eval(e)
+              write(addr, v)
+            }
+          else {
+            val vals = storebnds.map(ae => eval(ae._2))
+            storebnds.zip(vals).foreach { case ((addr, _), v) => write(addr, v) }
           }
-          run(body)
+          try runBody(body)
+          finally storebnds.foreach(b => free(b._1))
         }
-      case s@Set_(x, e) =>
+      case s@Exp.Set_(x, e) =>
         val addr = lookup(x).orElse(fail(UnboundVariable, x))
         write(addr, eval(e))
         void
-      case s@Define(x, e) => fail(UserError, "Define should only be used at top level")
-      case If(e1, e2, e3) => boolBranch(eval(e1), eval(e2), eval(e3))
-      case Op1(op, e) => op1(op, eval(e))
-      case Op2(op, e1, e2) => op2(op, eval(e1), eval(e2))
-      case OpVar(op, es) =>
+      case Exp.If(e1, e2, e3) => boolBranch(eval(e1), eval(e2), eval(e3))
+      case Exp.Op1(op, e) => op1(op, eval(e))
+      case Exp.Op2(op, e1, e2) => op2(op, eval(e1), eval(e2))
+      case Exp.OpVar(op, es) =>
         val vs = es.map(e => eval(e))
         opVar(op, vs)
-      case Error(err) => fail(UserError, err)
+      case Exp.Error(err) => fail(UserError, err)
     }
 
-    def run_open(es: List[Expr]): V = { es match
-      case (define@Define(x, e))::rest =>
-        val addr = alloc(AllocationSite.Define(define))
-        bind(x, addr)
-        write(addr, eval(e))
-        run(rest)
-      case Nil => void
-      case e::Nil => eval(e)
-      case e::rest =>
-        eval(e)
-        run(rest)
-    }
+    def runBody(body: Body): V =
+      if (body.defs.isEmpty) {
+        body.exps.init.foreach(eval)
+        eval(body.exps.last)
+      } else {
+        val letrec = Exp.LetRec(
+          body.defs.map(d => d.name -> d.e),
+          Body(List(), body.exps),
+          star = true
+        )
+        eval(letrec)
+      }
 
     def lit(literal: Literal): V = { literal match
       case Literal.IntLit(i) => intLit(i)
@@ -195,7 +194,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Literal.CharLit(c) => charLit(c)
       case Literal.StringLit(str) => stringLit(str)
       case Literal.SymbolLit(sym) => symbolLit(sym)
-      case Literal.QuoteLit(qot) => quoteLit(eval(Lit(qot)))
+      case Literal.QuoteLit(qot) => quoteLit(eval(Exp.Lit(qot)))
     }
 
     def op1(op: Op1Kinds, v: V): V = { op match
@@ -273,21 +272,21 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case StringAppend => vs.reduce(stringAppend)
     }
 
-    def applyClosure(vars: List[String], body: List[Expr], args: List[V], env: Env): V = {
+    def applyClosure(vars: List[String], body: Body, args: List[V], env: Env): V = {
       scoped {
         loadClosedEnvironment(env)
-        vars.zip(args).foreach { case (x, arg) =>
-          val addr = alloc(AllocationSite.ClosureParam(body, x))
+        // TODO compare size of vars and args\
+        val addrs = vars.map(x => alloc(AllocationSite.ClosureParam(body, x)))
+        vars.zip(addrs).zip(args).foreach { case ((x, addr), arg) =>
+          bind(x, addr)
           write(addr, arg)
         }
-        run(body)
+        try runBody(body)
+        finally addrs.foreach(free)
       }
     }
 
-    phi {
-      case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
-      case FixIn.Run(es) => FixOut.Run(run_open(es))
-    }
+    phi { eval_open }
   }
 
   def numTypeDispatch(v: V)(int: => V, rational: => V, double: => V, other: => V): V =
@@ -322,6 +321,21 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       fail(TypeError, s"(withNum2):expected num as first argument but got $v1")
     )
 
-  def eval(e: Expr): V = fixed(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
-  def run(es: List[Expr]): V = fixed(FixIn.Run(es)) match {case FixOut.Run(v) => v; case _ => throw new IllegalStateException()}
+  def eval(e: Exp): V = fixed(e)
+
+  def runForm(f: Form): V = f match
+    case Form.Expression(e) => eval(e)
+    case Form.Definition(d) =>
+      val addr = alloc(AllocationSite.Toplevel(d))
+      bind(d.name, addr)
+      write(addr, eval(d.e))
+      void
+    case Form.Begin(fs) =>
+      fs.init.foreach(runForm)
+      fs.lastOption match {
+        case None => void
+        case Some(f) => runForm(f)
+      }
+
+  def execute(p: Program): V = runForm(Form.Begin(p.forms))
 

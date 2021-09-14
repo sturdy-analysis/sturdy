@@ -78,22 +78,33 @@ enum OpVarKinds:
   // String operations
   case StringAppend
 
+case class Body(defs: List[Define], exps: List[Exp]):
+  require(exps.nonEmpty)
+object Body:
+  def apply(exps: List[Exp]): Body = Body(List(), exps)
+  def apply(e: Exp): Body = Body(List(), List(e))
 
-enum Expr extends Labeled:
+enum Exp extends Labeled:
   case Lit(l: Literal)
   case Nil_
-  case Cons_(e1: Expr, e2: Expr)
-  case Begin(es: List[Expr])
-  case AppFoo(foo: Expr, args: List[Expr])
-  case Apply(body: List[Expr])
+  case Cons_(e1: Exp, e2: Exp)
+  case Begin(es: List[Exp])
+  case Apply(foo: Exp, args: List[Exp])
   case Var(name: String)
-  case Set_(name: String, e: Expr)
-  case Define(name: String, e: Expr)
-  case Lam(names: List[String], body: List[Expr])
-  case If(e1: Expr, e2: Expr, e3: Expr)
-  case Let(bnds: List[(String, Expr)], body: List[Expr])
-  case LetRec(bnds: List[(String, Expr)], body: List[Expr])
-  case Op1(op: Op1Kinds, e: Expr)
-  case Op2(op: Op2Kinds, e1: Expr, e2: Expr)
-  case OpVar(op: OpVarKinds, es: List[Expr])
+  case Set_(name: String, e: Exp)
+  case Lam(names: List[String], body: Body)
+  case If(e1: Exp, e2: Exp, e3: Exp)
+  case Let(bnds: List[(String, Exp)], body: Body)
+  case LetRec(bnds: List[(String, Exp)], body: Body, star: Boolean = true)
+  case Op1(op: Op1Kinds, e: Exp)
+  case Op2(op: Op2Kinds, e1: Exp, e2: Exp)
+  case OpVar(op: OpVarKinds, es: List[Exp])
   case Error(s: String)
+
+case class Define(name: String, e: Exp)
+
+case class Program(forms: List[Form])
+enum Form:
+  case Expression(e: Exp)
+  case Definition(d: Define)
+  case Begin(fs: List[Form])

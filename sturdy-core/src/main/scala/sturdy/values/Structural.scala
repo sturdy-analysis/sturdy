@@ -6,9 +6,8 @@ import sturdy.util.Label
 trait Structural[T]
 
 given Structural[Unit] with {}
-given Structural[Boolean] with {}
-given Structural[Int] with {}
-given Structural[Double] with {}
 given Structural[String] with {}
 given Structural[Label] with {}
 
+given StructuralOption[A](using Structural[A]): Structural[Option[A]] with {}
+given StructuralMap[K, V](using Structural[K], Structural[V]): Structural[Map[K, V]] with {}

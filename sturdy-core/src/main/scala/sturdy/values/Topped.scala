@@ -36,6 +36,9 @@ given toppedPartialOrder[A](using po: PartialOrder[A]): PartialOrder[Topped[A]] 
     case (Topped.Top, _) => false
     case (Topped.Actual(a1), Topped.Actual(a2)) => po.lteq(a1, a2)
 
+given TopTopped[V]: Top[Topped[V]] with
+  override def top: Topped[V] = Topped.Top
+
 object Topped:
   given flatToppedJoin[V]: JoinValue[Topped[V]] with
     def joinValues(v1: Topped[V], v2: Topped[V]): Topped[V] =

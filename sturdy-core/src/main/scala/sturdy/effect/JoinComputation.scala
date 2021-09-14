@@ -53,4 +53,6 @@ trait JoinComputation:
     }
 
 object JoinComputation:
+  def join[A](f: => A)(g: => A)(using j: JoinComputation): JoinValue[A] ?=> A =
+    j.joinComputations(f)(g)
   case class StarvedJoin(ex1: Throwable, ex2: Throwable) extends Throwable(s"Starved Join with $ex1 and $ex2")
