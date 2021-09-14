@@ -8,4 +8,4 @@ object Functions:
   trait Powerset extends Interpreter :
     final type VFun = PSet[Function]
 
-    final def topFun(using self: Interpreter): VFun = PSet(self.getFunctions.toSet)
+    final def topFun(using self: Instance): VFun = PSet(self.getFunctions.toSet)

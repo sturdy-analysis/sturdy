@@ -24,6 +24,6 @@ object References:
       case AllocationSite.Record(r) => AllocationSiteAddr.Alloc(r.label)(true)
     )
 
-    final def topReference(using self: Interpreter): Powerset[AllocationSiteRef] =
+    final def topReference(using self: Instance): Powerset[AllocationSiteRef] =
       val addrs = self.effects.getStore.keySet
       Powerset(addrs.map(AllocationSiteRef.Addr.apply) + AllocationSiteRef.Null)

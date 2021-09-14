@@ -19,7 +19,7 @@ import sturdy.values.relational.CompareOps
 import sturdy.values.relational.EqOps
 import sturdy.values.unit
 
-object Interpreter:
+object GenericInterpreter:
   case class FrameData[V](returnArity: Int, module: ModuleInstance[V])
 
   enum WasmException[V]:
@@ -41,24 +41,23 @@ object Interpreter:
       with Failure
 
 
-import Interpreter.*
+import GenericInterpreter.*
 
-trait Interpreter[V,Addr,Bytes,Size]
-  (using effectOps: Effects[V,Addr,Bytes,Size])
+trait GenericInterpreter[V,Addr,Bytes,Size]
+  (val effects: Effects[V,Addr,Bytes,Size], wasmOps: WasmOperations[V])
   (using IntOps[V], LongOps[V], FloatOps[V], DoubleOps[V], EqOps[V, V], CompareOps[V, V], IntCompareOps[V, V],
    ConvertIntLong[V, V], ConvertIntFloat[V, V], ConvertIntDouble[V, V],
    ConvertLongInt[V, V], ConvertLongFloat[V, V], ConvertLongDouble[V, V],
    ConvertFloatInt[V, V], ConvertFloatLong[V, V], ConvertFloatDouble[V, V],
    ConvertDoubleInt[V, V], ConvertDoubleLong[V, V], ConvertDoubleFloat[V, V]
   )
-  (using wasmOps: WasmOperations[V])
-  (using effectOps.BoolBranchJoin[Unit],
-   effectOps.MemoryJoin[Unit], effectOps.MemoryJoin[V], effectOps.MemoryJoinComp,
-   effectOps.TableJoin[Unit], effectOps.TableJoinComp,
+  (using effects.BoolBranchJoin[Unit],
+   effects.MemoryJoin[Unit], effects.MemoryJoin[V], effects.MemoryJoinComp,
+   effects.TableJoin[Unit], effects.TableJoinComp,
    wasmOps.WasmOpsJoin[Unit], wasmOps.WasmOpsJoinComp):
 
-  import effectOps.*
-  val stack = effectOps.asInstanceOf[OperandStack[V]]
+  import effects.*
+  implicit val stack: OperandStack[V] = effects.asInstanceOf[OperandStack[V]]
   //val memory = effectOps.asInstanceOf[WasmMemory[Addr,Bytes,Size,V]]
 
   val numerics = new InterpretNumerics[V]
@@ -67,7 +66,7 @@ trait Interpreter[V,Addr,Bytes,Size]
 
   val labelStack = new LabelStack
 
-  inline private def fail(k: FailureKind, what: String) = effectOps.fail(k, s"$what in $module")
+  inline private def fail(k: FailureKind, what: String) = effects.fail(k, s"$what in $module")
 
   def module: ModuleInstance[V] = getFrameData.module
 

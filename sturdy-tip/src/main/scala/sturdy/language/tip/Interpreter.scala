@@ -25,35 +25,33 @@ trait Interpreter:
     case RecValue(rec: VRecord)
 
     def asBoolean: VBool = Interpreter.this.asBoolean(this)
-    def asInt(using Interpreter): VInt = this match
+    def asInt(using Instance): VInt = this match
       case IntValue(i) => i
       case TopValue => topInt
       case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
-    def asFunction(using Interpreter): VFun = this match
+    def asFunction(using Instance): VFun = this match
       case FunValue(f) => f
       case TopValue => topFun
       case _ => throw new IllegalArgumentException(s"Expected Function but got $this")
-    def asReference(using Interpreter): VRef = this match
+    def asReference(using Instance): VRef = this match
       case RefValue(a) => a
       case TopValue => topReference
       case _ => throw new IllegalArgumentException(s"Expected Reference but got $this")
-    def asRecord(using Interpreter): VRecord = this match
+    def asRecord(using Instance): VRecord = this match
       case RecValue(rec) => rec
       case TopValue => topRecord
       case _ => throw new IllegalArgumentException(s"Expected Record but got $this")
 
-  import Value.*
-
-  def topInt(using self: Interpreter): VInt
-  def topFun(using self: Interpreter): VFun
-  def topReference(using self: Interpreter): VRef
-  def topRecord(using self: Interpreter): VRecord
+  def topInt(using self: Instance): VInt
+  def topFun(using self: Instance): VFun
+  def topReference(using self: Instance): VRef
+  def topRecord(using self: Instance): VRecord
 
   def asBoolean(v: Value): VBool
   def boolean(b: VBool): Value
 
   given Top[Value] with
-    def top = TopValue
+    def top = Value.TopValue
 
   type Addr
   type Effects <: GenericEffects[Value, Addr]
@@ -76,10 +74,11 @@ trait Interpreter:
       case (RecValue(rec1), RecValue(rec2)) => RecValue(Widening.widen(rec1, rec2))
       case _ => TopValue
 
-  trait Interpreter
+  type Instance <: GenericInstance
+  trait GenericInstance
     extends GenericInterpreter[Value, Addr, Effects]:
 
-    given Interpreter = this
+    given Instance = this.asInstanceOf[Instance]
     given Failure = effects
 
     val vintOps: IntOps[VInt]
@@ -92,6 +91,7 @@ trait Interpreter:
     val vrefOps: ReferenceOps[Addr, VRef]
     val vrecOps: RecordOps[String, Value, VRecord]
 
+    import Value.*
     final val intOps = new LiftedIntOps[Value, VInt](_.asInt, IntValue.apply)(using vintOps)
     final val compareOps = new LiftedCompareOps[Value, Value, VInt, VBool](_.asInt, boolean)(using vcompareOps)
     final val eqOps = new EqOps[Value, Value]:

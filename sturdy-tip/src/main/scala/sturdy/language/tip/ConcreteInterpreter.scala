@@ -27,10 +27,10 @@ object ConcreteInterpreter extends Interpreter:
   override type VFun = Function
   override type VRecord = Map[String, Value]
 
-  override def topInt(using Interpreter): VInt = throw new UnsupportedOperationException
-  override def topReference(using Interpreter): VRef = throw new UnsupportedOperationException
-  override def topFun(using Interpreter): VFun = throw new UnsupportedOperationException
-  override def topRecord(using Interpreter): VRecord = throw new UnsupportedOperationException
+  override def topInt(using Instance): VInt = throw new UnsupportedOperationException
+  override def topReference(using Instance): VRef = throw new UnsupportedOperationException
+  override def topFun(using Instance): VFun = throw new UnsupportedOperationException
+  override def topRecord(using Instance): VRecord = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value): Boolean = v match
     case Value.IntValue(i) => i != 0
@@ -58,7 +58,7 @@ object ConcreteInterpreter extends Interpreter:
     new Instance(effects)
 
   class Instance(effects: Effects)(using Failure)
-    extends Interpreter with GenericInterpreter(effects):
+    extends GenericInstance with GenericInterpreter(effects):
 
     final val vintOps: IntOps[VInt] = implicitly
     final val vcompareOps: CompareOps[VInt, VBool] = implicitly

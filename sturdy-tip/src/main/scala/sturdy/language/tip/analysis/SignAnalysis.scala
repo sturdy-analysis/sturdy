@@ -55,7 +55,7 @@ object SignAnalysis extends Interpreter,
     new Instance(effects, steps)
 
   class Instance(effects: Effects, steps: Int)(using Failure, JoinComputation)
-    extends Interpreter with GenericInterpreter[Value, Addr, Effects](effects):
+    extends GenericInstance with GenericInterpreter[Value, Addr, Effects](effects):
 
     given Effects = effects
 

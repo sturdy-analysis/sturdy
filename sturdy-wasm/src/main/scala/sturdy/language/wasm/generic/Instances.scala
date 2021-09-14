@@ -15,7 +15,7 @@ trait ModuleInstance[V]:
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
 
-  def invokeExported[Addr,Bytes,Size](funcName: String, args: List[V])(using interp: Interpreter[V,Addr,Bytes,Size]): List[V] =
+  def invokeExported[Addr,Bytes,Size](funcName: String, args: List[V])(using interp: GenericInterpreter[V,Addr,Bytes,Size]): List[V] =
     exports.find((name,_) => name == funcName) match
       case Some((_,ExternalValue.Function(funcIx))) =>
         val func = functions.lift(funcIx).getOrElse(throw new Error(s"Unbound function index."))

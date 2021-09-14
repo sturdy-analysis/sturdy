@@ -12,7 +12,7 @@ object Records:
   trait PreciseFieldsOrTop extends Interpreter :
     final type VRecord = ARecord[String, Value]
 
-    final def topRecord(using Interpreter): ARecord[String, Value] = ARecord.Top()
+    final def topRecord(using Instance): ARecord[String, Value] = ARecord.Top()
 
     given recordJoin(using Lazy[JoinValue[Value]]): JoinValue[VRecord] = new ARecordJoin
     given recordWidening(using Lazy[Widening[Value]]): Widening[VRecord] = new ARecordWidening
