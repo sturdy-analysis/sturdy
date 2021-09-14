@@ -15,25 +15,45 @@ import scala.collection.immutable.TreeSet
 
 import apron.Abstract0 //default; for domains without environments
 import apron.Box
+import apron.*
 
 val ourAbstractDomain = apron.Box()
 
-object IntIntervalApron:
-  var Top = apron.Interval().setTop()
-  def bounded(l: Long, h: Long): IntIntervalApron =
-    IntIntervalApron(Math.max(l, Int.MinValue).toInt, Math.min(h, Int.MaxValue).toInt)
 
-case class IntIntervalApron(l: Int, h: Int):
-  if (l > h)
+
+
+object IntIntervalApron:
+  val Top = {var tmp = apron.Interval(0, 0); tmp.setTop(); tmp}
+  def bounded(l: Long, h: Long): IntIntervalApron = {new IntIntervalApron(Math.max(l, Int.MinValue).toInt, Math.min(h, Int.MaxValue).toInt)}
+
+case class IntIntervalApron(interval: apron.Interval):
+  if (interval.inf.cmp(interval.sup) < 0)
     throw new IllegalArgumentException(s"Empty intervals are illegal $this")
+ 
+  def this(l: Int, h: Int) = this(apron.Interval(l, h))
+  def this(inf: apron.Scalar, sup: apron.Scalar) = this(apron.Interval(inf, sup))
+
   def join(other: IntIntervalApron): IntIntervalApron =
     //problem: die join-Funktion erwartet abstract0 Objekte aber die apron Intervalle sind keine abstract0 Objekte sondern Coeff
-    var abstract0Object = Abstract0(ourAbstractDomain, 2, 0)
+    var abstract0Object = Abstract0(ourAbstractDomain, 1, 0, Array(interval))
     abstract0Object.toBox(ourAbstractDomain) //gibt überaproximierendes Intervall-Array um das abstracte objekt herum zurück
     //oder direkt: Abstract0(Manager man, int intdim, int realdim, Interval[] box) - Creates a new abstract element from a box.
     //var intervalArray: Seq[Abstract0] = Array(this, other)
-    apron.Abstract0.join(ourAbstractDomain,intervalArray)
+    val man = apron.Box()
+    val a0 = apron.Abstract0(man, 1, 0, Array(apron.Interval(0, 1)))
+    a0.join(man, a0)
+    val interval = a0.getBound(man, 1)
+    val r1 = Array[Double](1)
+    val r2 = Array[Double](1)
 
+    interval.inf.toDouble(r1, 0)//wir nutzen die toDouble() Funktion um defakto ints zu erzeugen, müssen aber trotzdem toInt() von Scala nochmal draufhauen
+    interval.sup.toDouble(r2, 0)
+    val intr1 = r1.last.toInt
+    val intr2 = r2.last.toInt
+
+    return IntIntervalApron(intr1, intr2)
+
+case class IntIntervalApron(interval: apron.Interval):
      
 /* 
 object IntInterval:
