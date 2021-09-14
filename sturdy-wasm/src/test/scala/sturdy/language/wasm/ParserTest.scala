@@ -18,7 +18,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
   val uri = classOf[ParserTest].getResource("/sturdy/language/wasm").toURI();
 
   Files.list(Paths.get(uri)).toScala(List).sorted.filter(p => p.toString.endsWith(".wast")).foreach { p =>
-    it must s"execute ${p.getFileName}" in {
+    it must s"parse ${p.getFileName}" in {
       val path = Path.of(p.toUri)
       parse(path)
       //print(mod)
