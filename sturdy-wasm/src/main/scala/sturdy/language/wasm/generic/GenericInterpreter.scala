@@ -7,7 +7,7 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import swam.syntax.*
 import swam.{BlockType, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
 import sturdy.effect.operandstack.OperandStack
-import sturdy.effect.binarymemory.{EffectiveAddress, MemSize, Memory, Serialize}
+import sturdy.effect.binarymemory.{Memory, Serialize}
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.table.Table
 import sturdy.values.convert.*
@@ -26,14 +26,10 @@ object GenericInterpreter:
     case Jump(labelIndex: LabelIdx, operands: List[V])
     case Return(operands: List[V])
 
-  type WasmMemory[Addr,Bytes,Size,V] = Memory[Addr,Bytes,Size]
-    with EffectiveAddress[V,Int,Addr]
-    with MemSize[V,Size]
-    with Serialize[V,Bytes,MemoryInst,MemoryInst]
-
-  type Effects[V,Addr,Bytes,Size] =
+  type GenericEffects[V,Addr,Bytes,Size] =
     OperandStack[V]
-      with WasmMemory[Addr,Bytes,Size,V]
+      with Memory[Addr,Bytes,Size]
+      with Serialize[V,Bytes,MemoryInst,MemoryInst]
       with Table[V,FunctionInstance[V]]
       with CMutableCallFrameInt[FrameData[V], V]
       with BoolBranching[V]
@@ -44,13 +40,8 @@ object GenericInterpreter:
 import GenericInterpreter.*
 
 trait GenericInterpreter[V,Addr,Bytes,Size]
-  (val effects: Effects[V,Addr,Bytes,Size], wasmOps: WasmOperations[V])
-  (using IntOps[V], LongOps[V], FloatOps[V], DoubleOps[V], EqOps[V, V], CompareOps[V, V], IntCompareOps[V, V],
-   ConvertIntLong[V, V], ConvertIntFloat[V, V], ConvertIntDouble[V, V],
-   ConvertLongInt[V, V], ConvertLongFloat[V, V], ConvertLongDouble[V, V],
-   ConvertFloatInt[V, V], ConvertFloatLong[V, V], ConvertFloatDouble[V, V],
-   ConvertDoubleInt[V, V], ConvertDoubleLong[V, V], ConvertDoubleFloat[V, V]
-  )
+  (val effects: GenericEffects[V,Addr,Bytes,Size])
+  (using wasmOps: WasmOperations[V, Addr, Size])
   (using effects.BoolBranchJoin[Unit],
    effects.MemoryJoin[Unit], effects.MemoryJoin[V], effects.MemoryJoinComp,
    effects.TableJoin[Unit], effects.TableJoinComp,
@@ -59,6 +50,26 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
   import effects.*
   implicit val stack: OperandStack[V] = effects.asInstanceOf[OperandStack[V]]
   //val memory = effectOps.asInstanceOf[WasmMemory[Addr,Bytes,Size,V]]
+
+  implicit val intOps: IntOps[V]
+  implicit val longOps: LongOps[V]
+  implicit val floatOps: FloatOps[V]
+  implicit val doubleOps: DoubleOps[V]
+  implicit val eqOps: EqOps[V, V]
+  implicit val compareOps: CompareOps[V, V]
+  implicit val intCompareOps: IntegerCompareOps[V, V]
+  implicit val convertIntLong: ConvertIntLong[V, V]
+  implicit val convertIntFloat: ConvertIntFloat[V, V]
+  implicit val convertIntDouble: ConvertIntDouble[V, V]
+  implicit val convertLongInt: ConvertLongInt[V, V]
+  implicit val convertLongFloat: ConvertLongFloat[V, V]
+  implicit val convertLongDouble: ConvertLongDouble[V, V]
+  implicit val convertFloatInt: ConvertFloatInt[V, V]
+  implicit val convertFloatLong: ConvertFloatLong[V, V]
+  implicit val convertFloatDouble: ConvertFloatDouble[V, V]
+  implicit val convertDoubleInt: ConvertDoubleInt[V, V]
+  implicit val convertDoubleLong: ConvertDoubleLong[V, V]
+  implicit val convertDoubleFloat: ConvertDoubleFloat[V, V]
 
   val numerics = new InterpretNumerics[V]
   import numerics.*
@@ -201,7 +212,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
           val args = stack.popN(funcType.params.size)
           val frameData = FrameData(funcType.t.size, mod)
           val vars = args.view.reverse ++ func.locals.map(defaultValue)
-          withFreshOperandStack(labelStack.withFresh(inNewFrame(frameData, vars) {
+          withFreshOperandStack(labelStack.withFresh(inNewFrameNoIndex(frameData, vars) {
             label(List.empty, funcType.t.size, func.body, None)
           }))
     } {
@@ -232,6 +243,19 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
 //        val res = stack.popN(rtLength)
 //        res.reverse
 //      case _ => fail(InvocationError,s"Function with name $funcName was not found in module's exports.")
+
+  def invokeExported[Addr,Bytes,Size](funcName: String, args: List[V]): List[V] =
+    module.exports.find((name,_) => name == funcName) match
+      case Some((_,ExternalValue.Function(funcIx))) =>
+        val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+        val paramTys = func.funcType.params
+        if (paramTys.length != args.length)
+          throw new Error(s"Wrong number of arguments in external invocation.")
+        // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
+        val rtLength = func.funcType.t.length
+        invokeWithArguments(args, rtLength, func)
+      case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
+
 
   private def defaultValue(ty: ValType): V = ty match
     case ValType.I32 => evalNumeric(i32.Const(0))
@@ -271,8 +295,11 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def load(inst: MemoryInst): Unit =
-    val base = stack.pop()
-    val addr = effectiveAddress(base, inst.offset)
+    // add offset to base address (which is already on the stack)
+    stack.push(summon[IntOps[V]].intLit(inst.offset))
+    evalNumeric(i32.Add)
+    val addr = valueToAddr(stack.pop())
+
     val memIdx = memoryIndex
     val byteSize = getBytesToRead(inst)
     val bytes = memRead(memIdx,addr,byteSize).withDefault
@@ -284,8 +311,12 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
   def store(inst: MemoryInst): Unit =
     val v = stack.pop()
     val bytes = encode(v, inst)
-    val base = stack.pop()
-    val addr = effectiveAddress(base, inst.offset)
+
+    // add offset to base address (which is already on the stack)
+    stack.push(summon[IntOps[V]].intLit(inst.offset))
+    evalNumeric(i32.Add)
+    val addr = valueToAddr(stack.pop())
+
     val memIdx = memoryIndex
     memStore(memIdx, addr, bytes).orElse(
       fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
@@ -315,7 +346,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
 
   def evalInstructionSequence(instructions: Expr, mod: ModuleInstance[V]): V =
     val frameData = FrameData(1,mod)
-    withFreshOperandStack(labelStack.withFresh(inNewFrame(frameData, Vector.empty[V]){
+    withFreshOperandStack(labelStack.withFresh(inNewFrameNoIndex(frameData, Vector.empty[V]){
       instructions.foreach(eval)
       stack.pop()
     }))
@@ -323,7 +354,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
   // we assume a valid module here
   def initializeModule(module: Module): ModuleInstance[V] =
     // we ignore imports an imports checking for now -> start with the empty module instance
-    val modInst = new Object with ModuleInstance[V]
+    val modInst = new ModuleInstance[V] {}
     // compute the initilization values for globals
     val globValues = module.globals.map(glob => evalInstructionSequence(glob.init, modInst))
     // in the current swam version reference vectors are already provided via the elem fields of the module
@@ -338,7 +369,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     modInst.tableAddrs = module.tables.map {
       tab =>
         tab match
-          case TableType(_, Limits(min,max)) => addEmptyTable(min,max,null)
+          case TableType(_, Limits(min,max)) => addEmptyTable(min,max)
     }
     // memory
     modInst.memoryAddrs = module.mems.map {
@@ -375,7 +406,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     // initialize tables and memories
     val frameData = FrameData(1,modInst)
     // TODO: do we need a fresh stack and label stack here?
-    inNewFrame(frameData, Vector.empty[V]){
+    inNewFrameNoIndex(frameData, Vector.empty[V]){
       // memory
       module.data.zipWithIndex.foreach {
         data =>
@@ -421,3 +452,4 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     }
 
     modInst
+

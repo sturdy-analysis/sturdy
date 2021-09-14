@@ -52,12 +52,7 @@ object ConcreteInterpreter extends Interpreter:
       with CUserInput[Value](nextInput)
       with CFailure
 
-  def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): Instance =
-    val effects = new Effects(initEnvironment, initStore, nextInput)
-    given Failure = effects
-    new Instance(effects)
-
-  class Instance(effects: Effects)(using Failure)
+  class Instance(effects: Effects)
     extends GenericInstance with GenericInterpreter(effects):
 
     final val vintOps: IntOps[VInt] = implicitly
@@ -71,3 +66,7 @@ object ConcreteInterpreter extends Interpreter:
     final val vrecOps: RecordOps[String, Value, VRecord] = implicitly
 
     override val phi: GenericPhi[Value] = fix.identity[FixIn, FixOut[Value]]
+
+  def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): Instance =
+    val effects = new Effects(initEnvironment, initStore, nextInput)
+    new Instance(effects)

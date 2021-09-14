@@ -33,8 +33,7 @@ trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V])
       this.vars = snapshotVars
     }
 
-  @targetName("inNewFrame_noindex")
-  def inNewFrame[A](d: Data, vars: Iterable[V])(f: => A): A =
+  def inNewFrameNoIndex[A](d: Data, vars: Iterable[V])(f: => A): A =
     val snapshotData = this.data
     val snapshotVars = this.vars
     this.data = d

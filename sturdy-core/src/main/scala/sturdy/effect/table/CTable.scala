@@ -1,36 +1,41 @@
 package sturdy.effect.table
 
-import sturdy.effect.{CMayCompute, MayCompute, NoJoin}
+import sturdy.effect.{MayCompute, NoJoin, CMayCompute}
 
 import scala.collection.mutable.ArrayBuffer
+import scala.reflect.ClassTag
 
 object CTable:
-  case class Tab[Elem](min: Int, max: Option[Int], table: ArrayBuffer[Elem])
+  case class Tab[Elem](min: Int, max: Option[Int], entries: Array[Elem]):
+    inline def size: Int = entries.length
 
 import CTable.*
 
-trait CTable[Elem] extends Table[Int,Elem]:
+trait CTable[V, Elem: ClassTag](vInt: V => Int) extends Table[V,Elem]:
   override type TableJoin[A] = NoJoin[A]
   override type TableJoinComp = Unit
 
-  protected val tables: ArrayBuffer[Tab[Elem]]
+  protected val tables: ArrayBuffer[Tab[Elem]] = ArrayBuffer.empty
 
-  override def tableGet(tabIdx: Int, idx: Int): CMayCompute[Elem] =
-    val Tab(_,_,table) = tables(tabIdx)
-    if (idx < table.length)
-      CMayCompute.Computes(table(idx))
+  override def tableGet(tabIdx: Int, vidx: V): CMayCompute[Elem] =
+    val idx = vInt(vidx)
+    val table = tables(tabIdx)
+    if (idx < table.size)
+      CMayCompute.Computes(table.entries(idx))
     else
       CMayCompute.ComputesNot()
 
-  override def tableSet(tabIdx: Int, idx: Int, elem: Elem): CMayCompute[Unit] =
-    val Tab(_,_,table) = tables(tabIdx)
-    if (idx < table.length)
-      table(idx) = elem
+  override def tableSet(tabIdx: Int, vidx: V, elem: Elem): CMayCompute[Unit] =
+    val idx = vInt(vidx)
+    val table = tables(tabIdx)
+    if (idx < table.size)
+      table.entries(idx) = elem
       CMayCompute.Computes(())
     else
       CMayCompute.ComputesNot()
 
-  override def addEmptyTable(min: Int, max: Option[Int], default: Elem): Int =
-    val newTab = ArrayBuffer.fill(min)(default)
-    tables += Tab(min,max,newTab)
-    tables.length
+  override def addEmptyTable(min: Int, max: Option[Int]): Int =
+    val tix = tables.length
+    val entries = Array.ofDim[Elem](min)
+    tables += Tab(min,max,entries)
+    tix

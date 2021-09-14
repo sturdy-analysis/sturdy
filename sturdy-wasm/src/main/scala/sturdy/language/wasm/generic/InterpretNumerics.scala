@@ -13,7 +13,7 @@ import swam.syntax.*
 class InterpretNumerics[V]
   (using stack: OperandStack[V],
    ints: IntOps[V], longs: LongOps[V], floats: FloatOps[V], doubles: DoubleOps[V],
-   eqOps: EqOps[V, V], compareOps: CompareOps[V, V], intCompareOps: IntCompareOps[V, V],
+   eqOps: EqOps[V, V], compareOps: CompareOps[V, V], intCompareOps: IntegerCompareOps[V, V],
    intLong: ConvertIntLong[V, V], intFloat: ConvertIntFloat[V, V], intDouble: ConvertIntDouble[V, V],
    longInt: ConvertLongInt[V, V], longFloat: ConvertLongFloat[V, V], longDouble: ConvertLongDouble[V, V],
    floatInt: ConvertFloatInt[V, V], floatLong: ConvertFloatLong[V, V], floatDouble: ConvertFloatDouble[V, V],
