@@ -40,15 +40,11 @@ object ConcreteInterpreter extends Interpreter :
   override type Bool = Boolean
 
   override def topI32: Int = throw new UnsupportedOperationException
-
   override def topI64: Long = throw new UnsupportedOperationException
-
   override def topF32: Float = throw new UnsupportedOperationException
-
   override def topF64: Double = throw new UnsupportedOperationException
 
   override def asBoolean(v: Value): Boolean = v.asInt32 != 0
-
   override def boolean(b: Boolean): Value =
     if (b)
       Value.Int32(1)
@@ -60,9 +56,7 @@ object ConcreteInterpreter extends Interpreter :
   override type Size = Int
 
   trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst] :
-
     import Value.*
-
     override def decode(dat: ByteBuffer, decInfo: MemoryInst): Value = decInfo match
       case _: i32.Load => Int32(dat.getInt(0))
       case _: i32.Load8S => Int32(dat.get(0))
@@ -126,9 +120,7 @@ object ConcreteInterpreter extends Interpreter :
     override type WasmOpsJoinComp = Unit
 
     override def valueToAddr(v: Value): Int = v.asInt32
-
     override def valToSize(v: Value): Int = v.asInt32
-
     override def sizeToVal(sz: Int): Value = Value.Int32(sz)
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): MayCompute[A, NoJoin, Unit] =
