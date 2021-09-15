@@ -55,15 +55,15 @@ object ConcreteInterpreter extends Interpreter:
   class Instance(effects: Effects)
     extends GenericInstance with GenericInterpreter(effects):
 
-    final val vintOps: IntOps[VInt] = implicitly
-    final val vcompareOps: CompareOps[VInt, VBool] = implicitly
-    final val vintEqOps: EqOps[VInt, VBool] = implicitly
-    final val vrefEqOps: EqOps[VRef, VBool] = implicitly
-    final val vfunEqOps: EqOps[VFun, VBool] = implicitly
-    final val vrecEqOps: EqOps[VRecord, VBool] = implicitly
-    final val vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
-    final val vrefOps: ReferenceOps[Addr, VRef] = implicitly
-    final val vrecOps: RecordOps[String, Value, VRecord] = implicitly
+    final def vintOps: IntOps[VInt] = implicitly
+    final def vcompareOps: CompareOps[VInt, VBool] = implicitly
+    final def vintEqOps: EqOps[VInt, VBool] = implicitly
+    final def vrefEqOps: EqOps[VRef, VBool] = implicitly
+    final def vfunEqOps: EqOps[VFun, VBool] = implicitly
+    final def vrecEqOps: EqOps[VRecord, VBool] = implicitly
+    final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
+    final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
+    final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
 
     override val phi: GenericPhi[Value] = fix.identity[FixIn, FixOut[Value]]
 

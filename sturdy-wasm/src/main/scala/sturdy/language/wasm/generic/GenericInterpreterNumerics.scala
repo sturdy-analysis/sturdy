@@ -10,8 +10,8 @@ import sturdy.values.relational.CompareOps
 import sturdy.values.relational.EqOps
 import swam.syntax.*
 
-class InterpretNumerics[V]
-  (using stack: OperandStack[V],
+class GenericInterpreterNumerics[V]
+  (stack: OperandStack[V],
    ints: IntOps[V], longs: LongOps[V], floats: FloatOps[V], doubles: DoubleOps[V],
    eqOps: EqOps[V, V], compareOps: CompareOps[V, V], intCompareOps: IntegerCompareOps[V, V],
    intLong: ConvertIntLong[V, V], intFloat: ConvertIntFloat[V, V], intDouble: ConvertIntDouble[V, V],

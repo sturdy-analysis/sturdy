@@ -59,15 +59,15 @@ object SignAnalysis extends Interpreter,
 
     given Effects = effects
 
-    final val vintOps: IntOps[VInt] = implicitly
-    final val vcompareOps: CompareOps[VInt, VBool] = implicitly
-    final val vintEqOps: EqOps[VInt, VBool] = implicitly
-    final val vrefEqOps: EqOps[VRef, VBool] = implicitly
-    final val vfunEqOps: EqOps[VFun, VBool] = implicitly
-    final val vrecEqOps: EqOps[VRecord, VBool] = new ARecordEqOps(using lazily(eqOps))
-    final val vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
-    final val vrefOps: ReferenceOps[Addr, VRef] = implicitly
-    final val vrecOps: RecordOps[String, Value, VRecord] = implicitly
+    final def vintOps: IntOps[VInt] = implicitly
+    final def vcompareOps: CompareOps[VInt, VBool] = implicitly
+    final def vintEqOps: EqOps[VInt, VBool] = implicitly
+    final def vrefEqOps: EqOps[VRef, VBool] = implicitly
+    final def vfunEqOps: EqOps[VFun, VBool] = implicitly
+    final def vrecEqOps: EqOps[VRecord, VBool] = new ARecordEqOps(using lazily(eqOps))
+    final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
+    final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
+    final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
 
     given Lazy[fix.Widening[Value]] = lazily(liftedWidening)
 

@@ -48,31 +48,37 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
    wasmOps.WasmOpsJoin[Unit], wasmOps.WasmOpsJoinComp):
 
   import effects.*
-  implicit val stack: OperandStack[V] = effects.asInstanceOf[OperandStack[V]]
-  //val memory = effectOps.asInstanceOf[WasmMemory[Addr,Bytes,Size,V]]
+  val stack: OperandStack[V] = effects
+  val memory: Memory[Addr,Bytes,Size] = effects
 
-  implicit val intOps: IntOps[V]
-  implicit val longOps: LongOps[V]
-  implicit val floatOps: FloatOps[V]
-  implicit val doubleOps: DoubleOps[V]
-  implicit val eqOps: EqOps[V, V]
-  implicit val compareOps: CompareOps[V, V]
-  implicit val intCompareOps: IntegerCompareOps[V, V]
-  implicit val convertIntLong: ConvertIntLong[V, V]
-  implicit val convertIntFloat: ConvertIntFloat[V, V]
-  implicit val convertIntDouble: ConvertIntDouble[V, V]
-  implicit val convertLongInt: ConvertLongInt[V, V]
-  implicit val convertLongFloat: ConvertLongFloat[V, V]
-  implicit val convertLongDouble: ConvertLongDouble[V, V]
-  implicit val convertFloatInt: ConvertFloatInt[V, V]
-  implicit val convertFloatLong: ConvertFloatLong[V, V]
-  implicit val convertFloatDouble: ConvertFloatDouble[V, V]
-  implicit val convertDoubleInt: ConvertDoubleInt[V, V]
-  implicit val convertDoubleLong: ConvertDoubleLong[V, V]
-  implicit val convertDoubleFloat: ConvertDoubleFloat[V, V]
+  val intOps: IntOps[V]
+  val longOps: LongOps[V]
+  val floatOps: FloatOps[V]
+  val doubleOps: DoubleOps[V]
+  val eqOps: EqOps[V, V]
+  val compareOps: CompareOps[V, V]
+  val intCompareOps: IntegerCompareOps[V, V]
+  val convertIntLong: ConvertIntLong[V, V]
+  val convertIntFloat: ConvertIntFloat[V, V]
+  val convertIntDouble: ConvertIntDouble[V, V]
+  val convertLongInt: ConvertLongInt[V, V]
+  val convertLongFloat: ConvertLongFloat[V, V]
+  val convertLongDouble: ConvertLongDouble[V, V]
+  val convertFloatInt: ConvertFloatInt[V, V]
+  val convertFloatLong: ConvertFloatLong[V, V]
+  val convertFloatDouble: ConvertFloatDouble[V, V]
+  val convertDoubleInt: ConvertDoubleInt[V, V]
+  val convertDoubleLong: ConvertDoubleLong[V, V]
+  val convertDoubleFloat: ConvertDoubleFloat[V, V]
 
-  val numerics = new InterpretNumerics[V]
-  import numerics.*
+  lazy val num = new GenericInterpreterNumerics[V](
+    effects,
+    intOps, longOps, floatOps, doubleOps, eqOps, compareOps, intCompareOps,
+    convertIntLong, convertIntFloat, convertIntDouble,
+    convertLongInt, convertLongFloat, convertLongDouble,
+    convertFloatInt, convertFloatLong, convertFloatDouble,
+    convertDoubleInt, convertDoubleLong, convertDoubleFloat)
+
   import wasmOps.*
 
   val labelStack = new LabelStack
@@ -84,7 +90,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
   def eval(inst: Inst): Unit =
     val opcode = inst.opcode
     if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)
-      val v = evalNumeric(inst)
+      val v = num.evalNumeric(inst)
       stack.push(v)
     else if (opcode >= OpCode.I32Load8S && opcode <= OpCode.MemoryGrow)
       evalMemoryInst(inst)
@@ -94,10 +100,10 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
       case i: VarInst => evalVarInst(i)
       case op: Miscop =>
         val v = stack.pop()
-        evalMiscop(op, v)
+        num.evalMiscop(op, v)
       case Drop => stack.pop()
       case Select =>
-        val isZero = evalNumeric(i32.Eqz)
+        val isZero = num.evalNumeric(i32.Eqz)
         boolBranch[Unit](isZero) {
           // v == 0: else branch
           val (_, v2) = stack.pop2()
@@ -137,7 +143,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
       val params = stack.popN(pt)
       label(params, pt, insts, Some(inst))
     case If(bt, thnInsts, elsInsts) =>
-      val isZero = evalNumeric(i32.Eqz)
+      val isZero = num.evalNumeric(i32.Eqz)
       val rt = returnArity(bt)
       val params = stack.popN(paramsArity(bt))
       boolBranch[Unit](isZero) {
@@ -148,7 +154,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
       }
     case Br(labelIndex) => branch(labelIndex)
     case BrIf(labelIndex) =>
-      val isZero = evalNumeric(i32.Eqz)
+      val isZero = num.evalNumeric(i32.Eqz)
       boolBranch[Unit](isZero) {
         // v == 0: else branch
         // do nothing
@@ -258,10 +264,10 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
 
 
   private def defaultValue(ty: ValType): V = ty match
-    case ValType.I32 => evalNumeric(i32.Const(0))
-    case ValType.I64 => evalNumeric(i64.Const(0))
-    case ValType.F32 => evalNumeric(f32.Const(0))
-    case ValType.F64 => evalNumeric(f64.Const(0))
+    case ValType.I32 => num.evalNumeric(i32.Const(0))
+    case ValType.I64 => num.evalNumeric(i64.Const(0))
+    case ValType.F32 => num.evalNumeric(f32.Const(0))
+    case ValType.F64 => num.evalNumeric(f64.Const(0))
 
   private def returnArity(bt: BlockType): Int =
     val returnArity = bt.arity(module.functionTypes)
@@ -290,14 +296,14 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
       val delta = valToSize(stack.pop())
       val memIdx = memoryIndex
       val res = memGrow(memIdx, delta).withDefault
-        (evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
+        (num.evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
         {sizeToVal(_)}
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def load(inst: MemoryInst): Unit =
     // add offset to base address (which is already on the stack)
-    stack.push(summon[IntOps[V]].intLit(inst.offset))
-    evalNumeric(i32.Add)
+    stack.push(intOps.intLit(inst.offset))
+    num.evalNumeric(i32.Add)
     val addr = valueToAddr(stack.pop())
 
     val memIdx = memoryIndex
@@ -313,8 +319,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     val bytes = encode(v, inst)
 
     // add offset to base address (which is already on the stack)
-    stack.push(summon[IntOps[V]].intLit(inst.offset))
-    evalNumeric(i32.Add)
+    stack.push(intOps.intLit(inst.offset))
+    num.evalNumeric(i32.Add)
     val addr = valueToAddr(stack.pop())
 
     val memIdx = memoryIndex

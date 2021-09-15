@@ -81,15 +81,15 @@ trait Interpreter:
     given Instance = this.asInstanceOf[Instance]
     given Failure = effects
 
-    val vintOps: IntOps[VInt]
-    val vcompareOps: CompareOps[VInt, VBool]
-    val vintEqOps: EqOps[VInt, VBool]
-    val vrefEqOps: EqOps[VRef, VBool]
-    val vfunEqOps: EqOps[VFun, VBool]
-    val vrecEqOps: EqOps[VRecord, VBool]
-    val vfunOps: FunctionOps[Function, Value, Value, VFun]
-    val vrefOps: ReferenceOps[Addr, VRef]
-    val vrecOps: RecordOps[String, Value, VRecord]
+    def vintOps: IntOps[VInt]
+    def vcompareOps: CompareOps[VInt, VBool]
+    def vintEqOps: EqOps[VInt, VBool]
+    def vrefEqOps: EqOps[VRef, VBool]
+    def vfunEqOps: EqOps[VFun, VBool]
+    def vrecEqOps: EqOps[VRecord, VBool]
+    def vfunOps: FunctionOps[Function, Value, Value, VFun]
+    def vrefOps: ReferenceOps[Addr, VRef]
+    def vrecOps: RecordOps[String, Value, VRecord]
 
     import Value.*
     final val intOps = new LiftedIntOps[Value, VInt](_.asInt, IntValue.apply)(using vintOps)
