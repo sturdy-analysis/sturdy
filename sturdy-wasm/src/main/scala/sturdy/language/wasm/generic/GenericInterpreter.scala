@@ -143,6 +143,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     case If(bt, thnInsts, elsInsts) =>
       val isZero = num.evalNumeric(i32.Eqz)
       val rt = returnArity(bt)
+      val params = stack.popN(paramsArity(bt))
       boolBranch[Unit](isZero) {
         // v == 0: else branch
         label(paramsArity(bt), rt, elsInsts, None)
@@ -275,7 +276,10 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
           throw new Error(s"Wrong number of arguments in external invocation.")
         // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
         val rtLength = func.funcType.t.length
-        invokeWithArguments(args, rtLength, func)
+        stack.pushN(args.reverse)
+        invoke(func)
+        val res = stack.popN(rtLength)
+        res.reverse
       case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
 
 
