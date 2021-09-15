@@ -201,7 +201,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
   //   - we don't know k, so we need to remember size of stack A
   def label(paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
     val restoreStackSize = stack.size() - paramsArity
-    catchFinally {
+    tryCatchFinally {
       labelStack.pushLabel(returnArity)
       insts.foreach(eval)
     } { ex =>
@@ -232,7 +232,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
         val frameData = FrameData(funcType.t.size, mod)
         val vars = args.view.reverse ++ func.locals.map(defaultValue)
         val restoreStackSize = stack.size()
-        catches {
+        tryCatch {
           labelStack.withFresh(inNewFrameNoIndex(frameData, vars) {
             label(0, funcType.t.size, func.body, None)
           })
