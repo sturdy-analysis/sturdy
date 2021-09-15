@@ -197,6 +197,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
       stack.restoreAfter {
         stack.pushN(params)
         insts.foreach(eval)
+        println(stack)
       }
     } { // catch
       case WasmException.Jump(labelIndex, operands) =>
@@ -220,6 +221,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
           val vars = args.view.reverse ++ func.locals.map(defaultValue)
           withFreshOperandStack(labelStack.withFresh(inNewFrameNoIndex(frameData, vars) {
             label(List.empty, funcType.t.size, func.body, None)
+            println(stack)
           }))
     } {
       case WasmException.Return(operands) =>
