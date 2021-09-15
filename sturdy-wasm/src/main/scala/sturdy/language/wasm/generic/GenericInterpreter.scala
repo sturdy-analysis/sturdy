@@ -192,7 +192,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     throws(WasmException.Jump(labelIndex, operands))
 
   def label(params: List[V], returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
-    catchFinally {
+    tryCatchFinally {
       labelStack.pushLabel(returnArity)
       stack.restoreAfter {
         stack.pushN(params)
@@ -212,7 +212,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     }
 
   def invoke(func: FunctionInstance[V]): Unit =
-    catches {
+    tryCatch {
       func match
         case FunctionInstance.Wasm(mod, func, funcType) =>
           val args = stack.popN(funcType.params.size)
@@ -224,14 +224,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     } {
       case WasmException.Return(operands) =>
         stack.pushN(operands)
-      case WasmException.Jump(_,_) => fail(InvalidModule, s"Tried to jump through a function boundary.")
+      case WasmException.Jump(_,_) =>
+        fail(InvalidModule, s"Tried to jump through a function boundary.")
     }
-
-  def invokeWithArguments(args: List[V], rtLength: Int, func: FunctionInstance[V]): List[V] =
-    stack.pushN(args.reverse)
-    invoke(func)
-    val res = stack.popN(rtLength)
-    res.reverse
 
 //  def invokeExported(funcName: String, args: List[V]): List[V] =
 //    // lookup funcName in module's exports
@@ -259,7 +254,10 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
           throw new Error(s"Wrong number of arguments in external invocation.")
         // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
         val rtLength = func.funcType.t.length
-        invokeWithArguments(args, rtLength, func)
+        stack.pushN(args.reverse)
+        invoke(func)
+        val res = stack.popN(rtLength)
+        res.reverse
       case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
 
 
