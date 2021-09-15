@@ -136,21 +136,18 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     case Nop => // nothing
     case Unreachable => fail(UnreachableInstruction, inst.toString)
     case Block(bt, insts) =>
-      val params = stack.popN(paramsArity(bt))
-      label(params, returnArity(bt), insts, None)
-    case Loop(bt, insts) =>
+      label(paramsArity(bt), returnArity(bt), insts, None)
+    case l@Loop(bt, insts) =>
       val pt = paramsArity(bt)
-      val params = stack.popN(pt)
-      label(params, pt, insts, Some(inst))
+      label(pt, pt, insts, Some(l))
     case If(bt, thnInsts, elsInsts) =>
       val isZero = num.evalNumeric(i32.Eqz)
       val rt = returnArity(bt)
-      val params = stack.popN(paramsArity(bt))
       boolBranch[Unit](isZero) {
         // v == 0: else branch
-        label(params, rt, elsInsts, None)
+        label(paramsArity(bt), rt, elsInsts, None)
       } {
-        label(params, rt, thnInsts, None)
+        label(paramsArity(bt), rt, thnInsts, None)
       }
     case Br(labelIndex) => branch(labelIndex)
     case BrIf(labelIndex) =>
@@ -191,41 +188,60 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     val operands = stack.popN(returnArity)
     throws(WasmException.Jump(labelIndex, operands))
 
-  def label(params: List[V], returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
+  // stack before label-call:  A p0 ... pn (n = params arity)
+  // finish without exception: A r0 ... rm (m = return arity) => nothing to do
+  // catch Jump(l0, op0, ..., opm)
+  //   - this block is the jump target
+  //   - stack: A g0 ... gk needs to become A op0 ... opm
+  //   - we don't know k, so we need to remember size of stack A
+  // catch Jump(li, op0, ..., opl) i != 0 and Return(op0, ..., opl)
+  //   - jump target is further out
+  //   - stack: A g0 ... gok needs to become A
+  //   - we don't know k, so we need to remember size of stack A
+  def label(paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
+    val restoreStackSize = stack.size() - paramsArity
     catchFinally {
       labelStack.pushLabel(returnArity)
-      stack.restoreAfter {
-        stack.pushN(params)
-        insts.foreach(eval)
-      }
-    } { // catch
-      case WasmException.Jump(labelIndex, operands) =>
-        if (labelIndex == 0) {
-          stack.pushN(operands)
-          branchTarget.foreach(eval)
-        } else {
-          throws(WasmException.Jump(labelIndex - 1, operands))
-        }
-      case ex => throws(ex)
+      insts.foreach(eval)
+    } { ex =>
+      stack.popN(stack.size() - restoreStackSize)
+      ex match
+        case WasmException.Jump(labelIndex, operands) =>
+          if (labelIndex == 0) {
+            stack.pushN(operands)
+            branchTarget.foreach(eval)
+          } else {
+            throws(WasmException.Jump(labelIndex - 1, operands))
+          }
+        case _ : WasmException.Return[V] => throws(ex)
     } { // finally
       labelStack.popLabel()
     }
 
+  // stack before invoke: A p0 ... pn (n = params arity)
+  // finish without excepction: A r0 ... rm (m = return arity)
+  // catch Return(op0, ..., opm)
+  //    - stack A g0 ... gk needs to become A op0 ... opm
+  //    - we don't know k, so we need to remember size of stack A
+  // catch Jump(...) => error
   def invoke(func: FunctionInstance[V]): Unit =
-    catches {
-      func match
-        case FunctionInstance.Wasm(mod, func, funcType) =>
-          val args = stack.popN(funcType.params.size)
-          val frameData = FrameData(funcType.t.size, mod)
-          val vars = args.view.reverse ++ func.locals.map(defaultValue)
-          withFreshOperandStack(labelStack.withFresh(inNewFrameNoIndex(frameData, vars) {
-            label(List.empty, funcType.t.size, func.body, None)
-          }))
-    } {
-      case WasmException.Return(operands) =>
-        stack.pushN(operands)
-      case WasmException.Jump(_,_) => fail(InvalidModule, s"Tried to jump through a function boundary.")
-    }
+    func match
+      case FunctionInstance.Wasm(mod,func, funcType) =>
+        val args = stack.popN(funcType.params.size)
+        val frameData = FrameData(funcType.t.size, mod)
+        val vars = args.view.reverse ++ func.locals.map(defaultValue)
+        val restoreStackSize = stack.size()
+        catches {
+          labelStack.withFresh(inNewFrameNoIndex(frameData, vars) {
+            label(0, funcType.t.size, func.body, None)
+          })
+        } { ex =>
+          stack.popN(stack.size() - restoreStackSize)
+          ex match
+            case WasmException.Return(operands) =>
+              stack.pushN(operands)
+            case WasmException.Jump(_,_) => fail(InvalidModule, s"Tried to jump through a function boundary.")
+        }
 
   def invokeWithArguments(args: List[V], rtLength: Int, func: FunctionInstance[V]): List[V] =
     stack.pushN(args.reverse)

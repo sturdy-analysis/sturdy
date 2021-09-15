@@ -13,6 +13,9 @@ trait COperandStack[V] extends OperandStack[V]:
 
   def peek(): V =
     stack.head
+    
+  def size(): Int =
+    stack.size
 
   def ifEmpty[A](empty: => A, notEmpty: => A): A =
     if (stack.isEmpty)

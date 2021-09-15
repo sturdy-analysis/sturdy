@@ -6,7 +6,7 @@ import scala.collection.mutable.ArrayBuffer
 
 class LabelStack:
   private var labelReturnArities: ArrayBuffer[LabelIdx] = ArrayBuffer()
-  inline def lookupLabel(lableIndex: LabelIdx): LabelIdx = labelReturnArities(lableIndex)
+  def lookupLabel(lableIndex: LabelIdx): LabelIdx = labelReturnArities(labelReturnArities.size - lableIndex - 1)
   inline def pushLabel(returnArity: LabelIdx): Unit =
     labelReturnArities += returnArity
   inline def popLabel(): Unit =

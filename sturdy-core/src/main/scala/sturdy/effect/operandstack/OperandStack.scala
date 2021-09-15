@@ -6,6 +6,7 @@ trait OperandStack[V]:
   def push(v: V): Unit
   def pop(): V
   def peek(): V
+  def size(): Int
   def ifEmpty[A](empty: => A, notEmpty: => A): A
   def withFreshOperandStack[A](f: => A): A
   def restoreAfter[A](f: => A): A

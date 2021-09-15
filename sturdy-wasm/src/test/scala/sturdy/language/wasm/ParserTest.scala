@@ -21,7 +21,6 @@ class ParserTest extends AnyFlatSpec, Matchers:
     it must s"parse ${p.getFileName}" in {
       val path = Path.of(p.toUri)
       parse(path)
-      //print(mod)
     }
   }
 
