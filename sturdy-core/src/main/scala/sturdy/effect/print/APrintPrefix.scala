@@ -2,8 +2,9 @@ package sturdy.effect.print
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.JoinComputation
-import sturdy.values.{JoinValue, Finite}
+import sturdy.effect.Effectful
+import sturdy.values.Finite
+import sturdy.values.JoinValue
 
 import scala.collection.mutable.ListBuffer
 
@@ -91,16 +92,17 @@ object APrintPrefix:
     case Mismatch(cs: List[C], rest: PrintResult[A])
     case Partial(rest: PrintResult[A])
 
-import APrintPrefix.*
-
 // TODO this is a workaround. We don't need widening for PrintResult since it's stability does not influence the fixed point
-given finitePrintResult[A]: Finite[PrintResult[A]] with {}
+given finitePrintResult[A]: Finite[APrintPrefix.PrintResult[A]] with {}
 
-given joinPrintResult[A]: JoinValue[PrintResult[A]] with
+given joinPrintResult[A]: JoinValue[APrintPrefix.PrintResult[A]] with
+  import APrintPrefix.*
   override def joinValues(v1: PrintResult[A], v2: PrintResult[A]): PrintResult[A] = v1.join(v2)
 
 
-trait APrintPrefix[P] extends Print[P], JoinComputation:
+trait APrintPrefix[P] extends Print[P], Effectful:
+  import APrintPrefix.*
+
   private var printed: PrintResult[P] = PrintResult.Definite(Vector.empty)
 
   def getPrinted: PrintResult[P] = printed
@@ -110,7 +112,7 @@ trait APrintPrefix[P] extends Print[P], JoinComputation:
   override def print(a: P): Unit =
     printed = printed :+ a
 
-  override def joinComputations[A](f: => A)(g: => A): Join[A] = {
+  override def joinComputations[A](f: => A)(g: => A): Joined[A] = {
     val snapshot = printed
     var printedF: PrintResult[P] = null
     var printedG: PrintResult[P] = null

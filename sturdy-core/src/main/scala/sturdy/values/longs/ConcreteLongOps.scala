@@ -8,7 +8,9 @@ import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.Convert
 
-import java.lang.{Float as JFloat, Long as JLong, Double as JDouble}
+import java.lang.Float as JFloat
+import java.lang.Long as JLong
+import java.lang.Double as JDouble
 
 
 given ConcreteLongOps(using f: Failure): LongOps[Long] with

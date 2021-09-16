@@ -1,22 +1,23 @@
 package sturdy.language.wasm.analyses
 
-import sturdy.effect.noJoin
-import sturdy.effect.AMayComputeMany
-import sturdy.effect.JoinComputation
+import sturdy.effect.MayComputeMany
+import sturdy.effect.{Effectful, Join, given}
 import sturdy.effect.MayCompute
 import sturdy.effect.NoJoin
-import sturdy.effect.binarymemory.CMemory
+import sturdy.effect.binarymemory.ConcreteMemory
+import sturdy.effect.binarymemory.ConstantAddressMemory
 import sturdy.effect.binarymemory.Serialize
+import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.CCallFrameInt
 import sturdy.effect.callframe.CMutableCallFrameInt
-import sturdy.effect.except.CExcept
+import sturdy.effect.except.ConcreteExcept
+import sturdy.effect.failure.AFailureCollect
 import sturdy.effect.failure.CFailure
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.COperandStack
-import sturdy.effect.table.CTable
+import sturdy.effect.table.ConcreteTable
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.abstractions.ConstantAddressMemory
 import sturdy.language.wasm.abstractions.ConstantValues
 import sturdy.language.wasm.generic.FunctionInstance
 import sturdy.language.wasm.generic.GenericInterpreter
@@ -36,25 +37,28 @@ import sturdy.values.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-object ConstantAnalysis extends Interpreter, ConstantValues, ConstantAddressMemory:
+object ConstantAnalysis extends Interpreter, ConstantValues:
+
+  type Addr = Topped[Int]
+  type Bytes = Vector[Topped[Byte]]
+  type Size = Topped[Int]
 
   given WasmOperations[Value, Addr, Size] with
-    override type WasmOpsJoin[A] = JoinValue[A]
-    override type WasmOpsJoinComp = JoinComputation
+    override type WasmOpsJoin[A] = Join[A]
 
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Int32(sz)
 
-    override def indexLookup[A](ix: Value, vec: Vector[A]): AMayComputeMany[A] =
+    override def indexLookup[A](ix: Value, vec: Vector[A]): MayComputeMany[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
           if (i < vec.size)
-            AMayComputeMany.Computes(Iterable.single(vec(i)))
+            MayComputeMany.Computes(Iterable.single(vec(i)))
           else
-            AMayComputeMany.ComputesNot()
+            MayComputeMany.ComputesNot()
         case Topped.Top =>
-          AMayComputeMany.MaybeComputes(vec)
+          MayComputeMany.MaybeComputes(vec)
 
 //  trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst] :
 //    import Value.*
@@ -118,13 +122,13 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ConstantAddressMemo
 
 //  class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
 //    extends COperandStack[Value]
-//      with CMemory
-//      with CSerialize
-//      with CTable[Value, FunctionInstance[Value]](_.asInt32)
+//      with ConstantAddressMemory[Topped[Byte]]
+////      with CSerialize
+////      with ConcreteTable[Value, FunctionInstance[Value]](_.asInt32)
 //      with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
-//      with CBoolBranching[Value]
-//      with CExcept[WasmException[Value]]
-//      with CFailure
+//      with ABoolBranching[Value]
+//      with AExcept[WasmException[Value]]
+//      with AFailureCollect
 
 //  class Instance(effects: Effects)
 //    extends GenericInstance with GenericInterpreter(effects) :

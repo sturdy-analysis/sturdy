@@ -1,7 +1,7 @@
 package sturdy.values.booleans
 
 import sturdy.values.Topped
-import sturdy.values.Topped._
+import sturdy.values.Topped.*
 
 class LiftedBooleanOps[V, B](extract: V => B, inject: B => V)(using ops: BooleanOps[B]) extends BooleanOps[V]:
   def boolLit(b: Boolean): V = inject(ops.boolLit(b))

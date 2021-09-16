@@ -1,7 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.effect.noJoin
-import sturdy.effect.{AnalysisState, JoinComputation}
+import sturdy.effect.{AnalysisState, Effectful, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.callframe.CCallFrame
@@ -51,10 +50,10 @@ object SignAnalysis extends Interpreter,
   def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
     val effects = new Effects(initEnvironment, initStore)
     given Failure = effects
-    given JoinComputation = effects
+    given Effectful = effects
     new Instance(effects, steps)
 
-  class Instance(effects: Effects, steps: Int)(using Failure, JoinComputation)
+  class Instance(effects: Effects, steps: Int)(using Failure, Effectful)
     extends GenericInstance with GenericInterpreter[Value, Addr, Effects](effects):
 
     given Effects = effects

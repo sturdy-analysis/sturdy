@@ -1,6 +1,8 @@
 package sturdy.effect.failure
 
-import sturdy.values.{Abstractly, PartialOrder, Powerset}
+import sturdy.values.Abstractly
+import sturdy.values.PartialOrder
+import sturdy.values.Powerset
 
 enum AFallible[T]:
   case Unfailing(t: T)

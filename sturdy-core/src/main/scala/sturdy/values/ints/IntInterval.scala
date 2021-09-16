@@ -1,6 +1,6 @@
 package sturdy.values.ints
 
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.fix.Widening
 import sturdy.values.Abstractly
@@ -63,7 +63,7 @@ class IntIntervalWiden(bounds: => Set[Int]) extends Widening[IntInterval]:
         treeSet.minAfter(v2.h).getOrElse(Int.MaxValue)
     IntInterval(low, high)
 
-given IntervalIntOps(using f: Failure, j: JoinComputation): IntOps[IntInterval] with
+given IntervalIntOps(using f: Failure, j: Effectful): IntOps[IntInterval] with
   def intLit(i: Int): IntInterval = IntInterval(i, i)
   def randomInt(): IntInterval = IntInterval.Top
   def add(v1: IntInterval, v2: IntInterval): IntInterval = v1 + v2

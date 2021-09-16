@@ -1,6 +1,5 @@
 package sturdy.language.scheme
 
-import sturdy.effect.noJoin
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.environment.CEnvironment
@@ -89,7 +88,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
              typeOps: TypeOps[V],
              eqOps: EqOps[V, V], compareOps: CompareOps[V, V],
              closureOps: ClosureOps[String, V, Body, effectOps.Env, V, V])
-  (using effectOps.StoreJoin[V], effectOps.StoreJoinComp, effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[V]):
+  (using effectOps.StoreJoin[V], effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[V]):
 
   import intOps.intLit
   import rationalOps.rationalLit

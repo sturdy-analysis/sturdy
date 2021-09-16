@@ -1,6 +1,6 @@
 package sturdy.values.ints
 
-import java.lang.{Long => JLong}
+import java.lang.Long as JLong
 
 /** Extra compare ops for integers */
 trait IntegerCompareOps[V, B]:

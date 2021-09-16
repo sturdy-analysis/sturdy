@@ -1,8 +1,12 @@
 package sturdy.values.records
 
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.values.{JoinValue, joinMayMust, MayMust, PartialOrder, mayMustPO}
+import sturdy.values.JoinValue
+import sturdy.values.MayMust
+import sturdy.values.PartialOrder
+import sturdy.values.joinMayMust
+import sturdy.values.mayMustPO
 import sturdy.values.relational.EqOps
 
 import scala.collection.immutable
@@ -13,7 +17,7 @@ case class MayMustRecord[F, V](m: Map[F, MayMust[V]]):
     case (f, MayMust.May(v)) => Right(f -> v)
   }
 
-given mayMustRecordOps[F, V] (using Failure, JoinValue[V])(using j: JoinComputation): RecordOps[F, V, MayMustRecord[F, V]] with
+given mayMustRecordOps[F, V] (using Failure, JoinValue[V])(using j: Effectful): RecordOps[F, V, MayMustRecord[F, V]] with
   override def makeRecord(fields: Seq[(F, V)]): MayMustRecord[F, V] =
     var rec = Map[F, MayMust[V]]()
     for ((field, v) <- fields)

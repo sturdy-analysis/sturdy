@@ -1,7 +1,7 @@
 package sturdy.fix
 
 import sturdy.effect.AnalysisState
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.values.JoinValue
 
 import scala.collection.mutable
@@ -26,7 +26,7 @@ case object RecurrentCall extends Exception:
  */
 final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], contextual: Contextual[Ctx, Dom, Codom])
   (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
-  (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation):
+  (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: Effectful):
 
   case class Frame(dom: Dom, ctx: Ctx)
 

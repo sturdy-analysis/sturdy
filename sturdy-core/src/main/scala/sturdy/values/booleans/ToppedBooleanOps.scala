@@ -1,7 +1,7 @@
 package sturdy.values.booleans
 
 import sturdy.values.Topped
-import sturdy.values.Topped._
+import sturdy.values.Topped.*
 
 given ToppedBooleanOps[V](using ops: BooleanOps[V]): BooleanOps[Topped[V]] with
   def boolLit(b: Boolean): Topped[V] = Actual(ops.boolLit(b))

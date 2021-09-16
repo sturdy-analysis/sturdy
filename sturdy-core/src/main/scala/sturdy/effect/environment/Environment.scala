@@ -7,9 +7,8 @@ import sturdy.effect.MayCompute
  */
 trait Environment[Var, V]:
   type EnvJoin[A]
-  type EnvJoinComp
 
-  def lookup(x: Var): MayCompute[V, EnvJoin, EnvJoinComp]
+  def lookup(x: Var): MayCompute[EnvJoin, V]
   def bind(x: Var, v: V): Unit
   def scoped[A](f: => A): A
   def clear(): Unit

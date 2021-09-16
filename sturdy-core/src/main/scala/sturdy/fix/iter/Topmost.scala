@@ -1,9 +1,12 @@
 package sturdy.fix.iter
 
 import sturdy.effect.AnalysisState
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.fix.Widening
-import sturdy.fix.{RecurrentCall, Combinator, Stack, Contextual}
+import sturdy.fix.Combinator
+import sturdy.fix.Contextual
+import sturdy.fix.RecurrentCall
+import sturdy.fix.Stack
 import sturdy.values.JoinValue
 
 import scala.collection.mutable
@@ -13,13 +16,13 @@ def topmost[Dom, Codom, In, Out, Ctx]
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: AnalysisState[In, Out])
   (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
-  (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation)
+  (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: Effectful)
   : Topmost[Dom, Codom, In, Out, Ctx] = new Topmost(state, context)
 
 final class Topmost[Dom, Codom, In, Out, Ctx]
   (state: AnalysisState[In, Out], context: Contextual[Ctx, Dom, Codom])
   (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
-  (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation)
+  (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: Effectful)
   extends Combinator[Dom, Codom]:
 
   private val stack: Stack[Dom, Codom, In, Out, Ctx] = new Stack(state, context)

@@ -1,7 +1,7 @@
 package sturdy.effect.callframe
 
-import sturdy.effect.CMayCompute
-import sturdy.effect.CMayCompute.*
+import sturdy.effect.MayComputeConcrete
+import sturdy.effect.MayComputeConcrete.*
 import sturdy.effect.NoJoin
 
 import scala.reflect.ClassTag
@@ -9,7 +9,6 @@ import scala.annotation.targetName
 
 trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V]) extends CallFrame[Data, Int, V]:
   type CallFrameJoin[A] = NoJoin[A]
-  type CallFrameJoinComp = Unit
 
   private var data: Data = _data
   protected var vars: Array[V] = _vars.toArray
@@ -17,7 +16,7 @@ trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V])
   def getFrameData: Data = data
   def getCallFrame: (Data, Vector[V]) = (data, vars.toVector)
 
-  def getLocal(ix: Int): CMayCompute[V] =
+  def getLocal(ix: Int): MayComputeConcrete[V] =
     if (ix >= 0 && ix < vars.size)
       Computes(vars(ix))
     else
@@ -44,7 +43,7 @@ trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V])
     }
 
 trait CMutableCallFrameInt[Data, V](using ClassTag[V]) extends CCallFrameInt[Data, V] with MutableCallFrame[Data, Int, V]:
-  override def setLocal(ix: Int, v: V): CMayCompute[Unit] =
+  override def setLocal(ix: Int, v: V): MayComputeConcrete[Unit] =
     if (ix >= 0 && ix < vars.size) {
       vars = vars.updated(ix, v)
       Computes(())

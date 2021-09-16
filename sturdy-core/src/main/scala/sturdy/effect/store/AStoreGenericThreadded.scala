@@ -1,7 +1,7 @@
 package sturdy.effect.store
 
 import sturdy.effect.AnalysisState
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.effect.store.AStoreGenericThreadded.StoreState
 import sturdy.values.JoinValue
 
@@ -12,7 +12,7 @@ import scala.collection.mutable.ListBuffer
  * optimize the join computation, since only values of dirty addresses need joining.
  */
 trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
-  extends JoinComputation:
+  extends Effectful:
 
   protected var store: Map[Addr, V] = Map()
   protected var dirtyAddrs: Set[Addr] = Set()
@@ -28,7 +28,7 @@ trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
       case None => store += x -> v
       case Some(old) => store += x -> j.joinValues(old, v)
 
-  override def joinComputations[A](f: => A)(g: => A): Join[A] =
+  override def joinComputations[A](f: => A)(g: => A): Joined[A] =
     val snapshot = store
     var snapshotDirtyAddrs = dirtyAddrs
     dirtyAddrs = Set()
@@ -53,7 +53,7 @@ trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
 
     joinedResult
 
-  def getStoreJoinedWith(other: Map[Addr, V]): Map[Addr, V] =
+  def getStoreJoinWith(other: Map[Addr, V]): Map[Addr, V] =
     var joined = other
     for (x <- this.dirtyAddrs)
       joined.get(x) match

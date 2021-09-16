@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.effect.{JoinComputation, AnalysisState}
+import sturdy.effect.{Effectful, AnalysisState, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.callframe.CCallFrame
@@ -52,7 +52,7 @@ object IntervalAnalysis extends Interpreter,
     given Effects = effects
     new Instance(effects, steps)
 
-  class Instance(effects: Effects, steps: Int)(using Failure, JoinComputation)
+  class Instance(effects: Effects, steps: Int)(using Failure, Effectful)
     extends GenericInstance with GenericInterpreter[Value, Addr, Effects](effects):
 
     given Effects = effects

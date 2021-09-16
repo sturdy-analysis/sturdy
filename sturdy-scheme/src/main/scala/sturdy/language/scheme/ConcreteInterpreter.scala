@@ -2,7 +2,6 @@ package sturdy.language.scheme
 
 import org.apache.commons.math3.fraction.Fraction
 
-import sturdy.effect.noJoin
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.environment.CEnvironment

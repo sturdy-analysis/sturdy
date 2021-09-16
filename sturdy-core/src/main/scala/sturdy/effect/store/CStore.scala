@@ -1,7 +1,7 @@
 package sturdy.effect.store
 
-import sturdy.effect.CMayCompute
-import sturdy.effect.CMayCompute.*
+import sturdy.effect.MayComputeConcrete
+import sturdy.effect.MayComputeConcrete.*
 import sturdy.effect.NoJoin
 
 import scala.collection.mutable.ListBuffer
@@ -11,12 +11,11 @@ import scala.collection.mutable.ListBuffer
  */
 trait CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V]:
   override type StoreJoin[A] = NoJoin[A]
-  override type StoreJoinComp = Unit
 
   protected var store: Map[Addr, V] = _init
   def getStore: Map[Addr, V] = store
 
-  override def read(x: Addr): CMayCompute[V] =
+  override def read(x: Addr): MayComputeConcrete[V] =
     store.get(x) match
       case Some(v) => Computes(v)
       case None => ComputesNot()

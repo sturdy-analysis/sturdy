@@ -1,6 +1,5 @@
 package sturdy.language.tip
 
-import sturdy.effect.noJoin
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.callframe.CCallFrame
@@ -79,7 +78,7 @@ import GenericInterpreter.*
 
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   (val effects: Effects)
-  (using effects.StoreJoin[V], effects.StoreJoinComp, effects.StoreJoin[Unit], effects.BoolBranchJoin[Unit]):
+  (using effects.StoreJoin[V], effects.StoreJoin[Unit], effects.BoolBranchJoin[Unit]):
 
   import effects._
   

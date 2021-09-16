@@ -1,18 +1,17 @@
 package sturdy.language.wasm
 
 
-import sturdy.effect.noJoin
-import sturdy.effect.CMayCompute
+import sturdy.effect.MayComputeConcrete
 import sturdy.effect.MayCompute
 import sturdy.effect.NoJoin
-import sturdy.effect.binarymemory.CMemory
+import sturdy.effect.binarymemory.ConcreteMemory
 import sturdy.effect.binarymemory.Serialize
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.{CMutableCallFrameInt, CCallFrameInt}
-import sturdy.effect.except.CExcept
+import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.{CFailure, Failure}
 import sturdy.effect.operandstack.COperandStack
-import sturdy.effect.table.CTable
+import sturdy.effect.table.ConcreteTable
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.FunctionInstance
 import sturdy.language.wasm.generic.GenericInterpreter
@@ -117,27 +116,26 @@ object ConcreteInterpreter extends Interpreter :
 
   given WasmOperations[Value, Addr, Size] with
     override type WasmOpsJoin[A] = NoJoin[A]
-    override type WasmOpsJoinComp = Unit
 
     override def valueToAddr(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Int32(sz)
 
-    override def indexLookup[A](ix: Value, vec: Vector[A]): MayCompute[A, NoJoin, Unit] =
+    override def indexLookup[A](ix: Value, vec: Vector[A]): MayComputeConcrete[A] =
       val i = ix.asInt32
       if (i < vec.size)
-        CMayCompute.Computes(vec(i))
+        MayComputeConcrete.Computes(vec(i))
       else
-        CMayCompute.ComputesNot()
+        MayComputeConcrete.ComputesNot()
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends COperandStack[Value]
-      with CMemory
+      with ConcreteMemory
       with CSerialize
-      with CTable[Value, FunctionInstance[Value]](_.asInt32)
+      with ConcreteTable[Value, FunctionInstance[Value]](_.asInt32)
       with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
       with CBoolBranching[Value]
-      with CExcept[WasmException[Value]]
+      with ConcreteExcept[WasmException[Value]]
       with CFailure
 
   class Instance(effects: Effects)

@@ -2,7 +2,7 @@ package sturdy.effect.environment
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 
 /*
  * An abstract environment that assumes static scoping of bindings. In particular,
@@ -11,8 +11,8 @@ import sturdy.effect.JoinComputation
  *
  *     case If(e, thn, els) => boolBranch(eval(e), scoped(thn), scoped(els))
  */
-trait AEnvironmentStaticScope[Var, V] extends CEnvironment[Var, V], JoinComputation:
-  override def joinComputations[A](f: => A)(g: => A): Join[A] =
+trait AEnvironmentStaticScope[Var, V] extends CEnvironment[Var, V], Effectful:
+  override def joinComputations[A](f: => A)(g: => A): Joined[A] =
     val snapshot = env
     super.joinComputations(ensureUnchangedEnv(f, snapshot))(ensureUnchangedEnv(g, snapshot))
 

@@ -2,11 +2,11 @@ package sturdy.effect.store
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.AMayComputeOne
-import sturdy.effect.AMayComputeOne.*
-import sturdy.effect.JoinComputation
+import sturdy.effect.MayComputeOne
+import sturdy.effect.MayComputeOne.*
+import sturdy.effect.Effectful
+import sturdy.effect.Join
 import sturdy.values.Abstractly
-import sturdy.values.JoinValue
 
 import scala.collection.mutable.ListBuffer
 
@@ -16,15 +16,14 @@ import scala.collection.mutable.ListBuffer
  * Internally, the store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using JoinValue[V])
+trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])
   extends Store[Addr, V], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
   
-  override type StoreJoin[A] = JoinValue[A]
-  override type StoreJoinComp = JoinComputation
+  override type StoreJoin[A] = Join[A]
 
-  override def read(x: Addr): AMayComputeOne[V] =
+  override def read(x: Addr): MayComputeOne[V] =
     store.get(x) match
       case None => ComputesNot()
       case Some(v) =>

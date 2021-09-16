@@ -1,6 +1,7 @@
 package sturdy.values.convert
 
-import sturdy.effect.failure.{Failure, FailureKind}
+import sturdy.effect.failure.Failure
+import sturdy.effect.failure.FailureKind
 
 case object ConversionFailure extends FailureKind
 

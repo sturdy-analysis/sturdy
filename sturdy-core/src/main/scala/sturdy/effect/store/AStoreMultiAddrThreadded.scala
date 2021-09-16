@@ -2,10 +2,13 @@ package sturdy.effect.store
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.AMayComputeMany
-import sturdy.effect.AMayComputeMany.*
-import sturdy.effect.JoinComputation
-import sturdy.values.*
+import sturdy.effect.given
+import sturdy.effect.Effectful
+import sturdy.effect.MayComputeMany
+import sturdy.effect.MayComputeMany.*
+import sturdy.effect.Effectful
+import sturdy.effect.Join
+import sturdy.values.{*, given}
 
 import scala.collection.mutable.ListBuffer
 import reflect.Selectable.reflectiveSelectable
@@ -21,10 +24,9 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
 
   this.store = _init
 
-  override type StoreJoin[A] = JoinValue[A]
-  override type StoreJoinComp = JoinComputation
-  
-  override def read(xs: Powerset[Addr]): AMayComputeMany[V] = {
+  override type StoreJoin[A] = Join[A]
+
+  override def read(xs: Powerset[Addr]): MayComputeMany[V] = {
     var needsNotFound = false
     var vs = ListBuffer[V]()
     for (x <- xs.set)
@@ -51,7 +53,7 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
     () // nothing
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Powerset[Addr]], vSoundness: Soundness[cV, V]): IsSound = {
-    import sturdy.values.given
+    import sturdy.values
 
     val abstractedKeys = c.getStore.keySet.flatMap(k => varAbstractly.abstractly(k).set)
     if (!abstractedKeys.subsetOf(store.keySet)) {
@@ -65,8 +67,9 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
       }
       IsSound.NotSound(s"${classOf[AStoreMultiAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else {
+      given Effectful = this
       c.getStore.foreachEntry { case (x, v) =>
-        val avs = this.read(varAbstractly.abstractly(x)).withDefault(Powerset[V]())(Powerset(_))(using this)
+        val avs = this.read(varAbstractly.abstractly(x)).withDefault(Powerset[V]())(Powerset(_))
         val subSound = Soundness.isSound(v, avs)
         if (subSound.isNotSound)
           return subSound

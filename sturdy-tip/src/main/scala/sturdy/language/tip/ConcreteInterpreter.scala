@@ -1,6 +1,5 @@
 package sturdy.language.tip
 
-import sturdy.effect.noJoin
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.CCallFrame

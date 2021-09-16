@@ -1,8 +1,12 @@
 package sturdy.values.ints
 
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.values.{Abstractly, JoinValue, PartialOrder, Topped, Finite}
+import sturdy.values.Abstractly
+import sturdy.values.Finite
+import sturdy.values.JoinValue
+import sturdy.values.PartialOrder
+import sturdy.values.Topped
 import sturdy.values.relational.*
 
 enum IntSign:
@@ -53,7 +57,7 @@ given IntSignJoin: JoinValue[IntSign] with
       case (Pos, Zero) => ZeroOrPos
       case _ => TopSign
 
-given SignIntOps(using f: Failure, j: JoinComputation): IntOps[IntSign] with
+given SignIntOps(using f: Failure, j: Effectful): IntOps[IntSign] with
   def intLit(i: Int): IntSign =
     if i < 0 then Neg
     else if i > 0 then Pos

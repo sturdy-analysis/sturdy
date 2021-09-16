@@ -7,8 +7,7 @@ import sturdy.effect.MayCompute
  */
 trait Store[Addr, V]:
   type StoreJoin[A]
-  type StoreJoinComp
 
-  def read(x: Addr): MayCompute[V, StoreJoin, StoreJoinComp]
+  def read(x: Addr): MayCompute[StoreJoin, V]
   def write(x: Addr, v: V): Unit
   def free(x: Addr): Unit

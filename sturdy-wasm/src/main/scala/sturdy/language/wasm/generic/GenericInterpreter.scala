@@ -1,14 +1,14 @@
 package sturdy.language.wasm.generic
 
-import sturdy.effect.noJoin
 import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import swam.syntax.*
-import swam.{BlockType, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
+import swam.{ValType, TableType, GlobalType, LabelIdx, MemType, OpCode, BlockType, Limits}
 import sturdy.effect.operandstack.OperandStack
-import sturdy.effect.binarymemory.{Memory, Serialize}
+import sturdy.effect.binarymemory.{Serialize, Memory}
 import sturdy.effect.branching.BoolBranching
+import sturdy.effect.operandstack.COperandStack
 import sturdy.effect.table.Table
 import sturdy.values.convert.*
 import sturdy.values.doubles.*
@@ -27,7 +27,7 @@ object GenericInterpreter:
     case Return(operands: List[V])
 
   type GenericEffects[V,Addr,Bytes,Size] =
-    OperandStack[V]
+    COperandStack[V]
       with Memory[Addr,Bytes,Size]
       with Serialize[V,Bytes,MemoryInst,MemoryInst]
       with Table[V,FunctionInstance[V]]
@@ -42,10 +42,9 @@ import GenericInterpreter.*
 trait GenericInterpreter[V,Addr,Bytes,Size]
   (val effects: GenericEffects[V,Addr,Bytes,Size])
   (using wasmOps: WasmOperations[V, Addr, Size])
-  (using effects.BoolBranchJoin[Unit],
-   effects.MemoryJoin[Unit], effects.MemoryJoin[V], effects.MemoryJoinComp,
-   effects.TableJoin[Unit], effects.TableJoinComp,
-   wasmOps.WasmOpsJoin[Unit], wasmOps.WasmOpsJoinComp):
+  (using effects.BoolBranchJoin[Unit], effects.ExceptJoin[Unit],
+   effects.MemoryJoin[Unit], effects.MemoryJoin[V],
+   effects.TableJoin[Unit], wasmOps.WasmOpsJoin[Unit]):
 
   import effects.*
   val stack: OperandStack[V] = effects

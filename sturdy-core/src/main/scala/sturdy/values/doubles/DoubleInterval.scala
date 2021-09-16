@@ -1,6 +1,6 @@
 package sturdy.values.doubles
 
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.fix.Widening
 import sturdy.values.Abstractly

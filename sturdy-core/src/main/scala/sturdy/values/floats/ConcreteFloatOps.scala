@@ -8,7 +8,8 @@ import sturdy.values.convert.ConversionFailure
 import sturdy.values.convert.Convert
 
 import scala.util.Random
-import java.lang.{Float as JFloat, Double as JDouble}
+import java.lang.Float as JFloat
+import java.lang.Double as JDouble
 
 given ConcreteFloatOps: FloatOps[Float] with
   def floatLit(f: Float): Float = f

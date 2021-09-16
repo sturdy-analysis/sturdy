@@ -1,13 +1,15 @@
 package sturdy.values.doubles
 
-import sturdy.values.convert.{Convert, ConversionFailure}
+import sturdy.values.convert.ConversionFailure
+import sturdy.values.convert.Convert
 import sturdy.values.config
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.config.UnsupportedConfiguration
 
 import scala.util.Random
-import java.lang.{Float as JFloat, Double as JDouble}
+import java.lang.Float as JFloat
+import java.lang.Double as JDouble
 
 given ConcreteDoubleOps: DoubleOps[Double] with
   def doubleLit(d: Double): Double = d

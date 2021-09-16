@@ -1,6 +1,6 @@
 package sturdy.values.longs
 
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.fix.Widening
 import sturdy.values.Abstractly
@@ -64,7 +64,7 @@ given LongIntervalWiden(using bounds: => Set[Long]): Widening[LongInterval] with
         treeSet.minAfter(v2.h).getOrElse(Long.MaxValue)
     LongInterval(low, high)
 
-given IntervalLongOps(using f: Failure, j: JoinComputation): LongOps[LongInterval] with
+given IntervalLongOps(using f: Failure, j: Effectful): LongOps[LongInterval] with
   def longLit(l: Long): LongInterval = LongInterval(l, l)
   def randomLong(): LongInterval = LongInterval.Top
   def add(v1: LongInterval, v2: LongInterval): LongInterval = v1 + v2

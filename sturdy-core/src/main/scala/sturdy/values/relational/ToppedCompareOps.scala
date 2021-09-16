@@ -2,7 +2,7 @@ package sturdy.values.relational
 
 import sturdy.values.JoinValue
 import sturdy.values.Topped
-import sturdy.values.Topped._
+import sturdy.values.Topped.*
 
 given ToppedCertainCompareOps[V, B](using ops: CompareOps[V, B]): CompareOps[Topped[V], Topped[B]] with
   override def lt(v1: Topped[V], v2: Topped[V]): Topped[B] =

@@ -1,16 +1,17 @@
 package sturdy.effect.failure
 
-import sturdy.effect.JoinComputation
-import sturdy.effect.JoinComputation.StarvedJoin
+import sturdy.effect.Effectful
+import sturdy.effect.Effectful.StarvedJoin
 import sturdy.values.Powerset
-import sturdy.values.{PartialOrder, Abstractly}
+import sturdy.values.Abstractly
+import sturdy.values.PartialOrder
 
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
 case object AFailureCollectException extends FailureException
 
-trait AFailureCollect extends Failure with JoinComputation:
+trait AFailureCollect extends Failure with Effectful:
   protected val failures: ListBuffer[(FailureKind,String)] = ListBuffer()
 
   def getFailures: List[(FailureKind,String)] = failures.toList

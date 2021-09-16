@@ -1,6 +1,6 @@
 package sturdy.values.floats
 
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.values.*
 import sturdy.values.Topped
 import sturdy.values.JoinValue

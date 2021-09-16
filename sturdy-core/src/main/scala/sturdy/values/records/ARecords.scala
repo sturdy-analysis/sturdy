@@ -1,10 +1,15 @@
 package sturdy.values.records
 
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.fix.Widening
-import sturdy.util.{*, given}
-import sturdy.values.{JoinValue, MayMust, PartialOrder, Top, joinMayMust, mayMustPO}
+import sturdy.util.*
+import sturdy.values.JoinValue
+import sturdy.values.MayMust
+import sturdy.values.PartialOrder
+import sturdy.values.Top
+import sturdy.values.joinMayMust
+import sturdy.values.mayMustPO
 import sturdy.values.relational.EqOps
 import sturdy.values.Topped
 
@@ -14,7 +19,7 @@ enum ARecord[F, V]:
   case Top()
   case Map(m: Predef.Map[F, V])
 
-given ARecordOps[F, V](using Failure, JoinValue[V], Top[V])(using j: JoinComputation): RecordOps[F, V, ARecord[F, V]] with
+given ARecordOps[F, V](using Failure, JoinValue[V], Top[V])(using j: Effectful): RecordOps[F, V, ARecord[F, V]] with
   override def makeRecord(fields: Seq[(F, V)]): ARecord[F, V] =
     ARecord.Map(fields.toMap)
   override def lookupRecordField(rec: ARecord[F, V], field: F): V = rec match

@@ -1,6 +1,6 @@
 package sturdy.values.longs
 
-import sturdy.effect.JoinComputation
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.values.Abstractly
 import sturdy.values.Topped
@@ -56,7 +56,7 @@ given LongSignJoin: JoinValue[LongSign] with
       case (Pos, Zero) => ZeroOrPos
       case _ => TopSign
 
-given SignLongOps(using f: Failure, j: JoinComputation): LongOps[LongSign] with
+given SignLongOps(using f: Failure, j: Effectful): LongOps[LongSign] with
   def longLit(l: Long): LongSign =
     if l < 0 then Neg
     else if l > 0 then Pos
