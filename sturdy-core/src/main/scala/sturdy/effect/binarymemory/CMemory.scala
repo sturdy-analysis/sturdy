@@ -62,5 +62,5 @@ trait CMemory extends Memory[Int, ByteBuffer, Int]:
 
   override def addEmptyMemory(min: Int, max: Option[Int]): Int =
     val mix = memories.length
-    memories += Mem(Array.ofDim[Byte](min), max)
+    memories += Mem(Array.ofDim[Byte](min*pageSize), max)
     mix

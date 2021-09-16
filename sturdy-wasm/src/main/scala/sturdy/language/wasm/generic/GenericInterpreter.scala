@@ -92,9 +92,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)
       val v = num.evalNumeric(inst)
       stack.push(v)
-    else if (opcode >= OpCode.I32Load8S && opcode <= OpCode.MemoryGrow)
+    else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
       evalMemoryInst(inst)
-    else if (opcode >= OpCode.Nop && opcode <= OpCode.CallIndirect)
+    else if (opcode >= OpCode.Unreachable && opcode <= OpCode.CallIndirect)
       evalControlInst(inst)
     else inst match
       case i: VarInst => evalVarInst(i)
@@ -143,7 +143,6 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     case If(bt, thnInsts, elsInsts) =>
       val isZero = num.evalNumeric(i32.Eqz)
       val rt = returnArity(bt)
-      val params = stack.popN(paramsArity(bt))
       boolBranch[Unit](isZero) {
         // v == 0: else branch
         label(paramsArity(bt), rt, elsInsts, None)
@@ -169,11 +168,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func)
     case CallIndirect(typeIx) =>
-      //val table = module.tables(0)
       val ftExpected = module.functionTypes(typeIx)
       val funcIx = stack.pop()
       tableGet(tableIndex, funcIx).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
-      //indexLookup(funcIx, table.functions).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
         if (func == null)
           fail(UninitializedFunction, funcIx.toString)
         val ftActual = func.funcType
@@ -230,7 +227,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
       case FunctionInstance.Wasm(mod,func, funcType) =>
         val args = stack.popN(funcType.params.size)
         val frameData = FrameData(funcType.t.size, mod)
-        val vars = args.view.reverse ++ func.locals.map(defaultValue)
+        val vars = args.view ++ func.locals.map(defaultValue)
         val restoreStackSize = stack.size()
         tryCatch {
           labelStack.withFresh(inNewFrameNoIndex(frameData, vars) {
@@ -244,42 +241,18 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
             case WasmException.Jump(_,_) => fail(InvalidModule, s"Tried to jump through a function boundary.")
         }
 
-  def invokeWithArguments(args: List[V], rtLength: Int, func: FunctionInstance[V]): List[V] =
-    stack.pushN(args.reverse)
-    invoke(func)
-    val res = stack.popN(rtLength)
-    res.reverse
-
-//  def invokeExported(funcName: String, args: List[V]): List[V] =
-//    // lookup funcName in module's exports
-//    module.exports.find(((name,_) => name == funcName)) match
-//      case Some((_,ExternalValue.Function(funcIx))) =>
-//        val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-//        val paramTys = func.funcType.params
-//        if (paramTys.length != args.length)
-//          fail(InvocationError,
-//            s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}")
-//        paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
-//        val rtLength = func.funcType.t.length
-//        stack.pushN(args.reverse)
-//        invoke(func)
-//        val res = stack.popN(rtLength)
-//        res.reverse
-//      case _ => fail(InvocationError,s"Function with name $funcName was not found in module's exports.")
-
   def invokeExported[Addr,Bytes,Size](funcName: String, args: List[V]): List[V] =
     module.exports.find((name,_) => name == funcName) match
       case Some((_,ExternalValue.Function(funcIx))) =>
         val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
         val paramTys = func.funcType.params
         if (paramTys.length != args.length)
-          throw new Error(s"Wrong number of arguments in external invocation.")
+          throw new Error(s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}.")
         // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
         val rtLength = func.funcType.t.length
-        stack.pushN(args.reverse)
+        stack.pushN(args)
         invoke(func)
-        val res = stack.popN(rtLength)
-        res.reverse
+        stack.popN(rtLength)
       case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
 
 
@@ -318,12 +291,13 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
       val res = memGrow(memIdx, delta).withDefault
         (num.evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
         {sizeToVal(_)}
+      stack.push(res)
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def load(inst: MemoryInst): Unit =
     // add offset to base address (which is already on the stack)
     stack.push(intOps.intLit(inst.offset))
-    num.evalNumeric(i32.Add)
+    eval(i32.Add)
     val addr = valueToAddr(stack.pop())
 
     val memIdx = memoryIndex
@@ -340,7 +314,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
 
     // add offset to base address (which is already on the stack)
     stack.push(intOps.intLit(inst.offset))
-    num.evalNumeric(i32.Add)
+    eval(i32.Add)
     val addr = valueToAddr(stack.pop())
 
     val memIdx = memoryIndex

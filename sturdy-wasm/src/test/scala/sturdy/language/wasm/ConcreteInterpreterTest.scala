@@ -4,9 +4,10 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.CFailureException
+import sturdy.effect.failure.{CFailureException, FailureKind}
 import sturdy.language.wasm.generic.GenericInterpreter.FrameData
 import ConcreteInterpreter.Value
+import sturdy.language.wasm.generic.UnreachableInstruction
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -16,11 +17,12 @@ import scala.jdk.StreamConverters.*
 import swam.syntax.Module
 import swam.text.*
 
+import scala.reflect.{ClassTag, TypeTest}
+
 
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm concrete interpreter"
 
-  //val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/wasm").toURI();
   val uriSimple = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/wasm/simple.wast").toURI();
   val uriFact = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/wasm/fact.wast").toURI();
   val simple = Paths.get(uriSimple)
@@ -28,6 +30,8 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 
   testFunction(simple, "noop", List.empty, List(Value.Int32(0)))
   testFunction(simple, "const", List(Value.Int32(5)), List(Value.Int32(5)))
+  testFunction(simple, "first", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(1)))
+  testFunction(simple, "second", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(2)))
 
   (0 to 8).zip(List(1,1,2,6,24,120,720,5040,40320)).foreach { (arg,res) =>
     testFunction(fact, "fac-rec", List(Value.Int64(arg)), List(Value.Int64(res)))
@@ -38,20 +42,44 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-rec-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
   testFunction(fact, "fac-iter-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
   testFunction(fact, "fac-opt", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-  
+  testFunction(simple, "test-mem", List(Value.Int32(42)), List(Value.Int32(43)))
+  testFunction(simple, "test-size", List.empty, List(Value.Int32(1)))
+  testFunction(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))
+  testFunction(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
+  testFunction(simple, "call-first", List.empty, List(Value.Int32(0)))
+  testFunction(simple, "nesting", List(Value.Float32(1), Value.Float32(2)), List(Value.Float32(2)))
+  testFunction(simple, "as-br_table-index", List.empty, List.empty)
+  testFunction(simple, "test-br1", List.empty, List(Value.Int32(42)))
+  testFunction(simple, "test-br2", List.empty, List(Value.Int32(43)))
+  testFunction(simple, "test-br3", List(Value.Int32(0)), List(Value.Int32(42)))
+  testFunction(simple, "test-br3", List(Value.Int32(1)), List(Value.Int32(43)))
+  testFunction(simple, "test-br-and-return", List(Value.Int32(0)), List(Value.Int32(42)))
+  testFunction(simple, "test-br-and-return", List(Value.Int32(1)), List(Value.Int32(43)))
+  testFunction(simple, "test-br-and-return2", List(Value.Int32(0)), List(Value.Int32(42)))
+  testFunction(simple, "test-br-and-return2", List(Value.Int32(1)), List(Value.Int32(43)))
+  testFunction(simple, "test-br-and-return3", List(Value.Int32(0)), List(Value.Int32(42)))
+  testFunction(simple, "test-br-and-return3", List(Value.Int32(1)), List(Value.Int32(43)))
+  testFunction(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
+  testFunction(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
+  testFunction(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
+  testFailingFunction[CFailureException](simple, "test-unreachable4", List.empty, UnreachableInstruction)
+  testFunction(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
+  testFunction(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
+
   def testFunction(path: Path, funcName: String, args: List[Value], expectedResult: List[Value]) =
     it must s"execute $funcName withs args $args with result $expectedResult" in {
       val res = runWasmFunction(path, funcName, args)
       assertResult(expectedResult)(res)
     }
 
-//  Files.list(Paths.get(uri)).toScala(List).sorted.filter(p => p.toString.endsWith(".wast")).foreach { p =>
-//    it must s"parse ${p.getFileName}" in {
-//      //val path = Path.of(p.toUri)
-//      val res = runWasmFunction(p, "first", List(Value.Int32(1), Value.Int32(2)))
-//      print(res)
-//    }
-//  }
+  def testFailingFunction[E <: CFailureException](path: Path, funcName: String, args: List[Value], failureKind: FailureKind)(using ClassTag[E]) =
+    it must s"execute $funcName with args $args throwing exception $failureKind" in {
+      val caught = intercept[E] {
+        runWasmFunction(path, funcName, args)
+      }
+      assertResult(failureKind)(caught.kind)
+    }
+
 
 def runWasmFunction(path: Path, funName: String, args: List[Value]): List[Value] =
   val module = parse(path)
