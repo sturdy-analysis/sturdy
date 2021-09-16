@@ -4,28 +4,33 @@ enum Topped[+V]:
   case Top
   case Actual(v: V)
 
-  def foreach[A](f: V => A): Unit = this match
+  inline def foreach[A](f: V => A): Unit = this match
     case Top => // nothing
     case Actual(v) => f(v)
 
-  def filter(f: V => Boolean): Topped[V] = this match
+  inline def filter(f: V => Boolean): Topped[V] = this match
     case Top => Top
     case Actual(v) => if (f(v)) this else Top
 
-  def withFilter(f: V => Boolean): Topped[V] =
+  inline def withFilter(f: V => Boolean): Topped[V] =
     filter(f)
 
   final def toString(suffix: String): String = this match
     case Top => s"Top$suffix"
     case Actual(v) => v.toString
 
-  final def map[A](f: V => A): Topped[A] = this match
+  inline final def map[A](f: V => A): Topped[A] = this match
     case Top => Top
     case Actual(v) => Actual(f(v))
 
-  final def flatMap[A](f: V => Topped[A]): Topped[A] = this match
+  inline final def flatMap[A](f: V => Topped[A]): Topped[A] = this match
     case Top => Top
     case Actual(v) => f(v)
+
+  inline def binary[B, AA >: V](f: (V, AA) => B, other: Topped[AA]): Topped[B] =
+    for (i1 <- this; i2 <- other) yield f(i1, i2)
+
+  inline def unary[B](f: V => B): Topped[B] = map(f)
 
 given toppedAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[C, Topped[A]] with
   override def abstractly(c: C): Topped[A] = Topped.Actual(abs.abstractly(c))

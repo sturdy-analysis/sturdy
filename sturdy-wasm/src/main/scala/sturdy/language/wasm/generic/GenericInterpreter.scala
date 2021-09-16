@@ -302,7 +302,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
 
     val memIdx = memoryIndex
     val byteSize = getBytesToRead(inst)
-    val bytes = memRead(memIdx,addr,byteSize).withDefault
+    memRead(memIdx,addr,byteSize).withDefault
       (fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
       {(b: Bytes) =>
         val v = decode(b, inst)

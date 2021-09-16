@@ -1,11 +1,11 @@
-package sturdy.values.doubles
+package sturdy.values.floats
 
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
 
-given ToppedDoubleOps[T](using ops: DoubleOps[T]): DoubleOps[Topped[T]] with
-  def doubleLit(d: Double): Topped[T] = Topped.Actual(ops.doubleLit(d))
-  def randomDouble(): Topped[T] = Topped.Top
+given ToppedFloatOps[T](using ops: FloatOps[T]): FloatOps[Topped[T]] with
+  def floatLit(f: Float): Topped[T] = Topped.Actual(ops.floatLit(f))
+  def randomFloat(): Topped[T] = Topped.Top
 
   def add(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.add, v2)
   def sub(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.sub, v2)
@@ -22,5 +22,3 @@ given ToppedDoubleOps[T](using ops: DoubleOps[T]): DoubleOps[Topped[T]] with
   def truncate(v: Topped[T]): Topped[T] = v.unary(ops.truncate)
   def nearest(v: Topped[T]): Topped[T] = v.unary(ops.nearest)
   def copysign(v: Topped[T], sign: Topped[T]): Topped[T] = v.binary(ops.copysign, sign)
-
-  def logNatural(v: Topped[T]): Topped[T] = v.unary(ops.logNatural)

@@ -45,7 +45,7 @@ trait CMemory extends Memory[Int, ByteBuffer, Int]:
     }
 
   override def memSize(memIdx: Int): Int =
-    (memories(memIdx).size / pageSize).toInt
+    memories(memIdx).size / pageSize
 
   override def memGrow(memIdx: Int, delta: Int): MayCompute[Int, NoJoin, Unit] =
     val mem = memories(memIdx)
