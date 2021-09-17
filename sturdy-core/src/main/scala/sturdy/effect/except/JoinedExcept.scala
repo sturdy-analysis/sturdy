@@ -5,6 +5,7 @@ import sturdy.effect.Effectful
 import sturdy.effect.EitherComputeAbstract
 import sturdy.effect.Join
 import sturdy.values.JoinValue
+import sturdy.values.exceptions.Exceptional
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Success
@@ -13,20 +14,21 @@ case object AbstractException extends ExceptException:
   override def toString: String = s"Exception (abstract)"
 
 
-trait JoinedExcept[E](using exJoin: JoinValue[E]) extends Except[E], Effectful:
+trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJoin: JoinValue[E]) extends Except[Exc, E], Effectful:
   override type ExceptJoin[A] = Join[A]
 
   protected var exception: Option[E] = None
 
   def getException: Option[E] = exception
 
-  override def throws(ex: E): Nothing =
+  override def throws(ex: Exc): Nothing =
+    val e = exceptional.exception(ex)
     exception match
-      case None => exception = Some(ex)
-      case Some(old) => exception = Some(exJoin.joinValues(old, ex))
+      case None => exception = Some(e)
+      case Some(old) => exception = Some(eJoin.joinValues(old, e))
     throw AbstractException
 
-  override def tries[A](f: => A): EitherComputeAbstract[A, E] =
+  override protected def tries[A](f: => A): EitherComputeAbstract[A, E] =
     try {
       val a = f
       exception match

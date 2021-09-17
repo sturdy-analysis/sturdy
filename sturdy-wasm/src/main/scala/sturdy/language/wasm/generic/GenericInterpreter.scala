@@ -10,6 +10,7 @@ import sturdy.effect.binarymemory.{Serialize, Memory}
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.operandstack.COperandStack
 import sturdy.effect.table.Table
+import sturdy.values.exceptions.Exceptional
 import sturdy.values.convert.*
 import sturdy.values.doubles.*
 import sturdy.values.floats.*
@@ -26,22 +27,22 @@ object GenericInterpreter:
     case Jump(labelIndex: LabelIdx, operands: List[V])
     case Return(operands: List[V])
 
-  type GenericEffects[V,Addr,Bytes,Size] =
+  type GenericEffects[V,Addr,Bytes,Size,E] =
     COperandStack[V]
       with Memory[Addr,Bytes,Size]
       with Serialize[V,Bytes,MemoryInst,MemoryInst]
       with Table[V,FunctionInstance[V]]
       with CMutableCallFrameInt[FrameData[V], V]
       with BoolBranching[V]
-      with Except[WasmException[V]]
+      with Except[WasmException[V], E]
       with Failure
 
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V,Addr,Bytes,Size]
-  (val effects: GenericEffects[V,Addr,Bytes,Size])
-  (using wasmOps: WasmOperations[V, Addr, Size])
+trait GenericInterpreter[V,Addr,Bytes,Size,E]
+  (val effects: GenericEffects[V,Addr,Bytes,Size,E])
+  (using wasmOps: WasmOperations[V, Addr, Size], exceptOps: Exceptional[WasmException[V], E, effects.ExceptJoin])
   (using effects.BoolBranchJoin[Unit], effects.ExceptJoin[Unit],
    effects.MemoryJoin[Unit], effects.MemoryJoin[V],
    effects.TableJoin[Unit], wasmOps.WasmOpsJoin[Unit]):
@@ -79,6 +80,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
     convertDoubleInt, convertDoubleLong, convertDoubleFloat)
 
   import wasmOps.*
+  import exceptOps.*
 
   val labelStack = new LabelStack
 
@@ -202,7 +204,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
       insts.foreach(eval)
     } { ex =>
       stack.popN(stack.size() - restoreStackSize)
-      ex match
+      ex match {
         case WasmException.Jump(labelIndex, operands) =>
           if (labelIndex == 0) {
             stack.pushN(operands)
@@ -210,7 +212,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
           } else {
             throws(WasmException.Jump(labelIndex - 1, operands))
           }
-        case _ : WasmException.Return[V] => throws(ex)
+        case _: WasmException.Return[V] => throws(ex)
+      }
     } { // finally
       labelStack.popLabel()
     }
@@ -234,10 +237,12 @@ trait GenericInterpreter[V,Addr,Bytes,Size]
           })
         } { ex =>
           stack.popN(stack.size() - restoreStackSize)
-          ex match
+          ex match {
             case WasmException.Return(operands) =>
               stack.pushN(operands)
-            case WasmException.Jump(_,_) => fail(InvalidModule, s"Tried to jump through a function boundary.")
+            case WasmException.Jump(_, _) =>
+              fail(InvalidModule, s"Tried to jump through a function boundary.")
+          }
         }
 
   def invokeExported[Addr,Bytes,Size](funcName: String, args: List[V]): List[V] =

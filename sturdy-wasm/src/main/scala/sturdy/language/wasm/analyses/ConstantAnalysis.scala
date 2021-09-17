@@ -11,7 +11,7 @@ import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.CCallFrameInt
 import sturdy.effect.callframe.CMutableCallFrameInt
-import sturdy.effect.except.ConcreteExcept
+import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.AFailureCollect
 import sturdy.effect.failure.CFailure
 import sturdy.effect.failure.Failure
@@ -27,12 +27,13 @@ import sturdy.language.wasm.generic.WasmOperations
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
-import sturdy.values.doubles.*
-import sturdy.values.floats.*
-import sturdy.values.ints.*
-import sturdy.values.longs.*
-import sturdy.values.relational.*
-import sturdy.values.*
+import sturdy.values.doubles.{*, given}
+import sturdy.values.exceptions.{*, given}
+import sturdy.values.floats.{*, given}
+import sturdy.values.ints.{*, given}
+import sturdy.values.longs.{*, given}
+import sturdy.values.relational.{*, given}
+import sturdy.values.{*, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -127,7 +128,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
 ////      with ConcreteTable[Value, FunctionInstance[Value]](_.asInt32)
 //      with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
 //      with ABoolBranching[Value]
-//      with AExcept[WasmException[Value]]
+//      with JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]]
 //      with AFailureCollect
 
 //  class Instance(effects: Effects)
