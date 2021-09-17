@@ -17,9 +17,8 @@ import apron.Abstract0 //default; for domains without environments
 import apron.Box
 import apron.*
 
-val ourAbstractDomain = apron.Box()
-
-
+val ourAbstractManager = apron.Box()
+val ourAbstractDomain = apron.Abstract0(ourAbstractManager, 1, 0, Array(apron.Interval()))
 
 
 object IntIntervalApron:
