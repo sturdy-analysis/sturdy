@@ -48,3 +48,6 @@ object OptionA:
   inline def none[A]: OptionA[A] = OptionA.None()
   inline def noneSome[A](as: A*): OptionA[A] = OptionA.NoneSome(as)
   inline def some[A](as: A*): OptionA[A] = OptionA.Some(as)
+  def apply[A](opt: scala.Option[A]): OptionA[A] = opt match
+    case scala.Some(a) => OptionA.Some(Iterable.single(a))
+    case scala.None => OptionA.None()

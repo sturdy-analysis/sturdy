@@ -14,6 +14,7 @@ import sturdy.values.exceptions.Exceptional
 import sturdy.values.convert.*
 import sturdy.values.doubles.*
 import sturdy.values.floats.*
+import sturdy.values.functions.FunctionOps
 import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.CompareOps
@@ -27,11 +28,11 @@ object GenericInterpreter:
     case Jump(labelIndex: LabelIdx, operands: List[V])
     case Return(operands: List[V])
 
-  type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx] =
+  type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV] =
     COperandStack[V]
       with Memory[Int, Addr,Bytes,Size]
       with Serialize[V,Bytes,MemoryInst,MemoryInst]
-      with SymbolTable[Int, FuncIx, FunctionInstance[V]]
+      with SymbolTable[Int, FuncIx, FunV]
       with CMutableCallFrameInt[FrameData[V], V]
       with BoolBranching[V]
       with Except[WasmException[V], ExcV]
@@ -40,9 +41,11 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx]
-  (val effects: GenericEffects[V,Addr,Bytes,Size,ExcV, FuncIx])
-  (using wasmOps: WasmOperations[V, Addr, Size, FuncIx], exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin])
+trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]
+  (val effects: GenericEffects[V,Addr,Bytes,Size,ExcV, FuncIx, FunV])
+  (using wasmOps: WasmOperations[V, Addr, Size, FuncIx],
+         exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin],
+         functionOps: FunctionOps[FunctionInstance[V], Nothing, Unit, FunV])
   (using effects.BoolBranchJoin[Unit], effects.ExceptJoin[Unit],
    effects.MemoryJoin[Unit], effects.MemoryJoin[V],
    effects.TableJoin[Unit], wasmOps.WasmOpsJoin[Unit]):
@@ -174,10 +177,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx]
       tableGet(tableIndex, valueToFuncIx(funcIx)).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
         if (func == null)
           fail(UninitializedFunction, funcIx.toString)
-        val ftActual = func.funcType
-        if (ftExpected != ftActual)
-          fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
-        invoke(func)
+        invokeIndirect(func, ftExpected, funcIx)
       }
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
@@ -244,6 +244,15 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx]
               fail(InvalidModule, s"Tried to jump through a function boundary.")
           }
         }
+
+  def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V): Unit =
+    functionOps.invokeFun(funV, Seq()) {
+      case (func, _) =>
+        val ftActual = func.funcType
+        if (ftExpected != ftActual)
+          fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
+        invoke(func)
+    }
 
   def invokeExported[Addr,Bytes,Size](funcName: String, args: List[V]): List[V] =
     module.exports.find((name,_) => name == funcName) match
@@ -441,7 +450,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx]
             eval(i32.Const(i))
             eval(i32.Add) // adds index to base
             val idx = stack.pop() // stack is empty
-            tableSet(tableIdx, valueToFuncIx(idx), modInst.functions(funcIx)) // funcIx is valid due to validation
+            val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
+            tableSet(tableIdx, valueToFuncIx(idx), funV)
             // TODO add failure conditions for table writing
           }
      }

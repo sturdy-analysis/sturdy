@@ -14,7 +14,7 @@ import sturdy.effect.failure.AFailureCollect
 import sturdy.effect.failure.CFailure
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.COperandStack
-import sturdy.effect.symboltable.ConcreteSymbolTable
+import sturdy.effect.symboltable.{ToppedSymbolTable, SymbolTable}
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.abstractions.ConstantValues
 import sturdy.language.wasm.generic.FunctionInstance
@@ -25,23 +25,26 @@ import sturdy.language.wasm.generic.WasmOperations
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
-import sturdy.values.doubles.*
-import sturdy.values.exceptions.*
-import sturdy.values.floats.*
-import sturdy.values.ints.*
-import sturdy.values.longs.*
-import sturdy.values.relational.*
-import sturdy.values.*
+import sturdy.values.doubles.{*, given}
+import sturdy.values.exceptions.{*, given}
+import sturdy.values.floats.{*, given}
+import sturdy.values.ints.{*, given}
+import sturdy.values.longs.{*, given}
+import sturdy.values.relational.{*, given}
+import sturdy.values.{*, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
+import scala.collection.IndexedSeqView
 
 object ConstantAnalysis extends Interpreter, ConstantValues:
 
   type Addr = Topped[Int]
-  type Bytes = Vector[Topped[Byte]]
+  type Bytes = IndexedSeqView[Topped[Byte]]
   type Size = Topped[Int]
+  type ExcV = Powerset[WasmException[Value]]
   type FuncIx = Topped[Int]
+  type FunV = Topped[FunctionInstance[Value]]
 
   given WasmOperations[Value, Addr, Size, FuncIx] with
     override type WasmOpsJoin[A] = Join[A]
@@ -61,75 +64,19 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
         case Topped.Top =>
           OptionA.NoneSome(vec)
 
-//  trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst] :
-//    import Value.*
-//    override def decode(dat: ByteBuffer, decInfo: MemoryInst): Value = decInfo match
-//      case _: i32.Load => Int32(dat.getInt(0))
-//      case _: i32.Load8S => Int32(dat.get(0))
-//      case _: i32.Load8U => Int32(dat.get(0) & 0xFF)
-//      case _: i32.Load16S => Int32(dat.getShort(0))
-//      case _: i32.Load16U => Int32(dat.getShort(0) & 0xFFFF)
-//      case _: i64.Load => Int64(dat.getLong(0))
-//      case _: i64.Load8S => Int64(dat.get(0))
-//      case _: i64.Load8U => Int64(dat.get(0) & 0xFFL)
-//      case _: i64.Load16S => Int64(dat.getShort(0))
-//      case _: i64.Load16U => Int64(dat.getShort(0) & 0xFFFFL)
-//      case _: i64.Load32S => Int64(dat.getInt(0))
-//      case _: i64.Load32U => Int64(dat.getInt(0) & 0xFFFFFFFFFL)
-//      case _: f32.Load => Float32(dat.getFloat(0))
-//      case _: f64.Load => Float64(dat.getDouble(0))
-//      case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $decInfo.")
-//
-//    private def newByteBuffer(cap: Int): ByteBuffer =
-//      val buf = ByteBuffer.allocate(cap)
-//      buf.order(ByteOrder.LITTLE_ENDIAN)
-//      buf
-//
-//    override def encode(v: Value, encInfo: MemoryInst): ByteBuffer =
-//      encInfo match
-//        case _: i32.Store =>
-//          val buf = newByteBuffer(4)
-//          buf.putInt(0, v.asInt32)
-//        case _: i32.Store8 =>
-//          val buf = newByteBuffer(1)
-//          val b = (v.asInt32 % (1 << 8)).toByte
-//          buf.put(0, b)
-//        case _: i32.Store16 =>
-//          val buf = newByteBuffer(2)
-//          val s = (v.asInt32 % (1 << 16)).toShort
-//          buf.putShort(0, s)
-//        case _: i64.Store =>
-//          val buf = newByteBuffer(8)
-//          buf.putLong(0, v.asInt64)
-//        case _: i64.Store8 =>
-//          val buf = newByteBuffer(1)
-//          val b = (v.asInt64 % (1L << 8)).toByte
-//          buf.put(0, b)
-//        case _: i64.Store16 =>
-//          val buf = newByteBuffer(2)
-//          val s = (v.asInt64 % (1L << 16)).toShort
-//          buf.putShort(0, s)
-//        case _: i64.Store32 =>
-//          val buf = newByteBuffer(4)
-//          val i = (v.asInt64 % (1L << 32)).toInt
-//          buf.putInt(0, i)
-//        case _: f32.Store =>
-//          val buf = newByteBuffer(4)
-//          buf.putFloat(0, v.asFloat32)
-//        case _: f64.Store =>
-//          val buf = newByteBuffer(8)
-//          buf.putDouble(0, v.asFloat64)
-//        case _ => throw new IllegalArgumentException(s"Expected store instruction, but got $encInfo.")
+  trait ASerialize extends Serialize[Value, Bytes, MemoryInst, MemoryInst]:
+    override def decode(dat: IndexedSeqView[Topped[Byte]], decInfo: MemoryInst): ConstantAnalysis.Value = ???
+    override def encode(v: Value, encInfo: MemoryInst): IndexedSeqView[Topped[Byte]] = ???
 
-//  class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
-//    extends COperandStack[Value]
-//      with ConstantAddressMemory[Topped[Byte]]
-////      with CSerialize
-////      with ConcreteTable[Value, FunctionInstance[Value]](_.asInt32)
-//      with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
-//      with ABoolBranching[Value]
-//      with JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]]
-//      with AFailureCollect
+  class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
+    extends COperandStack[Value]
+      with ConstantAddressMemory[Int, Topped[Byte]]
+      with ASerialize
+      with ToppedSymbolTable[Int, Int, FunV]
+      with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
+      with ABoolBranching[Value]
+      with JoinedExcept[WasmException[Value], ExcV]
+      with AFailureCollect
 
 //  class Instance(effects: Effects)
 //    extends GenericInstance with GenericInterpreter(effects) :

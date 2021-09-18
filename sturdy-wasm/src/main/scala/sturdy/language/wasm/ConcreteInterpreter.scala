@@ -22,6 +22,7 @@ import swam.syntax.*
 import sturdy.values.doubles.{*, given}
 import sturdy.values.exceptions.{*, given}
 import sturdy.values.floats.{*, given}
+import sturdy.values.functions.{*, given}
 import sturdy.values.ints.{*, given}
 import sturdy.values.longs.{*, given}
 import sturdy.values.relational.{*, given}
@@ -54,6 +55,7 @@ object ConcreteInterpreter extends Interpreter :
   override type Size = Int
   override type ExcV = WasmException[Value]
   override type FuncIx = Int
+  override type FunV = FunctionInstance[Value]
 
   trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst] :
     import Value.*
