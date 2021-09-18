@@ -1,6 +1,6 @@
 package sturdy.effect.except
 
-import sturdy.effect.EitherCompute
+import sturdy.data.Either
 import sturdy.values.exceptions.Exceptional
 
 trait ExceptException extends Throwable
@@ -12,7 +12,7 @@ trait Except[Exc, E]:
   @throws[ExceptException]
   def throws(ex: Exc): Nothing
 
-  protected def tries[A](f: => A): EitherCompute[ExceptJoin, A, E]
+  protected def tries[A](f: => A): Either[ExceptJoin, A, E]
 
   final def tryCatch[A](f: => A)(handle: Exc => A): ExceptJoin[A] ?=> A =
     tries(f).either(identity)(e => exceptional.handle(e)(handle))

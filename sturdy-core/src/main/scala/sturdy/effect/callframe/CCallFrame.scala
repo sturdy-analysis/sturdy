@@ -1,7 +1,6 @@
 package sturdy.effect.callframe
 
-import sturdy.effect.MayComputeConcrete
-import sturdy.effect.NoJoin
+import sturdy.data.*
 
 trait CCallFrame[Data, Var, V](_data: Data, _vars: Map[Var, V]) extends CallFrame[Data, Var, V]:
   type CallFrameJoin[A] = NoJoin[A]
@@ -12,7 +11,7 @@ trait CCallFrame[Data, Var, V](_data: Data, _vars: Map[Var, V]) extends CallFram
   def getFrameData: Data = data
   def getCallFrame: (Data, Map[Var, V]) = (data, vars)
 
-  def getLocal(x: Var): MayComputeConcrete[V] = MayComputeConcrete(vars.get(x))
+  def getLocal(x: Var): OptionC[V] = OptionC(vars.get(x))
 
   def inNewFrame[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A =
     val snapshotData = this.data
@@ -25,9 +24,9 @@ trait CCallFrame[Data, Var, V](_data: Data, _vars: Map[Var, V]) extends CallFram
     }
 
 trait CMutableCallFrame[Data, Var, V] extends CCallFrame[Data, Var, V] with MutableCallFrame[Data, Var, V]:
-  override def setLocal(x: Var, v: V): MayComputeConcrete[Unit] = vars.get(x) match
+  override def setLocal(x: Var, v: V): OptionC[Unit] = vars.get(x) match
     case Some(_) =>
       vars += x -> v
-      MayComputeConcrete.Computes(())
-    case _ => MayComputeConcrete.ComputesNot()
+      OptionC.Some(())
+    case _ => OptionC.none
 

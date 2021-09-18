@@ -1,6 +1,6 @@
 package sturdy.effect.environment
 
-import sturdy.effect.MayCompute
+import sturdy.data.Option
 
 /*
  * The environment interface.
@@ -8,7 +8,7 @@ import sturdy.effect.MayCompute
 trait Environment[Var, V]:
   type EnvJoin[A]
 
-  def lookup(x: Var): MayCompute[EnvJoin, V]
+  def lookup(x: Var): Option[EnvJoin, V]
   def bind(x: Var, v: V): Unit
   def scoped[A](f: => A): A
   def clear(): Unit

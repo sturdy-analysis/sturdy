@@ -104,8 +104,8 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Exp.Var(x) => functions.get(x) match
         case Some(fun) => funValue(fun)
         case None =>
-          val addr = getLocal(x).orElse(fail(UnboundVariable, x))
-          read(addr).orElse(fail(UnboundAddr, s"$addr for variable $x"))
+          val addr = getLocal(x).getOrElse(fail(UnboundVariable, x))
+          read(addr).getOrElse(fail(UnboundAddr, s"$addr for variable $x"))
       case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
       case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
       case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -122,11 +122,11 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         write(addr, eval(e))
         refValue(addr)
       case Exp.VarRef(x) =>
-        val addr = getLocal(x).orElse(fail(UnboundVariable, x))
+        val addr = getLocal(x).getOrElse(fail(UnboundVariable, x))
         unmanagedRefValue(addr)
       case Exp.Deref(e) =>
         val addr = refAddr(eval(e))
-        read(addr).orElse(fail(UnboundAddr, addr.toString))
+        read(addr).getOrElse(fail(UnboundAddr, addr.toString))
       case Exp.NullRef() =>
         nullValue
       case r@Exp.Record(fields) =>
@@ -158,7 +158,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
     def assign(lhs: Assignable, v: V): Unit = lhs match
       case Assignable.AVar(x) =>
-        val addr = getLocal(x).orElse(fail(UnboundVariable, x))
+        val addr = getLocal(x).getOrElse(fail(UnboundVariable, x))
         write(addr, v)
       case Assignable.ADeref(e) =>
         val addr = refAddr(eval(e))
@@ -166,13 +166,13 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Assignable.AField(recVar, field) =>
         val recRef = eval(Exp.Var(recVar))
         val recAddr = refAddr(recRef)
-        val recVal = read(recAddr).orElse(fail(UnboundAddr, recAddr.toString))
+        val recVal = read(recAddr).getOrElse(fail(UnboundAddr, recAddr.toString))
         val updated = updateRecordField(recVal, field, v)
         write(recAddr, updated)
       case Assignable.ADerefField(rec, field) =>
         val recRef = eval(rec)
         val recAddr = refAddr(recRef)
-        val recVal = read(recAddr).orElse(fail(UnboundAddr, recAddr.toString))
+        val recVal = read(recAddr).getOrElse(fail(UnboundAddr, recAddr.toString))
         val updated = updateRecordField(recVal, field, v)
         write(recAddr, updated)
 

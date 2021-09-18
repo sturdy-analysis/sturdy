@@ -2,12 +2,8 @@ package sturdy.effect.store
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.given
+import sturdy.data.{*, given}
 import sturdy.effect.Effectful
-import sturdy.effect.MayComputeMany
-import sturdy.effect.MayComputeMany.*
-import sturdy.effect.Effectful
-import sturdy.effect.Join
 import sturdy.values.{*, given}
 
 import scala.collection.mutable.ListBuffer
@@ -26,7 +22,7 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
 
   override type StoreJoin[A] = Join[A]
 
-  override def read(xs: Powerset[Addr]): MayComputeMany[V] = {
+  override def read(xs: Powerset[Addr]): OptionA[V] = {
     var needsNotFound = false
     var vs = ListBuffer[V]()
     for (x <- xs.set)
@@ -37,11 +33,11 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
           needsNotFound = true
         case Some(v) => vs += v
     if (vs.isEmpty)
-      ComputesNot()
+      OptionA.None()
     else if (needsNotFound)
-      MaybeComputes(vs)
+      OptionA.NoneSome(vs.toList)
     else
-      Computes(vs)
+      OptionA.Some(vs.toList)
   }
 
   override def write(xs: Powerset[Addr], v: V): Unit =
@@ -69,7 +65,7 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
     } else {
       given Effectful = this
       c.getStore.foreachEntry { case (x, v) =>
-        val avs = this.read(varAbstractly.abstractly(x)).withDefault(Powerset[V]())(Powerset(_))
+        val avs = this.read(varAbstractly.abstractly(x)).option(Powerset[V]())(Powerset(_))
         val subSound = Soundness.isSound(v, avs)
         if (subSound.isNotSound)
           return subSound

@@ -1,4 +1,4 @@
-package sturdy.effect.binarymemory
+package sturdy.effect.bytememory
 
 trait Serialize[V,D,EncInfo,DecInfo]:
   def decode(dat: D, decInfo: DecInfo): V

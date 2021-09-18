@@ -124,8 +124,8 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         val argVals = args.map(arg => eval(arg))
         invokeClosure(clsVal, argVals) { applyClosure }
       case Exp.Var(x) =>
-        val addr = lookup(x).orElse(fail(UnboundVariable, x))
-        read(addr).orElse(fail(UnboundAddr, s"$addr for variable $x"))
+        val addr = lookup(x).getOrElse(fail(UnboundVariable, x))
+        read(addr).getOrElse(fail(UnboundAddr, s"$addr for variable $x"))
       case Exp.Lam(names, body) =>
         val env = closeEnvironment
         closureValue(names, body, env)
@@ -160,7 +160,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
           finally storebnds.foreach(b => free(b._1))
         }
       case s@Exp.Set_(x, e) =>
-        val addr = lookup(x).orElse(fail(UnboundVariable, x))
+        val addr = lookup(x).getOrElse(fail(UnboundVariable, x))
         write(addr, eval(e))
         void
       case Exp.If(e1, e2, e3) => boolBranch(eval(e1), eval(e2), eval(e3))

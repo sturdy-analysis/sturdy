@@ -1,6 +1,7 @@
 package sturdy.values.exceptions
 
-import sturdy.effect.{Join, Effectful, given}
+import sturdy.data.{Join, given}
+import sturdy.effect.Effectful
 import sturdy.values.Powerset
 
 given PowersetExceptional[E]: Exceptional[E, Powerset[E], Join] with

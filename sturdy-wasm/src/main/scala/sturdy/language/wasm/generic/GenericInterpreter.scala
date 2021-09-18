@@ -6,10 +6,10 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import swam.syntax.*
 import swam.{ValType, TableType, GlobalType, LabelIdx, MemType, OpCode, BlockType, Limits}
 import sturdy.effect.operandstack.OperandStack
-import sturdy.effect.binarymemory.{Serialize, Memory}
+import sturdy.effect.bytememory.{Serialize, Memory}
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.operandstack.COperandStack
-import sturdy.effect.table.Table
+import sturdy.effect.symboltable.SymbolTable
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.convert.*
 import sturdy.values.doubles.*
@@ -27,29 +27,29 @@ object GenericInterpreter:
     case Jump(labelIndex: LabelIdx, operands: List[V])
     case Return(operands: List[V])
 
-  type GenericEffects[V,Addr,Bytes,Size,E] =
+  type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx] =
     COperandStack[V]
-      with Memory[Addr,Bytes,Size]
+      with Memory[Int, Addr,Bytes,Size]
       with Serialize[V,Bytes,MemoryInst,MemoryInst]
-      with Table[V,FunctionInstance[V]]
+      with SymbolTable[Int, FuncIx, FunctionInstance[V]]
       with CMutableCallFrameInt[FrameData[V], V]
       with BoolBranching[V]
-      with Except[WasmException[V], E]
+      with Except[WasmException[V], ExcV]
       with Failure
 
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V,Addr,Bytes,Size,E]
-  (val effects: GenericEffects[V,Addr,Bytes,Size,E])
-  (using wasmOps: WasmOperations[V, Addr, Size], exceptOps: Exceptional[WasmException[V], E, effects.ExceptJoin])
+trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx]
+  (val effects: GenericEffects[V,Addr,Bytes,Size,ExcV, FuncIx])
+  (using wasmOps: WasmOperations[V, Addr, Size, FuncIx], exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin])
   (using effects.BoolBranchJoin[Unit], effects.ExceptJoin[Unit],
    effects.MemoryJoin[Unit], effects.MemoryJoin[V],
    effects.TableJoin[Unit], wasmOps.WasmOpsJoin[Unit]):
 
   import effects.*
   val stack: OperandStack[V] = effects
-  val memory: Memory[Addr,Bytes,Size] = effects
+  val memory: Memory[Int, Addr,Bytes,Size] = effects
 
   val intOps: IntOps[V]
   val longOps: LongOps[V]
@@ -116,14 +116,14 @@ trait GenericInterpreter[V,Addr,Bytes,Size,E]
 
   def evalVarInst(inst: VarInst): Unit = inst match
     case LocalGet(ix) =>
-      val v = getLocal(ix).orElse(fail(UnboundLocal, ix.toString))
+      val v = getLocal(ix).getOrElse(fail(UnboundLocal, ix.toString))
       stack.push(v)
     case LocalSet(ix) =>
       val v = stack.pop()
-      setLocal(ix, v).orElse(fail(UnboundLocal, ix.toString))
+      setLocal(ix, v).getOrElse(fail(UnboundLocal, ix.toString))
     case LocalTee(ix) =>
       val v = stack.peek()
-      setLocal(ix, v).orElse(fail(UnboundLocal, ix.toString))
+      setLocal(ix, v).getOrElse(fail(UnboundLocal, ix.toString))
     case GlobalGet(globalIx) =>
       val global = module.globals.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
       stack.push(global.value)
@@ -171,7 +171,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,E]
     case CallIndirect(typeIx) =>
       val ftExpected = module.functionTypes(typeIx)
       val funcIx = stack.pop()
-      tableGet(tableIndex, funcIx).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
+      tableGet(tableIndex, valueToFuncIx(funcIx)).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
         if (func == null)
           fail(UninitializedFunction, funcIx.toString)
         val ftActual = func.funcType
@@ -292,7 +292,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,E]
     case MemoryGrow =>
       val delta = valToSize(stack.pop())
       val memIdx = memoryIndex
-      val res = memGrow(memIdx, delta).withDefault
+      val res = memGrow(memIdx, delta).option
         (num.evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
         {sizeToVal(_)}
       stack.push(res)
@@ -306,7 +306,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,E]
 
     val memIdx = memoryIndex
     val byteSize = getBytesToRead(inst)
-    memRead(memIdx,addr,byteSize).withDefault
+    memRead(memIdx,addr,byteSize).option
       (fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
       {(b: Bytes) =>
         val v = decode(b, inst)
@@ -322,7 +322,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,E]
     val addr = valueToAddr(stack.pop())
 
     val memIdx = memoryIndex
-    memStore(memIdx, addr, bytes).orElse(
+    memStore(memIdx, addr, bytes).getOrElse(
       fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
     )
 
@@ -357,6 +357,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,E]
 
   // we assume a valid module here
   def initializeModule(module: Module): ModuleInstance[V] =
+    var memCount = 0
+    var tabCount = 0
     // we ignore imports an imports checking for now -> start with the empty module instance
     val modInst = new ModuleInstance[V] {}
     // compute the initilization values for globals
@@ -371,40 +373,40 @@ trait GenericInterpreter[V,Addr,Bytes,Size,E]
     modInst.functions = module.funcs.map(func => FunctionInstance.Wasm(modInst,func,module.types(func.tpe)))
     // tables
     modInst.tableAddrs = module.tables.map {
-      tab =>
-        tab match
-          case TableType(_, Limits(min,max)) => addEmptyTable(min,max)
+      case TableType(_, Limits(min,max)) =>
+        addEmptyTable(tabCount)
+        val tabAddr = tabCount
+        tabCount += 1
+        tabAddr
     }
     // memory
     modInst.memoryAddrs = module.mems.map {
-      mem =>
-        mem match
-          case MemType(Limits(min, max)) => addEmptyMemory(min,max)
+      case MemType(Limits(min, max)) =>
+        val initSize = valToSize(intOps.intLit(min))
+        val sizeLimit = max.map(i => valToSize(intOps.intLit(i)))
+        addEmptyMemory(memCount, initSize, sizeLimit)
+        val memAddr = memCount
+        memCount += 1
+        memAddr
     }
     // globals
     modInst.globals = module.globals.zip(globValues).map {
-      glob =>
-        glob match
-          case (Global(GlobalType(tpe,_),_),value) => GlobalInstance(tpe,value)
+      case (Global(GlobalType(tpe,_),_),value) => GlobalInstance(tpe,value)
     }
     // data
     modInst.data = module.data.map {
-      data =>
-        data match
-          case Data(_,_,init) => DataInstance(init.toByteVector)
+      case Data(_,_,init) => DataInstance(init.toByteVector)
     }
     // we don't need elems currently
     // exports
     modInst.exports = module.exports.map {
-      exp =>
-        exp match
-          case Export(fieldName, kind, index) =>
-            kind match {
-              case ExternalKind.Function => (fieldName,ExternalValue.Function(index))
-              case ExternalKind.Global => (fieldName,ExternalValue.Global(index))
-              case ExternalKind.Memory => (fieldName,ExternalValue.Memory(index))
-              case ExternalKind.Table => (fieldName,ExternalValue.Table(index))
-            }
+      case Export(fieldName, kind, index) =>
+        kind match {
+          case ExternalKind.Function => (fieldName,ExternalValue.Function(index))
+          case ExternalKind.Global => (fieldName,ExternalValue.Global(index))
+          case ExternalKind.Memory => (fieldName,ExternalValue.Memory(index))
+          case ExternalKind.Table => (fieldName,ExternalValue.Table(index))
+        }
     }
 
     // initialize tables and memories
@@ -413,40 +415,35 @@ trait GenericInterpreter[V,Addr,Bytes,Size,E]
     inNewFrameNoIndex(frameData, Vector.empty[V]){
       // memory
       module.data.zipWithIndex.foreach {
-        data =>
-          data match
-            case (Data(memIdx, off, init),i) =>
-              assert(memIdx == 0)
-              off.foreach(eval)
-              val base = stack.pop()
-              val bytes = init.toByteVector.toIterable
-              bytes.zipWithIndex.foreach { (byte,byteIdx) =>
-                stack.push(base)
-                eval(i32.Const(byte.toInt))
-                eval(i32.Store8(0, byteIdx))
-              }
-              // in case we want to use memory.init here:
-              //eval(i32.Const(0))
-              //eval(i32.Const((init.size / 8).toInt)) //is it ok to convert long to int here?
-              //memoryInit(i)
-              // memoryDrop(i) for the current wasm version
+        case (Data(memIdx, off, init),i) =>
+          assert(memIdx == 0)
+          off.foreach(eval)
+          val base = stack.pop()
+          val bytes = init.toByteVector.toIterable
+          bytes.zipWithIndex.foreach { (byte,byteIdx) =>
+            stack.push(base)
+            eval(i32.Const(byte.toInt))
+            eval(i32.Store8(0, byteIdx))
+          }
+          // in case we want to use memory.init here:
+          //eval(i32.Const(0))
+          //eval(i32.Const((init.size / 8).toInt)) //is it ok to convert long to int here?
+          //memoryInit(i)
+          // memoryDrop(i) for the current wasm version
       }
       // tables
       module.elem.zipWithIndex.foreach {
-        elem =>
-          elem match
-            case (Elem(tableIdx, off, init), i) =>
-              off.foreach(eval)
-              val base = stack.pop()
-              init.zipWithIndex.foreach { (funcIx,i) =>
-                stack.push(base)
-                eval(i32.Const(i))
-                eval(i32.Add) // adds index to base
-                val idx = stack.pop() // stack is empty
-                tableSet(tableIdx, idx, modInst.functions(funcIx)).orElse(
-                  fail(TableAccessOutOfBounds, s"Cannot write at index $idx in current table.")
-                ) // funcIx is valid due to validation
-              }
+        case (Elem(tableIdx, off, init), i) =>
+          off.foreach(eval)
+          val base = stack.pop()
+          init.zipWithIndex.foreach { (funcIx,i) =>
+            stack.push(base)
+            eval(i32.Const(i))
+            eval(i32.Add) // adds index to base
+            val idx = stack.pop() // stack is empty
+            tableSet(tableIdx, valueToFuncIx(idx), modInst.functions(funcIx)) // funcIx is valid due to validation
+            // TODO add failure conditions for table writing
+          }
      }
     }
 

@@ -1,7 +1,6 @@
 package sturdy.effect.environment
 
-import sturdy.effect.MayComputeConcrete
-import sturdy.effect.NoJoin
+import sturdy.data.*
 
 /*
  * A concrete environment.
@@ -12,8 +11,8 @@ trait CEnvironment[Var, V](_init: Map[Var, V] = Map()) extends Environment[Var, 
   protected var env: Map[Var, V] = _init
   def getEnv: Map[Var, V] = env
   
-  override def lookup(x: Var): MayComputeConcrete[V] =
-    MayComputeConcrete(env.get(x))
+  override def lookup(x: Var): OptionC[V] =
+    OptionC(env.get(x))
 
   override def bind(x: Var, v: V): Unit = env = env + (x -> v)
 

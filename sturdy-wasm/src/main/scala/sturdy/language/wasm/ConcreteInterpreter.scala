@@ -1,17 +1,15 @@
 package sturdy.language.wasm
 
 
-import sturdy.effect.MayComputeConcrete
-import sturdy.effect.MayCompute
-import sturdy.effect.NoJoin
-import sturdy.effect.binarymemory.ConcreteMemory
-import sturdy.effect.binarymemory.Serialize
+import sturdy.data.*
+import sturdy.effect.bytememory.ConcreteMemory
+import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.{CMutableCallFrameInt, CCallFrameInt}
 import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.{CFailure, Failure}
 import sturdy.effect.operandstack.COperandStack
-import sturdy.effect.table.ConcreteTable
+import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.FunctionInstance
 import sturdy.language.wasm.generic.GenericInterpreter
@@ -54,7 +52,8 @@ object ConcreteInterpreter extends Interpreter :
   override type Addr = Int
   override type Bytes = ByteBuffer
   override type Size = Int
-  override type ExcRep = WasmException[Value]
+  override type ExcV = WasmException[Value]
+  override type FuncIx = Int
 
   trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst] :
     import Value.*
@@ -116,25 +115,26 @@ object ConcreteInterpreter extends Interpreter :
           buf.putDouble(0, v.asFloat64)
         case _ => throw new IllegalArgumentException(s"Expected store instruction, but got $encInfo.")
 
-  given WasmOperations[Value, Addr, Size] with
+  given WasmOperations[Value, Addr, Size, FuncIx] with
     override type WasmOpsJoin[A] = NoJoin[A]
 
     override def valueToAddr(v: Value): Int = v.asInt32
+    override def valueToFuncIx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Int32(sz)
 
-    override def indexLookup[A](ix: Value, vec: Vector[A]): MayComputeConcrete[A] =
+    override def indexLookup[A](ix: Value, vec: Vector[A]): OptionC[A] =
       val i = ix.asInt32
       if (i < vec.size)
-        MayComputeConcrete.Computes(vec(i))
+        OptionC.Some(vec(i))
       else
-        MayComputeConcrete.ComputesNot()
+        OptionC.none
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends COperandStack[Value]
-      with ConcreteMemory
+      with ConcreteMemory[Int]
       with CSerialize
-      with ConcreteTable[Value, FunctionInstance[Value]](_.asInt32)
+      with ConcreteSymbolTable[Int, Int, FunctionInstance[Value]]
       with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
       with CBoolBranching[Value]
       with ConcreteExcept[WasmException[Value]]

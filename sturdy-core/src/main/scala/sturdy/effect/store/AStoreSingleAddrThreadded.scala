@@ -2,10 +2,8 @@ package sturdy.effect.store
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.effect.MayComputeOne
-import sturdy.effect.MayComputeOne.*
+import sturdy.data.*
 import sturdy.effect.Effectful
-import sturdy.effect.Join
 import sturdy.values.Abstractly
 
 import scala.collection.mutable.ListBuffer
@@ -23,14 +21,14 @@ trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])
   
   override type StoreJoin[A] = Join[A]
 
-  override def read(x: Addr): MayComputeOne[V] =
+  override def read(x: Addr): OptionA[V] =
     store.get(x) match
-      case None => ComputesNot()
-      case Some(v) =>
+      case scala.None => OptionA.none
+      case scala.Some(v) =>
         if (x.isManaged)
-          Computes(v)
+          OptionA.some(v)
         else
-          MaybeComputes(v)
+          OptionA.noneSome(v)
 
   override def write(x: Addr, v: V): Unit =
     weakUpdate(x, v)

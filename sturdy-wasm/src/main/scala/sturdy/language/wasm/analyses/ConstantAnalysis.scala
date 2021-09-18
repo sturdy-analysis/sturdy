@@ -1,12 +1,10 @@
 package sturdy.language.wasm.analyses
 
-import sturdy.effect.MayComputeMany
-import sturdy.effect.{Effectful, Join, given}
-import sturdy.effect.MayCompute
-import sturdy.effect.NoJoin
-import sturdy.effect.binarymemory.ConcreteMemory
-import sturdy.effect.binarymemory.ConstantAddressMemory
-import sturdy.effect.binarymemory.Serialize
+import sturdy.data.*
+import sturdy.effect.Effectful
+import sturdy.effect.bytememory.ConcreteMemory
+import sturdy.effect.bytememory.ConstantAddressMemory
+import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.CCallFrameInt
@@ -16,7 +14,7 @@ import sturdy.effect.failure.AFailureCollect
 import sturdy.effect.failure.CFailure
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.COperandStack
-import sturdy.effect.table.ConcreteTable
+import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.abstractions.ConstantValues
 import sturdy.language.wasm.generic.FunctionInstance
@@ -27,13 +25,13 @@ import sturdy.language.wasm.generic.WasmOperations
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
-import sturdy.values.doubles.{*, given}
-import sturdy.values.exceptions.{*, given}
-import sturdy.values.floats.{*, given}
-import sturdy.values.ints.{*, given}
-import sturdy.values.longs.{*, given}
-import sturdy.values.relational.{*, given}
-import sturdy.values.{*, given}
+import sturdy.values.doubles.*
+import sturdy.values.exceptions.*
+import sturdy.values.floats.*
+import sturdy.values.ints.*
+import sturdy.values.longs.*
+import sturdy.values.relational.*
+import sturdy.values.*
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -43,23 +41,25 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
   type Addr = Topped[Int]
   type Bytes = Vector[Topped[Byte]]
   type Size = Topped[Int]
+  type FuncIx = Topped[Int]
 
-  given WasmOperations[Value, Addr, Size] with
+  given WasmOperations[Value, Addr, Size, FuncIx] with
     override type WasmOpsJoin[A] = Join[A]
 
     override def valueToAddr(v: Value): Addr = v.asInt32
+    override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Int32(sz)
 
-    override def indexLookup[A](ix: Value, vec: Vector[A]): MayComputeMany[A] =
+    override def indexLookup[A](ix: Value, vec: Vector[A]): OptionA[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
           if (i < vec.size)
-            MayComputeMany.Computes(Iterable.single(vec(i)))
+            OptionA.Some(Iterable.single(vec(i)))
           else
-            MayComputeMany.ComputesNot()
+            OptionA.None()
         case Topped.Top =>
-          MayComputeMany.MaybeComputes(vec)
+          OptionA.NoneSome(vec)
 
 //  trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst] :
 //    import Value.*

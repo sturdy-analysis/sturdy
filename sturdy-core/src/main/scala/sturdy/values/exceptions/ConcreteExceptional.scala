@@ -1,6 +1,6 @@
 package sturdy.values.exceptions
 
-import sturdy.effect.NoJoin
+import sturdy.data.NoJoin
 
 given ConcreteExceptional[E]: Exceptional[E, E, NoJoin] with
   override def exception(exc: E): E = exc

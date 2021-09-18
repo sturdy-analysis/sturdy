@@ -1,5 +1,6 @@
 package sturdy.language.tip.analysis
 
+import sturdy.data.given
 import sturdy.effect.{Effectful, AnalysisState, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching

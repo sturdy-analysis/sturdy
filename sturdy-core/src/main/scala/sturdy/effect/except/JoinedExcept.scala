@@ -1,9 +1,7 @@
 package sturdy.effect.except
 
-import sturdy.effect.EitherCompute
+import sturdy.data.*
 import sturdy.effect.Effectful
-import sturdy.effect.EitherComputeAbstract
-import sturdy.effect.Join
 import sturdy.values.JoinValue
 import sturdy.values.exceptions.Exceptional
 
@@ -17,25 +15,28 @@ case object AbstractException extends ExceptException:
 trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJoin: JoinValue[E]) extends Except[Exc, E], Effectful:
   override type ExceptJoin[A] = Join[A]
 
-  protected var exception: Option[E] = None
+  protected var exception: OptionA[E] = OptionA.none
 
-  def getException: Option[E] = exception
+  def getException: OptionA[E] = exception
 
   override def throws(ex: Exc): Nothing =
     val e = exceptional.exception(ex)
-    exception match
-      case None => exception = Some(e)
-      case Some(old) => exception = Some(eJoin.joinValues(old, e))
+    exception += e
     throw AbstractException
 
-  override protected def tries[A](f: => A): EitherComputeAbstract[A, E] =
+  override protected def tries[A](f: => A): EitherA[A, E] =
     try {
       val a = f
       exception match
-        case None => EitherComputeAbstract.Left(a)
-        case Some(ex) => EitherComputeAbstract.LeftRight(a, ex)
+        case OptionA.None() => EitherA.Left(Iterable.single(a))
+        case OptionA.Some(exs) => EitherA.Right(exs)
+        case OptionA.NoneSome(exs) => EitherA.LeftRight(Iterable.single(a), exs)
     } catch {
-      case AbstractException => EitherComputeAbstract.Right(exception.get)
+      case AbstractException =>
+        exception match
+          case OptionA.None() => throw new IllegalStateException(s"exception cannot be None here")
+          case OptionA.NoneSome(exs) => throw new IllegalStateException(s"exception cannot be NoneSome here")
+          case OptionA.Some(exs) => EitherA.Right(exs)
       case ex => throw ex
     }
 

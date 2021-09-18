@@ -32,6 +32,10 @@ enum Topped[+V]:
 
   inline def unary[B](f: V => B): Topped[B] = map(f)
 
+  def toOption: scala.Option[V] = this match
+    case Top => scala.None
+    case Actual(v) => scala.Some(v)
+
 given toppedAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[C, Topped[A]] with
   override def abstractly(c: C): Topped[A] = Topped.Actual(abs.abstractly(c))
 

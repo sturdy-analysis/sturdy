@@ -1,6 +1,6 @@
 package sturdy.effect.store
 
-import sturdy.effect.MayCompute
+import sturdy.data.Option
 
 /*
  * The store interface.
@@ -8,6 +8,6 @@ import sturdy.effect.MayCompute
 trait Store[Addr, V]:
   type StoreJoin[A]
 
-  def read(x: Addr): MayCompute[StoreJoin, V]
+  def read(x: Addr): Option[StoreJoin, V]
   def write(x: Addr, v: V): Unit
   def free(x: Addr): Unit
