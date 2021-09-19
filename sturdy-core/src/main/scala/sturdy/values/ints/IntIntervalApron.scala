@@ -22,19 +22,23 @@ val ourAbstractDomain = apron.Abstract0(ourAbstractManager, 1, 0, Array(apron.In
 
 
 object IntIntervalApron:
+  implicit def toIntInterval(in: IntIntervalApron): IntInterval = {  // TODO: implicitly convert IntIntervalApron to IntInterval
+    new IntInterval(0,0)
+  }
+
   val Top = {var tmp = apron.Interval(0, 0); tmp.setTop(); tmp}
-  def bounded(l: Long, h: Long): IntIntervalApron = {new IntIntervalApron(Math.max(l, Int.MinValue).toInt, Math.min(h, Int.MaxValue).toInt)}
+  def bounded(l: Long, h: Long): IntIntervalApron =
+    {new IntIntervalApron((l max Int.MinValue).toInt, (h min Int.MaxValue).toInt)}
 
 case class IntIntervalApron(interval: apron.Interval):
-  if (interval.inf.cmp(interval.sup) < 0)
+  if ((interval.inf cmp interval.sup) < 0)
     throw new IllegalArgumentException(s"Empty intervals are illegal $this")
- 
+  
   def this(l: Int, h: Int) = this(apron.Interval(l, h))
   def this(inf: apron.Scalar, sup: apron.Scalar) = this(apron.Interval(inf, sup))
 
   def join(other: IntIntervalApron): IntIntervalApron =
     //problem: die join-Funktion erwartet abstract0 Objekte aber die apron Intervalle sind keine abstract0 Objekte sondern Coeff
-    var abstract0Object = Abstract0(ourAbstractDomain, 1, 0, Array(interval))
     abstract0Object.toBox(ourAbstractDomain) //gibt überaproximierendes Intervall-Array um das abstracte objekt herum zurück
     //oder direkt: Abstract0(Manager man, int intdim, int realdim, Interval[] box) - Creates a new abstract element from a box.
     //var intervalArray: Seq[Abstract0] = Array(this, other)
@@ -52,7 +56,7 @@ case class IntIntervalApron(interval: apron.Interval):
 
     return IntIntervalApron(intr1, intr2)
 
-case class IntIntervalApron(interval: apron.Interval):
+//case class IntIntervalApron(interval: apron.Interval):
      
 /* 
 object IntInterval:
