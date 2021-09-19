@@ -4,8 +4,8 @@ import org.scalatest._
 import apron.Abstract0 //default; for domains without environments
 import apron.Box
 import apron.Interval
-import sturdy.IntInterval
-import sturdy.IntIntervalApron
+import sturdy.values.ints.IntInterval
+import sturdy.values.ints.IntIntervalApron
 
 val ourAbstractManager = apron.Box()
 val ourAbstractDomain = apron.Abstract0(ourAbstractManager, 1, 0, Array(apron.Interval()))
@@ -19,12 +19,17 @@ class ApronTest extends AnyFlatSpec, AnyFreeSpec, Matchers:
   lazy val mult = Seq(
       Seq(
         IntIntervalApron(-1, 0), // result
-        op2IIA(_*_, 0,1, -1,0)   // case1
+        op2IIA(_*_, 0,1, -1,0),  // case1
         op2IIA(_*_, -1,0, 0,1)   // case2
       ),
       Seq(IntIntervalApron(-25, 15), op2IIA(_*_, -5,3, 5,-3)),
       Seq(IntIntervalApron(-15, 25), op2IIA(_*_, -5,3, -5,-3))
   )
+  lazy val div = Seq(
+    Seq(IntIntervalApron(1, 1), op2IIA(_/_, 1,1, 1,1))
+  )
+  lazy val join0 = Seq(IntIntervalApron(-10, 10), op2IIA(_join_, 0,10, -10,5))
+
 
   def op2IIA(f: (IntIntervalApron, IntIntervalApron) => IntIntervalApron, l0: Int, l1: Int, r0: Int, r1: Int): IntIntervalApron = {
     IntIntervalApron.bounded(l0, l1) f IntIntervalApron.bounded(r0, r1)
@@ -33,42 +38,41 @@ class ApronTest extends AnyFlatSpec, AnyFreeSpec, Matchers:
     IntInterval.bounded(l0, l0) f IntInterval.bounded(r0, r1)
   }
   def testDefault(testSequence: Seq[Matchable]) = {
-    val split = testSequence match { case SortedSeq(result, rest @ _*) => (result, rest) }
-    for (member <- split[1]) split[0] should === member
+    val (result, rest) = testSequence match { case SortedSeq(result, rest @ _*) => (result, rest) }
+    for (member <- rest) result should === member
   }
 
-  "Apron Intervals" must "be able to perform addition" in {
+  "Apron Intervals" must "perform addition" in {
 
     testDefault(add0)
   }
-  it must "be able to perform substraction" in {
+  it must "perform substraction" in {
     
 
     testDefault(sub0)
   }
-  it must "be able to perform multiplication" in { // example for multiple tests and test cases
+  it must "perform multiplication" in { // example for multiple tests and test cases
     
     for (test <- mult) testDefault(test)
   }
-  it must "be able to perform division" in { // TODO
-    testDefault(???)
+  it must "perform division" in { // TODO
+    for (test <- div) testDefault(test)
   }
-  it must "be able to join" in {
-    val join0 = Seq(IntIntervalApron(-10, 10), op2IIA(_join_, 0,10, -10,5))
+  it must "join" in {
 
     testDefault(join0)
   }
-  it must "be able to meet" in {
+  it must "meet" in {
     assertEquals(IntIntervalApron(0,10) meet IntIntervalApron(-10,5), IntIntervalApron(0, 5))
   }
-  it must "be able to widen" in { // TODO
+  it must "widen" in { // TODO
     assertEquals(IntIntervalApron(0,10) meet IntIntervalApron(-10,5), IntIntervalApron(0, 5))
   }
-  it must "be able to compare" in { // TODO
+  it must "compare" in { // TODO
     //assertEquals(IntIntervalApron(0,10) meet IntIntervalApron(-10,5), IntIntervalApron(0, 5))
   }
 
-  "Apron intervals must behave like sturdy.IntInterval" - {
+  "sturdy.IntIntervalApron must behave like sturdy.IntInterval" - {
     "for addition" in {
       // Add
       //assertEquals(add0, IntIntervalApron(IntInterval(0,1) + IntInterval(-1,0)))
@@ -76,4 +80,18 @@ class ApronTest extends AnyFlatSpec, AnyFreeSpec, Matchers:
     "for substraction" in {}
     "for multiplication" in {}
     "for division" in {}
+    "for join" in {}
+    "for meet" in {}
+    "for widen" in {}
+    "for comparisons" - {
+      "greater or equal" in {}
+      "greater than" in {}
+      "less or equal" in {}
+      "less than" in {}
+    }
+    "for equality" - {
+      "equal" in {}
+      "not equal" in {}
+    }
+
   }

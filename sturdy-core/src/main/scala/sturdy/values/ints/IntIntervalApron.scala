@@ -10,163 +10,162 @@ import sturdy.values.PartialOrder
 import sturdy.values.Topped
 import sturdy.values.Topped.*
 import sturdy.values.relational.*
+import scala.language.implicitConversions
+import scala.math.Ordered.orderingToOrdered
 
 import scala.collection.immutable.TreeSet
 
-import apron.Abstract0 //default; for domains without environments
+import apron.Abstract0 // default; for domains without environments
 import apron.Box
 import apron.*
 
-val ourAbstractManager = apron.Box()
-val ourAbstractDomain = apron.Abstract0(ourAbstractManager, 1, 0, Array(apron.Interval()))
-
+val manager = apron.Box()
+def maxMpq(one: gmp.Mpq, other: gmp.Mpq) = {
+      if ((one cmp other) > 0)
+        one
+      else 
+        other
+}
+def minMpq(one: gmp.Mpq, other: gmp.Mpq) = {
+  if ((one cmp other) < 0)
+    one
+  else 
+    other
+}
 
 object IntIntervalApron:
-  implicit def toIntInterval(in: IntIntervalApron): IntInterval = {  // TODO: implicitly convert IntIntervalApron to IntInterval
-    new IntInterval(0,0)
-  }
-
-  val Top = {var tmp = apron.Interval(0, 0); tmp.setTop(); tmp}
+  val Top = IntIntervalApron({var tmp = apron.Interval(0, 0); tmp.setTop(); tmp})
+  
   def bounded(l: Long, h: Long): IntIntervalApron =
-    {new IntIntervalApron((l max Int.MinValue).toInt, (h min Int.MaxValue).toInt)}
+    new IntIntervalApron((l max Int.MinValue).toInt, (h min Int.MaxValue).toInt)
+  def bounded(l: gmp.Mpq, h: gmp.Mpq): IntIntervalApron =
+    new IntIntervalApron(maxMpq(l, new gmp.Mpq(Int.MaxValue, 1)), maxMpq(h, new gmp.Mpq(Int.MinValue, 1)))
 
-case class IntIntervalApron(interval: apron.Interval):
+  def apply(l: Int, h: Int) = new IntIntervalApron(apron.Interval(l, h))
+  def apply(inf: apron.MpqScalar, sup: apron.MpqScalar) = new IntIntervalApron(apron.Interval(inf, sup))
+  def apply(l: gmp.Mpq, h: gmp.Mpq) = new IntIntervalApron(apron.Interval(l, h))
+  def apply(l: gmp.Mpq, h: Int) = new IntIntervalApron(apron.Interval(l, gmp.Mpq(h)))
+  def apply(l: Int, h: gmp.Mpq) = new IntIntervalApron(apron.Interval(gmp.Mpq(l), h))
+
+  def unapply(interval: IntIntervalApron): Some[(Int, Int)] =
+    Some(interval.l.doubleValue.toInt, interval.h.doubleValue.toInt)
+
+case class IntIntervalApron(val interval: apron.Interval):
+  val abstractDomain = apron.Abstract0(manager, 1, 0, Array(interval))
+  val l: gmp.Mpq = {var l: gmp.Mpq = null; interval.inf.toMpq(l, 0); l.canonicalize; l}
+  val h: gmp.Mpq = {var h: gmp.Mpq = null; interval.sup.toMpq(h, 0); h.canonicalize; h}
+  
   if ((interval.inf cmp interval.sup) < 0)
     throw new IllegalArgumentException(s"Empty intervals are illegal $this")
+  if (!(Set(0,1) contains l.getDen.intValue) || !(Set(0,1) contains h.getDen.intValue))
+    throw new IllegalArgumentException(s"Non-Integer bounds are illegal $this")
   
   def this(l: Int, h: Int) = this(apron.Interval(l, h))
-  def this(inf: apron.Scalar, sup: apron.Scalar) = this(apron.Interval(inf, sup))
+  def this(inf: apron.MpqScalar, sup: apron.MpqScalar) = this(apron.Interval(inf, sup))
+  def this(l: gmp.Mpq, h: gmp.Mpq) = this(apron.Interval(l, h))
+  def this(l: gmp.Mpq, h: Int) = this(apron.Interval(l, gmp.Mpq(h)))
+  def this(l: Int, h: gmp.Mpq) = this(apron.Interval(gmp.Mpq(l), h))
+
+  
+  
+  implicit def toIntInterval(): IntInterval = {  // implicitly convert IntIntervalApron to IntInterval
+    new IntInterval(this.l.doubleValue.toInt, this.h.doubleValue.toInt)
+  }
 
   def join(other: IntIntervalApron): IntIntervalApron =
-    //problem: die join-Funktion erwartet abstract0 Objekte aber die apron Intervalle sind keine abstract0 Objekte sondern Coeff
-    abstract0Object.toBox(ourAbstractDomain) //gibt überaproximierendes Intervall-Array um das abstracte objekt herum zurück
-    //oder direkt: Abstract0(Manager man, int intdim, int realdim, Interval[] box) - Creates a new abstract element from a box.
-    //var intervalArray: Seq[Abstract0] = Array(this, other)
-    val man = apron.Box()
-    val a0 = apron.Abstract0(man, 1, 0, Array(apron.Interval(0, 1)))
-    a0.join(man, a0)
-    val interval = a0.getBound(man, 1)
-    val r1 = Array[Double](1)
-    val r2 = Array[Double](1)
-
-    interval.inf.toDouble(r1, 0)//wir nutzen die toDouble() Funktion um defakto ints zu erzeugen, müssen aber trotzdem toInt() von Scala nochmal draufhauen
-    interval.sup.toDouble(r2, 0)
-    val intr1 = r1.last.toInt
-    val intr2 = r2.last.toInt
-
-    return IntIntervalApron(intr1, intr2)
-
-//case class IntIntervalApron(interval: apron.Interval):
-     
-/* 
-object IntInterval:
-  val Top = IntInterval(Int.MinValue, Int.MaxValue)
-  def bounded(l: Long, h: Long): IntInterval =
-    IntInterval(Math.max(l, Int.MinValue).toInt, Math.min(h, Int.MaxValue).toInt)
-case class IntInterval(l: Int, h: Int):
-  if (l > h)
-    throw new IllegalArgumentException(s"Empty intervals are illegal $this")
-
-  def join(other: IntInterval): IntInterval =
-    IntInterval(Math.min(l, other.l), Math.max(h, other.h))
-  def +(y: IntInterval): IntInterval = IntInterval.bounded(l.toLong + y.l, h.toLong + y.h)
-  def -(y: IntInterval): IntInterval = IntInterval.bounded(l.toLong - y.l, h.toLong - y.h)
-  def *(y: IntInterval): IntInterval = withBounds2(_*_, y)
-  def /(y: IntInterval): IntInterval = withBounds2(_/_, y)
-  def withBounds2(f: (Long, Long) => Long, that: IntInterval): IntInterval = {
-    val v1 = f(this.l, that.l)
-    val v2 = f(this.l, that.h)
-    val v3 = f(this.h, that.l)
-    val v4 = f(this.h, that.h)
-    val low = Math.min(v1, Math.min(v2, Math.min(v3, v4)))
-    val high = Math.max(v1, Math.max(v2, Math.max(v3, v4)))
-    IntInterval.bounded(low, high)
+    // gibt überaproximierendes Intervall-Array um das abstracte objekt herum zurück
+    // oder direkt: Abstract0(Manager man, int intdim, int realdim, Interval[] box) - Creates a new abstract element from a box.
+    // es ist nicht möglich, dass diese Implementation schneller ist, als die von IntInterval
+    IntIntervalApron(abstractDomain.joinCopy(manager, other.abstractDomain).getBound(manager, 1))
+ 
+  def +(y: IntIntervalApron): IntIntervalApron = IntIntervalApron.bounded({val tmp = l; tmp add y.l; tmp}, {val tmp = h; tmp add y.h; tmp})
+  def -(y: IntIntervalApron): IntIntervalApron = IntIntervalApron.bounded({val tmp = l; tmp sub y.l; tmp}, {val tmp = h; tmp sub y.h; tmp})
+  def *(y: IntIntervalApron): IntIntervalApron = withBounds2(_ mul _, y)
+  def /(y: IntIntervalApron): IntIntervalApron = withBounds2(_ div _, y)
+  def withBounds2(f: (gmp.Mpq, gmp.Mpq) => Unit, that: IntIntervalApron): IntIntervalApron = {    
+    val v1 = gmp.Mpq(0); v1.add(this.l); f(v1, that.l)
+    val v2 = gmp.Mpq(0); v2.add(this.l); f(v2, that.h)
+    val v3 = gmp.Mpq(0); v3.add(this.h); f(v3, that.l)
+    val v4 = gmp.Mpq(0); v4.add(this.h); f(v4, that.h)
+    
+    val low = minMpq(v1, minMpq(v2, minMpq(v3, v4)))
+    val high = maxMpq(v1, maxMpq(v2, maxMpq(v3, v4)))
+    IntIntervalApron.bounded(low, high)
   }
   override def toString: String = s"[$l,$h]"
 
-given Abstractly[Int, IntInterval] with
-  override def abstractly(i: Int): IntInterval =
-    IntInterval(i, i)
+given Abstractly[Int, IntIntervalApron] with
+  override def abstractly(i: Int): IntIntervalApron =
+    new IntIntervalApron(i, i)
 
-given PartialOrder[IntInterval] with
-  override def lteq(x: IntInterval, y: IntInterval): Boolean = y.l <= x.l && x.h <= y.h
+given PartialOrder[IntIntervalApron] with
+  override def lteq(x: IntIntervalApron, y: IntIntervalApron): Boolean = y.l <= x.l && x.h <= y.h
 
-given intIntervalJoin: JoinValue[IntInterval] with
-  override def joinValues(v1: IntInterval, v2: IntInterval): IntInterval =
-    IntInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
+given IntIntervalApronJoin: JoinValue[IntIntervalApron] with
+  override def joinValues(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron =
+    new IntIntervalApron(minMpq(v1.l, v2.l), maxMpq(v1.h, v2.h))
 
-given intIntervalWiden(using bounds: => Set[Int]): Widening[IntInterval] with
-  private lazy val treeSet: TreeSet[Int] = TreeSet.from(bounds)
-  override def widen(v1: IntInterval, v2: IntInterval): IntInterval =
-    val low =
-      if (v1.l <= v2.l)
-        v1.l
-      else
-        treeSet.maxBefore(v2.l + 1).getOrElse(Int.MinValue)
-    val high =
-      if (v1.h >= v2.h)
-        v1.h
-      else
-        treeSet.minAfter(v2.h).getOrElse(Int.MaxValue)
-    IntInterval(low, high)
+given IntIntervalApronWiden(using bounds: => Set[Int]): Widening[IntIntervalApron] with
+  override def widen(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron =
+    IntIntervalApron(v1.abstractDomain.widening(manager, v2.abstractDomain).getBound(manager, 1))
 
-given IntervalIntOps(using f: Failure, j: JoinComputation): IntOps[IntInterval] with
-  def intLit(i: Int): IntInterval = IntInterval(i, i)
+given ApronIntervalIntOps(using f: Failure, j: JoinComputation): IntOps[IntIntervalApron] with
+  def intLit(i: Int): IntIntervalApron = new IntIntervalApron(i, i)
   //def intLit(i: Int): de.poiu.apron.Interval
-  def randomInt(): IntInterval = IntInterval.Top
-  def add(v1: IntInterval, v2: IntInterval): IntInterval = v1 + v2
-  def sub(v1: IntInterval, v2: IntInterval): IntInterval = v1 - v2
-  def mul(v1: IntInterval, v2: IntInterval): IntInterval = v1 * v2
-  def div(v1: IntInterval, v2: IntInterval): IntInterval = v2 match
-    case IntInterval(0, 0) => f.fail(IntDivisionByZero, s"$v1 / $v2")
-    case IntInterval(0, h) => j.joinComputations(v1 / IntInterval(1, h))(f.fail(IntDivisionByZero, s"$v1 / $v2"))
-    case IntInterval(l, 0) => j.joinComputations(v1 / IntInterval(l, -1))(f.fail(IntDivisionByZero, s"$v1 / $v2"))
-    case IntInterval(l, h) =>
+  def randomInt(): IntIntervalApron = IntIntervalApron.Top
+  def add(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = v1 + v2
+  def sub(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = v1 - v2
+  def mul(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = v1 * v2
+  def div(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = v2 match
+    case IntIntervalApron(0, 0) => f.fail(IntDivisionByZero, s"$v1 / $v2")
+    case IntIntervalApron(0, h) => j.joinComputations(v1 / IntIntervalApron(1, h))(f.fail(IntDivisionByZero, s"$v1 / $v2"))
+    case IntIntervalApron(l, 0) => j.joinComputations(v1 / IntIntervalApron(l, -1))(f.fail(IntDivisionByZero, s"$v1 / $v2"))
+    case IntIntervalApron(l, h) =>
       if (l <= 0 && h >= 0)
         j.joinComputations(v1 / v2)(f.fail(IntDivisionByZero, s"$v1 / $v2"))
       else
         v1 / v2
 
-  def max(v1: IntInterval, v2: IntInterval): IntInterval = ???
-  def min(v1: IntInterval, v2: IntInterval): IntInterval = ???
+  def max(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = ???
+  def min(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = ???
 
-  def divUnsigned(v1: IntInterval, v2: IntInterval): IntInterval = ???
-  def remainder(v1: IntInterval, v2: IntInterval): IntInterval = ???
-  def remainderUnsigned(v1: IntInterval, v2: IntInterval): IntInterval = ???
-  def modulo(v1: IntInterval, v2: IntInterval): IntInterval = ???
-  def gcd(v1: IntInterval, v2: IntInterval): IntInterval = ???
+  def divUnsigned(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = ???
+  def remainder(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = ???
+  def remainderUnsigned(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = ???
+  def modulo(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = ???
+  def gcd(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = ???
 
-  def absolute(v: IntInterval): IntInterval = ???
-  def bitAnd(v1: IntInterval, v2: IntInterval): IntInterval = ???
-  def bitOr(v1: IntInterval, v2: IntInterval): IntInterval = ???
-  def bitXor(v1: IntInterval, v2: IntInterval): IntInterval = ???
-  def shiftLeft(v: IntInterval, shift: IntInterval): IntInterval = ???
-  def shiftRight(v: IntInterval, shift: IntInterval): IntInterval = ???
-  def shiftRightUnsigned(v: IntInterval, shift: IntInterval): IntInterval = ???
-  def rotateLeft(v: IntInterval, shift: IntInterval): IntInterval = ???
-  def rotateRight(v: IntInterval, shift: IntInterval): IntInterval = ???
-  def countLeadingZeros(v: IntInterval): IntInterval = ???
-  def countTrailinZeros(v: IntInterval): IntInterval = ???
-  def nonzeroBitCount(v: IntInterval): IntInterval = ???
+  def absolute(v: IntIntervalApron): IntIntervalApron = ???
+  def bitAnd(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = ???
+  def bitOr(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = ???
+  def bitXor(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = ???
+  def shiftLeft(v: IntIntervalApron, shift: IntIntervalApron): IntIntervalApron = ???
+  def shiftRight(v: IntIntervalApron, shift: IntIntervalApron): IntIntervalApron = ???
+  def shiftRightUnsigned(v: IntIntervalApron, shift: IntIntervalApron): IntIntervalApron = ???
+  def rotateLeft(v: IntIntervalApron, shift: IntIntervalApron): IntIntervalApron = ???
+  def rotateRight(v: IntIntervalApron, shift: IntIntervalApron): IntIntervalApron = ???
+  def countLeadingZeros(v: IntIntervalApron): IntIntervalApron = ???
+  def countTrailinZeros(v: IntIntervalApron): IntIntervalApron = ???
+  def nonzeroBitCount(v: IntIntervalApron): IntIntervalApron = ???
 
-given IntIntervalCompareOps: CompareOps[IntInterval, Topped[Boolean]] with
-  def lt(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] =
+given IntIntervalApronCompareOps: CompareOps[IntIntervalApron, Topped[Boolean]] with
+  def lt(iv1: IntIntervalApron, iv2: IntIntervalApron): Topped[Boolean] =
     if iv1.h < iv2.l then Topped.Actual(true)
     else if iv2.h <= iv1.l then Topped.Actual(false)
     else Topped.Top
-  def le(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] =
+  def le(iv1: IntIntervalApron, iv2: IntIntervalApron): Topped[Boolean] =
     if iv1.h <= iv2.l then Topped.Actual(true)
     else if iv2.h < iv1.l then Topped.Actual(false)
     else Topped.Top
-  def ge(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] = le(iv2, iv1)
-  def gt(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] = lt(iv2, iv1)
+  def ge(iv1: IntIntervalApron, iv2: IntIntervalApron): Topped[Boolean] = le(iv2, iv1)
+  def gt(iv1: IntIntervalApron, iv2: IntIntervalApron): Topped[Boolean] = lt(iv2, iv1)
 
-given IntIntervalEqOps: EqOps[IntInterval, Topped[Boolean]] with
-  override def equ(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] =
+given IntIntervalApronEqOps: EqOps[IntIntervalApron, Topped[Boolean]] with
+  override def equ(iv1: IntIntervalApron, iv2: IntIntervalApron): Topped[Boolean] =
     if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Actual(true)
     else if iv1.h < iv2.l || iv2.h < iv1.l then Actual(false)
     else Top
-  override def neq(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] =
+  override def neq(iv1: IntIntervalApron, iv2: IntIntervalApron): Topped[Boolean] =
     if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Actual(false)
     else if iv1.h < iv2.l || iv2.h < iv1.l then Actual(true)
-    else Top */
+    else Top
