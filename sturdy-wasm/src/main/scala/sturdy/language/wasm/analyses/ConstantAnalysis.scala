@@ -15,7 +15,7 @@ import sturdy.effect.failure.CFailure
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.COperandStack
 import sturdy.effect.symboltable.{ToppedSymbolTable, SymbolTable}
-import sturdy.language.wasm.Interpreter
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.ConstantValues
 import sturdy.language.wasm.generic.FunctionInstance
 import sturdy.language.wasm.generic.GenericInterpreter
@@ -65,8 +65,40 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
           OptionA.NoneSome(vec)
 
   trait ASerialize extends Serialize[Value, Bytes, MemoryInst, MemoryInst]:
-    override def decode(dat: IndexedSeqView[Topped[Byte]], decInfo: MemoryInst): ConstantAnalysis.Value = ???
-    override def encode(v: Value, encInfo: MemoryInst): IndexedSeqView[Topped[Byte]] = ???
+    val cSerialize = new ConcreteInterpreter.CSerialize {}
+    override def decode(dat: IndexedSeqView[Topped[Byte]], decInfo: MemoryInst): Value =
+      val bytes = dat.map {
+        case Topped.Top => return decInfo match
+          case _: (i32.Load | i32.Load8S | i32.Load8U | i32.Load16S | i32.Load16U) => Value.Int32(Topped.Top)
+          case _: (i64.Load | i64.Load8S | i64.Load8U | i64.Load16S | i64.Load16U | i64.Load32S | i64.Load32U ) => Value.Int64(Topped.Top)
+          case _: f32.Load => Value.Float32(Topped.Top)
+          case _: f64.Load => Value.Float64(Topped.Top)
+          case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $decInfo.")
+        case Topped.Actual(b) => b
+      }
+      cSerialize.decode(ByteBuffer.wrap(bytes.toArray), decInfo) match
+        case ConcreteInterpreter.Value.TopValue => Value.TopValue
+        case ConcreteInterpreter.Value.Int32(i) => Value.Int32(Topped.Actual(i))
+        case ConcreteInterpreter.Value.Int64(l) => Value.Int64(Topped.Actual(l))
+        case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
+        case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
+
+    override def encode(v: Value, encInfo: MemoryInst): IndexedSeqView[Topped[Byte]] = v match
+      case Value.TopValue | Value.Int32(Topped.Top) | Value.Int64(Topped.Top) | Value.Float32(Topped.Top) | Value.Float64(Topped.Top) => encInfo match
+        case _: i32.Store => Array.fill(4)(Topped.Top).view
+        case _: i32.Store8 => Array.fill(1)(Topped.Top).view
+        case _: i32.Store16 => Array.fill(2)(Topped.Top).view
+        case _: i64.Store => Array.fill(8)(Topped.Top).view
+        case _: i64.Store8 => Array.fill(1)(Topped.Top).view
+        case _: i64.Store16 => Array.fill(2)(Topped.Top).view
+        case _: i64.Store32 => Array.fill(4)(Topped.Top).view
+        case _: f32.Store => Array.fill(4)(Topped.Top).view
+        case _: f64.Store => Array.fill(8)(Topped.Top).view
+        case _ => throw new IllegalArgumentException(s"Expected store instruction, but got $encInfo.")
+      case Value.Int32(Topped.Actual(i)) => cSerialize.encode(ConcreteInterpreter.Value.Int32(i), encInfo).array().view.map(Topped.Actual.apply)
+      case Value.Int64(Topped.Actual(l)) => cSerialize.encode(ConcreteInterpreter.Value.Int64(l), encInfo).array().view.map(Topped.Actual.apply)
+      case Value.Float32(Topped.Actual(f)) => cSerialize.encode(ConcreteInterpreter.Value.Float32(f), encInfo).array().view.map(Topped.Actual.apply)
+      case Value.Float64(Topped.Actual(d)) => cSerialize.encode(ConcreteInterpreter.Value.Float64(d), encInfo).array().view.map(Topped.Actual.apply)
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends COperandStack[Value]
