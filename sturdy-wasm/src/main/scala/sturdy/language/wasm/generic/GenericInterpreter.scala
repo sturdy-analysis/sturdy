@@ -253,19 +253,21 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]
         invoke(func)
     }
 
-  def invokeExported[Addr,Bytes,Size](funcName: String, args: List[V]): List[V] =
-    module.exports.find((name,_) => name == funcName) match
-      case Some((_,ExternalValue.Function(funcIx))) =>
-        val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-        val paramTys = func.funcType.params
-        if (paramTys.length != args.length)
-          throw new Error(s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}.")
-        // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
-        val rtLength = func.funcType.t.length
-        stack.pushN(args)
-        invoke(func)
-        stack.popN(rtLength)
-      case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
+  def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] =
+    inNewFrameNoIndex(FrameData(0, modInst), Iterable.empty) {
+      module.exports.find((name, _) => name == funcName) match
+        case Some((_, ExternalValue.Function(funcIx))) =>
+          val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+          val paramTys = func.funcType.params
+          if (paramTys.length != args.length)
+            throw new Error(s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}.")
+          // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
+          val rtLength = func.funcType.t.length
+          stack.pushN(args)
+          invoke(func)
+          stack.popN(rtLength)
+        case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
+    }
 
 
   private def defaultValue(ty: ValType): V = ty match

@@ -85,6 +85,4 @@ def runWasmFunction(path: Path, funName: String, args: List[Value]): List[Value]
   val module = parse(path)
   val interp = ConcreteInterpreter(FrameData(0, null), Iterable.empty)
   val modInst = interp.initializeModule(module)
-  interp.effects.inNewFrameNoIndex(FrameData(0, modInst), Iterable.empty) {
-    interp.invokeExported(funName, args)
-  }
+  interp.invokeExported(modInst, funName, args)

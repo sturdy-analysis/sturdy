@@ -2,9 +2,10 @@ package sturdy.language.wasm
 
 import cats.effect.*
 import fastparse.*
-import org.scalatest.Assertions._
+import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import swam.text.Command
 import swam.text.parser.TestScriptParser
 
 import java.nio.file.{Files, Path, Paths}
@@ -26,6 +27,7 @@ class TestScriptParserTest extends AnyFlatSpec, Matchers:
     }
   }
 
-def parseScript(wast: String) =
+def parseScript(wast: String): Seq[Command] =
   val script = _root_.fastparse.parse(wast, TestScriptParser.script(_))
   assert(script.isSuccess)
+  script.get.value
