@@ -52,7 +52,7 @@ object ConcreteInterpreter:
     case SymbolVal(sym: String)
     case QuoteVal(qot: Value)
     case VoidVal
-    case ClosureVal(cl: Closure[String, List[Expr], Environment])
+    case ClosureVal(cl: Closure[String, Body, Environment])
     case NumVal(num: Num)
 
     def asNum(using f: Failure): Num = this match
@@ -73,7 +73,7 @@ object ConcreteInterpreter:
     def asQuote(using f: Failure): Value = this match
       case QuoteVal(qot) => qot
       case _ => f.fail(TypeError, s"Expected Quote but got $this")
-    def asClosure(using f: Failure) : Closure[String, List[Expr], Environment] = this match
+    def asClosure(using f: Failure) : Closure[String, Body, Environment] = this match
       case ClosureVal(cl) => cl
       case _ => f.fail(TypeError, s"Expected Closure but got $this")
 
@@ -101,7 +101,7 @@ object ConcreteInterpreter:
     given DoubleOps[Value] = new LiftedDoubleOps(_.asNum.asDouble, x => NumVal(DoubleVal(x)))
     given BooleanOps[Value] = new LiftedBooleanOps(_.asBoolean, BoolVal.apply)
     given CompareOps[Value, Value] = new LiftedCompareOps(_.asNum.asDouble, BoolVal.apply)
-    given ClosureOps[String, Value, List[Expr], Environment, Value, Value] = new LiftedClosureOps(_.asClosure, ClosureVal.apply)
+    given ClosureOps[String, Value, Body, Environment, Value, Value] = new LiftedClosureOps(_.asClosure, ClosureVal.apply)
 
     given concreteListOps(using f: Failure): ListOps[Value] with
       override def cons(v1: Value, v2: Value): Value = ConsVal(v1, v2)
@@ -188,14 +188,14 @@ object ConcreteInterpreter:
 import ConcreteInterpreter.*
 
 class ConcreteInterpreter
-(using effectOps: Effects)
-(using IntOps[Value], ConvertIntDouble[Value, Value],
- RationalOps[Value], ConvertRationalDouble[Value, Value],
- DoubleOps[Value],
- BooleanOps[Value], CharOps[Value], StringOps[Value],
- ListOps[Value], SymbolOps[Value], QuoteOps[Value], VoidOps[Value],
- TypeOps[Value], EqOps[Value, Value], CompareOps[Value, Value],
- ClosureOps[String, Value, List[Expr], effectOps.Env, Value, Value])
+  (using effectOps: Effects)
+  (using IntOps[Value], ConvertIntDouble[Value, Value],
+   RationalOps[Value], ConvertRationalDouble[Value, Value],
+   DoubleOps[Value],
+   BooleanOps[Value], CharOps[Value], StringOps[Value],
+   ListOps[Value], SymbolOps[Value], QuoteOps[Value], VoidOps[Value],
+   TypeOps[Value], EqOps[Value, Value], CompareOps[Value, Value],
+   ClosureOps[String, Value, Body, effectOps.Env, Value, Value])
   extends GenericInterpreter[Value, Addr, Effects]:
 
-  val phi = fix.identity[FixIn[Value], FixOut[Value]]
+  val phi = fix.identity[Exp, Value]

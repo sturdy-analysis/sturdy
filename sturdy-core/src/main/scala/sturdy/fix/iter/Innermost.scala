@@ -13,14 +13,14 @@ import scala.collection.mutable
 import scala.util.Try
 
 def innermost[Dom, Codom, In, Out, Ctx]
-  (using context: Contextual[Ctx, Dom, Codom, In, Out])
+  (using context: Contextual[Ctx, Dom, Codom])
   (using state: AnalysisState[In, Out])
   (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation)
   : Innermost[Dom, Codom, In, Out, Ctx] = new Innermost(state, context)
 
 final class Innermost[Dom, Codom, In, Out, Ctx]
-  (state: AnalysisState[In, Out], context: Contextual[Ctx, Dom, Codom, In, Out])
+  (state: AnalysisState[In, Out], context: Contextual[Ctx, Dom, Codom])
   (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: JoinComputation)
   extends Combinator[Dom, Codom]:

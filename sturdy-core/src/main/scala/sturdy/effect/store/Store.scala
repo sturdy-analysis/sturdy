@@ -12,4 +12,3 @@ trait Store[Addr, V]:
   def read(x: Addr): MayCompute[V, StoreJoin, StoreJoinComp]
   def write(x: Addr, v: V): Unit
   def free(x: Addr): Unit
-  def scopedAddresses[A](xs: Iterable[Addr])(f: => A): A

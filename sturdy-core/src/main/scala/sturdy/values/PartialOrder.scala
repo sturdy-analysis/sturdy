@@ -1,7 +1,12 @@
 package sturdy.values
 
-trait PartialOrder[T] extends PartialOrdering[T] {
-  def tryCompare(x: T, y: T): Option[Int] = {
+trait Top[T]:
+  def top: T
+object Top:
+  def top[T](using t: Top[T]): T = t.top
+
+trait PartialOrder[T] extends PartialOrdering[T]:
+  def tryCompare(x: T, y: T): Option[Int] =
     val lte = lteq(x, y)
     val gte = lteq(y, x)
     if (lte && !gte)
@@ -12,8 +17,6 @@ trait PartialOrder[T] extends PartialOrdering[T] {
       Some(1)
     else
       None
-  }
-}
 
 object PartialOrder:
   def apply[T](using po: PartialOrder[T]): PartialOrder[T] = po

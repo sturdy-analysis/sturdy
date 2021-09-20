@@ -3,10 +3,11 @@ package sturdy.values.doubles
 import sturdy.values.convert.{Convert, ConversionFailure}
 import sturdy.values.config
 import sturdy.effect.failure.Failure
+import sturdy.values.Structural
 import sturdy.values.config.UnsupportedConfiguration
 
 import scala.util.Random
-import java.lang.{Double => JDouble, Float => JFloat}
+import java.lang.{Float as JFloat, Double as JDouble}
 
 given ConcreteDoubleOps: DoubleOps[Double] with
   def doubleLit(d: Double): Double = d
@@ -35,6 +36,7 @@ given ConcreteDoubleOps: DoubleOps[Double] with
 
   def logNatural(v: Double): Double = Math.log(v)
 
+given Structural[Double] with {}
 
 given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] with
   /*

@@ -3,7 +3,6 @@
 //import sturdy.effect.failure.Failure
 //import sturdy.values.JoinValue
 //import sturdy.values.Topped
-//import sturdy.values.Topped.*
 //
 //given ToppedLongOps[V] (using ops: LongOps[V])(using Failure): LongOps[Topped[V]] with
 //  def longLit(l: Long): Topped[V] = Actual(ops.longLit(l))

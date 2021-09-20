@@ -21,13 +21,13 @@ object Powerset {
 
 given finitePowerset[T](using Finite[T]): Finite[Powerset[T]] with {}
 
-given concretePowersetPO[T: Structural]: PartialOrder[Powerset[T]] with
+given powersetPO[T]: PartialOrder[Powerset[T]] with
   override def lteq(x: Powerset[T], y: Powerset[T]): Boolean = x.set.subsetOf(y.set)
 
 given powersetJoin[A]: JoinValue[Powerset[A]] with
   override def joinValues(v1: Powerset[A], v2: Powerset[A]): Powerset[A] = new Powerset(v1.set ++ v2.set)
 
-given powersetCertainEqualOps[A] (using ops: EqOps[A, Boolean]): EqOps[Powerset[A], Topped[Boolean]] with
+given powersetCertainEqualOps[A](using ops: EqOps[A, Boolean]): EqOps[Powerset[A], Topped[Boolean]] with
   override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] =
     if (v1.set.size == 1 && v2.set.size == 1)
       Topped.Actual(ops.equ(v1.set.head, v2.set.head))
@@ -40,7 +40,7 @@ given powersetCertainEqualOps[A] (using ops: EqOps[A, Boolean]): EqOps[Powerset[
 
   override def neq(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] = equ(v1, v2).map(!_)
 
-given powersetUncertainEqualOps[A] (using ops: EqOps[A, Topped[Boolean]]): EqOps[Powerset[A], Topped[Boolean]] with
+given powersetUncertainEqualOps[A](using ops: EqOps[A, Topped[Boolean]]): EqOps[Powerset[A], Topped[Boolean]] with
   override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] =
     if (v1.set.size == 1 && v2.set.size == 1)
       ops.equ(v1.set.head, v2.set.head)
