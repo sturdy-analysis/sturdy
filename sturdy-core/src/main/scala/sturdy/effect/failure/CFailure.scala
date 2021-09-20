@@ -15,5 +15,5 @@ trait CFailure extends Failure:
       CFallible.Unfailing(res)
     } catch {
       case CFailureException(kind, msg) => CFallible.Failing(kind, msg)
-      case NonFatal(ex) => CFallible.Failing(RuntimeFailure, ex.toString)
+      case ex => throw ex
     }

@@ -1,8 +1,10 @@
 package sturdy.effect.operandstack
 
+import sturdy.effect.Effectful
+
 import scala.collection.immutable.VectorBuilder
 
-trait OperandStack[V]:
+trait OperandStack[V] extends Effectful:
   def push(v: V): Unit
   def pop(): V
   def peek(): V

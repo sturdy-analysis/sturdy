@@ -8,7 +8,7 @@ import swam.{ValType, TableType, GlobalType, LabelIdx, MemType, OpCode, BlockTyp
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.{Serialize, Memory}
 import sturdy.effect.branching.BoolBranching
-import sturdy.effect.operandstack.COperandStack
+import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.SymbolTable
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.convert.*
@@ -28,7 +28,7 @@ object GenericInterpreter:
     case Return(operands: List[V])
 
   type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV] =
-    COperandStack[V]
+    OperandStack[V]
       with Memory[Int, Addr,Bytes,Size]
       with Serialize[V,Bytes,MemoryInst,MemoryInst]
       with SymbolTable[Int, FuncIx, FunV]

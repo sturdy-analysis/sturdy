@@ -8,7 +8,7 @@ import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.{CMutableCallFrameInt, CCallFrameInt}
 import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.{CFailure, Failure}
-import sturdy.effect.operandstack.COperandStack
+import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.FunctionInstance
@@ -133,7 +133,7 @@ object ConcreteInterpreter extends Interpreter :
         OptionC.none
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
-    extends COperandStack[Value]
+    extends ConcreteOperandStack[Value]
       with ConcreteMemory[Int]
       with CSerialize
       with ConcreteSymbolTable[Int, Int, FunctionInstance[Value]]

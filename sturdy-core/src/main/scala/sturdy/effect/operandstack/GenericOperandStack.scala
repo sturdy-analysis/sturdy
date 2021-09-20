@@ -1,7 +1,7 @@
 package sturdy.effect.operandstack
 
-trait COperandStack[V] extends OperandStack[V]:
-  private var stack: List[V] = Nil
+trait GenericOperandStack[V] extends OperandStack[V]:
+  protected var stack: List[V] = Nil
 
   def push(v: V): Unit =
     stack = v :: stack

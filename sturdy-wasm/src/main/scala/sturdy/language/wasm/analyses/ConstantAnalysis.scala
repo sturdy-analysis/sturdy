@@ -13,7 +13,7 @@ import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.AFailureCollect
 import sturdy.effect.failure.CFailure
 import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.COperandStack
+import sturdy.effect.operandstack.SameHeightOperandStack
 import sturdy.effect.symboltable.{ToppedSymbolTable, SymbolTable}
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.ConstantValues
@@ -98,7 +98,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       case Value.Float64(Topped.Actual(d)) => cSerialize.encode(ConcreteInterpreter.Value.Float64(d), encInfo).array().view.map(Topped.Actual.apply)
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
-    extends COperandStack[Value]
+    extends SameHeightOperandStack[Value]
       with ConstantAddressMemory[Int, Topped[Byte]](Topped.Actual(0))
       with ASerialize
       with ToppedSymbolTable[Int, Int, FunV]

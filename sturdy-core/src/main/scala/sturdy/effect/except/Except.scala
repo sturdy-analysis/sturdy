@@ -21,4 +21,5 @@ trait Except[Exc, E]:
     tries(f).either(a => {g; a})(e => {g; exceptional.handle(e)(throws)})
 
   final def tryCatchFinally[A](f: => A)(handle: Exc => A)(g: => Unit): ExceptJoin[A] ?=> A =
-    tries(f).either(a => {g; a})(e => try exceptional.handle(e)(handle) finally g)
+    val tried = tries(f)
+    tried.either(a => {g; a})(e => try exceptional.handle(e)(handle) finally g)

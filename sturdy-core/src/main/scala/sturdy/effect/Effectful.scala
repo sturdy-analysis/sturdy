@@ -26,10 +26,12 @@ trait Effectful:
     val triedG = Try(g)
 
     (triedF, triedG) match
+      case (Failure(failA: RuntimeException), _) => throw failA
+      case (_, Failure(failB: RuntimeException)) => throw failB
+      case (Failure(failA), Failure(failB)) => throw joinFailedComputations(failA, failB)
       case (Success(aF), Success(aG)) => summon[JoinValue[A]].joinValues(aF, aG)
       case (Success(aF), _) => aF
       case (_, Success(aG)) => aG
-      case (Failure(failA), Failure(failB)) => throw joinFailedComputations(failA, failB)
   }
 
   def joinWithFailure[A](f: => A)(g: => Nothing): A = {

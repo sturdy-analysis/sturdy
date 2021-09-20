@@ -1,6 +1,7 @@
 package sturdy.data
 
 import sturdy.effect.Effectful
+import sturdy.values.JoinValue
 
 trait Option[J[_], A]:
   def option[B](default: => B)(f: A => B): J[B] ?=> B
@@ -44,17 +45,28 @@ enum OptionA[A] extends Option[Join, A]:
     case NoneSome(as) => NoneSome(as concat Iterable.single(a))
     case Some(as) => Some(as concat Iterable.single(a))
 
-  def join[AA <: A](that: OptionA[AA]): OptionA[A] = (this, that) match
+  def joinShallow[AA <: A](that: OptionA[AA]): OptionA[A] = (this, that) match
     case (None(), None()) => None()
     case (None(), NoneSome(as2)) => NoneSome(as2)
     case (None(), Some(as2)) => NoneSome(as2)
-    case (None(), None()) => None()
     case (NoneSome(as1), None()) => NoneSome(as1)
     case (NoneSome(as1), NoneSome(as2)) => NoneSome(as1 ++ as2)
     case (NoneSome(as1), Some(as2)) => NoneSome(as1 ++ as2)
     case (Some(as1), None()) => NoneSome(as1)
     case (Some(as1), NoneSome(as2)) => NoneSome(as1 ++ as2)
     case (Some(as1), Some(as2)) => Some(as1 ++ as2)
+
+  def joinDeep[AA <: A](that: OptionA[AA])(using JoinValue[A]): OptionA[A] = (this, that) match
+    case (None(), None()) => None()
+    case (None(), NoneSome(e2::Nil)) => NoneSome(e2::Nil)
+    case (None(), Some(e2::Nil)) => NoneSome(e2::Nil)
+    case (NoneSome(e1::Nil), None()) => NoneSome(e1::Nil)
+    case (NoneSome(e1::Nil), NoneSome(e2::Nil)) => NoneSome(JoinValue.join(e1,e2)::Nil)
+    case (NoneSome(e1::Nil), Some(e2::Nil)) => NoneSome(JoinValue.join(e1,e2)::Nil)
+    case (Some(e1::Nil), None()) => NoneSome(e1::Nil)
+    case (Some(e1::Nil), NoneSome(e2::Nil)) => NoneSome(JoinValue.join(e1,e2)::Nil)
+    case (Some(e1::Nil), Some(e2::Nil)) => Some(JoinValue.join(e1,e2)::Nil)
+    case _ => throw new IllegalStateException()
 
 object OptionA:
   inline def none[A]: OptionA[A] = OptionA.None()

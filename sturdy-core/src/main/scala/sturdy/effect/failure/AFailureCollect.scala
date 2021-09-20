@@ -35,5 +35,5 @@ trait AFailureCollect extends Failure with Effectful:
         AFallible.MaybeFailing(res, Powerset(failures.toSet))
     } catch {
       case AFailureCollectException => AFallible.Failing(Powerset(failures.toSet))
-      case NonFatal(ex) => AFallible.Failing(Powerset(failures.toSet + (RuntimeFailure -> ex.toString)))
+      case ex => throw ex
     }

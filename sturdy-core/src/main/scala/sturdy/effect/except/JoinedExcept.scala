@@ -21,11 +21,15 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJo
 
   override def throws(ex: Exc): Nothing =
     val e = exceptional.exception(ex)
-    exception += e
+    this.exception = exception match
+      case OptionA.None() => OptionA.Some(e::Nil)
+      case OptionA.NoneSome(old::Nil) => OptionA.NoneSome(JoinValue.join(old, e)::Nil)
+      case OptionA.Some(old::Nil) => OptionA.Some(JoinValue.join(old, e)::Nil)
+      case _ => throw new IllegalStateException()
     throw AbstractException
 
   override protected def tries[A](f: => A): EitherA[A, E] =
-    try {
+    val res = try {
       val a = f
       exception match
         case OptionA.None() => EitherA.Left(Iterable.single(a))
@@ -39,6 +43,9 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJo
           case OptionA.Some(exs) => EitherA.Right(exs)
       case ex => throw ex
     }
+    // all exceptions are passed to the catch block, which must re-throw them if desired
+    this.exception = OptionA.None()
+    res
 
   override def joinFailedComputations(failA: Throwable, failB: Throwable): Throwable = (failA, failB) match
     case (AbstractException, AbstractException) => AbstractException
@@ -52,6 +59,6 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJo
       val fExcept = this.exception
       this.exception = snapshot
       try g finally {
-        this.exception = fExcept.join(this.exception)
+        this.exception = fExcept.joinDeep(this.exception)
       }
     }
