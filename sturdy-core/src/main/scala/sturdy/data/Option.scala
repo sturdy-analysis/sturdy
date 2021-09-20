@@ -44,6 +44,18 @@ enum OptionA[A] extends Option[Join, A]:
     case NoneSome(as) => NoneSome(as concat Iterable.single(a))
     case Some(as) => Some(as concat Iterable.single(a))
 
+  def join[AA <: A](that: OptionA[AA]): OptionA[A] = (this, that) match
+    case (None(), None()) => None()
+    case (None(), NoneSome(as2)) => NoneSome(as2)
+    case (None(), Some(as2)) => NoneSome(as2)
+    case (None(), None()) => None()
+    case (NoneSome(as1), None()) => NoneSome(as1)
+    case (NoneSome(as1), NoneSome(as2)) => NoneSome(as1 ++ as2)
+    case (NoneSome(as1), Some(as2)) => NoneSome(as1 ++ as2)
+    case (Some(as1), None()) => NoneSome(as1)
+    case (Some(as1), NoneSome(as2)) => NoneSome(as1 ++ as2)
+    case (Some(as1), Some(as2)) => Some(as1 ++ as2)
+
 object OptionA:
   inline def none[A]: OptionA[A] = OptionA.None()
   inline def noneSome[A](as: A*): OptionA[A] = OptionA.NoneSome(as)

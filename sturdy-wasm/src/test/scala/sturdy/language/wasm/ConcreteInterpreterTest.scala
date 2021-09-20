@@ -4,7 +4,7 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.{CFailureException, FailureKind}
+import sturdy.effect.failure.{CFallible, FailureKind}
 import sturdy.language.wasm.generic.GenericInterpreter.FrameData
 import ConcreteInterpreter.Value
 import sturdy.language.wasm.generic.UnreachableInstruction
@@ -16,8 +16,6 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 import swam.syntax.Module
 import swam.text.*
-
-import scala.reflect.{ClassTag, TypeTest}
 
 
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
@@ -62,27 +60,28 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
   testFunction(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
   testFunction(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
-  testFailingFunction[CFailureException](simple, "test-unreachable4", List.empty, UnreachableInstruction)
+  testFailingFunction(simple, "test-unreachable4", List.empty, UnreachableInstruction)
   testFunction(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
   testFunction(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
 
   def testFunction(path: Path, funcName: String, args: List[Value], expectedResult: List[Value]) =
     it must s"execute $funcName withs args $args with result $expectedResult" in {
       val res = runWasmFunction(path, funcName, args)
-      assertResult(expectedResult)(res)
+      assertResult(CFallible.Unfailing(expectedResult))(res)
     }
 
-  def testFailingFunction[E <: CFailureException](path: Path, funcName: String, args: List[Value], failureKind: FailureKind)(using ClassTag[E]) =
+  def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind) =
     it must s"execute $funcName with args $args throwing exception $failureKind" in {
-      val caught = intercept[E] {
-        runWasmFunction(path, funcName, args)
-      }
-      assertResult(failureKind)(caught.kind)
+      val res = runWasmFunction(path, funcName, args)
+      assert(res.isFailing)
+      assertResult(failureKind)(res.asInstanceOf[CFallible.Failing[_]].kind)
     }
 
 
-def runWasmFunction(path: Path, funName: String, args: List[Value]): List[Value] =
+def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[List[Value]] =
   val module = parse(path)
   val interp = ConcreteInterpreter(FrameData(0, null), Iterable.empty)
   val modInst = interp.initializeModule(module)
-  interp.invokeExported(modInst, funName, args)
+  interp.effects.fallible(
+    interp.invokeExported(modInst, funName, args)
+  )

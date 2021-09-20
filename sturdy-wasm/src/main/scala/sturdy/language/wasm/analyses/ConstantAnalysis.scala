@@ -99,7 +99,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends COperandStack[Value]
-      with ConstantAddressMemory[Int, Topped[Byte]]
+      with ConstantAddressMemory[Int, Topped[Byte]](Topped.Actual(0))
       with ASerialize
       with ToppedSymbolTable[Int, Int, FunV]
       with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
@@ -113,7 +113,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
     new Instance(effects)
 
   class Instance(effects: Effects)(using Failure, Effectful)
-    extends GenericInstance with GenericInterpreter(effects) :
+    extends GenericInstance[Effects] with GenericInterpreter(effects) :
 
     def i32Ops: IntOps[I32] = implicitly
     def i64Ops: LongOps[I64] = implicitly

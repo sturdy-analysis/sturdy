@@ -4,6 +4,10 @@ enum Topped[+V]:
   case Top
   case Actual(v: V)
 
+  inline def get: V = this match
+    case Top => throw new MatchError(this)
+    case Actual(v) => v
+
   inline def foreach[A](f: V => A): Unit = this match
     case Top => // nothing
     case Actual(v) => f(v)

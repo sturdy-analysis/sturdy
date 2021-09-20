@@ -47,5 +47,11 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJo
     case _ => super.joinFailedComputations(failA, failB)
 
   override def joinComputations[A](f: => A)(g: => A): Joined[A] =
-    // TODO implement
-    ???
+    val snapshot = this.exception
+    super.joinComputations(f) {
+      val fExcept = this.exception
+      this.exception = snapshot
+      try g finally {
+        this.exception = fExcept.join(this.exception)
+      }
+    }

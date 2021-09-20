@@ -33,25 +33,20 @@ trait AStoreGenericThreadded[Addr, V](using j: JoinValue[V])
     var snapshotDirtyAddrs = dirtyAddrs
     dirtyAddrs = Set()
 
-    var fStore: Map[Addr, V] = null
-    var fDirtyAddrs: Set[Addr] = null
-
-    val joinedResult = super.joinComputations(f) {
-      fStore = store
-      fDirtyAddrs = dirtyAddrs
-
+    super.joinComputations(f) {
+      val fStore = store
+      val fDirtyAddrs = dirtyAddrs
       store = snapshot
       dirtyAddrs = Set()
-      g
+
+      try g finally {
+        for (x <- fDirtyAddrs)
+          weakUpdate(x, fStore(x))
+
+        dirtyAddrs ++= snapshotDirtyAddrs
+        dirtyAddrs ++= fDirtyAddrs
+      }
     }
-
-    for (x <- fDirtyAddrs)
-      weakUpdate(x, fStore(x))
-
-    dirtyAddrs ++= snapshotDirtyAddrs
-    dirtyAddrs ++= fDirtyAddrs
-
-    joinedResult
 
   def getStoreJoinWith(other: Map[Addr, V]): Map[Addr, V] =
     var joined = other

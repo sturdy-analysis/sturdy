@@ -2,17 +2,17 @@ package sturdy.effect.bytememory
 
 import sturdy.data.*
 import sturdy.effect.Effectful
-import sturdy.values.JoinValue
-import sturdy.values.Top
-import sturdy.values.Topped
+import sturdy.values.*
 
 import scala.collection.IndexedSeqView
 import scala.collection.mutable
 import scala.reflect.ClassTag
 
 
-/** A memory that tracks byte properties `B` for memory accesses via possibly constant addresses `Topped[Int]`. */
-trait ConstantAddressMemory[Key, B: ClassTag](using Top[B]) extends Memory[Key, Topped[Int], IndexedSeqView[B], Topped[Int]], Effectful:
+/** A memory that tracks byte properties `B` for memory accesses via possibly constant addresses `Topped[Int]`.
+ *  This memory currently uses weak updates on a global store, although strong updates on a threadded store are possible for constant addresses.
+ */
+trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], JoinValue[B]) extends Memory[Key, Topped[Int], IndexedSeqView[B], Topped[Int]], Effectful:
   import ConstantAddressMemory.*
 
   override type MemoryJoin[A] = Join[A]
@@ -38,7 +38,8 @@ trait ConstantAddressMemory[Key, B: ClassTag](using Top[B]) extends Memory[Key, 
           OptionA.noneSome(())
         case Topped.Actual(a) =>
           if (a + bytes.size < mem.size) {
-            Array.copy(bytes, 0, mem.bytes, a, bytes.size)
+            for (ix <- 0 until bytes.size)
+              mem.bytes(a + ix) = JoinValue.join(mem.bytes(a + ix), bytes(ix))
             OptionA.some(())
           } else {
             OptionA.none
@@ -71,11 +72,8 @@ trait ConstantAddressMemory[Key, B: ClassTag](using Top[B]) extends Memory[Key, 
       case Topped.Top => // unknown size
         memories(key) = Topped.Top
       case Topped.Actual(size) =>
-        memories(key) = Topped.Actual(Mem(Array.ofDim[B](size), sizeLimit.flatMap(_.toOption)))
+        memories(key) = Topped.Actual(Mem(Array.fill[B](size)(emptyB), sizeLimit.flatMap(_.toOption)))
 
-  override def joinComputations[A](f: => A)(g: => A): Joined[A] =
-    // TODO implement
-    ???
 
 object ConstantAddressMemory:
   case class Mem[B](bytes: Array[B], sizeLimit: scala.Option[Int]):

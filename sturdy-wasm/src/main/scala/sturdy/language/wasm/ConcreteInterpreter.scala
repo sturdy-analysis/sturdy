@@ -143,7 +143,7 @@ object ConcreteInterpreter extends Interpreter :
       with CFailure
 
   class Instance(effects: Effects)
-    extends GenericInstance with GenericInterpreter(effects) :
+    extends GenericInstance[Effects] with GenericInterpreter(effects) :
     given Failure = effects
 
     def i32Ops: IntOps[I32] = implicitly

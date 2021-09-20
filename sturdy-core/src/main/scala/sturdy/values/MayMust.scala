@@ -16,6 +16,10 @@ enum MayMust[T]:
     case May(t) => May(f(t))
     case Must(t) => Must(f(t))
 
+  def asMay: MayMust[T] = this match
+    case May(_) => this
+    case Must(t) => May(t)
+
 given finiteMayMust[T](using Finite[T]): Finite[MayMust[T]] with {}
 
 given joinMayMust[T](using j: JoinValue[T]): JoinValue[MayMust[T]] with

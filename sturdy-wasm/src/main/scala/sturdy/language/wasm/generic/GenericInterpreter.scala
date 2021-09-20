@@ -40,8 +40,8 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]
-  (val effects: GenericEffects[V,Addr,Bytes,Size,ExcV, FuncIx, FunV])
+trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]]
+  (val effects: Effects)
   (using wasmOps: WasmOperations[V, Addr, Size, FuncIx],
          exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin])
   (using effects.BoolBranchJoin[Unit], effects.ExceptJoin[Unit],

@@ -82,9 +82,11 @@ trait Interpreter:
   type FunV
   type Effects <: GenericEffects[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV]
 
-  type Instance <: GenericInstance
+  type Instance <: GenericInstance[Effects]
 
-  trait GenericInstance extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV]:
+  trait GenericInstance[Effects <: GenericEffects[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV]] 
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Effects]:
+    
     implicit def i32Ops: IntOps[I32]
     implicit def i64Ops: LongOps[I64]
     implicit def f32Ops: FloatOps[F32]
