@@ -11,8 +11,7 @@ import sturdy.values.doubles.*
 import sturdy.values.floats.*
 import sturdy.values.ints.*
 import sturdy.values.longs.*
-import sturdy.values.relational.CompareOps
-import sturdy.values.relational.EqOps
+import sturdy.values.relational.*
 
 trait Interpreter:
   type I32
@@ -98,8 +97,8 @@ trait Interpreter:
     implicit def i64CompareOps: CompareOps[I64, Bool]
     implicit def f32CompareOps: CompareOps[F32, Bool]
     implicit def f64CompareOps: CompareOps[F64, Bool]
-    implicit def i32IntCompareOps: IntegerCompareOps[I32, Bool]
-    implicit def i64IntCompareOps: IntegerCompareOps[I64, Bool]
+    implicit def i32UnsignedCompareOps: UnsignedCompareOps[I32, Bool]
+    implicit def i64UnsignedCompareOps: UnsignedCompareOps[I64, Bool]
     implicit def convertI32I64: ConvertIntLong[I32, I64]
     implicit def convertI32F32: ConvertIntFloat[I32, F32]
     implicit def convertI32F64: ConvertIntDouble[I32, F64]
@@ -160,23 +159,23 @@ trait Interpreter:
         case (Float64(d1), Float64(d2)) => boolean(CompareOps.gt(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
-    final val intCompareOps: IntegerCompareOps[Value, Value] = new IntegerCompareOps[Value, Value]:
+    final val unsignedCompareOps: UnsignedCompareOps[Value, Value] = new UnsignedCompareOps[Value, Value]:
       import Value.*
       override def ltUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(IntegerCompareOps.ltUnsigned(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(IntegerCompareOps.ltUnsigned(l1, l2))
+        case (Int32(i1), Int32(i2)) => boolean(UnsignedCompareOps.ltUnsigned(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(UnsignedCompareOps.ltUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
       override def leUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(IntegerCompareOps.leUnsigned(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(IntegerCompareOps.leUnsigned(l1, l2))
+        case (Int32(i1), Int32(i2)) => boolean(UnsignedCompareOps.leUnsigned(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(UnsignedCompareOps.leUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
       override def geUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(IntegerCompareOps.geUnsigned(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(IntegerCompareOps.geUnsigned(l1, l2))
+        case (Int32(i1), Int32(i2)) => boolean(UnsignedCompareOps.geUnsigned(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(UnsignedCompareOps.geUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
       override def gtUnsigned(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(IntegerCompareOps.gtUnsigned(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(IntegerCompareOps.gtUnsigned(l1, l2))
+        case (Int32(i1), Int32(i2)) => boolean(UnsignedCompareOps.gtUnsigned(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(UnsignedCompareOps.gtUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
 
     final val convertIntLong: ConvertIntLong[Value, Value] = new LiftedConvert(_.asInt32, Value.Int64.apply)

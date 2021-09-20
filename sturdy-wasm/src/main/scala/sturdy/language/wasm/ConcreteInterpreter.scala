@@ -158,8 +158,8 @@ object ConcreteInterpreter extends Interpreter :
     def i64CompareOps: CompareOps[I64, Bool] = implicitly
     def f32CompareOps: CompareOps[F32, Bool] = implicitly
     def f64CompareOps: CompareOps[F64, Bool] = implicitly
-    def i32IntCompareOps: IntegerCompareOps[I32, Bool] = implicitly
-    def i64IntCompareOps: IntegerCompareOps[I64, Bool] = implicitly
+    def i32UnsignedCompareOps: UnsignedCompareOps[I32, Bool] = implicitly
+    def i64UnsignedCompareOps: UnsignedCompareOps[I64, Bool] = implicitly
     def convertI32I64: ConvertIntLong[I32, I64] = implicitly
     def convertI32F32: ConvertIntFloat[I32, F32] = implicitly
     def convertI32F64: ConvertIntDouble[I32, F64] = implicitly
@@ -172,6 +172,7 @@ object ConcreteInterpreter extends Interpreter :
     def convertF64I32: ConvertDoubleInt[F64, I32] = implicitly
     def convertF64I64: ConvertDoubleLong[F64, I64] = implicitly
     def convertF64F32: ConvertDoubleFloat[F64, F32] = implicitly
+    val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
 
   def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)

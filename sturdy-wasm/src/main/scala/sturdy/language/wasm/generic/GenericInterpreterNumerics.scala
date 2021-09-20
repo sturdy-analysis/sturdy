@@ -6,14 +6,13 @@ import sturdy.values.doubles.*
 import sturdy.values.floats.*
 import sturdy.values.ints.*
 import sturdy.values.longs.*
-import sturdy.values.relational.CompareOps
-import sturdy.values.relational.EqOps
+import sturdy.values.relational.*
 import swam.syntax.*
 
 class GenericInterpreterNumerics[V]
   (stack: OperandStack[V],
    ints: IntOps[V], longs: LongOps[V], floats: FloatOps[V], doubles: DoubleOps[V],
-   eqOps: EqOps[V, V], compareOps: CompareOps[V, V], intCompareOps: IntegerCompareOps[V, V],
+   eqOps: EqOps[V, V], compareOps: CompareOps[V, V], unsignedCompareOps: UnsignedCompareOps[V, V],
    intLong: ConvertIntLong[V, V], intFloat: ConvertIntFloat[V, V], intDouble: ConvertIntDouble[V, V],
    longInt: ConvertLongInt[V, V], longFloat: ConvertLongFloat[V, V], longDouble: ConvertLongDouble[V, V],
    floatInt: ConvertFloatInt[V, V], floatLong: ConvertFloatLong[V, V], floatDouble: ConvertFloatDouble[V, V],
@@ -22,7 +21,7 @@ class GenericInterpreterNumerics[V]
 
   import eqOps.*
   import compareOps.*
-  import intCompareOps.*
+  import unsignedCompareOps.*
   import intLong.*
   import intDouble.*
   import longDouble.*

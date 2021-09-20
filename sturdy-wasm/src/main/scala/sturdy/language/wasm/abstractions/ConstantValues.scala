@@ -1,6 +1,6 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.language.wasm.Interpreter
+import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.Topped
 
 trait ConstantValues extends Interpreter:
@@ -23,3 +23,9 @@ trait ConstantValues extends Interpreter:
     case Topped.Actual(true) => Value.Int32(Topped.Actual(1))
     case Topped.Actual(false) => Value.Int32(Topped.Actual(0))
 
+  def liftConcreteValue(cv: ConcreteInterpreter.Value): Value = cv match
+    case ConcreteInterpreter.Value.TopValue => Value.TopValue
+    case ConcreteInterpreter.Value.Int32(i) => Value.Int32(Topped.Actual(i))
+    case ConcreteInterpreter.Value.Int64(l) => Value.Int64(Topped.Actual(l))
+    case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
+    case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))

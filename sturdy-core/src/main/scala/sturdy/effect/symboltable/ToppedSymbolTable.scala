@@ -13,10 +13,11 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Top[Entry]) extends SymbolTabl
   protected val tables: mutable.Map[Key, Topped[mutable.Map[Symbol, Entry]]] = mutable.Map()
 
   override def tableGet(key: Key, symbol: Topped[Symbol]): OptionA[Entry] =
-    (tables(key), symbol) match
-      case (Topped.Top, _) | (_, Topped.Top) => OptionA.NoneSome(Iterable.single(Top.top))
-      case (Topped.Actual(tab), Topped.Actual(sym)) =>
-        OptionA(tab.get(sym))
+    tables(key) match
+      case Topped.Top => OptionA.NoneSome(Iterable.single(Top.top))
+      case Topped.Actual(tab) => symbol match
+        case Topped.Top => OptionA.NoneSome(tab.values)
+        case Topped.Actual(sym) => OptionA(tab.get(sym))
 
   override def tableSet(key: Key, symbol: Topped[Symbol], newEntry: Entry): Unit =
     tables(key) match

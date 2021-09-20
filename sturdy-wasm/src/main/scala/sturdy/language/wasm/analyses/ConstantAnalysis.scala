@@ -1,6 +1,6 @@
 package sturdy.language.wasm.analyses
 
-import sturdy.data.*
+import sturdy.data.{*, given}
 import sturdy.effect.Effectful
 import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.bytememory.ConstantAddressMemory
@@ -25,8 +25,10 @@ import sturdy.language.wasm.generic.WasmOperations
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
+import sturdy.values.convert.ToppedConvert
 import sturdy.values.doubles.{*, given}
 import sturdy.values.exceptions.{*, given}
+import sturdy.values.functions.{*, given}
 import sturdy.values.floats.{*, given}
 import sturdy.values.ints.{*, given}
 import sturdy.values.longs.{*, given}
@@ -44,7 +46,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
   type Size = Topped[Int]
   type ExcV = Powerset[WasmException[Value]]
   type FuncIx = Topped[Int]
-  type FunV = Topped[FunctionInstance[Value]]
+  type FunV = Topped[Powerset[FunctionInstance[Value]]]
 
   given WasmOperations[Value, Addr, Size, FuncIx] with
     override type WasmOpsJoin[A] = Join[A]
@@ -76,12 +78,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
           case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $decInfo.")
         case Topped.Actual(b) => b
       }
-      cSerialize.decode(ByteBuffer.wrap(bytes.toArray), decInfo) match
-        case ConcreteInterpreter.Value.TopValue => Value.TopValue
-        case ConcreteInterpreter.Value.Int32(i) => Value.Int32(Topped.Actual(i))
-        case ConcreteInterpreter.Value.Int64(l) => Value.Int64(Topped.Actual(l))
-        case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
-        case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
+      liftConcreteValue(cSerialize.decode(ByteBuffer.wrap(bytes.toArray), decInfo))
 
     override def encode(v: Value, encInfo: MemoryInst): IndexedSeqView[Topped[Byte]] = v match
       case Value.TopValue | Value.Int32(Topped.Top) | Value.Int64(Topped.Top) | Value.Float32(Topped.Top) | Value.Float64(Topped.Top) => encInfo match
@@ -110,37 +107,42 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
 
-//  class Instance(effects: Effects)
-//    extends GenericInstance with GenericInterpreter(effects) :
-//    given Failure = effects
-//
-//    def i32Ops: IntOps[I32] = implicitly
-//    def i64Ops: LongOps[I64] = implicitly
-//    def f32Ops: FloatOps[F32] = implicitly
-//    def f64Ops: DoubleOps[F64] = implicitly
-//    def i32EqOps: EqOps[I32, Bool] = implicitly
-//    def i64EqOps: EqOps[I64, Bool] = implicitly
-//    def f32EqOps: EqOps[F32, Bool] = implicitly
-//    def f64EqOps: EqOps[F64, Bool] = implicitly
-//    def i32CompareOps: CompareOps[I32, Bool] = implicitly
-//    def i64CompareOps: CompareOps[I64, Bool] = implicitly
-//    def f32CompareOps: CompareOps[F32, Bool] = implicitly
-//    def f64CompareOps: CompareOps[F64, Bool] = implicitly
-//    def i32IntCompareOps: IntegerCompareOps[I32, Bool] = implicitly
-//    def i64IntCompareOps: IntegerCompareOps[I64, Bool] = implicitly
-//    def convertI32I64: ConvertIntLong[I32, I64] = implicitly
-//    def convertI32F32: ConvertIntFloat[I32, F32] = implicitly
-//    def convertI32F64: ConvertIntDouble[I32, F64] = implicitly
-//    def convertI64I32: ConvertLongInt[I64, I32] = implicitly
-//    def convertI64F32: ConvertLongFloat[I64, F32] = implicitly
-//    def convertI64F64: ConvertLongDouble[I64, F64] = implicitly
-//    def convertF32I32: ConvertFloatInt[F32, I32] = implicitly
-//    def convertF32I64: ConvertFloatLong[F32, I64] = implicitly
-//    def convertF32F64: ConvertFloatDouble[F32, F64] = implicitly
-//    def convertF64I32: ConvertDoubleInt[F64, I32] = implicitly
-//    def convertF64I64: ConvertDoubleLong[F64, I64] = implicitly
-//    def convertF64F32: ConvertDoubleFloat[F64, F32] = implicitly
-//
-//  def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =
-//    val effects = new Effects(rootFrameData, rootFrameValues)
-//    new Instance(effects)
+  def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =
+    val effects = new Effects(rootFrameData, rootFrameValues)
+    given Effects = effects
+    new Instance(effects)
+
+  class Instance(effects: Effects)(using Failure, Effectful)
+    extends GenericInstance with GenericInterpreter(effects) :
+
+    def i32Ops: IntOps[I32] = implicitly
+    def i64Ops: LongOps[I64] = implicitly
+    def f32Ops: FloatOps[F32] = implicitly
+    def f64Ops: DoubleOps[F64] = implicitly
+    def i32EqOps: EqOps[I32, Bool] = implicitly
+    def i64EqOps: EqOps[I64, Bool] = implicitly
+    def f32EqOps: EqOps[F32, Bool] = implicitly
+    def f64EqOps: EqOps[F64, Bool] = implicitly
+    def i32CompareOps: CompareOps[I32, Bool] = implicitly
+    def i64CompareOps: CompareOps[I64, Bool] = implicitly
+    def f32CompareOps: CompareOps[F32, Bool] = implicitly
+    def f64CompareOps: CompareOps[F64, Bool] = implicitly
+    def i32UnsignedCompareOps: UnsignedCompareOps[I32, Bool] = implicitly
+    def i64UnsignedCompareOps: UnsignedCompareOps[I64, Bool] = implicitly
+    def convertI32I64: ConvertIntLong[I32, I64] = implicitly
+    def convertI32F32: ConvertIntFloat[I32, F32] = implicitly
+    def convertI32F64: ConvertIntDouble[I32, F64] = implicitly
+    def convertI64I32: ConvertLongInt[I64, I32] = implicitly
+    def convertI64F32: ConvertLongFloat[I64, F32] = implicitly
+    def convertI64F64: ConvertLongDouble[I64, F64] = implicitly
+    def convertF32I32: ConvertFloatInt[F32, I32] = implicitly
+    def convertF32I64: ConvertFloatLong[F32, I64] = implicitly
+    def convertF32F64: ConvertFloatDouble[F32, F64] = implicitly
+    def convertF64I32: ConvertDoubleInt[F64, I32] = implicitly
+    def convertF64I64: ConvertDoubleLong[F64, I64] = implicitly
+    def convertF64F32: ConvertDoubleFloat[F64, F32] = implicitly
+
+    implicit def topFunctionCall(args: Seq[Nothing], invoke: (FunctionInstance[Value], Seq[Nothing]) => Unit): Unit =
+      val invokeAllFuns = module.functions.map(fun => () => invoke(fun, args))
+      effects.joinComputationsIterable(invokeAllFuns)
+    val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly

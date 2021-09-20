@@ -17,8 +17,7 @@ import sturdy.values.floats.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.ints.*
 import sturdy.values.longs.*
-import sturdy.values.relational.CompareOps
-import sturdy.values.relational.EqOps
+import sturdy.values.relational.*
 import sturdy.values.unit
 
 object GenericInterpreter:
@@ -44,8 +43,7 @@ import GenericInterpreter.*
 trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]
   (val effects: GenericEffects[V,Addr,Bytes,Size,ExcV, FuncIx, FunV])
   (using wasmOps: WasmOperations[V, Addr, Size, FuncIx],
-         exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin],
-         functionOps: FunctionOps[FunctionInstance[V], Nothing, Unit, FunV])
+         exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin])
   (using effects.BoolBranchJoin[Unit], effects.ExceptJoin[Unit],
    effects.MemoryJoin[Unit], effects.MemoryJoin[V],
    effects.TableJoin[Unit], wasmOps.WasmOpsJoin[Unit]):
@@ -60,7 +58,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]
   val doubleOps: DoubleOps[V]
   val eqOps: EqOps[V, V]
   val compareOps: CompareOps[V, V]
-  val intCompareOps: IntegerCompareOps[V, V]
+  val unsignedCompareOps: UnsignedCompareOps[V, V]
   val convertIntLong: ConvertIntLong[V, V]
   val convertIntFloat: ConvertIntFloat[V, V]
   val convertIntDouble: ConvertIntDouble[V, V]
@@ -73,10 +71,11 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]
   val convertDoubleInt: ConvertDoubleInt[V, V]
   val convertDoubleLong: ConvertDoubleLong[V, V]
   val convertDoubleFloat: ConvertDoubleFloat[V, V]
+  val functionOps: FunctionOps[FunctionInstance[V], Nothing, Unit, FunV]
 
   lazy val num = new GenericInterpreterNumerics[V](
     effects,
-    intOps, longOps, floatOps, doubleOps, eqOps, compareOps, intCompareOps,
+    intOps, longOps, floatOps, doubleOps, eqOps, compareOps, unsignedCompareOps,
     convertIntLong, convertIntFloat, convertIntDouble,
     convertLongInt, convertLongFloat, convertLongDouble,
     convertFloatInt, convertFloatLong, convertFloatDouble,
@@ -89,7 +88,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]
 
   inline private def fail(k: FailureKind, what: String) = effects.fail(k, s"$what in $module")
 
-  def module: ModuleInstance[V] = getFrameData.module
+  protected def module: ModuleInstance[V] = getFrameData.module
 
   def eval(inst: Inst): Unit =
     val opcode = inst.opcode

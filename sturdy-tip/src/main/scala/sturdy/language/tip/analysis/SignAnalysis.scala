@@ -50,8 +50,7 @@ object SignAnalysis extends Interpreter,
 
   def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
     val effects = new Effects(initEnvironment, initStore)
-    given Failure = effects
-    given Effectful = effects
+    given Effects = effects
     new Instance(effects, steps)
 
   class Instance(effects: Effects, steps: Int)(using Failure, Effectful)

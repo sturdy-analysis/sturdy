@@ -11,8 +11,8 @@ case object ConversionFailure extends FailureKind
  *  the actual values are represented as `VFrom` and `VTo`.
  */
 trait Convert[From, To, VFrom, VTo, Config]:
-  def apply(t1: VFrom, conf: Config): VTo
+  def apply(from: VFrom, conf: Config): VTo
 
 
 object Convert:
-  def apply[From, To, V1, V2, Config](t1: V1, conf: Config)(using c: Convert[From, To, V1, V2, Config]) = c(t1, conf)
+  def apply[From, To, V1, V2, Config](from: V1, conf: Config)(using c: Convert[From, To, V1, V2, Config]) = c(from, conf)
