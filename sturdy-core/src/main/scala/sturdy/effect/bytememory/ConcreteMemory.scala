@@ -18,7 +18,6 @@ trait ConcreteMemory[Key] extends Memory[Key, Int, ByteBuffer, Int]:
     val mem = memories(key)
     if (addr + length < mem.size)
       val buf = ByteBuffer.wrap(mem.bytes, addr, length)
-      buf.order(ByteOrder.LITTLE_ENDIAN)
       OptionC.Some(buf)
     else
       OptionC.none

@@ -77,8 +77,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
           case _: f64.Load => Value.Float64(Topped.Top)
           case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $decInfo.")
         case Topped.Actual(b) => b
-      }
-      liftConcreteValue(cSerialize.decode(ByteBuffer.wrap(bytes.toArray), decInfo))
+      }.toArray
+      liftConcreteValue(cSerialize.decode(ByteBuffer.wrap(bytes), decInfo))
 
     override def encode(v: Value, encInfo: MemoryInst): IndexedSeqView[Topped[Byte]] = v match
       case Value.TopValue | Value.Int32(Topped.Top) | Value.Int64(Topped.Top) | Value.Float32(Topped.Top) | Value.Float64(Topped.Top) => encInfo match

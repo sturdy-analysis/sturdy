@@ -59,22 +59,24 @@ object ConcreteInterpreter extends Interpreter :
 
   trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst] :
     import Value.*
-    override def decode(dat: ByteBuffer, decInfo: MemoryInst): Value = decInfo match
-      case _: i32.Load => Int32(dat.getInt(0))
-      case _: i32.Load8S => Int32(dat.get(0))
-      case _: i32.Load8U => Int32(dat.get(0) & 0xFF)
-      case _: i32.Load16S => Int32(dat.getShort(0))
-      case _: i32.Load16U => Int32(dat.getShort(0) & 0xFFFF)
-      case _: i64.Load => Int64(dat.getLong(0))
-      case _: i64.Load8S => Int64(dat.get(0))
-      case _: i64.Load8U => Int64(dat.get(0) & 0xFFL)
-      case _: i64.Load16S => Int64(dat.getShort(0))
-      case _: i64.Load16U => Int64(dat.getShort(0) & 0xFFFFL)
-      case _: i64.Load32S => Int64(dat.getInt(0))
-      case _: i64.Load32U => Int64(dat.getInt(0) & 0xFFFFFFFFFL)
-      case _: f32.Load => Float32(dat.getFloat(0))
-      case _: f64.Load => Float64(dat.getDouble(0))
-      case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $decInfo.")
+    override def decode(dat: ByteBuffer, decInfo: MemoryInst): Value =
+      dat.order(ByteOrder.LITTLE_ENDIAN)
+      decInfo match
+        case _: i32.Load => Int32(dat.getInt(0))
+        case _: i32.Load8S => Int32(dat.get(0))
+        case _: i32.Load8U => Int32(dat.get(0) & 0xFF)
+        case _: i32.Load16S => Int32(dat.getShort(0))
+        case _: i32.Load16U => Int32(dat.getShort(0) & 0xFFFF)
+        case _: i64.Load => Int64(dat.getLong(0))
+        case _: i64.Load8S => Int64(dat.get(0))
+        case _: i64.Load8U => Int64(dat.get(0) & 0xFFL)
+        case _: i64.Load16S => Int64(dat.getShort(0))
+        case _: i64.Load16U => Int64(dat.getShort(0) & 0xFFFFL)
+        case _: i64.Load32S => Int64(dat.getInt(0))
+        case _: i64.Load32U => Int64(dat.getInt(0) & 0xFFFFFFFFFL)
+        case _: f32.Load => Float32(dat.getFloat(0))
+        case _: f64.Load => Float64(dat.getDouble(0))
+        case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $decInfo.")
 
     private def newByteBuffer(cap: Int): ByteBuffer =
       val buf = ByteBuffer.allocate(cap)

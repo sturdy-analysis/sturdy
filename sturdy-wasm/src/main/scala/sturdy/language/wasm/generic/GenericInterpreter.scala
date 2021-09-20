@@ -337,8 +337,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     )
 
   def getBytesToRead(inst: MemoryInst): Int = inst match
-    case Load(tpe,_,_) => tpe.width / 4
-    case LoadN(_,n,_,_) => n / 4
+    case Load(tpe,_,_) => tpe.width / 8
+    case LoadN(_,n,_,_) => n / 8
     case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $inst")
 
   def memoryIndex: Int =
