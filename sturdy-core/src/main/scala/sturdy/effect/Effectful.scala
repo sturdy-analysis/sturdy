@@ -51,7 +51,7 @@ trait Effectful:
     if (as.isEmpty)
       next()
     else {
-      joinComputations(next())(joinComputationsIt(as))
+      joinComputations(joinComputationsIt(as))(next())
     }
 
 object Effectful:

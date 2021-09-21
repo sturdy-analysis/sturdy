@@ -40,6 +40,7 @@ object GenericInterpreter:
   case object UnboundVariable extends FailureKind
   case object UnboundAddr extends FailureKind
   case object UserError extends FailureKind
+  case object TypeError extends FailureKind
 
   enum FixIn:
     case Eval(e: Exp)

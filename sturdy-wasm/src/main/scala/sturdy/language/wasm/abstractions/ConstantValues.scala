@@ -1,5 +1,6 @@
 package sturdy.language.wasm.abstractions
 
+import sturdy.effect.failure.Failure
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.values.Topped
 
@@ -15,7 +16,7 @@ trait ConstantValues extends Interpreter:
   final def topF32: F32 = Topped.Top
   final def topF64: F64 = Topped.Top
 
-  final def asBoolean(v: Value): Bool = v.asInt32 match
+  final def asBoolean(v: Value)(using Failure): Bool = v.asInt32 match
     case Topped.Top => Topped.Top
     case Topped.Actual(i) => Topped.Actual(i != 0)
   final def boolean(b: Bool): Value = b match

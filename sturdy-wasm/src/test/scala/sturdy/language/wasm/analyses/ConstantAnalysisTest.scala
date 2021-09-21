@@ -37,49 +37,71 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
-//    testFunctionConstantArgs(simple, "noop", List.empty, List(Value.Int32(0)))
-//    testFunctionConstantArgs(simple, "const", List(Value.Int32(5)), List(Value.Int32(5)))
-//    testFunctionConstantArgs(simple, "first", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(1)))
-//    testFunctionConstantArgs(simple, "second", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(2)))
-//
-//    (0 to 8).zip(List(1, 1, 2, 6, 24, 120, 720, 5040, 40320)).foreach { (arg, res) =>
-//      testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(arg)), List(Value.Int64(res)))
-//    }
-//
-////    testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-////    testFunctionConstantArgs(fact, "fac-iter", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-////    testFunctionConstantArgs(fact, "fac-rec-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-////    testFunctionConstantArgs(fact, "fac-iter-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-////    testFunctionConstantArgs(fact, "fac-opt", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
+    testFunctionConstantArgs(simple, "noop", List.empty, List(Value.Int32(0)))
+    testFunctionConstantArgs(simple, "const", List(Value.Int32(5)), List(Value.Int32(5)))
+    testFunctionConstantArgs(simple, "first", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(1)))
+    testFunctionConstantArgs(simple, "second", List(Value.Int32(1), Value.Int32(2)), List(Value.Int32(2)))
     testFunctionConstantArgs(simple, "test-mem", List(Value.Int32(42)), List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-size", List.empty, List(Value.Int32(1)))
-//    testFunctionConstantArgs(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))
-//    testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
-//    testFunctionConstantArgs(simple, "call-first", List.empty, List(Value.Int32(0)))
-////    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(1), Value.Float32(2)), List(Value.Float32(2)))
-//    testFunctionConstantArgs(simple, "as-br_table-index", List.empty, List.empty)
-//    testFunctionConstantArgs(simple, "test-br1", List.empty, List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-br2", List.empty, List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(0)), List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(1)), List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(0)), List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(1)), List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(0)), List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(1)), List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(0)), List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(1)), List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
-//    testFailingFunction(simple, "test-unreachable4", List.empty, UnreachableInstruction)
-//    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
+    testFunctionConstantArgs(simple, "test-size", List.empty, List(Value.Int32(1)))
+    testFunctionConstantArgs(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))
+    testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
+    testFunctionConstantArgs(simple, "call-first", List.empty, List(Value.Int32(0)))
+    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(1), Value.Float32(2)), List(Value.Float32(2)))
+    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(4), Value.Float32(2)), List(Value.Float32(3.4166665)))
+    testFunctionConstantArgs(simple, "as-br_table-index", List.empty, List.empty)
+    testFunctionConstantArgs(simple, "test-br1", List.empty, List(Value.Int32(42)))
+    testFunctionConstantArgs(simple, "test-br2", List.empty, List(Value.Int32(43)))
+    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(0)), List(Value.Int32(42)))
+    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(1)), List(Value.Int32(43)))
+    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(0)), List(Value.Int32(42)))
+    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(1)), List(Value.Int32(43)))
+    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(0)), List(Value.Int32(42)))
+    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(1)), List(Value.Int32(43)))
+    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(0)), List(Value.Int32(42)))
+    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(1)), List(Value.Int32(43)))
+    testFunctionConstantArgs(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
+    testFunctionConstantArgs(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
+    testFunctionConstantArgs(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
+    testFailingFunction(simple, "test-unreachable4", List.empty, UnreachableInstruction)
+    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
+    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
+
+    //
+    //    (0 to 8).zip(List(1, 1, 2, 6, 24, 120, 720, 5040, 40320)).foreach { (arg, res) =>
+    //      testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(arg)), List(Value.Int64(res)))
+    //    }
+    //
+    ////    testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
+    ////    testFunctionConstantArgs(fact, "fac-iter", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
+    ////    testFunctionConstantArgs(fact, "fac-rec-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
+    ////    testFunctionConstantArgs(fact, "fac-iter-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
+    ////    testFunctionConstantArgs(fact, "fac-opt", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
   }
 
+  testFunction(simple, "const", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "first", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(1))))
+  testFunction(simple, "first", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "second", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "second", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Actual(2))))
+  testFunction(simple, "test-mem", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+//  testFunction(simple, "nesting", List(Value.Float32(Topped.Top), Value.Float32(Topped.Actual(2))), List(Value.Float32(Topped.Top)))
+//  testFunction(simple, "nesting", List(Value.Float32(Topped.Actual(1)), Value.Float32(Topped.Top)), List(Value.Float32(Topped.Top)))
+  testFunction(simple, "test-br3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "test-br-and-return", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "test-br-and-return2", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "test-br-and-return3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+  testFunction(simple, "test-br-and-return4", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(42))))
+  testFunction(simple, "test-unreachable5", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
+
+
+
+
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], expectedResult: List[ConcreteInterpreter.Value]) =
-    it must s"execute $funcName withs args $args with result $expectedResult" in {
-      val res = runConstantAnalysis(path, funcName, args.map(ConstantAnalysis.liftConcreteValue))
-      val expected = expectedResult.map(ConstantAnalysis.liftConcreteValue)
+    testFunction(path, funcName, args.map(ConstantAnalysis.liftConcreteValue), expectedResult.map(ConstantAnalysis.liftConcreteValue))
+
+  def testFunction(path: Path, funcName: String, args: List[Value], expected: List[Value]) =
+    it must s"execute $funcName withs args $args with result $expected" in {
+      val res = runConstantAnalysis(path, funcName, args)
       res match
         case AFallible.Unfailing(vals) => assertResult(expected)(vals)
         case AFallible.MaybeFailing(vals, _) => assertResult(expected)(vals)

@@ -43,7 +43,7 @@ object ConcreteInterpreter extends Interpreter :
   override def topF32: Float = throw new UnsupportedOperationException
   override def topF64: Double = throw new UnsupportedOperationException
 
-  override def asBoolean(v: Value): Boolean = v.asInt32 != 0
+  override def asBoolean(v: Value)(using Failure): Boolean = v.asInt32 != 0
   override def boolean(b: Boolean): Value =
     if (b)
       Value.Int32(1)
@@ -57,7 +57,7 @@ object ConcreteInterpreter extends Interpreter :
   override type FuncIx = Int
   override type FunV = FunctionInstance[Value]
 
-  trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst] :
+  trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst], Failure :
     import Value.*
     override def decode(dat: ByteBuffer, decInfo: MemoryInst): Value =
       dat.order(ByteOrder.LITTLE_ENDIAN)
@@ -83,6 +83,7 @@ object ConcreteInterpreter extends Interpreter :
       buf.order(ByteOrder.LITTLE_ENDIAN)
       buf
 
+    given Failure = this
     override def encode(v: Value, encInfo: MemoryInst): ByteBuffer =
       encInfo match
         case _: i32.Store =>
@@ -119,7 +120,7 @@ object ConcreteInterpreter extends Interpreter :
           buf.putDouble(0, v.asFloat64)
         case _ => throw new IllegalArgumentException(s"Expected store instruction, but got $encInfo.")
 
-  given WasmOperations[Value, Addr, Size, FuncIx] with
+  given ConcreteWasmOperations(using Failure): WasmOperations[Value, Addr, Size, FuncIx] with
     override type WasmOpsJoin[A] = NoJoin[A]
 
     override def valueToAddr(v: Value): Int = v.asInt32
@@ -144,9 +145,8 @@ object ConcreteInterpreter extends Interpreter :
       with ConcreteExcept[WasmException[Value]]
       with CFailure
 
-  class Instance(effects: Effects)
+  class Instance(effects: Effects)(using Failure)
     extends GenericInstance[Effects] with GenericInterpreter(effects) :
-    given Failure = effects
 
     def i32Ops: IntOps[I32] = implicitly
     def i64Ops: LongOps[I64] = implicitly
@@ -178,4 +178,5 @@ object ConcreteInterpreter extends Interpreter :
 
   def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
+    given Failure = effects
     new Instance(effects)

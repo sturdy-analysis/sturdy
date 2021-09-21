@@ -46,6 +46,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
   testFunction(simple, "call-first", List.empty, List(Value.Int32(0)))
   testFunction(simple, "nesting", List(Value.Float32(1), Value.Float32(2)), List(Value.Float32(2)))
+  testFunction(simple, "nesting", List(Value.Float32(4), Value.Float32(2)), List(Value.Float32(3.4166665)))
   testFunction(simple, "as-br_table-index", List.empty, List.empty)
   testFunction(simple, "test-br1", List.empty, List(Value.Int32(42)))
   testFunction(simple, "test-br2", List.empty, List(Value.Int32(43)))

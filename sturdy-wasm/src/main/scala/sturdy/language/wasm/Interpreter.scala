@@ -1,6 +1,8 @@
 package sturdy.language.wasm
 
+import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.fix.Widening
+import sturdy.language.wasm.generic.TypeError
 import sturdy.language.wasm.generic.GenericInterpreter
 import sturdy.language.wasm.generic.GenericInterpreter.GenericEffects
 import sturdy.language.wasm.generic.WasmOperations
@@ -27,33 +29,33 @@ trait Interpreter:
     case Float32(f: F32)
     case Float64(d: F64)
 
-    def asBoolean: Bool = Interpreter.this.asBoolean(this)
+    def asBoolean(using Failure): Bool = Interpreter.this.asBoolean(this)
 
-    def asInt32: I32 = this match
+    def asInt32(using f: Failure): I32 = this match
       case Int32(i) => i
       case TopValue => topI32
-      case _ => throw new IllegalArgumentException(s"Expected i32 but got $this")
+      case _ => f.fail(TypeError, s"Expected i32 but got $this")
 
-    def asInt64: I64 = this match
+    def asInt64(using f: Failure): I64 = this match
       case Int64(l) => l
       case TopValue => topI64
-      case _ => throw new IllegalArgumentException(s"Expected i64 but got $this")
+      case _ => f.fail(TypeError, s"Expected i64 but got $this")
 
-    def asFloat32: F32 = this match
+    def asFloat32(using f: Failure): F32 = this match
       case Float32(f) => f
       case TopValue => topF32
-      case _ => throw new IllegalArgumentException(s"Expected f32 but got $this")
+      case _ => f.fail(TypeError, s"Expected f32 but got $this")
 
-    def asFloat64: F64 = this match
+    def asFloat64(using f: Failure): F64 = this match
       case Float64(d) => d
       case TopValue => topF64
-      case _ => throw new IllegalArgumentException(s"Expected f64 but got $this")
+      case _ => f.fail(TypeError, s"Expected f64 but got $this")
 
   def topI32: I32
   def topI64: I64
   def topF32: F32
   def topF64: F64
-  def asBoolean(v: Value): Bool
+  def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
 
   given liftedJoinValue(using JoinValue[I32], JoinValue[I64], JoinValue[F32], JoinValue[F64]): JoinValue[Value] with
@@ -113,6 +115,8 @@ trait Interpreter:
     implicit def convertF64I32: ConvertDoubleInt[F64, I32]
     implicit def convertF64I64: ConvertDoubleLong[F64, I64]
     implicit def convertF64F32: ConvertDoubleFloat[F64, F32]
+
+    given Failure = this.effects
 
     final val intOps: IntOps[Value] = new LiftedIntOps(_.asInt32, Value.Int32.apply)
     final val longOps: LongOps[Value] = new LiftedLongOps(_.asInt64, Value.Int64.apply)

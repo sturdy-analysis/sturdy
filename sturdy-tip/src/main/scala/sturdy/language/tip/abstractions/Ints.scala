@@ -1,9 +1,11 @@
 package sturdy.language.tip.abstractions
 
+import sturdy.effect.failure.Failure
 import sturdy.values.relational.EqOps
 import sturdy.values.Topped
 import sturdy.values.ints.{IntInterval, IntSign, given}
 import sturdy.language.tip.Interpreter
+import sturdy.language.tip.GenericInterpreter.TypeError
 
 object Ints:
   trait Interval extends Interpreter :
@@ -12,10 +14,10 @@ object Ints:
 
     final def topInt(using Instance): IntInterval = IntInterval.Top
 
-    final def asBoolean(v: Value): VBool = v match
+    final def asBoolean(v: Value)(using f: Failure): VBool = v match
       case Value.IntValue(i) => EqOps.equ(i, IntInterval(0, 0)).map(!_)
       case Value.TopValue => Topped.Top
-      case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
+      case _ => f.fail(TypeError, s"Expected Int but got $this")
 
     final def boolean(b: VBool): Value = Value.IntValue(b match
       case Topped.Top => IntInterval(0, 1)
@@ -29,13 +31,13 @@ object Ints:
 
     final def topInt(using Instance): IntSign = IntSign.TopSign
 
-    final def asBoolean(v: Value): VBool = v match
+    final def asBoolean(v: Value)(using f: Failure): VBool = v match
       case Value.IntValue(i) => i match
         case IntSign.Zero => Topped.Actual(false)
         case IntSign.Pos | IntSign.Neg => Topped.Actual(true)
         case _ => Topped.Top
       case Value.TopValue => Topped.Top
-      case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
+      case _ => f.fail(TypeError, s"Expected Int but got $this")
 
     final def boolean(b: Topped[Boolean]): Value = Value.IntValue(b match
       case Topped.Top => IntSign.ZeroOrPos

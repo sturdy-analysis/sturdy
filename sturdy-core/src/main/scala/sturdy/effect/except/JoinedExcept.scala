@@ -23,7 +23,7 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJo
     val e = exceptional.exception(ex)
     this.exception = exception match
       case OptionA.None() => OptionA.Some(e::Nil)
-      case OptionA.NoneSome(old::Nil) => OptionA.NoneSome(JoinValue.join(old, e)::Nil)
+      case OptionA.NoneSome(old::Nil) => OptionA.Some(JoinValue.join(old, e)::Nil)
       case OptionA.Some(old::Nil) => OptionA.Some(JoinValue.join(old, e)::Nil)
       case _ => throw new IllegalStateException()
     throw AbstractException
@@ -33,7 +33,7 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJo
       val a = f
       exception match
         case OptionA.None() => EitherA.Left(Iterable.single(a))
-        case OptionA.Some(exs) => EitherA.Right(exs)
+        case OptionA.Some(exs) => EitherA.LeftRight(Iterable.single(a), exs)
         case OptionA.NoneSome(exs) => EitherA.LeftRight(Iterable.single(a), exs)
     } catch {
       case AbstractException =>

@@ -63,7 +63,7 @@ object SignAnalysis extends Interpreter,
     final def vintEqOps: EqOps[VInt, VBool] = implicitly
     final def vrefEqOps: EqOps[VRef, VBool] = implicitly
     final def vfunEqOps: EqOps[VFun, VBool] = implicitly
-    final def vrecEqOps: EqOps[VRecord, VBool] = new ARecordEqOps(using lazily(eqOps))
+    final def vrecEqOps: EqOps[VRecord, VBool] = ??? // new ARecordEqOps(using lazily(eqOps))
     final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[String, Value, VRecord] = implicitly

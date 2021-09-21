@@ -188,6 +188,23 @@
     )
   )
 
+  (func (export "test-br-and-return4") (param i32) (result i32)
+      (block (result i32)
+        (block (result i32)
+          (if (result i32) (i32.eq (local.get 0) (i32.const 0))
+            (then
+              i32.const 42
+              return
+            )
+            (else
+              i32.const 42
+              br 1
+            )
+          )
+        )
+      )
+    )
+
   (func (export "test-unreachable") (result i32)
     i32.const 42
     return

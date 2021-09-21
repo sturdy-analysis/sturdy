@@ -31,9 +31,9 @@ object ConcreteInterpreter extends Interpreter:
   override def topFun(using Instance): VFun = throw new UnsupportedOperationException
   override def topRecord(using Instance): VRecord = throw new UnsupportedOperationException
 
-  override def asBoolean(v: Value): Boolean = v match
+  override def asBoolean(v: Value)(using f: Failure): Boolean = v match
     case Value.IntValue(i) => i != 0
-    case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
+    case _ => f.fail(TypeError, s"Expected Int but got $this")
   override def boolean(b: Boolean): Value = Value.IntValue(if (b) 1 else 0)
 
   given Structural[VRecord] with {}

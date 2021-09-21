@@ -1,8 +1,8 @@
 package sturdy.language.tip
 
-import sturdy.effect.failure.Failure
+import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.fix.Widening
-import sturdy.language.tip.GenericInterpreter.{AllocationSite, FixIn, FixOut, GenericEffects, GenericPhi}
+import sturdy.language.tip.GenericInterpreter.{AllocationSite, FixIn, FixOut, GenericEffects, GenericPhi, TypeError}
 import sturdy.values.{Top, JoinValue}
 import sturdy.values.functions.{FunctionOps, LiftedFunctionOps}
 import sturdy.values.ints.{IntOps, LiftedIntOps}
@@ -24,30 +24,30 @@ trait Interpreter:
     case FunValue(fun: VFun)
     case RecValue(rec: VRecord)
 
-    def asBoolean: VBool = Interpreter.this.asBoolean(this)
-    def asInt(using Instance): VInt = this match
+    def asBoolean(using Failure): VBool = Interpreter.this.asBoolean(this)
+    def asInt(using inst: Instance): VInt = this match
       case IntValue(i) => i
       case TopValue => topInt
-      case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
-    def asFunction(using Instance): VFun = this match
+      case _ => inst.effects.fail(TypeError, s"Expected Int but got $this")
+    def asFunction(using inst: Instance): VFun = this match
       case FunValue(f) => f
       case TopValue => topFun
-      case _ => throw new IllegalArgumentException(s"Expected Function but got $this")
-    def asReference(using Instance): VRef = this match
+      case _ => inst.effects.fail(TypeError, s"Expected Function but got $this")
+    def asReference(using inst: Instance): VRef = this match
       case RefValue(a) => a
       case TopValue => topReference
-      case _ => throw new IllegalArgumentException(s"Expected Reference but got $this")
-    def asRecord(using Instance): VRecord = this match
+      case _ => inst.effects.fail(TypeError, s"Expected Reference but got $this")
+    def asRecord(using inst: Instance): VRecord = this match
       case RecValue(rec) => rec
       case TopValue => topRecord
-      case _ => throw new IllegalArgumentException(s"Expected Record but got $this")
+      case _ => inst.effects.fail(TypeError, s"Expected Record but got $this")
 
-  def topInt(using self: Instance): VInt
-  def topFun(using self: Instance): VFun
-  def topReference(using self: Instance): VRef
-  def topRecord(using self: Instance): VRecord
+  def topInt(using Instance): VInt
+  def topFun(using Instance): VFun
+  def topReference(using Instance): VRef
+  def topRecord(using Instance): VRecord
 
-  def asBoolean(v: Value): VBool
+  def asBoolean(v: Value)(using Failure): VBool
   def boolean(b: VBool): Value
 
   given Top[Value] with

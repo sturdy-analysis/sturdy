@@ -186,22 +186,24 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     val operands = stack.popN(returnArity)
     throws(WasmException.Jump(labelIndex, operands))
 
-  // stack before label-call:  A p0 ... pn (n = params arity)
-  // finish without exception: A r0 ... rm (m = return arity) => nothing to do
-  // catch Jump(l0, op0, ..., opm)
-  //   - this block is the jump target
-  //   - stack: A g0 ... gk needs to become A op0 ... opm
-  //   - we don't know k, so we need to remember size of stack A
-  // catch Jump(li, op0, ..., opl) i != 0 and Return(op0, ..., opl)
-  //   - jump target is further out
-  //   - stack: A g0 ... gok needs to become A
-  //   - we don't know k, so we need to remember size of stack A
+  /* stack before label-call:  A p0 ... pn (n = params arity)
+   * finish without exception: A r0 ... rm (m = return arity) => nothing to do
+   * catch Jump(l0, op0, ..., opm)
+   *   - this block is the jump target
+   *   - stack: A g0 ... gk needs to become A op0 ... opm
+   *   - we don't know k, so we need to remember size of stack A
+   * catch Jump(li, op0, ..., opl) i != 0 and Return(op0, ..., opl)
+   *   - jump target is further out
+   *   - stack: A g0 ... gok needs to become A
+   *   - we don't know k, so we need to remember size of stack A
+   */
   def label(paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
     val restoreStackSize = stack.size() - paramsArity
-    tryCatchFinally {
-      labelStack.pushLabel(returnArity)
+    labelStack.pushLabel(returnArity)
+    try tryCatch {
       insts.foreach(eval)
     } { ex =>
+      // unwind the stack
       stack.popN(stack.size() - restoreStackSize)
       ex match {
         case WasmException.Jump(labelIndex, operands) =>
@@ -211,11 +213,10 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
           } else {
             throws(WasmException.Jump(labelIndex - 1, operands))
           }
-        case _: WasmException.Return[V] => throws(ex)
+        case _: WasmException.Return[V] =>
+          throws(ex)
       }
-    } { // finally
-      labelStack.popLabel()
-    }
+    } finally labelStack.popLabel()
 
   // stack before invoke: A p0 ... pn (n = params arity)
   // finish without excepction: A r0 ... rm (m = return arity)
@@ -360,7 +361,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
 
   def evalInstructionSequence(instructions: Expr, mod: ModuleInstance[V]): V =
     val frameData = FrameData(1,mod)
-    withFreshOperandStack(labelStack.withFresh(inNewFrameNoIndex(frameData, Vector.empty[V]){
+    labelStack.withFresh(withFreshOperandStack(inNewFrameNoIndex(frameData, Vector.empty[V]){
       instructions.foreach(eval)
       stack.pop()
     }))

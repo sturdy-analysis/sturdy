@@ -57,7 +57,7 @@ object ConcreteInterpreter:
     def asNum(using f: Failure): Num = this match
       case NumVal(num) => num
       case _ => f.fail(TypeError, s"Expected Num but got $this")
-    def asBoolean: Boolean = this match
+    def asBoolean(using f: Failure): Boolean = this match
       case BoolVal(b) => b
       case _ => true
     def asChar(using f: Failure): Char = this match

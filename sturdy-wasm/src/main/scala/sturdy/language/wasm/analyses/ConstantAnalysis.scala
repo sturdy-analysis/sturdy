@@ -2,18 +2,14 @@ package sturdy.language.wasm.analyses
 
 import sturdy.data.{*, given}
 import sturdy.effect.Effectful
-import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.ABoolBranching
-import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.CCallFrameInt
 import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.except.JoinedExcept
-import sturdy.effect.failure.AFailureCollect
-import sturdy.effect.failure.CFailure
-import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.SameHeightOperandStack
+import sturdy.effect.failure.*
+import sturdy.effect.operandstack.JoinedOperandStack
 import sturdy.effect.symboltable.{ToppedSymbolTable, SymbolTable}
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.ConstantValues
@@ -48,7 +44,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
   type FuncIx = Topped[Int]
   type FunV = Topped[Powerset[FunctionInstance[Value]]]
 
-  given WasmOperations[Value, Addr, Size, FuncIx] with
+  given ConstantWasmOperations(using Failure): WasmOperations[Value, Addr, Size, FuncIx] with
     override type WasmOpsJoin[A] = Join[A]
 
     override def valueToAddr(v: Value): Addr = v.asInt32
@@ -66,8 +62,10 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
         case Topped.Top =>
           OptionA.NoneSome(vec)
 
-  trait ASerialize extends Serialize[Value, Bytes, MemoryInst, MemoryInst]:
-    val cSerialize = new ConcreteInterpreter.CSerialize {}
+  trait ASerialize extends Serialize[Value, Bytes, MemoryInst, MemoryInst], Failure:
+    val cSerialize = new ConcreteInterpreter.CSerialize with Failure {
+      override def fail(kind: FailureKind, msg: String): Nothing = ASerialize.this.fail(kind, msg)
+    }
     override def decode(dat: IndexedSeqView[Topped[Byte]], decInfo: MemoryInst): Value =
       val bytes = dat.map {
         case Topped.Top => return decInfo match
@@ -98,7 +96,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       case Value.Float64(Topped.Actual(d)) => cSerialize.encode(ConcreteInterpreter.Value.Float64(d), encInfo).array().view.map(Topped.Actual.apply)
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
-    extends SameHeightOperandStack[Value]
+    extends JoinedOperandStack[Value]
       with ConstantAddressMemory[Int, Topped[Byte]](Topped.Actual(0))
       with ASerialize
       with ToppedSymbolTable[Int, Int, FunV]
