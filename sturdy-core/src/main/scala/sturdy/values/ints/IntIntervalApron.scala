@@ -18,13 +18,14 @@ import scala.collection.immutable.TreeSet
 import apron.Abstract0 // default; for domains without environments
 import apron.Box
 import apron.*
+import scala.compiletime.ops.int
 
 val manager = apron.Box()
 def maxMpq(one: gmp.Mpq, other: gmp.Mpq) = {
-      if ((one cmp other) > 0)
-        one
-      else 
-        other
+  if ((one cmp other) > 0)
+    one
+  else 
+    other
 }
 def minMpq(one: gmp.Mpq, other: gmp.Mpq) = {
   if ((one cmp other) < 0)
@@ -34,12 +35,12 @@ def minMpq(one: gmp.Mpq, other: gmp.Mpq) = {
 }
 
 object IntIntervalApron:
-  val Top = IntIntervalApron({var tmp = apron.Interval(0, 0); tmp.setTop(); tmp})
+  val Top = IntIntervalApron(gmp.Mpq(-1, 0), gmp.Mpq(1, 0))
   
   def bounded(l: Long, h: Long): IntIntervalApron =
-    new IntIntervalApron((l max Int.MinValue).toInt, (h min Int.MaxValue).toInt)
+    IntIntervalApron((l max Int.MinValue).toInt, (h min Int.MaxValue).toInt)
   def bounded(l: gmp.Mpq, h: gmp.Mpq): IntIntervalApron =
-    new IntIntervalApron(maxMpq(l, new gmp.Mpq(Int.MaxValue, 1)), maxMpq(h, new gmp.Mpq(Int.MinValue, 1)))
+    IntIntervalApron(maxMpq(l, gmp.Mpq(Int.MaxValue, 1)), maxMpq(h, gmp.Mpq(Int.MinValue, 1)))
 
   def apply(l: Int, h: Int) = new IntIntervalApron(apron.Interval(l, h))
   def apply(inf: apron.MpqScalar, sup: apron.MpqScalar) = new IntIntervalApron(apron.Interval(inf, sup))
@@ -50,10 +51,17 @@ object IntIntervalApron:
   def unapply(interval: IntIntervalApron): Some[(Int, Int)] =
     Some(interval.l.doubleValue.toInt, interval.h.doubleValue.toInt)
 
+  def joinCopy(one: IntIntervalApron, other: IntIntervalApron): IntIntervalApron =
+    val abstractDomain = apron.Abstract0(manager, 1, 0, Array(one.interval))
+    abstractDomain.join(manager, other.abstractDomain)
+    IntIntervalApron(abstractDomain.getBound(manager, 1))
+  
+  
+
 case class IntIntervalApron(val interval: apron.Interval):
-  val abstractDomain = apron.Abstract0(manager, 1, 0, Array(interval))
-  val l: gmp.Mpq = {var l: gmp.Mpq = null; interval.inf.toMpq(l, 0); l.canonicalize; l}
-  val h: gmp.Mpq = {var h: gmp.Mpq = null; interval.sup.toMpq(h, 0); h.canonicalize; h}
+  val abstractDomain = Abstract0(manager, 1, 0, Array(this.interval))
+  val l: gmp.Mpq = {var tmp: gmp.Mpq = null; interval.inf.toMpq(tmp, 0); tmp.canonicalize; tmp}
+  val h: gmp.Mpq = {var tmp: gmp.Mpq = null; interval.sup.toMpq(tmp, 0); tmp.canonicalize; tmp}
   
   if ((interval.inf cmp interval.sup) < 0)
     throw new IllegalArgumentException(s"Empty intervals are illegal $this")
@@ -66,44 +74,86 @@ case class IntIntervalApron(val interval: apron.Interval):
   def this(l: gmp.Mpq, h: Int) = this(apron.Interval(l, gmp.Mpq(h)))
   def this(l: Int, h: gmp.Mpq) = this(apron.Interval(gmp.Mpq(l), h))
 
-  
-  
   implicit def toIntInterval(): IntInterval = {  // implicitly convert IntIntervalApron to IntInterval
     new IntInterval(this.l.doubleValue.toInt, this.h.doubleValue.toInt)
   }
 
-  def join(other: IntIntervalApron): IntIntervalApron =
+  private enum UpdateCases:
+    case ADN
+
+  private def update(u_case: UpdateCases): Unit =
+    u_case match {
+      case UpdateCases.ADN => {
+        val interval = this.abstractDomain.getBound(manager, 1)
+        this.interval.setInf(interval.inf)
+        this.interval.setSup(interval.sup)
+        this.l.set({var tmp: gmp.Mpq = null; interval.inf.toMpq(tmp, 0); tmp.canonicalize; tmp})
+        this.h.set({var tmp: gmp.Mpq = null; interval.sup.toMpq(tmp, 0); tmp.canonicalize; tmp})
+      } 
+    }
+
+  def joinCopy(other: IntIntervalApron): IntIntervalApron =
     // gibt überaproximierendes Intervall-Array um das abstracte objekt herum zurück
     // oder direkt: Abstract0(Manager man, int intdim, int realdim, Interval[] box) - Creates a new abstract element from a box.
     // es ist nicht möglich, dass diese Implementation schneller ist, als die von IntInterval
     IntIntervalApron(abstractDomain.joinCopy(manager, other.abstractDomain).getBound(manager, 1))
+
+  def join(other: IntIntervalApron): Unit =
+    // gibt überaproximierendes Intervall-Array um das abstracte objekt herum zurück
+    // oder direkt: Abstract0(Manager man, int intdim, int realdim, Interval[] box) - Creates a new abstract element from a box.
+    // es ist nicht möglich, dass diese Implementation schneller ist, als die von IntInterval
+    abstractDomain.join(manager, other.abstractDomain)
+    update(UpdateCases.ADN)
  
-  def +(y: IntIntervalApron): IntIntervalApron = IntIntervalApron.bounded({val tmp = l; tmp add y.l; tmp}, {val tmp = h; tmp add y.h; tmp})
-  def -(y: IntIntervalApron): IntIntervalApron = IntIntervalApron.bounded({val tmp = l; tmp sub y.l; tmp}, {val tmp = h; tmp sub y.h; tmp})
+  def +(y: IntIntervalApron): IntIntervalApron =
+    IntIntervalApron.bounded({
+      val tmp = l.clone
+      tmp add y.l
+      tmp
+    }, {
+      val tmp = h.clone
+      tmp add y.h
+      tmp
+    })
+  def -(y: IntIntervalApron): IntIntervalApron =
+    IntIntervalApron.bounded({
+      val tmp = l.clone
+      tmp sub y.l
+      tmp
+    }, {
+      val tmp = h.clone
+      tmp sub y.h
+      tmp
+    })
   def *(y: IntIntervalApron): IntIntervalApron = withBounds2(_ mul _, y)
   def /(y: IntIntervalApron): IntIntervalApron = withBounds2(_ div _, y)
   def withBounds2(f: (gmp.Mpq, gmp.Mpq) => Unit, that: IntIntervalApron): IntIntervalApron = {    
-    val v1 = gmp.Mpq(0); v1.add(this.l); f(v1, that.l)
-    val v2 = gmp.Mpq(0); v2.add(this.l); f(v2, that.h)
-    val v3 = gmp.Mpq(0); v3.add(this.h); f(v3, that.l)
-    val v4 = gmp.Mpq(0); v4.add(this.h); f(v4, that.h)
+    val v1 = gmp.Mpq(0); v1.add(l); f(v1, that.l)
+    val v2 = gmp.Mpq(0); v2.add(l); f(v2, that.h)
+    val v3 = gmp.Mpq(0); v3.add(h); f(v3, that.l)
+    val v4 = gmp.Mpq(0); v4.add(h); f(v4, that.h)
     
     val low = minMpq(v1, minMpq(v2, minMpq(v3, v4)))
     val high = maxMpq(v1, maxMpq(v2, maxMpq(v3, v4)))
     IntIntervalApron.bounded(low, high)
   }
+
+  def widen(other: IntIntervalApron): Unit =
+    this.abstractDomain.widening(manager, other.abstractDomain)
+    update(UpdateCases.ADN)
+
   override def toString: String = s"[$l,$h]"
 
 given Abstractly[Int, IntIntervalApron] with
   override def abstractly(i: Int): IntIntervalApron =
-    new IntIntervalApron(i, i)
+    IntIntervalApron(i, i)
 
 given PartialOrder[IntIntervalApron] with
   override def lteq(x: IntIntervalApron, y: IntIntervalApron): Boolean = y.l <= x.l && x.h <= y.h
 
 given IntIntervalApronJoin: JoinValue[IntIntervalApron] with
   override def joinValues(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron =
-    new IntIntervalApron(minMpq(v1.l, v2.l), maxMpq(v1.h, v2.h))
+    IntIntervalApron(minMpq(v1.l, v2.l), maxMpq(v1.h, v2.h))
 
 given IntIntervalApronWiden(using bounds: => Set[Int]): Widening[IntIntervalApron] with
   override def widen(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron =
