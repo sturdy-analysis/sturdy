@@ -16,7 +16,9 @@ trait ConcreteMemory[Key] extends Memory[Key, Int, ByteBuffer, Int]:
 
   override def memRead(key: Key, addr: Int, length: Int): OptionC[ByteBuffer] =
     val mem = memories(key)
-    if (addr + length < mem.size)
+    // since collections are indexed by signed integers, we have to check here for addr >= 0
+    // this means our maximum memory size is half of the allowed size in wasm
+    if (addr >= 0 && addr + length <= mem.size)
       val buf = ByteBuffer.wrap(mem.bytes, addr, length)
       OptionC.Some(buf)
     else

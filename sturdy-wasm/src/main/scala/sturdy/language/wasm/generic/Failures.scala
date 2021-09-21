@@ -13,4 +13,5 @@ case object MemoryAccessOutOfBounds extends FailureKind
 case object TableAccessOutOfBounds extends FailureKind
 case object InvocationError extends FailureKind
 case object InvalidModule extends FailureKind
+case object IntOverflow extends FailureKind
 case object TypeError extends FailureKind

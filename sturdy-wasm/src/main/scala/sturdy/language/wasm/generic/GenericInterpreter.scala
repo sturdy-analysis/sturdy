@@ -312,8 +312,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
   def load(inst: MemoryInst): Unit =
     // add offset to base address (which is already on the stack)
     stack.push(intOps.intLit(inst.offset))
-    eval(i32.Add)
-    val addr = valueToAddr(stack.pop())
+    addWithOverflowCheck
+    val effectiveAddr = stack.pop()
+    val addr = valueToAddr(effectiveAddr)
 
     val memIdx = memoryIndex
     val byteSize = getBytesToRead(inst)
@@ -365,6 +366,17 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
       instructions.foreach(eval)
       stack.pop()
     }))
+
+  def addWithOverflowCheck =
+    val v1 = stack.pop()
+    val v2 = stack.pop()
+    val res = intOps.add(v1,v2)
+    val cmp = unsignedCompareOps.ltUnsigned(res,v1)
+    boolBranch[Unit](cmp) {
+      fail(IntOverflow, s"$v1 + $v2")
+    } {
+      stack.push(res)
+    }
 
   // we assume a valid module here
   def initializeModule(module: Module): ModuleInstance[V] =
