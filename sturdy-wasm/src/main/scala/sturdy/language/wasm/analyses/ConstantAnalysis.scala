@@ -11,12 +11,12 @@ import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.*
 import sturdy.effect.operandstack.JoinedOperandStack
 import sturdy.effect.symboltable.{ToppedSymbolTable, SymbolTable}
+import sturdy.fix
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.ConstantValues
 import sturdy.language.wasm.generic.FunctionInstance
 import sturdy.language.wasm.generic.GenericInterpreter
-import sturdy.language.wasm.generic.GenericInterpreter.FrameData
-import sturdy.language.wasm.generic.GenericInterpreter.WasmException
+import sturdy.language.wasm.generic.GenericInterpreter.{FrameData, WasmException, FixIn}
 import sturdy.language.wasm.generic.WasmOperations
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
@@ -144,3 +144,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       val invokeAllFuns = module.functions.map(fun => () => invoke(fun, args))
       effects.joinComputationsIterable(invokeAllFuns)
     val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
+
+    val phi: fix.Combinator[FixIn[Value], Unit] = fix.identity
+    

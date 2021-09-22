@@ -10,11 +10,11 @@ import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.{CFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.ConcreteSymbolTable
+import sturdy.fix
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.FunctionInstance
 import sturdy.language.wasm.generic.GenericInterpreter
-import sturdy.language.wasm.generic.GenericInterpreter.FrameData
-import sturdy.language.wasm.generic.GenericInterpreter.WasmException
+import sturdy.language.wasm.generic.GenericInterpreter.{FrameData, WasmException, FixIn}
 import sturdy.language.wasm.generic.WasmOperations
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
@@ -175,6 +175,8 @@ object ConcreteInterpreter extends Interpreter :
     def convertF64I64: ConvertDoubleLong[F64, I64] = implicitly
     def convertF64F32: ConvertDoubleFloat[F64, F32] = implicitly
     val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
+    
+    val phi: fix.Combinator[FixIn[Value], Unit] = fix.identity
 
   def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)

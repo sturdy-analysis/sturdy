@@ -3,8 +3,7 @@ package sturdy.language.wasm.generic
 import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
-import swam.syntax.*
-import swam.{ValType, TableType, GlobalType, LabelIdx, MemType, OpCode, BlockType, Limits}
+import sturdy.fix
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.{Serialize, Memory}
 import sturdy.effect.branching.BoolBranching
@@ -19,6 +18,9 @@ import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
 import sturdy.values.unit
+
+import swam.syntax.*
+import swam.{ValType, TableType, GlobalType, LabelIdx, MemType, OpCode, BlockType, Limits}
 
 object GenericInterpreter:
   case class FrameData[V](returnArity: Int, module: ModuleInstance[V])
@@ -37,6 +39,9 @@ object GenericInterpreter:
       with Except[WasmException[V], ExcV]
       with Failure
 
+  enum FixIn[V]:
+    case Eval(inst: Inst)
+    case EnterWasmFunction(func: swam.syntax.Func, ft: swam.FuncType)
 
 import GenericInterpreter.*
 
@@ -73,6 +78,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
   val convertDoubleFloat: ConvertDoubleFloat[V, V]
   val functionOps: FunctionOps[FunctionInstance[V], Nothing, Unit, FunV]
 
+  val phi: fix.Combinator[FixIn[V], Unit]
+
   lazy val num = new GenericInterpreterNumerics[V](
     effects,
     intOps, longOps, floatOps, doubleOps, eqOps, compareOps, unsignedCompareOps,
@@ -89,32 +96,6 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
   inline private def fail(k: FailureKind, what: String) = effects.fail(k, s"$what in $module")
 
   protected def module: ModuleInstance[V] = getFrameData.module
-
-  def eval(inst: Inst): Unit =
-    val opcode = inst.opcode
-    if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)
-      val v = num.evalNumeric(inst)
-      stack.push(v)
-    else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
-      evalMemoryInst(inst)
-    else if (opcode >= OpCode.Unreachable && opcode <= OpCode.CallIndirect)
-      evalControlInst(inst)
-    else inst match
-      case i: VarInst => evalVarInst(i)
-      case op: Miscop =>
-        val v = stack.pop()
-        num.evalMiscop(op, v)
-      case Drop => stack.pop()
-      case Select =>
-        val isZero = num.evalNumeric(i32.Eqz)
-        boolBranch[Unit](isZero) {
-          // v == 0: else branch
-          val (_, v2) = stack.pop2()
-          stack.push(v2)
-        } {
-          stack.pop()
-        }
-      case _ => throw new IllegalArgumentException(s"Unexpected instruction $inst")
 
   def evalVarInst(inst: VarInst): Unit = inst match
     case LocalGet(ix) =>
@@ -133,162 +114,6 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
       val global = module.globals.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
       val v = stack.pop()
       global.value = v
-
-
-  def evalControlInst(inst: Inst): Unit = inst match
-    case Nop => // nothing
-    case Unreachable => fail(UnreachableInstruction, inst.toString)
-    case Block(bt, insts) =>
-      label(paramsArity(bt), returnArity(bt), insts, None)
-    case l@Loop(bt, insts) =>
-      val pt = paramsArity(bt)
-      label(pt, pt, insts, Some(l))
-    case If(bt, thnInsts, elsInsts) =>
-      val isZero = num.evalNumeric(i32.Eqz)
-      val rt = returnArity(bt)
-      boolBranch[Unit](isZero) {
-        // v == 0: else branch
-        label(paramsArity(bt), rt, elsInsts, None)
-      } {
-        label(paramsArity(bt), rt, thnInsts, None)
-      }
-    case Br(labelIndex) => branch(labelIndex)
-    case BrIf(labelIndex) =>
-      val isZero = num.evalNumeric(i32.Eqz)
-      boolBranch[Unit](isZero) {
-        // v == 0: else branch
-        // do nothing
-      } {
-        branch(labelIndex)
-      }
-    case BrTable(labels, defaultLabel) =>
-      val ix = stack.pop()
-      indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
-    case Return =>
-      val operands = stack.popN(getFrameData.returnArity)
-      throws(WasmException.Return(operands))
-    case Call(funcIx) =>
-      val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-      invoke(func)
-    case CallIndirect(typeIx) =>
-      val ftExpected = module.functionTypes(typeIx)
-      val funcIx = stack.pop()
-      tableGet(tableIndex, valueToFuncIx(funcIx)).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
-        if (func == null)
-          fail(UninitializedFunction, funcIx.toString)
-        invokeIndirect(func, ftExpected, funcIx)
-      }
-    case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
-
-
-  def branch(labelIndex: LabelIdx): Unit =
-    val returnArity: Int = labelStack.lookupLabel(labelIndex)
-    val operands = stack.popN(returnArity)
-    throws(WasmException.Jump(labelIndex, operands))
-
-  /* stack before label-call:  A p0 ... pn (n = params arity)
-   * finish without exception: A r0 ... rm (m = return arity) => nothing to do
-   * catch Jump(l0, op0, ..., opm)
-   *   - this block is the jump target
-   *   - stack: A g0 ... gk needs to become A op0 ... opm
-   *   - we don't know k, so we need to remember size of stack A
-   * catch Jump(li, op0, ..., opl) i != 0 and Return(op0, ..., opl)
-   *   - jump target is further out
-   *   - stack: A g0 ... gok needs to become A
-   *   - we don't know k, so we need to remember size of stack A
-   */
-  def label(paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
-    val restoreStackSize = stack.size() - paramsArity
-    labelStack.pushLabel(returnArity)
-    try tryCatch {
-      insts.foreach(eval)
-    } { ex =>
-      // unwind the stack
-      stack.popN(stack.size() - restoreStackSize)
-      ex match {
-        case WasmException.Jump(labelIndex, operands) =>
-          if (labelIndex == 0) {
-            stack.pushN(operands)
-            branchTarget.foreach(eval)
-          } else {
-            throws(WasmException.Jump(labelIndex - 1, operands))
-          }
-        case _: WasmException.Return[V] =>
-          throws(ex)
-      }
-    } finally labelStack.popLabel()
-
-  // stack before invoke: A p0 ... pn (n = params arity)
-  // finish without excepction: A r0 ... rm (m = return arity)
-  // catch Return(op0, ..., opm)
-  //    - stack A g0 ... gk needs to become A op0 ... opm
-  //    - we don't know k, so we need to remember size of stack A
-  // catch Jump(...) => error
-  def invoke(func: FunctionInstance[V]): Unit =
-    func match
-      case FunctionInstance.Wasm(mod,func, funcType) =>
-        val args = stack.popN(funcType.params.size)
-        val frameData = FrameData(funcType.t.size, mod)
-        val vars = args.view ++ func.locals.map(defaultValue)
-        val restoreStackSize = stack.size()
-        tryCatch {
-          labelStack.withFresh(inNewFrameNoIndex(frameData, vars) {
-            label(0, funcType.t.size, func.body, None)
-          })
-        } { ex =>
-          stack.popN(stack.size() - restoreStackSize)
-          ex match {
-            case WasmException.Return(operands) =>
-              stack.pushN(operands)
-            case WasmException.Jump(_, _) =>
-              fail(InvalidModule, s"Tried to jump through a function boundary.")
-          }
-        }
-
-  def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V): Unit =
-    functionOps.invokeFun(funV, Seq()) {
-      case (func, _) =>
-        val ftActual = func.funcType
-        if (ftExpected != ftActual)
-          fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
-        invoke(func)
-    }
-
-  def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] =
-    inNewFrameNoIndex(FrameData(0, modInst), Iterable.empty) {
-      module.exports.find((name, _) => name == funcName) match
-        case Some((_, ExternalValue.Function(funcIx))) =>
-          val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-          val paramTys = func.funcType.params
-          if (paramTys.length != args.length)
-            throw new Error(s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}.")
-          // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
-          val rtLength = func.funcType.t.length
-          stack.pushN(args)
-          invoke(func)
-          stack.popN(rtLength)
-        case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
-    }
-
-
-  private def defaultValue(ty: ValType): V = ty match
-    case ValType.I32 => num.evalNumeric(i32.Const(0))
-    case ValType.I64 => num.evalNumeric(i64.Const(0))
-    case ValType.F32 => num.evalNumeric(f32.Const(0))
-    case ValType.F64 => num.evalNumeric(f64.Const(0))
-
-  private def returnArity(bt: BlockType): Int =
-    val returnArity = bt.arity(module.functionTypes)
-    if (returnArity < 0)
-      fail(UnboundFunctionType, bt.toString)
-    else
-      returnArity
-
-  private def paramsArity(bt: BlockType): Int =
-    bt.params(module.functionTypes) match
-      case Some(params) => params.size
-      case None => fail(UnboundFunctionType, bt.toString)
-
 
   def evalMemoryInst(inst: Inst): Unit = inst match
     case i: LoadInst => load(i)
@@ -330,7 +155,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
 
     // add offset to base address (which is already on the stack)
     stack.push(intOps.intLit(inst.offset))
-    eval(i32.Add)
+    stack.push(num.evalNumeric(i32.Add))
     val addr = valueToAddr(stack.pop())
 
     val memIdx = memoryIndex
@@ -349,16 +174,208 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
   def tableIndex: Int =
     module.tableAddrs(0)
 
-  // placeholder for the (not yet present in swam) memory.init instruction
-  def memoryInit(dataIdx: Int): Unit =
-    val dataInstance = module.data(dataIdx)
-    val cnt = stack.pop() // i32
-    val src = stack.pop() // i32
-    val dst = stack.pop() // i32
-    // check ranges TODO
-    //if (src + cnt > dataInstance.data.size)
-    // TODO WIP
-    ???
+
+
+  private lazy val fixed = fix.Fixpoint { (rec: FixIn[V] => Unit) =>
+    def eval(inst: Inst): Unit = rec(FixIn.Eval(inst))
+
+    def eval_open(inst: Inst): Unit =
+      val opcode = inst.opcode
+      if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)
+        stack.push(num.evalNumeric(inst))
+      else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
+        evalMemoryInst(inst)
+      else if (opcode >= OpCode.Unreachable && opcode <= OpCode.CallIndirect)
+        evalControlInst(inst)
+      else inst match
+        case i: VarInst => evalVarInst(i)
+        case op: Miscop =>
+          val v = stack.pop()
+          stack.push(num.evalMiscop(op, v))
+        case Drop => stack.pop()
+        case Select =>
+          val isZero = num.evalNumeric(i32.Eqz)
+          boolBranch[Unit](isZero) {
+            // v == 0: else branch
+            val (_, v2) = stack.pop2()
+            stack.push(v2)
+          } {
+            stack.pop()
+          }
+        case _ => throw new IllegalArgumentException(s"Unexpected instruction $inst")
+
+    def evalControlInst(inst: Inst): Unit = inst match
+      case Nop => // nothing
+      case Unreachable => fail(UnreachableInstruction, inst.toString)
+      case Block(bt, insts) =>
+        label(paramsArity(bt), returnArity(bt), insts, None)
+      case l@Loop(bt, insts) =>
+        val pt = paramsArity(bt)
+        label(pt, pt, insts, Some(l))
+      case If(bt, thnInsts, elsInsts) =>
+        val isZero = num.evalNumeric(i32.Eqz)
+        val rt = returnArity(bt)
+        boolBranch[Unit](isZero) {
+          // v == 0: else branch
+          label(paramsArity(bt), rt, elsInsts, None)
+        } {
+          label(paramsArity(bt), rt, thnInsts, None)
+        }
+      case Br(labelIndex) => branch(labelIndex)
+      case BrIf(labelIndex) =>
+        val isZero = num.evalNumeric(i32.Eqz)
+        boolBranch[Unit](isZero) {
+          // v == 0: else branch
+          // do nothing
+        } {
+          branch(labelIndex)
+        }
+      case BrTable(labels, defaultLabel) =>
+        val ix = stack.pop()
+        indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
+      case Return =>
+        val operands = stack.popN(getFrameData.returnArity)
+        throws(WasmException.Return(operands))
+      case Call(funcIx) =>
+        val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+        invoke(func)
+      case CallIndirect(typeIx) =>
+        val ftExpected = module.functionTypes(typeIx)
+        val funcIx = stack.pop()
+        tableGet(tableIndex, valueToFuncIx(funcIx)).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
+          if (func == null)
+            fail(UninitializedFunction, funcIx.toString)
+          invokeIndirect(func, ftExpected, funcIx)
+        }
+      case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
+
+
+    def branch(labelIndex: LabelIdx): Unit =
+      val returnArity: Int = labelStack.lookupLabel(labelIndex)
+      val operands = stack.popN(returnArity)
+      throws(WasmException.Jump(labelIndex, operands))
+
+    /* stack before label-call:  A p0 ... pn (n = params arity)
+   * finish without exception: A r0 ... rm (m = return arity) => nothing to do
+   * catch Jump(l0, op0, ..., opm)
+   *   - this block is the jump target
+   *   - stack: A g0 ... gk needs to become A op0 ... opm
+   *   - we don't know k, so we need to remember size of stack A
+   * catch Jump(li, op0, ..., opl) i != 0 and Return(op0, ..., opl)
+   *   - jump target is further out
+   *   - stack: A g0 ... gok needs to become A
+   *   - we don't know k, so we need to remember size of stack A
+   */
+    def label(paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
+      val restoreStackSize = stack.size() - paramsArity
+      labelStack.pushLabel(returnArity)
+      try tryCatch {
+        insts.foreach(eval)
+      } { ex =>
+        // unwind the stack
+        stack.popN(stack.size() - restoreStackSize)
+        ex match {
+          case WasmException.Jump(labelIndex, operands) =>
+            if (labelIndex == 0) {
+              stack.pushN(operands)
+              branchTarget.foreach(eval)
+            } else {
+              throws(WasmException.Jump(labelIndex - 1, operands))
+            }
+          case _: WasmException.Return[V] =>
+            throws(ex)
+        }
+      } finally labelStack.popLabel()
+
+    // stack before invoke: A p0 ... pn (n = params arity)
+    // finish without excepction: A r0 ... rm (m = return arity)
+    // catch Return(op0, ..., opm)
+    //    - stack A g0 ... gk needs to become A op0 ... opm
+    //    - we don't know k, so we need to remember size of stack A
+    // catch Jump(...) => error
+    def invoke(fun: FunctionInstance[V]): Unit =
+      fun match
+        case FunctionInstance.Wasm(mod, func, funcType) =>
+          val args = stack.popN(funcType.params.size)
+          val frameData = FrameData(funcType.t.size, mod)
+          val vars = args.view ++ func.locals.map(num.defaultValue)
+          val restoreStackSize = stack.size()
+          tryCatch {
+            labelStack.withFresh(inNewFrameNoIndex(frameData, vars) {
+              rec(FixIn.EnterWasmFunction(func, funcType))
+            })
+          } { ex =>
+            stack.popN(stack.size() - restoreStackSize)
+            ex match {
+              case WasmException.Return(operands) =>
+                stack.pushN(operands)
+              case WasmException.Jump(_, _) =>
+                fail(InvalidModule, s"Tried to jump through a function boundary.")
+            }
+          }
+
+    def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V): Unit =
+      functionOps.invokeFun(funV, Seq()) {
+        case (func, _) =>
+          val ftActual = func.funcType
+          if (ftExpected != ftActual)
+            fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
+          invoke(func)
+      }
+
+    phi {
+      case FixIn.Eval(inst) => eval_open(inst)
+      case FixIn.EnterWasmFunction(func, funcType) => label(0, funcType.t.size, func.body, None)
+    }
+  }
+
+  def eval(inst: Inst): Unit = fixed(FixIn.Eval(inst))
+
+
+  def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] =
+    inNewFrameNoIndex(FrameData(0, modInst), Iterable.empty) {
+      module.exports.find((name, _) => name == funcName) match
+        case Some((_, ExternalValue.Function(funcIx))) =>
+          val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+          val paramTys = func.funcType.params
+          if (paramTys.length != args.length)
+            throw new Error(s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}.")
+          // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
+          val rtLength = func.funcType.t.length
+          stack.pushN(args)
+          eval(Call(funcIx))
+          stack.popN(rtLength)
+        case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
+    }
+
+
+
+
+  private def returnArity(bt: BlockType): Int =
+    val returnArity = bt.arity(module.functionTypes)
+    if (returnArity < 0)
+      fail(UnboundFunctionType, bt.toString)
+    else
+      returnArity
+
+  private def paramsArity(bt: BlockType): Int =
+    bt.params(module.functionTypes) match
+      case Some(params) => params.size
+      case None => fail(UnboundFunctionType, bt.toString)
+
+
+
+
+//  // placeholder for the (not yet present in swam) memory.init instruction
+//  def memoryInit(dataIdx: Int): Unit =
+//    val dataInstance = module.data(dataIdx)
+//    val cnt = stack.pop() // i32
+//    val src = stack.pop() // i32
+//    val dst = stack.pop() // i32
+//    // check ranges TODO
+//    //if (src + cnt > dataInstance.data.size)
+//    // TODO WIP
+//    ???
 
   def evalInstructionSequence(instructions: Expr, mod: ModuleInstance[V]): V =
     val frameData = FrameData(1,mod)

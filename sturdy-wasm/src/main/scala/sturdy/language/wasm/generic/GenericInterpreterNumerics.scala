@@ -7,6 +7,7 @@ import sturdy.values.floats.*
 import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
+import swam.ValType
 import swam.syntax.*
 
 class GenericInterpreterNumerics[V]
@@ -234,3 +235,8 @@ class GenericInterpreterNumerics[V]
     case i64.TruncSatSF64 => doubleLong(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
     case i64.TruncSatUF64 => doubleLong(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
 
+  def defaultValue(ty: ValType): V = ty match
+    case ValType.I32 => evalNumeric(i32.Const(0))
+    case ValType.I64 => evalNumeric(i64.Const(0))
+    case ValType.F32 => evalNumeric(f32.Const(0))
+    case ValType.F64 => evalNumeric(f64.Const(0))
