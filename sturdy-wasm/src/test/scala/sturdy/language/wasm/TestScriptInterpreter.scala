@@ -31,6 +31,10 @@ class TestScriptInterpreter:
       val mod = compileUnresovedModule(m)
       // initialize module
       modules += interp.initializeModule(mod)
+    case BinaryModule(id, bytes) =>
+      // TODO
+    case QuotedModule(id, text) =>
+      // TODO
     case AssertReturn(invoke: Invoke, expectedRes) =>
       val res = evalInvoke(invoke)
       assertResult(CFallible.Unfailing(constExprToVals(expectedRes)))(res)
@@ -77,6 +81,15 @@ def compileUnresovedModule(mod: unresolved.Module): Module =
       mod <- compiler.compile(mod)
     } yield mod
   }.unsafeRunSync()
+
+//def compileBinaryModule(bytes: Array[Byte]): Module =
+//  implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
+//  Blocker[IO].use { blocker =>
+//    for {
+//      compiler <- Compiler[IO](blocker)
+//      mod <- compiler.compile(mod)
+//    } yield mod
+//  }.unsafeRunSync()
 
 def isNaN(value: Value): Boolean =
   value match

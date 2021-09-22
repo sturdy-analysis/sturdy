@@ -127,7 +127,7 @@ object ConcreteInterpreter extends Interpreter :
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): OptionC[A] =
       val i = ix.asInt32
-      if (i < vec.size)
+      if (i >= 0 && i < vec.size)
         OptionC.Some(vec(i))
       else
         OptionC.none

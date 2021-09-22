@@ -52,7 +52,7 @@ given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] wi
     case (config.Overflow.Fail, config.Bits.Signed) =>
       if (f.isNaN)
         fa.fail(ConversionFailure, s"float $f cannot be converted")
-      else if (f >= -Int.MinValue.toFloat || f <= Int.MinValue.toFloat - 1)
+      else if (f >= -Int.MinValue.toFloat || f < Int.MinValue.toFloat)
         fa.fail(ConversionFailure, s"float $f out of integer range")
       else
         f.toInt

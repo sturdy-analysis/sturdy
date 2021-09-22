@@ -27,7 +27,7 @@ trait ConcreteMemory[Key] extends Memory[Key, Int, ByteBuffer, Int]:
   override def memStore(key: Key, addr: Int, buf: ByteBuffer): OptionC[Unit] =
     val mem = memories(key)
     val length = buf.capacity()
-    if (addr + length < mem.size) {
+    if (addr >= 0 && addr + length <= mem.size) {
       buf.get(mem.bytes, addr, length)
       OptionC.Some(())
     } else {
