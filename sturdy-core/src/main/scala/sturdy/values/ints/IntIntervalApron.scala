@@ -77,6 +77,10 @@ case class IntIntervalApron(val interval: apron.Interval):
     // oder direkt: Abstract0(Manager man, int intdim, int realdim, Interval[] box) - Creates a new abstract element from a box.
     // es ist nicht möglich, dass diese Implementation schneller ist, als die von IntInterval
     IntIntervalApron(abstractDomain.joinCopy(manager, other.abstractDomain).getBound(manager, 1))
+  
+  def meet(other: IntIntervalApron): IntIntervalApron = 
+    IntIntervalApron(abstractDomain.meetCopy(manager, other.abstractDomain).getBound(manager, 1))
+  
  
   def +(y: IntIntervalApron): IntIntervalApron = IntIntervalApron.bounded({val tmp = l; tmp add y.l; tmp}, {val tmp = h; tmp add y.h; tmp})
   def -(y: IntIntervalApron): IntIntervalApron = IntIntervalApron.bounded({val tmp = l; tmp sub y.l; tmp}, {val tmp = h; tmp sub y.h; tmp})
