@@ -1,7 +1,7 @@
 package sturdy.language.wasm.analyses
 
 import sturdy.data.{*, given}
-import sturdy.effect.Effectful
+import sturdy.effect.{Effectful, AnalysisState}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.ABoolBranching
@@ -14,10 +14,7 @@ import sturdy.effect.symboltable.{ToppedSymbolTable, SymbolTable}
 import sturdy.fix
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.ConstantValues
-import sturdy.language.wasm.generic.FunctionInstance
-import sturdy.language.wasm.generic.GenericInterpreter
-import sturdy.language.wasm.generic.GenericInterpreter.{FrameData, WasmException, FixIn}
-import sturdy.language.wasm.generic.WasmOperations
+import sturdy.language.wasm.generic.*
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
@@ -95,6 +92,15 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       case Value.Float32(Topped.Actual(f)) => cSerialize.encode(ConcreteInterpreter.Value.Float32(f), encInfo).array().view.map(Topped.Actual.apply)
       case Value.Float64(Topped.Actual(d)) => cSerialize.encode(ConcreteInterpreter.Value.Float64(d), encInfo).array().view.map(Topped.Actual.apply)
 
+  type InState =
+    (CCallFrameInt.State[FrameData[Value], Value],
+      ConstantAddressMemory.State[Int, Topped[Byte]],
+      ToppedSymbolTable.State[Int, Int, FunV])
+
+  type OutState = // function result
+    (ConstantAddressMemory.State[Int, Topped[Byte]],
+      ToppedSymbolTable.State[Int, Int, FunV])
+
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends JoinedOperandStack[Value]
       with ConstantAddressMemory[Int, Topped[Byte]](Topped.Actual(0))
@@ -104,6 +110,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       with ABoolBranching[Value]
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
+//      with AnalysisState[_, _]
 
   def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
@@ -145,5 +152,9 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       effects.joinComputationsIterable(invokeAllFuns)
     val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
 
-    val phi: fix.Combinator[FixIn[Value], Unit] = fix.identity
-    
+    val phi: fix.Combinator[FixIn, Unit] =
+      fix.notContextSensitive(
+        fix.filter(Fix.isFunOrWhile,
+          fix.identity
+        )
+      )

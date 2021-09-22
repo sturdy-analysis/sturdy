@@ -4,7 +4,7 @@ import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.{CFailureException, CFallible}
-import sturdy.language.wasm.generic.GenericInterpreter.FrameData
+import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.generic.ModuleInstance
 import ConcreteInterpreter.Value
 
@@ -42,7 +42,7 @@ class TestScriptInterpreter:
       assert(res.isFailing)
     case _ => //skip for now
 
-  def evalInvoke(invoke: Invoke): CFallible[List[Value]] =
+  def evalInvoke(invoke: Invoke): CFallible[Iterable[Value]] =
     val modInst = modules.last
     interp.effects.fallible {
       interp.invokeExported(modInst, invoke.s, constExprToVals(invoke.inst))

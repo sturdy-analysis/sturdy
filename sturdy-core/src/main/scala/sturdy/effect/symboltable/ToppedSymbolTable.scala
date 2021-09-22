@@ -6,28 +6,17 @@ import sturdy.values.{*, given}
 
 import scala.collection.mutable
 
+import ToppedSymbolTable.*
+
 trait ToppedSymbolTable[Key, Symbol, Entry](using JoinValue[Entry], Top[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry], Effectful:
 
   override type TableJoin[A] = Join[A]
 
-  class Table(val underlying: Map[Symbol, MayMust[Entry]], val dirtySymbols: Set[Symbol]):
-    inline def updated(symbol: Symbol, entry: Entry): Table =
-      new Table(underlying.updated(symbol, MayMust.Must(entry)), dirtySymbols + symbol)
-    inline def updated(symbol: Symbol, entry: MayMust[Entry]): Table =
-      new Table(underlying.updated(symbol, entry), dirtySymbols + symbol)
-    def allMay: Table =
-      var newUnderlying = underlying
-      var newDirtySymbols = dirtySymbols
-      for ((s, mentry) <- underlying if mentry.isMust) {
-        newDirtySymbols += s
-        newUnderlying += s -> mentry.asMay
-      }
-      new Table(newUnderlying, newDirtySymbols)
-
-
-  protected var tables: Map[Key, Topped[Table]] = Map()
+  protected var tables: Map[Key, Topped[Table[Symbol, Entry]]] = Map()
   private var dirtyTables = Set[Key]()
 
+  def getTables: State[Key, Symbol, Entry] = tables
+  
   override def tableGet(key: Key, symbol: Topped[Symbol]): OptionA[Entry] =
     tables(key) match
       case Topped.Top => OptionA.NoneSome(Iterable.single(Top.top))
@@ -104,3 +93,20 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using JoinValue[Entry], Top[Entry]) 
         dirtyTables ++= snapDirtyTables
       }
     }
+
+object ToppedSymbolTable:
+  type State[Key, Symbol, Entry] = Map[Key, Topped[Table[Symbol, Entry]]]
+  
+  class Table[Symbol, Entry](val underlying: Map[Symbol, MayMust[Entry]], val dirtySymbols: Set[Symbol]):
+    inline def updated(symbol: Symbol, entry: Entry): Table[Symbol, Entry] =
+      new Table(underlying.updated(symbol, MayMust.Must(entry)), dirtySymbols + symbol)
+    inline def updated(symbol: Symbol, entry: MayMust[Entry]): Table[Symbol, Entry] =
+      new Table(underlying.updated(symbol, entry), dirtySymbols + symbol)
+    def allMay: Table[Symbol, Entry] =
+      var newUnderlying = underlying
+      var newDirtySymbols = dirtySymbols
+      for ((s, mentry) <- underlying if mentry.isMust) {
+        newDirtySymbols += s
+        newUnderlying += s -> mentry.asMay
+      }
+      new Table(newUnderlying, newDirtySymbols)

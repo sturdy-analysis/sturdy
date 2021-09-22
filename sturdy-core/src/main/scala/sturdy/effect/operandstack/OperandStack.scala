@@ -2,17 +2,20 @@ package sturdy.effect.operandstack
 
 import sturdy.effect.Effectful
 
-import scala.collection.immutable.VectorBuilder
-
 trait OperandStack[V] extends Effectful:
   def push(v: V): Unit
   def pop(): V
   def peek(): V
-  def size(): Int
   def ifEmpty[A](empty: => A, notEmpty: => A): A
-  def withFreshOperandStack[A](f: => A): A
-  def restoreAfter[A](f: => A): A
 
+  /** Computes `f` in a new operand frame, discarding all remaining operands. */
+  def withFreshOperandStack[A](f: => A): A
+
+  /** Computes `f` in a new operand frame, but all remaining operands are moved to the surrounding frame upon exit of `f`. */
+  def withFreshOperandFrame[A](f: => A): A
+
+  def clearCurrentOperandFrame(): Unit
+  
   final def pop2(): (V, V) =
     val v2 = pop()
     val v1 = pop()

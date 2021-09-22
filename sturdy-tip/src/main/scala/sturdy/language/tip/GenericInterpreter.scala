@@ -96,8 +96,8 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   def getFunctions: Iterable[Function] = functions.values
 
   private lazy val fixed = fix.Fixpoint { (rec: FixIn => FixOut[V]) =>
-    def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
-    def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case v => throw new IllegalStateException()}
+    inline def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
+    inline def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case v => throw new IllegalStateException()}
 
     def eval_open(e: Exp): V = e match {
       case Exp.NumLit(n) => intLit(n)
@@ -117,7 +117,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         val v2 = eval(e2)
         equ(v1, v2)
       case Exp.Call(fun, args) =>
-        invokeFun(eval(fun), args.map(eval))(call)
+        invokeFun(eval(fun), args.map(eval(_)))(call)
       case a@Exp.Alloc(e) =>
         val addr = alloc(AllocationSite.Alloc(a))
         write(addr, eval(e))
@@ -147,11 +147,11 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         val v = eval(e)
         assign(lhs, v)
       case Stm.If(cond: Exp, thn: Stm, els: Option[Stm]) =>
-        boolBranch(eval(cond), run(thn), els.map(run).getOrElse(()))
+        boolBranch(eval(cond), run(thn), els.map(run(_)).getOrElse(()))
       case Stm.While(cond, body) =>
         boolBranch(eval(cond), {run(body); run(s)}, {})
       case Stm.Block(body) =>
-        body.foreach(run)
+        body.foreach(run(_))
       case Stm.Output(e) =>
         print(eval(e))
       case Stm.Error(e) =>

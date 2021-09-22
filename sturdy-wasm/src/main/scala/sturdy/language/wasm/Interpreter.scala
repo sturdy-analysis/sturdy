@@ -2,10 +2,7 @@ package sturdy.language.wasm
 
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.fix.Widening
-import sturdy.language.wasm.generic.TypeError
-import sturdy.language.wasm.generic.GenericInterpreter
-import sturdy.language.wasm.generic.GenericInterpreter.GenericEffects
-import sturdy.language.wasm.generic.WasmOperations
+import sturdy.language.wasm.generic.*
 import sturdy.values.JoinValue
 import sturdy.values.Top
 import sturdy.values.convert.LiftedConvert

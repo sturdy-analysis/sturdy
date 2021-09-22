@@ -8,7 +8,7 @@ import sturdy.language.tip.Exp
 import sturdy.values.unit
 
 object Fix:
-  final def isCallOrWhile(dom: FixIn): Int = dom match
+  final def isFunOrWhile(dom: FixIn): Int = dom match
     case FixIn.EnterFunction(_) => 0
     case FixIn.Run(Stm.While(_, _)) => 1
     case _ => -1

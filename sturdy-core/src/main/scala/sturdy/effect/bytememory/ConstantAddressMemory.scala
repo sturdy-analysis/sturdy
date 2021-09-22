@@ -17,6 +17,8 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], JoinValue
   override type MemoryJoin[A] = Join[A]
 
   protected var memories: mutable.Map[Key, Topped[Mem[B]]] = mutable.Map()
+  
+  def getMemories: State[Key, B] = memories.view.mapValues(_.map(_.clone())).toMap
 
   override def memRead(key: Key, addr: Topped[Int], length: Int): OptionA[IndexedSeqView[B]] =
     (memories(key), addr) match
@@ -99,6 +101,8 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], JoinValue
 
 
 object ConstantAddressMemory:
+  type State[Key, B] = Map[Key, Topped[Mem[B]]]
+
   case class Mem[B](bytes: Array[B], dirty: mutable.BitSet, sizeLimit: scala.Option[Int], definite: Boolean = true):
     override def clone(): Mem[B] = Mem(bytes.clone(), dirty.clone(), sizeLimit)
     inline def size = bytes.length

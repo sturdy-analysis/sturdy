@@ -10,7 +10,7 @@ import sturdy.effect.failure.FailureKind
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
-import sturdy.language.wasm.generic.GenericInterpreter.FrameData
+import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.generic.UnreachableInstruction
 import sturdy.values.Topped
 
@@ -118,7 +118,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     }
 
 
-def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
+def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[Iterable[Value]] =
   val module = wasm.parse(path)
   val interp = ConstantAnalysis(FrameData(0, null), Iterable.empty)
   val modInst = interp.initializeModule(module)

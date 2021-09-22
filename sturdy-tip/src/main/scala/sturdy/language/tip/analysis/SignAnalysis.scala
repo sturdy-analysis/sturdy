@@ -72,7 +72,7 @@ object SignAnalysis extends Interpreter,
 
     val phi =
       fix.contextSensitive(parameters,
-        fix.dispatch(isCallOrWhile, Seq(
+        fix.dispatch(isFunOrWhile, Seq(
           // call
           fix.iter.topmost,
           // while

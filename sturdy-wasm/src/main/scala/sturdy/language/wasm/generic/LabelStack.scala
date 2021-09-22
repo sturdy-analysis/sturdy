@@ -5,9 +5,9 @@ import swam.LabelIdx
 import scala.collection.mutable.ArrayBuffer
 
 class LabelStack:
-  private var labelReturnArities: ArrayBuffer[LabelIdx] = ArrayBuffer()
-  def lookupLabel(lableIndex: LabelIdx): LabelIdx = labelReturnArities(labelReturnArities.size - lableIndex - 1)
-  inline def pushLabel(returnArity: LabelIdx): Unit =
+  private var labelReturnArities: ArrayBuffer[Int] = ArrayBuffer()
+  def lookupLabel(lableIndex: LabelIdx): Int = labelReturnArities(labelReturnArities.size - lableIndex - 1)
+  inline def pushLabel(returnArity: Int): Unit =
     labelReturnArities += returnArity
   inline def popLabel(): Unit =
     labelReturnArities.remove(labelReturnArities.size - 1)

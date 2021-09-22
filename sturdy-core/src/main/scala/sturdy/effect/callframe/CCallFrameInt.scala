@@ -5,6 +5,11 @@ import sturdy.data.*
 import scala.reflect.ClassTag
 import scala.annotation.targetName
 
+import CCallFrameInt.*
+
+object CCallFrameInt:
+  type State[Data, V] = (Data, Vector[V])
+
 trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V]) extends CallFrame[Data, Int, V]:
   type CallFrameJoin[A] = NoJoin[A]
 
@@ -12,7 +17,7 @@ trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V])
   protected var vars: Array[V] = _vars.toArray
 
   def getFrameData: Data = data
-  def getCallFrame: (Data, Vector[V]) = (data, vars.toVector)
+  def getCallFrame: State[Data, V] = (data, vars.toVector)
 
   def getLocal(ix: Int): OptionC[V] =
     if (ix >= 0 && ix < vars.size)

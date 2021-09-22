@@ -5,7 +5,7 @@ import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.{CFallible, FailureKind}
-import sturdy.language.wasm.generic.GenericInterpreter.FrameData
+import sturdy.language.wasm.generic.FrameData
 import ConcreteInterpreter.Value
 import sturdy.language.wasm.generic.UnreachableInstruction
 
@@ -79,7 +79,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
     }
 
 
-def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[List[Value]] =
+def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[Iterable[Value]] =
   val module = parse(path)
   val interp = ConcreteInterpreter(FrameData(0, null), Iterable.empty)
   val modInst = interp.initializeModule(module)

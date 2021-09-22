@@ -18,32 +18,29 @@ import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
 import sturdy.values.unit
-
+import swam.FuncType
 import swam.syntax.*
 import swam.{ValType, TableType, GlobalType, LabelIdx, MemType, OpCode, BlockType, Limits}
 
-object GenericInterpreter:
-  case class FrameData[V](returnArity: Int, module: ModuleInstance[V])
+case class FrameData[V](returnArity: Int, module: ModuleInstance[V])
 
-  enum WasmException[V]:
-    case Jump(labelIndex: LabelIdx, operands: List[V])
-    case Return(operands: List[V])
+enum WasmException[V]:
+  case Jump(labelIndex: LabelIdx, operands: List[V])
+  case Return(operands: List[V])
 
-  type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV] =
-    OperandStack[V]
-      with Memory[Int, Addr,Bytes,Size]
-      with Serialize[V,Bytes,MemoryInst,MemoryInst]
-      with SymbolTable[Int, FuncIx, FunV]
-      with CMutableCallFrameInt[FrameData[V], V]
-      with BoolBranching[V]
-      with Except[WasmException[V], ExcV]
-      with Failure
+type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV] =
+  OperandStack[V]
+    with Memory[Int, Addr,Bytes,Size]
+    with Serialize[V,Bytes,MemoryInst,MemoryInst]
+    with SymbolTable[Int, FuncIx, FunV]
+    with CMutableCallFrameInt[FrameData[V], V]
+    with BoolBranching[V]
+    with Except[WasmException[V], ExcV]
+    with Failure
 
-  enum FixIn[V]:
-    case Eval(inst: Inst)
-    case EnterWasmFunction(func: swam.syntax.Func, ft: swam.FuncType)
-
-import GenericInterpreter.*
+enum FixIn:
+  case Eval(inst: Inst)
+  case EnterWasmFunction(func: swam.syntax.Func, ft: swam.FuncType)
 
 trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]]
   (val effects: Effects)
@@ -78,7 +75,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
   val convertDoubleFloat: ConvertDoubleFloat[V, V]
   val functionOps: FunctionOps[FunctionInstance[V], Nothing, Unit, FunV]
 
-  val phi: fix.Combinator[FixIn[V], Unit]
+  val phi: fix.Combinator[FixIn, Unit]
 
   lazy val num = new GenericInterpreterNumerics[V](
     effects,
@@ -176,8 +173,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
 
 
 
-  private lazy val fixed = fix.Fixpoint { (rec: FixIn[V] => Unit) =>
-    def eval(inst: Inst): Unit = rec(FixIn.Eval(inst))
+  private lazy val fixed = fix.Fixpoint { (rec: FixIn => Unit) =>
+    inline def eval(inst: Inst): Unit = rec(FixIn.Eval(inst))
+    inline def enterFunction(func: Func, ft: FuncType): Unit = rec(FixIn.EnterWasmFunction(func, ft))
 
     def eval_open(inst: Inst): Unit =
       val opcode = inst.opcode
@@ -267,23 +265,23 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
    *   - we don't know k, so we need to remember size of stack A
    */
     def label(paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
-      val restoreStackSize = stack.size() - paramsArity
       labelStack.pushLabel(returnArity)
-      try tryCatch {
-        insts.foreach(eval)
-      } { ex =>
-        // unwind the stack
-        stack.popN(stack.size() - restoreStackSize)
-        ex match {
-          case WasmException.Jump(labelIndex, operands) =>
-            if (labelIndex == 0) {
-              stack.pushN(operands)
-              branchTarget.foreach(eval)
-            } else {
-              throws(WasmException.Jump(labelIndex - 1, operands))
-            }
-          case _: WasmException.Return[V] =>
-            throws(ex)
+      try stack.withFreshOperandFrame {
+        tryCatch {
+          insts.foreach(eval(_))
+        } { ex =>
+          stack.clearCurrentOperandFrame()
+          ex match {
+            case WasmException.Jump(labelIndex, operands) =>
+              if (labelIndex == 0) {
+                stack.pushN(operands)
+                branchTarget.foreach(eval(_))
+              } else {
+                throws(WasmException.Jump(labelIndex - 1, operands))
+              }
+            case _: WasmException.Return[V] =>
+              throws(ex)
+          }
         }
       } finally labelStack.popLabel()
 
@@ -299,20 +297,23 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
           val args = stack.popN(funcType.params.size)
           val frameData = FrameData(funcType.t.size, mod)
           val vars = args.view ++ func.locals.map(num.defaultValue)
-          val restoreStackSize = stack.size()
-          tryCatch {
-            labelStack.withFresh(inNewFrameNoIndex(frameData, vars) {
-              rec(FixIn.EnterWasmFunction(func, funcType))
-            })
-          } { ex =>
-            stack.popN(stack.size() - restoreStackSize)
-            ex match {
-              case WasmException.Return(operands) =>
-                stack.pushN(operands)
-              case WasmException.Jump(_, _) =>
-                fail(InvalidModule, s"Tried to jump through a function boundary.")
-            }
-          }
+          labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
+            enterFunction(func, funcType)
+          }))
+
+    def enterFunction_open(func: Func, funcType: FuncType): Unit =
+      val returnN = funcType.t.size
+      tryCatch {
+        label(0, returnN, func.body, None)
+      } { ex =>
+        stack.clearCurrentOperandFrame()
+        ex match {
+          case WasmException.Return(operands) =>
+            stack.pushN(operands)
+          case WasmException.Jump(_, _) =>
+            fail(InvalidModule, s"Tried to jump through a function boundary.")
+        }
+      }
 
     def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V): Unit =
       functionOps.invokeFun(funV, Seq()) {
@@ -325,7 +326,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
 
     phi {
       case FixIn.Eval(inst) => eval_open(inst)
-      case FixIn.EnterWasmFunction(func, funcType) => label(0, funcType.t.size, func.body, None)
+      case FixIn.EnterWasmFunction(func, funcType) => enterFunction_open(func, funcType)
     }
   }
 

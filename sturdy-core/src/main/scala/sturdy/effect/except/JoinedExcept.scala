@@ -8,6 +8,8 @@ import sturdy.values.exceptions.Exceptional
 import scala.collection.mutable.ListBuffer
 import scala.util.Success
 
+import JoinedExcept.*
+
 case object AbstractException extends ExceptException:
   override def toString: String = s"Exception (abstract)"
 
@@ -17,7 +19,7 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJo
 
   protected var exception: OptionA[E] = OptionA.none
 
-  def getException: OptionA[E] = exception
+  def getException: State[Exc, E] = exception
 
   override def throws(ex: Exc): Nothing =
     val e = exceptional.exception(ex)
@@ -62,3 +64,6 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJo
         this.exception = fExcept.joinDeep(this.exception)
       }
     }
+
+object JoinedExcept:
+  type State[Exc, E] = OptionA[E]

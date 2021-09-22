@@ -81,7 +81,7 @@ object IntervalAnalysis extends Interpreter,
     val phi =
       fix.log(callSites,
         fix.contextSensitive(callSites.callString(2),
-          fix.dispatch(isCallOrWhile, Seq(
+          fix.dispatch(isFunOrWhile, Seq(
             // call
             fix.iter.topmost,
             // while
