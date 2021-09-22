@@ -12,6 +12,7 @@ import sturdy.values.ints.IntIntervalApronWiden
 import sturdy.fix.Widening
 import scala.language.postfixOps
 import org.scalatest.freespec.AnyFreeSpec
+import sturdy.values.ints.IntOps
 
 val ourAbstractManager = apron.Box()
 val ourAbstractDomain = apron.Abstract0(ourAbstractManager, 1, 0, Array(apron.Interval()))
@@ -21,8 +22,13 @@ val ourAbstractDomain = apron.Abstract0(ourAbstractManager, 1, 0, Array(apron.In
 // TODO: add tests for all use cases/functions
 //anyflatspec wird unten benutzt (texte, die den test definieren)
 class ApronTest extends AnyFlatSpec, Matchers:
-  lazy val add0 = Seq(IntIntervalApron(-1, 1), op2IIA(_+_, 0,1, -1,0))
-  lazy val sub0 = Seq(IntIntervalApron(1, 1), op2IIA(_-_, 0,1, -1,0))
+  // TODO: for a given trait
+  def parityIItoIIA(test_f: (IntIntervalApron, IntIntervalApron) => IntIntervalApron & (IntInterval, IntInterval) => IntInterval,
+                      v1_l: Int, v1_h: Int, v2_l: Int, v2_h: Int) =
+                        assert(op2IIA(test_f, v1_l,v1.h, v2_l,v2_h) === op2IItoIIA(test_f, v1_l,v1_h, v2_l,v2_h))
+
+  lazy val add = Seq(IntIntervalApron(-1, 1), op2IIA(_+_, 0,1, -1,0))
+  lazy val sub = Seq(IntIntervalApron(1, 1), op2IIA(_-_, 0,1, -1,0))
   lazy val mult = Seq(
       Seq(
         IntIntervalApron(-1, 0), // result
@@ -43,7 +49,7 @@ class ApronTest extends AnyFlatSpec, Matchers:
   }
 
    def op2IItoIIA(f: (IntInterval, IntInterval) => IntInterval, l0: Int, l1: Int, r0: Int, r1: Int): IntIntervalApron = {
-    f(IntInterval.bounded(l0, l1), IntInterval.bounded(r0, r1))
+    IntIntervalApron(f(IntInterval.bounded(l0, l1), IntInterval.bounded(r0, r1)))
   }
 
   def testDefault(testSequence: Seq[Matchable]) = {
@@ -51,41 +57,40 @@ class ApronTest extends AnyFlatSpec, Matchers:
     for (member <- rest) result === member //todo: testausgabe hierfür
   }
 
-  "Apron Intervals" must "perform addition" in {
+  // "Apron Intervals" must "perform addition" in {
 
-    testDefault(add0)
-  }
-  it must "perform substraction" in {
+  //   testDefault(add)
+  // }
+  // it must "perform substraction" in {
     
-
-    testDefault(sub0)
-  }
-  it must "perform multiplication" in { // example for multiple tests and test cases
+  //   testDefault(sub)
+  // }
+  // it must "perform multiplication" in { // example for multiple tests and test cases
     
-    for (test <- mult) testDefault(test)
-  }
-  it must "perform division" in { // TODO
-    for (test <- div) testDefault(test)
-  }
-  it must "join" in {
+  //   for (test <- mult) testDefault(test)
+  // }
+  // it must "perform division" in { // TODO
+  //   for (test <- div) testDefault(test)
+  // }
+  // it must "join" in {
 
-    testDefault(join0)
-  }
-  it must "meet" in {
-    assert((IntIntervalApron(0,10) meet IntIntervalApron(-10,5)) === IntIntervalApron(0, 5)) 
-  }
-  it must "widen" in { // TODO
-    implicit var bounds: Set[Int] = Set.empty
-    assert(IntIntervalApronWiden.widen(IntIntervalApron(0,10), IntIntervalApron(-10,5)) === IntIntervalApron(0, 5))
-  }
-  it must "compare" in { // TODO
-    //assertEquals(IntIntervalApron(0,10) meet IntIntervalApron(-10,5), IntIntervalApron(0, 5))
-  }
+  //   testDefault(join0)
+  // }
+  // it must "meet" in {
+  //   assert((IntIntervalApron(0,10) meet IntIntervalApron(-10,5)) === IntIntervalApron(0, 5)) 
+  // }
+  // it must "widen" in { // TODO
+  //   implicit var bounds: Set[Int] = Set.empty
+  //   assert(IntIntervalApronWiden.widen(IntIntervalApron(0,10), IntIntervalApron(-10,5)) === IntIntervalApron(0, 5))
+  // }
+  // it must "compare" in { // TODO
+  //   //assertEquals(IntIntervalApron(0,10) meet IntIntervalApron(-10,5), IntIntervalApron(0, 5))
+  // }
 
   "sturdy.IntIntervalApron" must "behave like sturdy.IntInterval" {
     "for addition" in {
       // Add
-      //assertEquals(add0, IntIntervalApron(IntInterval(0,1) + IntInterval(-1,0)))
+      //assert(add, IntIntervalApron(IntInterval(0,1) + IntInterval(-1,0)))
     }
     "for substraction" in {}
     "for multiplication" in {}

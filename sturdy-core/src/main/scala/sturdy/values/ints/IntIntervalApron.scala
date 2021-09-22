@@ -46,6 +46,7 @@ object IntIntervalApron:
   def apply(l: gmp.Mpq, h: gmp.Mpq) = new IntIntervalApron(apron.Interval(l, h))
   def apply(l: gmp.Mpq, h: Int) = new IntIntervalApron(apron.Interval(l, gmp.Mpq(h)))
   def apply(l: Int, h: gmp.Mpq) = new IntIntervalApron(apron.Interval(gmp.Mpq(l), h))
+  def apply(interval: IntInterval) = new IntIntervalApron(interval.l, interval.h)
 
   def unapply(interval: IntIntervalApron): Some[(Int, Int)] =
     Some(interval.l.doubleValue.toInt, interval.h.doubleValue.toInt)
