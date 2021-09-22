@@ -119,21 +119,16 @@ object ConstantAddressMemory:
     inline def size = bytes.length
     inline def pageNum: Int = (size / pageSize).toInt
 
-    def join(that: Mem[B])(using j: JoinValue[B]): Topped[Mem[B]] =
-      if (this.bytes.length != that.bytes.length)
-        Topped.Top
-      else if (this.dirty.size >= that.dirty.size)
-        Topped.Actual(this.joinSameSized(that, j.joinValues))
-      else
-        Topped.Actual(that.joinSameSized(this, j.joinValues))
+    inline def join(that: Mem[B])(using j: JoinValue[B]) = combine(that, j.joinValues)
+    inline def widen(that: Mem[B])(using w: Widening[B]) = combine(that, w.widen)
 
-    def widen(that: Mem[B])(using w: Widening[B]): Topped[Mem[B]] =
+    private def combine(that: Mem[B], com: (B, B) => B): Topped[Mem[B]] =
       if (this.bytes.length != that.bytes.length)
         Topped.Top
       else if (this.dirty.size >= that.dirty.size)
-        Topped.Actual(this.joinSameSized(that, w.widen))
+        Topped.Actual(this.clone().joinSameSized(that, com))
       else
-        Topped.Actual(that.joinSameSized(this, w.widen))
+        Topped.Actual(that.clone().joinSameSized(this, com))
 
     inline private def joinSameSized(that: Mem[B], combine: (B, B) => B): Mem[B] =
       for (ix <- that.dirty)

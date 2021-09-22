@@ -20,6 +20,10 @@ enum MayMust[T]:
     case May(_) => this
     case Must(t) => May(t)
 
+  def combine(that: MayMust[T], com: (T,T) => T): MayMust[T] = (this, that) match
+    case (MayMust.Must(t1), MayMust.Must(t2)) => MayMust.Must(com(t1, t2))
+    case _ => MayMust.May(com(this.get, that.get))
+
 given finiteMayMust[T](using Finite[T]): Finite[MayMust[T]] with {}
 
 given joinMayMust[T](using j: JoinValue[T]): JoinValue[MayMust[T]] with

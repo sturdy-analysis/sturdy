@@ -61,36 +61,7 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using JoinValue[Entry], Top[Entry]) 
           case Topped.Actual(fTab) => tables.get(fkey) match
             case None => tables += fkey -> Topped.Actual(fTab.allMay)
             case Some(Topped.Top) => // leave at top
-            case Some(Topped.Actual(gTab)) =>
-              var newGTab = gTab
-              lazy val snapTab = tables.getOrElse(fkey, Topped.Actual(new Table(Map(), Set()))).get
-              for (fsym <- fTab.dirtySymbols) {
-                val fEntry = fTab.underlying(fsym)
-                if (gTab.dirtySymbols.contains(fsym))
-                  // fsym is also in gTab
-                  newGTab = newGTab.updated(fsym, JoinValue.join(fEntry, gTab.underlying(fsym)))
-                else
-                  // fsym is not in gTab
-                  snapTab.underlying.get(fsym) match
-                    case Some(snapEntry) =>
-                      // fsym was already in snapTab => join with the old value
-                      newGTab = newGTab.updated(fsym, JoinValue.join(fEntry, snapEntry))
-                    case None =>
-                      // fsym is neither in snapTab nor gTab, it only occurs in fTab => make it a `May`
-                      newGTab = newGTab.updated(fsym, fEntry.asMay)
-              }
-
-              for (gsym <- gTab.dirtySymbols)
-                val gEntry = gTab.underlying(gsym)
-                // this is the last remaining case to consider
-                if (!fTab.dirtySymbols.contains(gsym))
-                  snapTab.underlying.get(gsym) match
-                    case Some(snapEntry) =>
-                      // fsym was already in snapTab => join with the old value
-                      newGTab = newGTab.updated(gsym, JoinValue.join(gEntry, snapEntry))
-                    case None =>
-                      // fsym is neither in snapTab nor gTab, it only occurs in fTab => make it a `May`
-                      newGTab = newGTab.updated(gsym, gEntry.asMay)
+            case Some(Topped.Actual(gTab)) => tables += fkey -> Topped.Actual(fTab.join(gTab))
 
         dirtyTables ++= fDirty
         dirtyTables ++= snapDirtyTables
@@ -119,3 +90,27 @@ object ToppedSymbolTable:
         newUnderlying += s -> mentry.asMay
       }
       new Table(newUnderlying, newDirtySymbols)
+
+    inline def join(that: Table[Symbol, Entry])(using j: JoinValue[Entry]) = combine(that, j.joinValues)
+    inline def widen(that: Table[Symbol, Entry])(using w: Widening[Entry]) = combine(that, w.widen)
+
+    def combine(that: Table[Symbol, Entry], com: (Entry, Entry) => Entry): Table[Symbol, Entry] =
+      if (this.dirtySymbols.size >= that.dirtySymbols.size)
+        this.combineFrom(that, com)
+      else
+        that.combineFrom(this, com)
+
+    inline private def combineFrom(that: Table[Symbol, Entry], com: (Entry, Entry) => Entry): Table[Symbol, Entry] =
+      var tab = this.underlying
+      var dirty = this.dirtySymbols
+      for (s <- that.dirtySymbols) {
+        val now = that.underlying(s)
+        val e = tab.get(s) match {
+          case None => now
+          case Some(old) => old.combine(now, com)
+        }
+        tab += s -> e
+        dirty += s
+      }
+      Table(tab, dirty)
+
