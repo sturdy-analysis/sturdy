@@ -1,5 +1,7 @@
 package sturdy.values
 
+import sturdy.fix.Widening
+
 enum Topped[+V]:
   case Top
   case Actual(v: V)
@@ -60,8 +62,21 @@ object Topped:
       else
         Topped.Top
 
+  given flatToppedWidening[V]: Widening[Topped[V]] with
+    def widen(v1: Topped[V], v2: Topped[V]): Topped[V] =
+      if v1 == v2 then
+        v1
+      else
+        Topped.Top
+
   given nestedToppedJoin[V](using j: JoinValue[V]): JoinValue[Topped[V]] with
     def joinValues(v1: Topped[V], v2: Topped[V]): Topped[V] = (v1, v2) match
       case (Top, _) => Top
       case (_, Top) => Top
       case (Actual(x1), Actual(x2)) => Actual(j.joinValues(x1, x2))
+
+  given nestedToppedWidening[V](using j: Widening[V]): Widening[Topped[V]] with
+    def widen(v1: Topped[V], v2: Topped[V]): Topped[V] = (v1, v2) match
+      case (Top, _) => Top
+      case (_, Top) => Top
+      case (Actual(x1), Actual(x2)) => Actual(j.widen(x1, x2))

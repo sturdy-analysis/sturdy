@@ -1,5 +1,6 @@
 package sturdy.effect.operandstack
 
+import sturdy.fix.Widening
 import sturdy.values.JoinValue
 
 /** Stacks of different execution branches are joined. */
@@ -19,3 +20,6 @@ trait JoinedOperandStack[V <: AnyRef](using JoinValue[V]) extends GenericOperand
       }
     }
 
+object JoinedOperandStack:
+  type State[V] = GenericOperandStack.State[V]
+  given Widen[V](using Widening[V]): Widening[State[V]] = GenericOperandStack.Widen

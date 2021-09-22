@@ -31,6 +31,10 @@ object IntervalAnalysis extends Interpreter,
 
   given Lazy[JoinValue[Value]] = lazily(liftedJoinValue)
 
+  type InState = Store
+  type OutState = (Store, APrintPrefix.PrintResult[Value])
+  type AllState = OutState
+
   class Effects(initEnvironment: Environment, initStore: Store)
     extends ABoolBranching[Value]
       with CCallFrame[Unit, String, Addr]((), initEnvironment)
@@ -39,14 +43,13 @@ object IntervalAnalysis extends Interpreter,
       with APrintPrefix[Value]
       with AUserInput[Value](Value.IntValue(IntInterval.Top))
       with AFailureCollect
-      with AnalysisState[Store, (Store, APrintPrefix.PrintResult[Value])]:
-    override def getInState(): InState = getStore
-    override def setInState(in: InState): Unit = setStore(in)
-    override def getOutState(): OutState = (getStore, getPrinted)
-    override def setOutState(out: OutState): Unit =
-      setStore(out._1)
-      setPrinted(out._2)
-    override def isOutStateStable(old: OutState, now: OutState): Boolean = old._1 == now._1
+      with AnalysisState[InState, OutState, AllState]:
+    override def getInState() = getStore
+    override def setInState(in: InState) = setStore(in)
+    override def getOutState() = (getStore, getPrinted)
+    override def setOutState(out: OutState) = { setStore(out._1); setPrinted(out._2) }
+    override def getAllState() = getOutState()
+    override def setAllState(all: AllState) = setOutState(all)
 
   def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
     val effects = new Effects(initEnvironment, initStore)

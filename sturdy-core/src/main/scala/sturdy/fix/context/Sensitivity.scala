@@ -22,7 +22,7 @@ final class Product[Dom, Ctx1, Ctx2](s1: Sensitivity[Dom, Ctx1], s2: Sensitivity
   override def apply(dom: Dom): (Ctx1, Ctx2) = (s1(dom), s2(dom))
 
 
-def full[Dom, In](using state: AnalysisState[In, _]) = new Sensitivity[Dom, In] {
+def full[Dom, In](using state: AnalysisState[In, _, _]) = new Sensitivity[Dom, In] {
   override def emptyContext = null.asInstanceOf[In]
   override def switchCall(dom: Dom): Boolean = true
   override def apply(dom: Dom) = state.getInState()

@@ -24,8 +24,7 @@ case object RecurrentCall extends Exception:
  *  This can be achieved by making sure that each call chain repeats a previous context after
  *  finitely many calls. This property holds in particular if the set of contexts is finite.
  */
-final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], contextual: Contextual[Ctx, Dom, Codom])
-  (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
+final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, All], contextual: Contextual[Ctx, Dom, Codom])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: Effectful):
 
   case class Frame(dom: Dom, ctx: Ctx)
@@ -58,8 +57,7 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
 
   /** Iterates `f` until the outCache is stable. */
   def repeatUntilStable[A](f: () => A): A = {
-    val originalInState = state.getInState()
-    val originalOutState = state.getOutState()
+    val originalState = state.getAllState()
     var iterationCount = 0
 
     var previousOutCache = outCache
@@ -73,8 +71,7 @@ final class Stack[Dom, Codom, In, Out, Ctx](state: AnalysisState[In, Out], conte
         if (Fixpoint.DEBUG)
           println(s"## REPEAT (Iteration $iterationCount)")
         previousOutCache = outCache
-        state.setInState(originalInState)
-        state.setOutState(originalOutState)
+        state.setAllState(originalState)
       }
     }
     throw new IllegalStateException()

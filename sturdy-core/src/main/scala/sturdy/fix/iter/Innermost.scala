@@ -13,20 +13,18 @@ import scala.annotation.tailrec
 import scala.collection.mutable
 import scala.util.Try
 
-def innermost[Dom, Codom, In, Out, Ctx]
+def innermost[Dom, Codom, In, Out, All, Ctx]
   (using context: Contextual[Ctx, Dom, Codom])
-  (using state: AnalysisState[In, Out])
-  (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
+  (using state: AnalysisState[In, Out, All])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: Effectful)
-  : Innermost[Dom, Codom, In, Out, Ctx] = new Innermost(state, context)
+  : Innermost[Dom, Codom, In, Out, All, Ctx] = new Innermost(state, context)
 
-final class Innermost[Dom, Codom, In, Out, Ctx]
-  (state: AnalysisState[In, Out], context: Contextual[Ctx, Dom, Codom])
-  (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
+final class Innermost[Dom, Codom, In, Out, All, Ctx]
+  (state: AnalysisState[In, Out, All], context: Contextual[Ctx, Dom, Codom])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: Effectful)
   extends Combinator[Dom, Codom]:
 
-  private val stack: Stack[Dom, Codom, In, Out, Ctx] = new Stack(state, context)
+  private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)
 
   /** Runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =

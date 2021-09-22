@@ -5,14 +5,18 @@ import sturdy.effect.{Effectful, AnalysisState}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.ABoolBranching
+import sturdy.effect.bytememory.ConstantAddressMemory.State
 import sturdy.effect.callframe.CCallFrameInt
 import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.*
 import sturdy.effect.operandstack.JoinedOperandStack
+import sturdy.effect.operandstack.JoinedOperandStack.State
+import sturdy.effect.symboltable.ToppedSymbolTable.State
 import sturdy.effect.symboltable.{ToppedSymbolTable, SymbolTable}
 import sturdy.fix
-import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.fix.given
+import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
 import sturdy.language.wasm.abstractions.ConstantValues
 import sturdy.language.wasm.generic.*
 import sturdy.values.doubles.DoubleOps
@@ -93,13 +97,15 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       case Value.Float64(Topped.Actual(d)) => cSerialize.encode(ConcreteInterpreter.Value.Float64(d), encInfo).array().view.map(Topped.Actual.apply)
 
   type InState =
-    (CCallFrameInt.State[FrameData[Value], Value],
+    (CCallFrameInt.Vars[Value],
+      JoinedOperandStack.State[Value],
       ConstantAddressMemory.State[Int, Topped[Byte]],
       ToppedSymbolTable.State[Int, Int, FunV])
-
-  type OutState = // function result
-    (ConstantAddressMemory.State[Int, Topped[Byte]],
+  type OutState =
+    (JoinedOperandStack.State[Value],
+      ConstantAddressMemory.State[Int, Topped[Byte]],
       ToppedSymbolTable.State[Int, Int, FunV])
+  type AllState = InState
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends JoinedOperandStack[Value]
@@ -110,7 +116,21 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       with ABoolBranching[Value]
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
-//      with AnalysisState[_, _]
+      with AnalysisState[InState, OutState, AllState] {
+    override def getInState() = (getFrameVars, getOperandFrame, getMemories, getSymbolTables)
+    override def getOutState() = (getOperandFrame, getMemories, getSymbolTables)
+    override def getAllState() = getInState()
+    def setInState(in: InState) =
+      setFrameVars(in._1)
+      setOperandFrame(in._2)
+      setMemories(in._3)
+      setSymbolTables(in._4)
+    def setOutState(out: OutState) =
+      setOperandFrame(out._1)
+      setMemories(out._2)
+      setSymbolTables(out._3)
+    def setAllState(all: AllState) = setInState(all)
+  }
 
   def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
@@ -119,6 +139,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
 
   class Instance(effects: Effects)(using Failure, Effectful)
     extends GenericInstance[Effects] with GenericInterpreter(effects) :
+
+    given Effects = effects
 
     def i32Ops: IntOps[I32] = implicitly
     def i64Ops: LongOps[I64] = implicitly
@@ -152,8 +174,14 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       effects.joinComputationsIterable(invokeAllFuns)
     val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
 
+
+    // TODO must at least be sensitive to frame data, since that is unjoinable
+
+    summon[fix.Widening[JoinedOperandStack.State[Value]]]
+    summon[fix.Widening[ConstantAddressMemory.State[Int, Topped[Byte]]]]
+
     val phi: fix.Combinator[FixIn, Unit] =
-      fix.notContextSensitive(
+      fix.notContextSensitive[FixIn, Unit, fix.Combinator[FixIn, Unit]](
         fix.filter(Fix.isFunOrWhile,
           fix.identity
         )

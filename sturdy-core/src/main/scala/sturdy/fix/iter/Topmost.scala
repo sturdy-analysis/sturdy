@@ -12,20 +12,18 @@ import sturdy.values.JoinValue
 import scala.collection.mutable
 import scala.util.Try
 
-def topmost[Dom, Codom, In, Out, Ctx]
+def topmost[Dom, Codom, In, Out, All, Ctx]
   (using context: Contextual[Ctx, Dom, Codom])
-  (using state: AnalysisState[In, Out])
-  (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
+  (using state: AnalysisState[In, Out, All])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: Effectful)
-  : Topmost[Dom, Codom, In, Out, Ctx] = new Topmost(state, context)
+  : Topmost[Dom, Codom, In, Out, All, Ctx] = new Topmost(state, context)
 
-final class Topmost[Dom, Codom, In, Out, Ctx]
-  (state: AnalysisState[In, Out], context: Contextual[Ctx, Dom, Codom])
-  (using joinCodom: JoinValue[Codom], joinIn: JoinValue[In], joinOut: JoinValue[Out])
+final class Topmost[Dom, Codom, In, Out, All, Ctx]
+  (state: AnalysisState[In, Out, All], context: Contextual[Ctx, Dom, Codom])
   (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: Effectful)
   extends Combinator[Dom, Codom]:
 
-  private val stack: Stack[Dom, Codom, In, Out, Ctx] = new Stack(state, context)
+  private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)
   private var hasLoop: Boolean = false
 
   /** Runs `f`. If this is the topmost call, runs `f` until a fixed point is reached. */

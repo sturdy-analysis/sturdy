@@ -1,7 +1,8 @@
 package sturdy.language.wasm.abstractions
 
 import sturdy.effect.failure.Failure
-import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
+import sturdy.values.Finite
 import sturdy.values.Topped
 
 trait ConstantValues extends Interpreter:
@@ -11,6 +12,11 @@ trait ConstantValues extends Interpreter:
   final type F64 = Topped[Double]
   final type Bool = Topped[Boolean]
 
+  given Finite[I32] with {}
+  given Finite[I64] with {}
+  given Finite[F32] with {}
+  given Finite[F64] with {}
+  
   final def topI32: I32 = Topped.Top
   final def topI64: I64 = Topped.Top
   final def topF32: F32 = Topped.Top

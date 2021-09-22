@@ -5,8 +5,9 @@ import sturdy.effect.Effectful
 import sturdy.values.{*, given}
 
 import scala.collection.mutable
-
 import ToppedSymbolTable.*
+import sturdy.fix.Widening
+import sturdy.fix.widenMap
 
 trait ToppedSymbolTable[Key, Symbol, Entry](using JoinValue[Entry], Top[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry], Effectful:
 
@@ -15,7 +16,9 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using JoinValue[Entry], Top[Entry]) 
   protected var tables: Map[Key, Topped[Table[Symbol, Entry]]] = Map()
   private var dirtyTables = Set[Key]()
 
-  def getTables: State[Key, Symbol, Entry] = tables
+  def getSymbolTables: State[Key, Symbol, Entry] = tables
+  def setSymbolTables(s: State[Key, Symbol, Entry]): Unit =
+    tables = s
   
   override def tableGet(key: Key, symbol: Topped[Symbol]): OptionA[Entry] =
     tables(key) match
@@ -96,7 +99,13 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using JoinValue[Entry], Top[Entry]) 
 
 object ToppedSymbolTable:
   type State[Key, Symbol, Entry] = Map[Key, Topped[Table[Symbol, Entry]]]
-  
+
+//  given Widen[Key, Symbol, Entry]: Widening[Map[Key, Topped[Table[Symbol, Entry]]]] =
+//    new widenMap(using new Finite[Key] {}, new Topped.nestedToppedWidening)
+//
+//  given WidenTable[Symbol, Entry]: Widening[Table[Symbol, Entry]] with
+//    override def widen(old: Table[Symbol, Entry], now: Table[Symbol, Entry]): Table[Symbol, Entry] = ???
+
   class Table[Symbol, Entry](val underlying: Map[Symbol, MayMust[Entry]], val dirtySymbols: Set[Symbol]):
     inline def updated(symbol: Symbol, entry: Entry): Table[Symbol, Entry] =
       new Table(underlying.updated(symbol, MayMust.Must(entry)), dirtySymbols + symbol)

@@ -2,6 +2,7 @@ package sturdy.effect.bytememory
 
 import sturdy.data.*
 import sturdy.effect.Effectful
+import sturdy.fix.*
 import sturdy.values.*
 
 import scala.collection.mutable
@@ -19,6 +20,8 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], JoinValue
   protected var memories: mutable.Map[Key, Topped[Mem[B]]] = mutable.Map()
   
   def getMemories: State[Key, B] = memories.view.mapValues(_.map(_.clone())).toMap
+  protected def setMemories(s: State[Key, B]): Unit =
+    memories = mutable.Map() ++ s
 
   override def memRead(key: Key, addr: Topped[Int], length: Int): OptionA[IndexedSeqView[B]] =
     (memories(key), addr) match
@@ -103,22 +106,38 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], JoinValue
 object ConstantAddressMemory:
   type State[Key, B] = Map[Key, Topped[Mem[B]]]
 
+  given Widen[Key, B](using Widening[B]): Widening[Map[Key, Topped[Mem[B]]]] =
+    new widenMap(using new Finite[Key] {}, new WidenMem)
+
+  given WidenMem[B](using w: Widening[B]): Widening[Topped[Mem[B]]] with
+    def widen(old: Topped[Mem[B]], now: Topped[Mem[B]]): Topped[Mem[B]] = (old, now) match
+      case (Topped.Top, _) | (_, Topped.Top) => Topped.Top
+      case (Topped.Actual(oldMem), Topped.Actual(nowMem)) => oldMem.widen(nowMem)
+
   case class Mem[B](bytes: Array[B], dirty: mutable.BitSet, sizeLimit: scala.Option[Int], definite: Boolean = true):
     override def clone(): Mem[B] = Mem(bytes.clone(), dirty.clone(), sizeLimit)
     inline def size = bytes.length
     inline def pageNum: Int = (size / pageSize).toInt
 
-    def join(that: Mem[B])(using JoinValue[B]): Topped[Mem[B]] =
+    def join(that: Mem[B])(using j: JoinValue[B]): Topped[Mem[B]] =
       if (this.bytes.length != that.bytes.length)
         Topped.Top
       else if (this.dirty.size >= that.dirty.size)
-        Topped.Actual(this.joinSameSized(that))
+        Topped.Actual(this.joinSameSized(that, j.joinValues))
       else
-        Topped.Actual(that.joinSameSized(this))
+        Topped.Actual(that.joinSameSized(this, j.joinValues))
 
-    inline private def joinSameSized(that: Mem[B])(using JoinValue[B]): Mem[B] =
+    def widen(that: Mem[B])(using w: Widening[B]): Topped[Mem[B]] =
+      if (this.bytes.length != that.bytes.length)
+        Topped.Top
+      else if (this.dirty.size >= that.dirty.size)
+        Topped.Actual(this.joinSameSized(that, w.widen))
+      else
+        Topped.Actual(that.joinSameSized(this, w.widen))
+
+    inline private def joinSameSized(that: Mem[B], combine: (B, B) => B): Mem[B] =
       for (ix <- that.dirty)
-        this.bytes(ix) = JoinValue.join(this.bytes(ix), that.bytes(ix))
+        this.bytes(ix) = combine(this.bytes(ix), that.bytes(ix))
       this.dirty |= that.dirty
       this
 
