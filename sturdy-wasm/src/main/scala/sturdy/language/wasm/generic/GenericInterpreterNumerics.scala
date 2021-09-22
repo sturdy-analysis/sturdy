@@ -118,11 +118,11 @@ class GenericInterpreterNumerics[V]
     case i64.And => longs.bitAnd(v1, v2)
     case i64.Or => longs.bitOr(v1, v2)
     case i64.Xor => longs.bitXor(v1, v2)
-    case i64.Shl => longs.shiftLeft(v1, ints.remainder(v2, ints.intLit(64)))
-    case i64.ShrS => longs.shiftRight(v1, ints.remainder(v2, ints.intLit(64)))
-    case i64.ShrU => longs.shiftRightUnsigned(v1, ints.remainder(v2, ints.intLit(64)))
-    case i64.Rotl => longs.rotateLeft(v1, ints.remainder(v2, ints.intLit(64)))
-    case i64.Rotr => longs.rotateRight(v1, ints.remainder(v2, ints.intLit(64)))
+    case i64.Shl => longs.shiftLeft(v1, longs.remainder(v2, longs.longLit(64)))
+    case i64.ShrS => longs.shiftRight(v1, longs.remainder(v2, longs.longLit(64)))
+    case i64.ShrU => longs.shiftRightUnsigned(v1, longs.remainder(v2, longs.longLit(64)))
+    case i64.Rotl => longs.rotateLeft(v1, longs.remainder(v2, longs.longLit(64)))
+    case i64.Rotr => longs.rotateRight(v1, longs.remainder(v2, longs.longLit(64)))
 
   inline def evalIRelop(op: IRelop, v1: V, v2: V): V = op match
     case i32.Eq => equ(v1, v2)
@@ -199,7 +199,7 @@ class GenericInterpreterNumerics[V]
 
   inline def evalConvertop(op: Convertop, v: V): V = op match
     case i32.WrapI64 => longInt(v, ())
-    case i32.TruncSF32 => floatInt(v, (config.Overflow.Fail, config.Bits.Signed))
+    case i32.TruncSF32 => floatInt(v  , (config.Overflow.Fail, config.Bits.Signed))
     case i32.TruncUF32 => floatInt(v, (config.Overflow.Fail, config.Bits.Unsigned))
     case i32.TruncSF64 => doubleInt(v, (config.Overflow.Fail, config.Bits.Signed))
     case i32.TruncUF64 => doubleInt(v, (config.Overflow.Fail, config.Bits.Unsigned))
