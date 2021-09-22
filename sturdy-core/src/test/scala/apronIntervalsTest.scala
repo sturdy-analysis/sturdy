@@ -9,7 +9,11 @@ import apron.Interval
 import sturdy.values.ints.IntInterval
 import sturdy.values.ints.IntIntervalApron
 import sturdy.values.ints.IntIntervalApronWiden
+import sturdy.values.ints.ApronIntervalIntOps
+import sturdy.values.ints.IntervalIntOps
 import sturdy.fix.Widening
+import sturdy.effect.failure.Failure
+import sturdy.effect.JoinComputation
 import scala.language.postfixOps
 import org.scalatest.freespec.AnyFreeSpec
 import sturdy.values.ints.IntOps
@@ -22,11 +26,7 @@ val ourAbstractDomain = apron.Abstract0(ourAbstractManager, 1, 0, Array(apron.In
 // TODO: add tests for all use cases/functions
 //anyflatspec wird unten benutzt (texte, die den test definieren)
 class ApronTest extends AnyFlatSpec, Matchers:
-  // TODO: for a given trait
-  def parityIItoIIA(test_f: (IntIntervalApron, IntIntervalApron) => IntIntervalApron & (IntInterval, IntInterval) => IntInterval,
-                      v1_l: Int, v1_h: Int, v2_l: Int, v2_h: Int) =
-                        assert(op2IIA(test_f, v1_l,v1.h, v2_l,v2_h) === op2IItoIIA(test_f, v1_l,v1_h, v2_l,v2_h))
-
+  
   lazy val add = Seq(IntIntervalApron(-1, 1), op2IIA(_+_, 0,1, -1,0))
   lazy val sub = Seq(IntIntervalApron(1, 1), op2IIA(_-_, 0,1, -1,0))
   lazy val mult = Seq(
@@ -42,8 +42,14 @@ class ApronTest extends AnyFlatSpec, Matchers:
     Seq(IntIntervalApron(1, 1), op2IIA(_/_, 1,1, 1,1))
   )
   lazy val join0 = Seq(IntIntervalApron(-10, 10), op2IIA(_ join _, 0,10, -10,5))
+  
 
-//binary operation cunstructor for IntIntervalApron using bounded to ensure valid intervals
+  // TODO: for a given trait
+  def parityIItoIIA(apron_f: ((IntIntervalApron, IntIntervalApron) => IntIntervalApron), intInterval_f:((IntInterval, IntInterval) => IntInterval),
+                      v1_l: Int, v1_h: Int, v2_l: Int, v2_h: Int) =
+                        assert(op2IIA(apron_f, v1_l,v1_h, v2_l,v2_h) === op2IItoIIA(intInterval_f, v1_l,v1_h, v2_l,v2_h))
+
+  //binary operation cunstructor for IntIntervalApron using bounded to ensure valid intervals
   def op2IIA(f: (IntIntervalApron, IntIntervalApron) => IntIntervalApron, l0: Int, l1: Int, r0: Int, r1: Int): IntIntervalApron = {
     f(IntIntervalApron.bounded(l0, l1), IntIntervalApron.bounded(r0, r1))
   }
@@ -87,26 +93,28 @@ class ApronTest extends AnyFlatSpec, Matchers:
   //   //assertEquals(IntIntervalApron(0,10) meet IntIntervalApron(-10,5), IntIntervalApron(0, 5))
   // }
 
-  "sturdy.IntIntervalApron" must "behave like sturdy.IntInterval" {
-    "for addition" in {
-      // Add
+  "sturdy.IntIntervalApron ADDITION" must "behave like sturdy.IntInterval ADDITION" in{
+    
+      implicit val f: Failure = fail()
+      implicit val j: JoinComputation = new JoinComputation
+      parityIItoIIA(ApronIntervalIntOps.add, IntervalIntOps.add, 0,1, -1, 0)
       //assert(add, IntIntervalApron(IntInterval(0,1) + IntInterval(-1,0)))
     }
-    "for substraction" in {}
-    "for multiplication" in {}
-    "for division" in {}
-    "for join" in {}
-    "for meet" in {}
-    "for widen" in {}
-    "for comparisons" - {
-      "greater or equal" in {}
-      "greater than" in {}
-      "less or equal" in {}
-      "less than" in {}
-    }
-    "for equality" - {
-      "equal" in {}
-      "not equal" in {}
-    }
+    // "for substraction" in {}
+    // "for multiplication" in {}
+    // "for division" in {}
+    // "for join" in {}
+    // "for meet" in {}
+    // "for widen" in {}
+    // "for comparisons" - {
+    //   "greater or equal" in {}
+    //   "greater than" in {}
+    //   "less or equal" in {}
+    //   "less than" in {}
+    // }
+    // "for equality" - {
+    //   "equal" in {}
+    //   "not equal" in {}
+    // }
 
-  }
+  
