@@ -2,7 +2,6 @@
 //
 //import sturdy.values.JoinValue
 //import sturdy.values.Topped
-//import sturdy.values.Topped.*
 //
 //given ToppedDoubleOps[V](using ops: DoubleOps[V]): DoubleOps[Topped[V]] with
 //  def doubleLit(d: Double): Topped[V] = Actual(ops.doubleLit(d))

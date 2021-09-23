@@ -34,7 +34,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
     if (program.funs.exists(_.name == "main")) {
 //      print(s"${p.getFileName}")
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
-      interp.effectOps.fallible(interp.execute(program))
+      interp.effects.fallible(interp.execute(program))
 //      Try(interp.execute(program)) match
 //        case Success(_) => println(" prints: " + interp.effectOps.getPrinted)
 //        case Failure(e) => println(" errors: " + e)
@@ -49,7 +49,7 @@ object RunConcreteInterpreter extends App:
     file.close()
     val program = Parser.parse(sourceCode)
     val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
-    (interp.effectOps.fallible(interp.execute(program)), interp.effectOps)
+    (interp.effects.fallible(interp.execute(program)), interp.effects)
 
   val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/interpreter_test.tip").toURI();
   val (res, effects) = runFile(Paths.get(uri))

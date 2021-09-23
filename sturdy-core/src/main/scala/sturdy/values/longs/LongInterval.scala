@@ -7,7 +7,6 @@ import sturdy.values.Abstractly
 import sturdy.values.JoinValue
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
-import sturdy.values.Topped.*
 import sturdy.values.relational.*
 
 import scala.collection.immutable.TreeSet
@@ -111,10 +110,10 @@ given LongIntervalCompareOps: CompareOps[LongInterval, Topped[Boolean]] with
 
 given LongIntervalEqOps: EqOps[LongInterval, Topped[Boolean]] with
   override def equ(iv1: LongInterval, iv2: LongInterval): Topped[Boolean] =
-    if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Actual(true)
-    else if iv1.h < iv2.l || iv2.h < iv1.l then Actual(false)
-    else Top
+    if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Topped.Actual(true)
+    else if iv1.h < iv2.l || iv2.h < iv1.l then Topped.Actual(false)
+    else Topped.Top
   override def neq(iv1: LongInterval, iv2: LongInterval): Topped[Boolean] =
-    if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Actual(false)
-    else if iv1.h < iv2.l || iv2.h < iv1.l then Actual(true)
-    else Top
+    if iv1.l == iv1.h && iv1.h == iv2.l && iv2.l == iv2.h then Topped.Actual(false)
+    else if iv1.h < iv2.l || iv2.h < iv1.l then Topped.Actual(true)
+    else Topped.Top

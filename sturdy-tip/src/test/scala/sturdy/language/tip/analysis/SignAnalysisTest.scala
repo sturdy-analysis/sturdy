@@ -43,18 +43,18 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
     if (program.funs.exists(_.name == "main")) {
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
-      val cresult = interp.effectOps.fallible(interp.execute(program))
+      val cresult = interp.effects.fallible(interp.execute(program))
 //      println("\n" + cresult)
-//      println(interp.effectOps.getPrinted)
-//      println(interp.effectOps.getStore)
-//      println(interp.effectOps.getAddressContexts.map{case (i,AllocationSite.Alloc(a)) => (i,a.label); case a => a})
+//      println(interp.effects.getPrinted)
+//      println(interp.effects.getStore)
+//      println(interp.effects.getAddressContexts.map{case (i,AllocationSite.Alloc(a)) => (i,a.label); case a => a})
 
       val analysis = SignAnalysis(Map(), Map(), steps)
-      val aresult = analysis.effectOps.fallible(analysis.execute(program))
-//      println("\n" + analysis.effectOps.getPrinted)
-//      println(analysis.effectOps.getStore)
+      val aresult = analysis.effects.fallible(analysis.execute(program))
+//      println("\n" + analysis.effects.getPrinted)
+//      println(analysis.effects.getStore)
 
-      given CAllocationIntIncrement[AllocationSite] = interp.effectOps
+      given CAllocationIntIncrement[AllocationSite] = interp.effects
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
     }
@@ -70,7 +70,7 @@ object RunSignAnalysis extends App {
       //      println(s"Running ${p.getFileName}")
 
       val analysis = SignAnalysis(Map(), Map(), steps)
-      (analysis.effectOps.fallible(analysis.execute(program)), analysis.effectOps)
+      (analysis.effects.fallible(analysis.execute(program)), analysis.effects)
     } else {
       null
     }

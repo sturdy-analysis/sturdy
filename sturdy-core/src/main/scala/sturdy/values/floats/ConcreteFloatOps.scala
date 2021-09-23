@@ -1,13 +1,14 @@
 package sturdy.values.floats
 
 import sturdy.effect.failure.Failure
+import sturdy.values.Structural
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.ConversionFailure
 import sturdy.values.convert.Convert
 
 import scala.util.Random
-import java.lang.{Double => JDouble, Float => JFloat}
+import java.lang.{Float as JFloat, Double as JDouble}
 
 given ConcreteFloatOps: FloatOps[Float] with
   def floatLit(f: Float): Float = f
@@ -33,6 +34,9 @@ given ConcreteFloatOps: FloatOps[Float] with
     else
       Math.copySign((Math.round(v / 2) * 2).toFloat, v)
   def copysign(v: Float, sign: Float): Float = Math.copySign(v, sign)
+
+
+given Structural[Float] with {}
 
 
 given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] with
