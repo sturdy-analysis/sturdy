@@ -41,19 +41,13 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJo
       case AbstractException =>
         exception match
           case OptionA.None() => throw new IllegalStateException(s"exception cannot be None here")
-          case OptionA.NoneSome(exs) => throw new IllegalStateException(s"exception cannot be NoneSome here")
+          case OptionA.NoneSome(exs) => EitherA.Right(exs)
           case OptionA.Some(exs) => EitherA.Right(exs)
       case ex => throw ex
     }
     // all exceptions are passed to the catch block, which must re-throw them if desired
     this.exception = OptionA.None()
     res
-
-  override def joinFailedComputations(failA: Throwable, failB: Throwable): Throwable = (failA, failB) match
-    case (AbstractException, AbstractException) => AbstractException
-    case (AbstractException, ex) => ex
-    case (ex, AbstractException) => ex
-    case _ => super.joinFailedComputations(failA, failB)
 
   override def joinComputations[A](f: => A)(g: => A): Joined[A] =
     val snapshot = this.exception

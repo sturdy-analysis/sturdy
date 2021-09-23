@@ -1,7 +1,6 @@
 package sturdy.effect.failure
 
 import sturdy.effect.Effectful
-import sturdy.effect.Effectful.StarvedJoin
 import sturdy.values.Powerset
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
@@ -19,13 +18,7 @@ trait AFailureCollect extends Failure with Effectful:
   override def fail(kind: FailureKind, msg: String): Nothing =
     failures += kind -> msg
     throw AFailureCollectException
-
-  override def joinFailedComputations(failA: Throwable, failB: Throwable): Throwable = (failA, failB) match
-    case (AFailureCollectException, AFailureCollectException) => AFailureCollectException
-    case (AFailureCollectException, ex) => ex
-    case (ex, AFailureCollectException) => ex
-    case _ => super.joinFailedComputations(failA, failB)
-
+  
   def fallible[A](f: => A): AFallible[A] =
     try {
       val res = f

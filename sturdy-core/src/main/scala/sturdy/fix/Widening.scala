@@ -18,6 +18,12 @@ case class WidenEquiList[V]()(using j: Widening[V]) extends Widening[List[V]]:
       throw new IllegalStateException()
     v1.zip(v2).map(j.widen.tupled)
 
+case class WidenEquiVector[V]()(using j: Widening[V]) extends Widening[Vector[V]]:
+  override def widen(v1: Vector[V], v2: Vector[V]): Vector[V] =
+    if (v1.size != v2.size)
+      throw new IllegalStateException()
+    v1.zip(v2).map(j.widen.tupled)
+
 given widenMap[K, V](using f: Finite[K], w: Widening[V]): Widening[Map[K, V]] with
   override def widen(v1: Map[K, V], v2: Map[K, V]): Map[K, V] =
     var joined = v1

@@ -173,7 +173,7 @@ object ConcreteInterpreter extends Interpreter :
     def convertF64F32: ConvertDoubleFloat[F64, F32] = implicitly
     val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
     
-    val phi: fix.Combinator[FixIn, Unit] = fix.identity
+    val phi: fix.Combinator[FixIn[Value], FixOut[Value]] = fix.identity
 
   def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)

@@ -19,6 +19,7 @@ import sturdy.fix.given
 import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
 import sturdy.language.wasm.abstractions.ConstantValues
 import sturdy.language.wasm.generic.*
+import sturdy.language.wasm.analyses.Fix.{*, given}
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
@@ -98,12 +99,10 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
 
   type InState =
     (CCallFrameInt.Vars[Value],
-      JoinedOperandStack.State[Value],
       ConstantAddressMemory.State[Int, Topped[Byte]],
       ToppedSymbolTable.State[Int, Int, FunV])
   type OutState =
-    (JoinedOperandStack.State[Value],
-      ConstantAddressMemory.State[Int, Topped[Byte]],
+    (ConstantAddressMemory.State[Int, Topped[Byte]],
       ToppedSymbolTable.State[Int, Int, FunV])
   type AllState = InState
 
@@ -117,18 +116,16 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
       with AnalysisState[InState, OutState, AllState] {
-    override def getInState() = (getFrameVars, getOperandFrame, getMemories, getSymbolTables)
-    override def getOutState() = (getOperandFrame, getMemories, getSymbolTables)
+    override def getInState() = (getFrameVars, getMemories, getSymbolTables)
+    override def getOutState() = (getMemories, getSymbolTables)
     override def getAllState() = getInState()
     def setInState(in: InState) =
       setFrameVars(in._1)
-      setOperandFrame(in._2)
-      setMemories(in._3)
-      setSymbolTables(in._4)
+      setMemories(in._2)
+      setSymbolTables(in._3)
     def setOutState(out: OutState) =
-      setOperandFrame(out._1)
-      setMemories(out._2)
-      setSymbolTables(out._3)
+      setMemories(out._1)
+      setSymbolTables(out._2)
     def setAllState(all: AllState) = setInState(all)
   }
 
@@ -175,14 +172,9 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
     val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
 
 
-    // TODO must at least be sensitive to frame data, since that is unjoinable
-
-    summon[fix.Widening[JoinedOperandStack.State[Value]]]
-    summon[fix.Widening[ConstantAddressMemory.State[Int, Topped[Byte]]]]
-
-    val phi: fix.Combinator[FixIn, Unit] =
-      fix.notContextSensitive[FixIn, Unit, fix.Combinator[FixIn, Unit]](
-        fix.filter(Fix.isFunOrWhile,
-          fix.identity
+    val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
+      fix.contextSensitive(frameSensitive,
+        fix.filter(isFunOrWhile,
+          fix.iter.topmost
         )
       )

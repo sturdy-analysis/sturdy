@@ -41,7 +41,7 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using JoinValue[Entry], Top[Entry]) 
           tables += key -> newTab
 
   override def addEmptyTable(key: Key): Unit =
-    tables += key -> Topped.Actual(new Table(Map(), Set()))
+    tables += key -> Topped.Actual(Table(Map(), Set()))
     dirtyTables += key
 
   override def joinComputations[A](f: => A)(g: => A): Joined[A] =
@@ -71,17 +71,17 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using JoinValue[Entry], Top[Entry]) 
 object ToppedSymbolTable:
   type State[Key, Symbol, Entry] = Map[Key, Topped[Table[Symbol, Entry]]]
 
-//  given Widen[Key, Symbol, Entry]: Widening[Map[Key, Topped[Table[Symbol, Entry]]]] =
-//    new widenMap(using new Finite[Key] {}, new Topped.nestedToppedWidening)
-//
-//  given WidenTable[Symbol, Entry]: Widening[Table[Symbol, Entry]] with
-//    override def widen(old: Table[Symbol, Entry], now: Table[Symbol, Entry]): Table[Symbol, Entry] = ???
+  given Widen[Key, Symbol, Entry](using Widening[Entry]): Widening[Map[Key, Topped[Table[Symbol, Entry]]]] =
+    new widenMap(using new Finite[Key] {}, new Topped.nestedToppedWidening)
 
-  class Table[Symbol, Entry](val underlying: Map[Symbol, MayMust[Entry]], val dirtySymbols: Set[Symbol]):
+  given WidenTable[Symbol, Entry](using Widening[Entry]): Widening[Table[Symbol, Entry]] with
+    override def widen(old: Table[Symbol, Entry], now: Table[Symbol, Entry]): Table[Symbol, Entry] = old.widen(now)
+
+  case class Table[Symbol, Entry](val underlying: Map[Symbol, MayMust[Entry]], val dirtySymbols: Set[Symbol]):
     inline def updated(symbol: Symbol, entry: Entry): Table[Symbol, Entry] =
-      new Table(underlying.updated(symbol, MayMust.Must(entry)), dirtySymbols + symbol)
+      Table(underlying.updated(symbol, MayMust.Must(entry)), dirtySymbols + symbol)
     inline def updated(symbol: Symbol, entry: MayMust[Entry]): Table[Symbol, Entry] =
-      new Table(underlying.updated(symbol, entry), dirtySymbols + symbol)
+      Table(underlying.updated(symbol, entry), dirtySymbols + symbol)
     def allMay: Table[Symbol, Entry] =
       var newUnderlying = underlying
       var newDirtySymbols = dirtySymbols
@@ -89,7 +89,7 @@ object ToppedSymbolTable:
         newDirtySymbols += s
         newUnderlying += s -> mentry.asMay
       }
-      new Table(newUnderlying, newDirtySymbols)
+      Table(newUnderlying, newDirtySymbols)
 
     inline def join(that: Table[Symbol, Entry])(using j: JoinValue[Entry]) = combine(that, j.joinValues)
     inline def widen(that: Table[Symbol, Entry])(using w: Widening[Entry]) = combine(that, w.widen)

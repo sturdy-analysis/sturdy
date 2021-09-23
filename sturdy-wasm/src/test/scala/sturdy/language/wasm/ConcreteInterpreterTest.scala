@@ -45,6 +45,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))
   testFunction(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
   testFunction(simple, "call-first", List.empty, List(Value.Int32(0)))
+  testFunction(simple, "nesting", List(Value.Float32(0), Value.Float32(2)), List(Value.Float32(0)))
   testFunction(simple, "nesting", List(Value.Float32(1), Value.Float32(2)), List(Value.Float32(2)))
   testFunction(simple, "nesting", List(Value.Float32(4), Value.Float32(2)), List(Value.Float32(3.4166665)))
   testFunction(simple, "as-br_table-index", List.empty, List.empty)
@@ -81,7 +82,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 
 def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[Iterable[Value]] =
   val module = parse(path)
-  val interp = ConcreteInterpreter(FrameData(0, null), Iterable.empty)
+  val interp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
   val modInst = interp.initializeModule(module)
   interp.effects.fallible(
     interp.invokeExported(modInst, funName, args)

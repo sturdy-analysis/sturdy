@@ -19,7 +19,7 @@ import scala.collection.mutable.ArrayBuffer
 
 
 class TestScriptInterpreter:
-  val interp = ConcreteInterpreter(FrameData(0, null), Iterable.empty)
+  val interp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
   val modules: ArrayBuffer[ModuleInstance[Value]] = ArrayBuffer.empty
 
   def run(commands: Seq[Command]) =

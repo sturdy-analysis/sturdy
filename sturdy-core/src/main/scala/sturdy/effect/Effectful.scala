@@ -14,9 +14,12 @@ trait Effectful:
 //  type JoinExceptions
   type Joined[A] = JoinValue[A] ?=> A
 
-  def joinFailedComputations(failA: Throwable, failB: Throwable): Throwable = (failA, failB) match
-    case (RecurrentCall, RecurrentCall) => failA
-    case _ => StarvedJoin(failA, failB)
+  final def joinThrowables(failA: Throwable, failB: Throwable): Throwable = (failA, failB) match
+    case (failA: RuntimeException, _) => throw failA
+    case (_, failB: RuntimeException) => throw failB
+    case (RecurrentCall, _) => failB
+    case (_, RecurrentCall) => failA
+    case _ => if (failA == failB) failA else StarvedJoin(failA, failB)
 
   /* This is the default join for pure computations f and g.
    * Subclasses must override join to join effects and call super.join
@@ -28,7 +31,7 @@ trait Effectful:
     (triedF, triedG) match
       case (Failure(failA: RuntimeException), _) => throw failA
       case (_, Failure(failB: RuntimeException)) => throw failB
-      case (Failure(failA), Failure(failB)) => throw joinFailedComputations(failA, failB)
+      case (Failure(failA), Failure(failB)) => throw joinThrowables(failA, failB)
       case (Success(aF), Success(aG)) => summon[JoinValue[A]].joinValues(aF, aG)
       case (Success(aF), _) => aF
       case (_, Success(aG)) => aG
@@ -40,7 +43,7 @@ trait Effectful:
 
     triedF match
       case Success(aF) => aF
-      case Failure(failA) => throw joinFailedComputations(failA, failB)
+      case Failure(failA) => throw joinThrowables(failA, failB)
   }
 
   final def joinComputationsIterable[A](as: IterableOnce[() => A]): Joined[A] =

@@ -150,10 +150,9 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
     case None =>
       throw RecurrentCall
     case Some((res, previousOut)) =>
-      val joinedOut = widenOut.widen(previousOut, state.getOutState())
-      state.setOutState(joinedOut)
+      state.setOutState(previousOut)
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}## RECURRENT $frame <- $res, $joinedOut")
+        println(s"${stackHeightIndent}## RECURRENT $frame <- $res, $previousOut")
       Some(res)
 
   @inline private def storeCorecurrentOutput(frame: Frame, result: Try[Codom]): Try[Codom] = outCache.get(frame) match
@@ -165,7 +164,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
       result
     case Some((previousResult, previousOut)) =>
       val joinedResult = (previousResult, result) match
-        case (Failure(ex1), Failure(ex2)) => Failure(j.joinFailedComputations(ex1, ex2))
+        case (Failure(ex1), Failure(ex2)) => Failure(j.joinThrowables(ex1, ex2))
         case (Failure(_), Success(v)) => Success(v)
         case (Success(v), Failure(_)) => Success(v)
         case (Success(v1), Success(v2)) => Success(widenCodom.widen(v1, v2))

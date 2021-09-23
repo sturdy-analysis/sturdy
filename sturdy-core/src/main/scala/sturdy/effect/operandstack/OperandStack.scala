@@ -7,6 +7,7 @@ trait OperandStack[V] extends Effectful:
   def pop(): V
   def peek(): V
   def ifEmpty[A](empty: => A, notEmpty: => A): A
+  def peekN(n: Int): List[V]
 
   /** Computes `f` in a new operand frame, discarding all remaining operands. */
   def withFreshOperandStack[A](f: => A): A

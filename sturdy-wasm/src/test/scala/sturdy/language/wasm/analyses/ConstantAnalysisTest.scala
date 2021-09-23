@@ -46,8 +46,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(simple, "test-memgrow", List.empty, List(Value.Int32(1), Value.Int32(2)))
     testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List(Value.Int32(0)))
     testFunctionConstantArgs(simple, "call-first", List.empty, List(Value.Int32(0)))
-    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(1), Value.Float32(2)), List(Value.Float32(2)))
-    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(4), Value.Float32(2)), List(Value.Float32(3.4166665)))
+    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(0), Value.Float32(2)), List(Value.Float32(0)))
     testFunctionConstantArgs(simple, "as-br_table-index", List.empty, List.empty)
     testFunctionConstantArgs(simple, "test-br1", List.empty, List(Value.Int32(42)))
     testFunctionConstantArgs(simple, "test-br2", List.empty, List(Value.Int32(43)))
@@ -66,17 +65,9 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
     testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
 
-    //
-    //    (0 to 8).zip(List(1, 1, 2, 6, 24, 120, 720, 5040, 40320)).foreach { (arg, res) =>
-    //      testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(arg)), List(Value.Int64(res)))
-    //    }
-    //
-    ////    testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-    ////    testFunctionConstantArgs(fact, "fac-iter", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-    ////    testFunctionConstantArgs(fact, "fac-rec-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-    ////    testFunctionConstantArgs(fact, "fac-iter-named", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
-    ////    testFunctionConstantArgs(fact, "fac-opt", List(Value.Int64(25)), List(Value.Int64(7034535277573963776)))
+    testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(0)), List(Value.Int64(1)))
   }
+
 
   testFunction(simple, "const", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
   testFunction(simple, "first", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(1))))
@@ -84,8 +75,8 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "second", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
   testFunction(simple, "second", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Actual(2))))
   testFunction(simple, "test-mem", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//  testFunction(simple, "nesting", List(Value.Float32(Topped.Top), Value.Float32(Topped.Actual(2))), List(Value.Float32(Topped.Top)))
-//  testFunction(simple, "nesting", List(Value.Float32(Topped.Actual(1)), Value.Float32(Topped.Top)), List(Value.Float32(Topped.Top)))
+  testFunction(simple, "nesting", List(Value.Float32(Topped.Top), Value.Float32(Topped.Actual(2))), List(Value.Float32(Topped.Top)))
+  testFunction(simple, "nesting", List(Value.Float32(Topped.Actual(1)), Value.Float32(Topped.Top)), List(Value.Float32(Topped.Top)))
   testFunction(simple, "test-br3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
   testFunction(simple, "test-br-and-return", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
   testFunction(simple, "test-br-and-return2", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
@@ -93,6 +84,14 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "test-br-and-return4", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(42))))
   testFunction(simple, "test-unreachable5", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
 
+  (1 to 8).foreach { arg =>
+    testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
+  }
+  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-iter", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-opt", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
 
 
 
@@ -120,7 +119,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 
 def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[Iterable[Value]] =
   val module = wasm.parse(path)
-  val interp = ConstantAnalysis(FrameData(0, null), Iterable.empty)
+  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)
   val modInst = interp.initializeModule(module)
   interp.effects.fallible(
     interp.invokeExported(modInst, funName, args)

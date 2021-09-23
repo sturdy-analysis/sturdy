@@ -18,11 +18,20 @@ import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
 import sturdy.values.unit
+import swam.FuncIdx
 import swam.FuncType
 import swam.syntax.*
 import swam.{ValType, TableType, GlobalType, LabelIdx, MemType, OpCode, BlockType, Limits}
 
-case class FrameData[V](returnArity: Int, module: ModuleInstance[V])
+case class FrameData[V](returnArity: Int, module: ModuleInstance[V]):
+  override def toString: String =
+    if (module == null)
+      s"module null, rt $returnArity"
+    else
+      s"module ${Integer.toHexString(module.hashCode())}, rt $returnArity"
+
+object FrameData:
+  def empty[V]: FrameData[V] = FrameData[V](0, null)
 
 enum WasmException[V]:
   case Jump(labelIndex: LabelIdx, operands: List[V])
@@ -38,9 +47,19 @@ type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV] =
     with Except[WasmException[V], ExcV]
     with Failure
 
-enum FixIn:
+enum FixIn[V]:
   case Eval(inst: Inst)
-  case EnterWasmFunction(func: swam.syntax.Func, ft: swam.FuncType)
+  case EnterWasmFunction(id: Either[FuncIdx, V], func: swam.syntax.Func, ft: swam.FuncType)
+
+  override def toString: String = this match
+    case Eval(i) => s"eval ${i.getClass.getSimpleName} ${Integer.toHexString(i.hashCode())}"
+    case EnterWasmFunction(id, _, _) => id match
+      case Left(ix) => s"enter direct $ix"
+      case Right(v) => s"enter indirect $v"
+
+enum FixOut[V]:
+  case Eval()
+  case ExitWasmFunction(vals: List[V])
 
 trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]]
   (val effects: Effects)
@@ -75,7 +94,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
   val convertDoubleFloat: ConvertDoubleFloat[V, V]
   val functionOps: FunctionOps[FunctionInstance[V], Nothing, Unit, FunV]
 
-  val phi: fix.Combinator[FixIn, Unit]
+  val phi: fix.Combinator[FixIn[V], FixOut[V]]
 
   lazy val num = new GenericInterpreterNumerics[V](
     effects,
@@ -173,9 +192,11 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
 
 
 
-  private lazy val fixed = fix.Fixpoint { (rec: FixIn => Unit) =>
-    inline def eval(inst: Inst): Unit = rec(FixIn.Eval(inst))
-    inline def enterFunction(func: Func, ft: FuncType): Unit = rec(FixIn.EnterWasmFunction(func, ft))
+  private lazy val fixed = fix.Fixpoint { (rec: FixIn[V] => FixOut[V]) =>
+    inline def eval(inst: Inst): FixOut[V] =
+      rec(FixIn.Eval(inst))
+    inline def enterFunction(id: Either[FuncIdx, V], func: Func, ft: FuncType): FixOut[V] =
+      rec(FixIn.EnterWasmFunction(id, func, ft))
 
     def eval_open(inst: Inst): Unit =
       val opcode = inst.opcode
@@ -211,7 +232,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
         val pt = paramsArity(bt)
         label(pt, pt, insts, Some(l))
       case If(bt, thnInsts, elsInsts) =>
+//        val cond = stack.peek()
         val isZero = num.evalNumeric(i32.Eqz)
+//        println(s"If ($cond -> $isZero) $thnInsts else $elsInsts")
         val rt = returnArity(bt)
         boolBranch[Unit](isZero) {
           // v == 0: else branch
@@ -236,7 +259,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
         throws(WasmException.Return(operands))
       case Call(funcIx) =>
         val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-        invoke(func)
+        invoke(func, Left(funcIx))
       case CallIndirect(typeIx) =>
         val ftExpected = module.functionTypes(typeIx)
         val funcIx = stack.pop()
@@ -291,17 +314,17 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     //    - stack A g0 ... gk needs to become A op0 ... opm
     //    - we don't know k, so we need to remember size of stack A
     // catch Jump(...) => error
-    def invoke(fun: FunctionInstance[V]): Unit =
+    def invoke(fun: FunctionInstance[V], funcIx: Either[FuncIdx, V]): Unit =
       fun match
         case FunctionInstance.Wasm(mod, func, funcType) =>
           val args = stack.popN(funcType.params.size)
           val frameData = FrameData(funcType.t.size, mod)
           val vars = args.view ++ func.locals.map(num.defaultValue)
           labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
-            enterFunction(func, funcType)
+            enterFunction(funcIx, func, funcType)
           }))
 
-    def enterFunction_open(func: Func, funcType: FuncType): Unit =
+    def enterFunction_open(func: Func, funcType: FuncType): List[V] =
       val returnN = funcType.t.size
       tryCatch {
         label(0, returnN, func.body, None)
@@ -314,6 +337,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
             fail(InvalidModule, s"Tried to jump through a function boundary.")
         }
       }
+      stack.peekN(returnN)
 
     def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V): Unit =
       functionOps.invokeFun(funV, Seq()) {
@@ -321,35 +345,39 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
           val ftActual = func.funcType
           if (ftExpected != ftActual)
             fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
-          invoke(func)
+          invoke(func, Right(funcIx))
       }
 
     phi {
-      case FixIn.Eval(inst) => eval_open(inst)
-      case FixIn.EnterWasmFunction(func, funcType) => enterFunction_open(func, funcType)
+      case FixIn.Eval(inst) =>
+        eval_open(inst); FixOut.Eval()
+      case FixIn.EnterWasmFunction(id, func, funcType) =>
+        FixOut.ExitWasmFunction(enterFunction_open(func, funcType))
     }
   }
 
   def eval(inst: Inst): Unit = fixed(FixIn.Eval(inst))
+  def enterFunction(id: Either[FuncIdx, V], func: Func, ft: FuncType): Unit = fixed(FixIn.EnterWasmFunction(id, func, ft))
 
 
   def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] =
-    inNewFrameNoIndex(FrameData(0, modInst), Iterable.empty) {
-      module.exports.find((name, _) => name == funcName) match
-        case Some((_, ExternalValue.Function(funcIx))) =>
-          val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-          val paramTys = func.funcType.params
-          if (paramTys.length != args.length)
-            throw new Error(s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}.")
-          // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
-          val rtLength = func.funcType.t.length
-          stack.pushN(args)
-          eval(Call(funcIx))
-          stack.popN(rtLength)
-        case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
-    }
-
-
+    modInst.exports.find((name, _) => name == funcName) match
+      case Some((_, ExternalValue.Function(funcIx))) =>
+        val func = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+        val paramTys = func.funcType.params
+        if (paramTys.length != args.length)
+          throw new Error(s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}.")
+        // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
+        val rtLength = func.funcType.t.length
+        func match
+          case FunctionInstance.Wasm(mod, func, funcType) =>
+            val frameData = FrameData(funcType.t.size, mod)
+            val vars = args.view ++ func.locals.map(num.defaultValue)
+            labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
+              enterFunction(Left(funcIx), func, funcType)
+            }))
+        stack.popN(rtLength)
+      case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
 
 
   private def returnArity(bt: BlockType): Int =

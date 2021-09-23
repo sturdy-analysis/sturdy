@@ -119,6 +119,18 @@ object ConstantAddressMemory:
     inline def size = bytes.length
     inline def pageNum: Int = (size / pageSize).toInt
 
+    override def toString: String = s"Mem(bytesHash=${bytes.toSeq.hashCode()}, dirtyHash=${dirty.hashCode()}, $definite)"
+
+    override def equals(obj: Any): Boolean = obj match
+      case that: Mem[_] =>
+        Array.equals(this.bytes.asInstanceOf[Array[AnyRef]], that.bytes.asInstanceOf[Array[AnyRef]]) &&
+          this.dirty == that.dirty &&
+          this.sizeLimit == that.sizeLimit &&
+          this.definite == that.definite
+      case _ => false
+
+    override def hashCode(): Int = this.bytes.toSeq.hashCode * 31 + this.dirty.hashCode * 17 + sizeLimit.hashCode + definite.hashCode
+
     inline def join(that: Mem[B])(using j: JoinValue[B]) = combine(that, j.joinValues)
     inline def widen(that: Mem[B])(using w: Widening[B]) = combine(that, w.widen)
 
