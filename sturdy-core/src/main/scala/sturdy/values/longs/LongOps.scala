@@ -5,6 +5,7 @@ import sturdy.values.config
 import sturdy.values.convert.Convert
 
 case object LongDivisionByZero extends FailureKind
+case object LongOverflow extends FailureKind
 
 trait LongOps[V]:
   def longLit(l: Long): V

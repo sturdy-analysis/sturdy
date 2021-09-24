@@ -25,11 +25,11 @@
   (func $f)
   (elem (i32.const 0) $f)
 )
-;;(module
-;;  (import "spectest" "table" (table 10 funcref))
-;;  (func $f)
-;;  (elem (i32.const 0) $f)
-;;)
+(module
+  (import "spectest" "table" (table 10 funcref))
+  (func $f)
+  (elem (i32.const 0) $f)
+)
 
 (module
   (table 10 funcref)
@@ -40,29 +40,29 @@
   (elem (i32.const 5) $f)
   (elem (i32.const 3) $f)
 )
-;;(module
-;;  (import "spectest" "table" (table 10 funcref))
-;;  (func $f)
-;;  (elem (i32.const 9) $f)
-;;  (elem (i32.const 3) $f)
-;;  (elem (i32.const 7) $f)
-;;  (elem (i32.const 3) $f)
-;;  (elem (i32.const 5) $f)
-;;)
-;;
-;;(module
-;;  (global (import "spectest" "global_i32") i32)
-;;  (table 1000 funcref)
-;;  (func $f)
-;;  (elem (global.get 0) $f)
-;;)
-;;
-;;(module
-;;  (global $g (import "spectest" "global_i32") i32)
-;;  (table 1000 funcref)
-;;  (func $f)
-;;  (elem (global.get $g) $f)
-;;)
+(module
+  (import "spectest" "table" (table 10 funcref))
+  (func $f)
+  (elem (i32.const 9) $f)
+  (elem (i32.const 3) $f)
+  (elem (i32.const 7) $f)
+  (elem (i32.const 3) $f)
+  (elem (i32.const 5) $f)
+)
+
+(module
+  (global (import "spectest" "global_i32") i32)
+  (table 1000 funcref)
+  (func $f)
+  (elem (global.get 0) $f)
+)
+
+(module
+  (global $g (import "spectest" "global_i32") i32)
+  (table 1000 funcref)
+  (func $f)
+  (elem (global.get $g) $f)
+)
 
 (module
   (type $out-i32 (func (result i32)))
@@ -88,20 +88,20 @@
   (func $f)
   (elem (i32.const 9) $f)
 )
-;;(module
-;;  (import "spectest" "table" (table 10 funcref))
-;;  (func $f)
-;;  (elem (i32.const 9) $f)
-;;)
+(module
+  (import "spectest" "table" (table 10 funcref))
+  (func $f)
+  (elem (i32.const 9) $f)
+)
 
 (module
   (table 0 funcref)
   (elem (i32.const 0))
 )
-;;(module
-;;  (import "spectest" "table" (table 0 funcref))
-;;  (elem (i32.const 0))
-;;)
+(module
+  (import "spectest" "table" (table 0 funcref))
+  (elem (i32.const 0))
+)
 
 (module
   (table 0 0 funcref)
@@ -113,29 +113,29 @@
   (elem (i32.const 20))
 )
 
-;;(module
-;;  (import "spectest" "table" (table 0 funcref))
-;;  (func $f)
-;;  (elem (i32.const 0) $f)
-;;)
-;;
-;;(module
-;;  (import "spectest" "table" (table 0 100 funcref))
-;;  (func $f)
-;;  (elem (i32.const 0) $f)
-;;)
-;;
-;;(module
-;;  (import "spectest" "table" (table 0 funcref))
-;;  (func $f)
-;;  (elem (i32.const 1) $f)
-;;)
-;;
-;;(module
-;;  (import "spectest" "table" (table 0 30 funcref))
-;;  (func $f)
-;;  (elem (i32.const 1) $f)
-;;)
+(module
+  (import "spectest" "table" (table 0 funcref))
+  (func $f)
+  (elem (i32.const 0) $f)
+)
+
+(module
+  (import "spectest" "table" (table 0 100 funcref))
+  (func $f)
+  (elem (i32.const 0) $f)
+)
+
+(module
+  (import "spectest" "table" (table 0 funcref))
+  (func $f)
+  (elem (i32.const 1) $f)
+)
+
+(module
+  (import "spectest" "table" (table 0 30 funcref))
+  (func $f)
+  (elem (i32.const 1) $f)
+)
 
 ;; Invalid bounds for elements
 
@@ -376,67 +376,67 @@
 )
 (assert_return (invoke "call-overwritten") (i32.const 66))
 
-;;(module
-;;  (type $out-i32 (func (result i32)))
-;;  (import "spectest" "table" (table 10 funcref))
-;;  (elem (i32.const 9) $const-i32-a)
-;;  (elem (i32.const 9) $const-i32-b)
-;;  (func $const-i32-a (type $out-i32) (i32.const 65))
-;;  (func $const-i32-b (type $out-i32) (i32.const 66))
-;;  (func (export "call-overwritten-element") (type $out-i32)
-;;    (call_indirect (type $out-i32) (i32.const 9))
-;;  )
-;;)
-;;(assert_return (invoke "call-overwritten-element") (i32.const 66))
+(module
+  (type $out-i32 (func (result i32)))
+  (import "spectest" "table" (table 10 funcref))
+  (elem (i32.const 9) $const-i32-a)
+  (elem (i32.const 9) $const-i32-b)
+  (func $const-i32-a (type $out-i32) (i32.const 65))
+  (func $const-i32-b (type $out-i32) (i32.const 66))
+  (func (export "call-overwritten-element") (type $out-i32)
+    (call_indirect (type $out-i32) (i32.const 9))
+  )
+)
+(assert_return (invoke "call-overwritten-element") (i32.const 66))
 
 ;; Element sections across multiple modules change the same table
 
-;;(module $module1
-;;  (type $out-i32 (func (result i32)))
-;;  (table (export "shared-table") 10 funcref)
-;;  (elem (i32.const 8) $const-i32-a)
-;;  (elem (i32.const 9) $const-i32-b)
-;;  (func $const-i32-a (type $out-i32) (i32.const 65))
-;;  (func $const-i32-b (type $out-i32) (i32.const 66))
-;;  (func (export "call-7") (type $out-i32)
-;;    (call_indirect (type $out-i32) (i32.const 7))
-;;  )
-;;  (func (export "call-8") (type $out-i32)
-;;    (call_indirect (type $out-i32) (i32.const 8))
-;;  )
-;;  (func (export "call-9") (type $out-i32)
-;;    (call_indirect (type $out-i32) (i32.const 9))
-;;  )
-;;)
-;;
-;;(register "module1" $module1)
-;;
-;;(assert_trap (invoke $module1 "call-7") "uninitialized element")
-;;(assert_return (invoke $module1 "call-8") (i32.const 65))
-;;(assert_return (invoke $module1 "call-9") (i32.const 66))
-;;
-;;(module $module2
-;;  (type $out-i32 (func (result i32)))
-;;  (import "module1" "shared-table" (table 10 funcref))
-;;  (elem (i32.const 7) $const-i32-c)
-;;  (elem (i32.const 8) $const-i32-d)
-;;  (func $const-i32-c (type $out-i32) (i32.const 67))
-;;  (func $const-i32-d (type $out-i32) (i32.const 68))
-;;)
-;;
-;;(assert_return (invoke $module1 "call-7") (i32.const 67))
-;;(assert_return (invoke $module1 "call-8") (i32.const 68))
-;;(assert_return (invoke $module1 "call-9") (i32.const 66))
-;;
-;;(module $module3
-;;  (type $out-i32 (func (result i32)))
-;;  (import "module1" "shared-table" (table 10 funcref))
-;;  (elem (i32.const 8) $const-i32-e)
-;;  (elem (i32.const 9) $const-i32-f)
-;;  (func $const-i32-e (type $out-i32) (i32.const 69))
-;;  (func $const-i32-f (type $out-i32) (i32.const 70))
-;;)
-;;
-;;(assert_return (invoke $module1 "call-7") (i32.const 67))
-;;(assert_return (invoke $module1 "call-8") (i32.const 69))
-;;(assert_return (invoke $module1 "call-9") (i32.const 70))
+(module $module1
+  (type $out-i32 (func (result i32)))
+  (table (export "shared-table") 10 funcref)
+  (elem (i32.const 8) $const-i32-a)
+  (elem (i32.const 9) $const-i32-b)
+  (func $const-i32-a (type $out-i32) (i32.const 65))
+  (func $const-i32-b (type $out-i32) (i32.const 66))
+  (func (export "call-7") (type $out-i32)
+    (call_indirect (type $out-i32) (i32.const 7))
+  )
+  (func (export "call-8") (type $out-i32)
+    (call_indirect (type $out-i32) (i32.const 8))
+  )
+  (func (export "call-9") (type $out-i32)
+    (call_indirect (type $out-i32) (i32.const 9))
+  )
+)
+
+(register "module1" $module1)
+
+(assert_trap (invoke $module1 "call-7") "uninitialized element")
+(assert_return (invoke $module1 "call-8") (i32.const 65))
+(assert_return (invoke $module1 "call-9") (i32.const 66))
+
+(module $module2
+  (type $out-i32 (func (result i32)))
+  (import "module1" "shared-table" (table 10 funcref))
+  (elem (i32.const 7) $const-i32-c)
+  (elem (i32.const 8) $const-i32-d)
+  (func $const-i32-c (type $out-i32) (i32.const 67))
+  (func $const-i32-d (type $out-i32) (i32.const 68))
+)
+
+(assert_return (invoke $module1 "call-7") (i32.const 67))
+(assert_return (invoke $module1 "call-8") (i32.const 68))
+(assert_return (invoke $module1 "call-9") (i32.const 66))
+
+(module $module3
+  (type $out-i32 (func (result i32)))
+  (import "module1" "shared-table" (table 10 funcref))
+  (elem (i32.const 8) $const-i32-e)
+  (elem (i32.const 9) $const-i32-f)
+  (func $const-i32-e (type $out-i32) (i32.const 69))
+  (func $const-i32-f (type $out-i32) (i32.const 70))
+)
+
+(assert_return (invoke $module1 "call-7") (i32.const 67))
+(assert_return (invoke $module1 "call-8") (i32.const 69))
+(assert_return (invoke $module1 "call-9") (i32.const 70))

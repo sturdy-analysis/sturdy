@@ -22,6 +22,8 @@ given ConcreteLongOps(using f: Failure): LongOps[Long] with
   def div(v1: Long, v2: Long): Long =
     if (v2 == 0)
       f.fail(LongDivisionByZero, s"$v1 / $v2")
+    else if (v1 == Long.MinValue && v2 == -1)
+      f.fail(LongOverflow, s"$v1 / $v2")
     else
       v1 / v2
   def divUnsigned(v1: Long, v2: Long): Long =

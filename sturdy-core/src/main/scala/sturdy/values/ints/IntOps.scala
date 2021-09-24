@@ -5,6 +5,7 @@ import sturdy.values.config
 import sturdy.values.convert.Convert
 
 case object IntDivisionByZero extends FailureKind
+case object IntOverflow extends FailureKind
 
 trait IntOps[V]:
   def intLit(i: Int): V

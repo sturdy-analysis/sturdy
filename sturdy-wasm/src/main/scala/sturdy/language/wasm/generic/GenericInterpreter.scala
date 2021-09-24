@@ -521,7 +521,17 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
 
     // invoke the start function
     module.start.foreach {
-      funcIdx => eval(Call(funcIdx))
+      funcIdx =>
+        val func = modInst.functions(funcIdx)
+        func match
+          case FunctionInstance.Wasm(mod, func, funcType) =>
+            val frameData = FrameData(funcType.t.size, mod)
+            val vars = func.locals.map(num.defaultValue)
+            labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
+              val res = enterFunction(Left(funcIdx), func, funcType)
+//              println(s"invoke exported $funcName = $res should have $rtLength values")
+//              println(func)
+            }))
     }
 
     modInst

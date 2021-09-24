@@ -40,7 +40,7 @@ trait ConcreteMemory[Key] extends Memory[Key, Int, ByteBuffer, Int]:
   override def memGrow(key: Key, delta: Int): OptionC[Int] =
     val mem = memories(key)
     val newPageNum = mem.pageNum + delta
-    if (newPageNum < maxPageNum && mem.sizeLimit.forall(newPageNum < _)) {
+    if (newPageNum <= maxPageNum && mem.sizeLimit.forall(newPageNum <= _)) {
       val newBytes = Array.ofDim[Byte](mem.size + delta * pageSize)
       Array.copy(mem.bytes, 0, newBytes, 0, mem.size)
       memories(key) = Mem(newBytes, mem.sizeLimit)
