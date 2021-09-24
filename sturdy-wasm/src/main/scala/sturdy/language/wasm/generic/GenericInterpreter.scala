@@ -232,9 +232,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
         val pt = paramsArity(bt)
         label(pt, pt, insts, Some(l))
       case If(bt, thnInsts, elsInsts) =>
-//        val cond = stack.peek()
         val isZero = num.evalNumeric(i32.Eqz)
-//        println(s"If ($cond -> $isZero) $thnInsts else $elsInsts")
         val rt = returnArity(bt)
         boolBranch[Unit](isZero) {
           // v == 0: else branch
@@ -242,7 +240,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
         } {
           label(paramsArity(bt), rt, thnInsts, None)
         }
-      case Br(labelIndex) => branch(labelIndex)
+      case Br(labelIndex) =>
+        branch(labelIndex)
       case BrIf(labelIndex) =>
         val isZero = num.evalNumeric(i32.Eqz)
         boolBranch[Unit](isZero) {
@@ -288,10 +287,11 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
    *   - we don't know k, so we need to remember size of stack A
    */
     def label(paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
-      labelStack.pushLabel(returnArity)
-      try stack.withFreshOperandFrame {
+      stack.withFreshOperandFrame {
         tryCatch {
-          insts.foreach(eval(_))
+          labelStack.pushLabel(returnArity)
+          try insts.foreach(eval(_))
+          finally labelStack.popLabel()
         } { ex =>
           stack.clearCurrentOperandFrame()
           ex match {
@@ -306,7 +306,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
               throws(ex)
           }
         }
-      } finally labelStack.popLabel()
+      }
 
     // stack before invoke: A p0 ... pn (n = params arity)
     // finish without excepction: A r0 ... rm (m = return arity)
@@ -356,8 +356,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     }
   }
 
-  def eval(inst: Inst): Unit = fixed(FixIn.Eval(inst))
-  def enterFunction(id: Either[FuncIdx, V], func: Func, ft: FuncType): Unit = fixed(FixIn.EnterWasmFunction(id, func, ft))
+  def eval(inst: Inst): FixOut[V] = fixed(FixIn.Eval(inst))
+  def enterFunction(id: Either[FuncIdx, V], func: Func, ft: FuncType): FixOut[V] = fixed(FixIn.EnterWasmFunction(id, func, ft))
 
 
   def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] =
@@ -374,7 +374,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
             val frameData = FrameData(funcType.t.size, mod)
             val vars = args.view ++ func.locals.map(num.defaultValue)
             labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
-              enterFunction(Left(funcIx), func, funcType)
+              val res = enterFunction(Left(funcIx), func, funcType)
+//              println(s"invoke exported $funcName = $res should have $rtLength values")
+//              println(func)
             }))
         stack.popN(rtLength)
       case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")

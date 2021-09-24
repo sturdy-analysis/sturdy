@@ -23,7 +23,7 @@
 (assert_return (invoke $Func "e" (i32.const 42)) (i32.const 43))
 (module)
 (module $Other1)
-;;(assert_return (invoke $Func "e" (i32.const 42)) (i32.const 43))
+(assert_return (invoke $Func "e" (i32.const 42)) (i32.const 43))
 
 (assert_invalid
   (module (export "a" (func 0)))
@@ -80,7 +80,7 @@
 (assert_return (get $Global "e") (i32.const 42))
 (module)
 (module $Other2)
-;;(assert_return (get $Global "e") (i32.const 42))
+(assert_return (get $Global "e") (i32.const 42))
 
 (assert_invalid
   (module (export "a" (global 0)))

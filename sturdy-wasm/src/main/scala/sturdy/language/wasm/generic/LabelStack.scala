@@ -5,11 +5,16 @@ import swam.LabelIdx
 import scala.collection.mutable.ArrayBuffer
 
 class LabelStack:
+  private var size: Int = 0
   private var labelReturnArities: ArrayBuffer[Int] = ArrayBuffer()
-  def lookupLabel(lableIndex: LabelIdx): Int = labelReturnArities(labelReturnArities.size - lableIndex - 1)
-  inline def pushLabel(returnArity: Int): Unit =
+
+  def lookupLabel(lableIndex: LabelIdx): Int =
+    labelReturnArities(labelReturnArities.size - lableIndex - 1)
+
+  def pushLabel(returnArity: Int): Unit =
     labelReturnArities += returnArity
-  inline def popLabel(): Unit =
+
+  def popLabel(): Int =
     labelReturnArities.remove(labelReturnArities.size - 1)
   
   def withFresh[A](f: => A): A =
@@ -17,3 +22,6 @@ class LabelStack:
     labelReturnArities = ArrayBuffer()
     try f finally 
       labelReturnArities = snapshot
+
+
+  override def toString: String = s"LabelStack(${labelReturnArities.mkString(", ")})"
