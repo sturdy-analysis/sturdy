@@ -25,12 +25,12 @@ import scala.collection.mutable.ListBuffer
 object GenericInterpreter:
   type GenericEffects[V, Addr] =
     BoolBranching[V] with
-      CCallFrame[Unit, String, Addr] with
-      Store[Addr, V] with
-      Allocation[Addr, AllocationSite] with
-      Print[V] with
-      UserInput[V] with
-      Failure
+    CCallFrame[Unit, String, Addr] with
+    Store[Addr, V] with
+    Allocation[Addr, AllocationSite] with
+    Print[V] with
+    UserInput[V] with
+    Failure
 
   enum AllocationSite:
     case Alloc(e: Exp.Alloc)
@@ -86,24 +86,23 @@ trait TypeOps[V]:
   // Klassen sind ja auch Typen oder?
   def isIdentifier(v: V): V
 
-// ehrlich gesagt keine ahnung
 // noch irgendwas mit lifted ops??
-trait ArrayOps[V]:
-  def allocArray(v: V): V
-  def accessArray(v1: V, v2: V): V
-  def arrayLength(v: V): V
+trait ArrayOps[I, V, A]:
+  def allocArray(v: I): A
+  def accessArray(ar: A, ix: I): V
+  def arrayLength(ar: A): I
 
-given concreteArrayOps: ArrayOps[Array[Int]] with
+given concreteArrayOps[V]: ArrayOps[Int, V, Array[V]] with
   // Funktioniert das so mit Scala Arrays?
-  def allocArray(v: Int): Array[Int] = new Array[Int](v)
-  def accessArray(v1: Array[Int], v2: Int): Int = v1(v2)
+  def allocArray(v: Int): Array[V] = new Array[V](v)
+  def accessArray(v1: Array[V], v2: Int): V = v1(v2)
   def arrayLength(v: Array[Int]): Int = v.length
 
 import GenericInterpreter.*
 
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 (using val effectOps: Effects)
-(using intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V], recOps: RecordOps[String, V, V], booleanOps: BooleanOps[V], arrayOps: ArrayOps[V])
+(using intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V], recOps: RecordOps[String, V, V], booleanOps: BooleanOps[V], arrayOps: ArrayOps[Int,V,V])
 (using effectOps.StoreJoin[V], effectOps.StoreJoinComp, effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
 
   import intOps._
@@ -118,7 +117,9 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
   val phi: GenericPhi[V]
 
-  private var functions: Map[String, Function] = Map()
+  //private var functions: Map[String, Function] = Map()
+  private var classTable: Map[String, classDeclaration] = Map()
+  private var classVars: Map[Map[String, V]] = Map()
 
   private lazy val fixed = fix.Fixpoint { (rec: FixIn => FixOut[V]) =>
     def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
@@ -140,17 +141,30 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
         val v1 = eval(e1)
         val v2 = eval(e2)
         equ(v1, v2)
-      // Muss man hier noch den Identifier mit einbringen?
-      case Exp.Call(fun, args) =>
+
+      case Exp.Call(obj, name, args) =>
+        //Eval identifier des class object
+        val o = eval(obj)
+        //Greife auf die Felder des class object zu
+        val classObj = classVars.get(o)
+        //Im Feld "class" steht der name der class
+        val className = classObj.get("class")
+        //Schaue die class in der class table nach
+        val actualClass: classDeclaration = classTable.get(className)
+        //Finde die zugehörige function der class
+        val fun: Function = actualClass.funs.find(_.name == name)
+        //locals binden? keine ahnung
         invokeFun(eval(fun), args.map(eval))(call)
 
-      // Alloc wie? Haben wir bei miniJava für new Identifier(), was machen wir?
-      case a@Exp.Alloc(e) =>
-        val addr = alloc(AllocationSite.Alloc(a))
-        write(addr, eval(e))
-        refValue(addr)
+      case a@Exp.Alloc(name) =>
+        //Finde die class die zum identifer passt
+        val actualClass: classDeclaration = classTable.get(name)
+        //Wie setzt man eigentlich überhaupt lokale variablen?
+        val locals = actualClass.locals ++ "class"
+        //füge die neue class variable zur liste aller class variablen hinzu
+        classVars(name) = locals.toMap
 
-      // Wie funktionieren die Array Ops?
+
       case Exp.AllocArray(e) => allocArray(eval(e))
 
       case Exp.AccessArray(e1, e2) => accessArray(eval(e1), eval(e2))
@@ -164,27 +178,6 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
 
       case And(e1, e2) => and(eval(e1), eval(e2))
 
-
-      // Die haben wir alle nicht in miniJava
-      /*case Exp.Input() => readInput()
-      case Exp.VarRef(x) =>
-        val addr = getLocal(x).orElse(fail(UnboundVariable, x))
-        unmanagedRefValue(addr)
-      case Exp.Deref(e) =>
-        val addr = refAddr(eval(e))
-        read(addr).orElse(fail(UnboundAddr, addr.toString))
-      case Exp.NullRef() =>
-        nullValue
-      case r@Exp.Record(fields) =>
-        // represents record as a reference to a record value
-        val fieldVals = fields.map(fe => fe._1 -> eval(fe._2))
-        val rec = makeRecord(fieldVals)
-        val addr = alloc(AllocationSite.Record(r))
-        write(addr, rec)
-        refValue(addr)
-      case Exp.FieldAccess(rec, field) =>
-        val recVal = eval(Exp.Deref(rec))
-        lookupRecordField(recVal, field)*/
     }
     // Statements sind praktisch identisch
     def run_open(s: Stm): Unit = s match
@@ -206,27 +199,12 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       case Assignable.AVar(x) =>
         val addr = getLocal(x).orElse(fail(UnboundVariable, x))
         write(addr, v)
-      //Auch hier wie arrayOps?
-      case Assignable.AArray(name, e)
+      //Auch hier wie arrayOps? keine ahnung
+      case Assignable.AArray(name, e) =>
+        ???
 
-    /*case Assignable.ADeref(e) =>
-        val addr = refAddr(eval(e))
-        write(addr, v)
-      case Assignable.AField(recVar, field) =>
-        val recRef = eval(Exp.Var(recVar))
-        val recAddr = refAddr(recRef)
-        val recVal = read(recAddr).orElse(fail(UnboundAddr, recAddr.toString))
-        val updated = updateRecordField(recVal, field, v)
-        write(recAddr, updated)
-      case Assignable.ADerefField(rec, field) =>
-        val recRef = eval(rec)
-        val recAddr = refAddr(recRef)
-        val recVal = read(recAddr).orElse(fail(UnboundAddr, recAddr.toString))
-        val updated = updateRecordField(recVal, field, v)
-        write(recAddr, updated)
-       */
 
-    //Funktions noch editieren, auch mit Typen? Wie dann Klassen? So ähnlich?
+    //Funktions noch editieren, local variablen irgendwie binden?
     def call(fun: Function, args: Seq[V]): V =
       var locals: Map[String, Addr] = Map()
       val paramAddrs = fun.params.map { name =>
@@ -262,7 +240,8 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   def run(s: Stm): Unit = fixed(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
 
   def execute(p: Program): V =
-    functions = p.funs.map(f => f.name -> f).toMap
-    val main = functions("main")
-    val args = main.params.map(_ => Exp.Input())
-    eval(Exp.Call(Exp.Var("main"), args))
+    classTable = p.classes.map(c => c.name -> c).toMap
+    val main = p.main
+    //Wie geht man mit den main class params um?
+    //val args = main.params.map
+    run(main.body)
