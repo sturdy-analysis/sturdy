@@ -16,7 +16,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
 
   val uri = classOf[ParserTest].getResource("/sturdy/language/tip").toURI();
 
-  Files.list(Paths.get(uri)).toScala(List).sorted.filter(p => p.toString.endsWith(".tip")).foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".tip")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
       val file = Source.fromURI(p.toUri)
       val sourceCode = file.getLines().mkString("\n")

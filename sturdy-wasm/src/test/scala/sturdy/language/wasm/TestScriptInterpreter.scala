@@ -57,16 +57,16 @@ class TestScriptInterpreter:
         // TODO
       case AssertReturn(action, expectedRes) =>
         val res = runAction(action)
-        assertResult(CFallible.Unfailing(constExprToVals(expectedRes)))(res)
+        assertResult(CFallible.Unfailing(constExprToVals(expectedRes)), c.toString)(res)
       case AssertReturnCanonicalNaN(action) =>
         val res = runAction(action)
-        checkNaN(res)
+        checkNaN(res, c.toString)
       case AssertReturnArithmeticNaN(action) =>
         val res = runAction(action)
-        checkNaN(res)
+        checkNaN(res, c.toString)
       case AssertTrap(action: Action, message: String) =>
         val res = runAction(action)
-        assert(res.isFailing)
+        assert(res.isFailing, c.toString)
       case _: AssertInvalid => // skip
       case _: AssertMalformed => // skip
       case _: AssertUnlinkable => // skip
@@ -96,12 +96,12 @@ class TestScriptInterpreter:
       case ext =>
         throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")
 
-  def checkNaN(res: Result) =
+  def checkNaN(res: Result, clue: String) =
     assert(!res.isFailing)
     val resClean: List[Value] = res.get
-    assert(resClean.size == 1)
+    assert(resClean.size == 1, clue)
     val h = resClean.head
-    assert(isNaN(h))
+    assert(isNaN(h), clue)
 
 
 def constExprToVals(e: unresolved.Expr): List[Value] =

@@ -12,7 +12,7 @@ class TestScriptInterpreterTest extends AnyFlatSpec, Matchers:
 
   val uri = classOf[TestScriptParserTest].getResource("/sturdy/language/wasm/scripts").toURI();
 
-  Files.list(Paths.get(uri)).toScala(List).sorted.filter(p => p.toString.endsWith(".wast")).foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
       val file = Source.fromURI(p.toUri)
       val sourceCode = file.getLines().mkString("\n")
