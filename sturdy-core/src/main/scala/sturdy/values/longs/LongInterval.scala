@@ -2,11 +2,7 @@ package sturdy.values.longs
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.fix.Widening
-import sturdy.values.Abstractly
-import sturdy.values.JoinValue
-import sturdy.values.PartialOrder
-import sturdy.values.Topped
+import sturdy.values.*
 import sturdy.values.relational.*
 
 import scala.collection.immutable.TreeSet
@@ -45,13 +41,13 @@ given Abstractly[Long, LongInterval] with
 given PartialOrder[LongInterval] with
   override def lteq(x: LongInterval, y: LongInterval): Boolean = y.l <= x.l && x.h <= y.h
 
-given LongIntervalJoin: JoinValue[LongInterval] with
-  override def joinValues(v1: LongInterval, v2: LongInterval): LongInterval =
+given JoinLongInterval: Join[LongInterval] with
+  override def apply(v1: LongInterval, v2: LongInterval): LongInterval =
     LongInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
 
-given LongIntervalWiden(using bounds: => Set[Long]): Widening[LongInterval] with
+given WidenLongInterval(using bounds: => Set[Long]): Widen[LongInterval] with
   private lazy val treeSet: TreeSet[Long] = TreeSet.from(bounds)
-  override def widen(v1: LongInterval, v2: LongInterval): LongInterval =
+  override def apply(v1: LongInterval, v2: LongInterval): LongInterval =
     val low =
       if (v1.l <= v2.l)
         v1.l

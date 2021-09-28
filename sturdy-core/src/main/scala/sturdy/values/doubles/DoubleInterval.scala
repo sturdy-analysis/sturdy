@@ -2,11 +2,7 @@ package sturdy.values.doubles
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.fix.Widening
-import sturdy.values.Abstractly
-import sturdy.values.JoinValue
-import sturdy.values.PartialOrder
-import sturdy.values.Topped
+import sturdy.values.*
 import sturdy.values.relational.*
 
 object DoubleInterval:
@@ -38,12 +34,12 @@ given Abstractly[Double, DoubleInterval] with
 given PartialOrder[DoubleInterval] with
   override def lteq(x: DoubleInterval, y: DoubleInterval): Boolean = y.l <= x.l && x.h <= y.h
 
-given doubleIntervalJoin: JoinValue[DoubleInterval] with
-  override def joinValues(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =
+given JoinDoubleInterval: Join[DoubleInterval] with
+  override def apply(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =
     DoubleInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
 
-given doubleIntervalWiden: Widening[DoubleInterval] with
-  override def widen(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =
+given WidenDoubleInterval: Widen[DoubleInterval] with
+  override def apply(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =
     val low =
       if (v1.l <= v2.l)
         v1.l

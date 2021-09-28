@@ -2,7 +2,7 @@ package sturdy.effect.except
 
 import sturdy.data.*
 import sturdy.effect.Effectful
-import sturdy.values.JoinValue
+import sturdy.values.Join
 import sturdy.values.exceptions.Exceptional
 
 import scala.collection.mutable.ListBuffer
@@ -14,8 +14,8 @@ case object AbstractException extends ExceptException:
   override def toString: String = s"Exception (abstract)"
 
 
-trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJoin: JoinValue[E]) extends Except[Exc, E], Effectful:
-  override type ExceptJoin[A] = Join[A]
+trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin], eJoin: Join[E]) extends Except[Exc, E], Effectful:
+  override type ExceptJoin[A] = WithJoin[A]
 
   protected var exception: OptionA[E] = OptionA.none
 
@@ -25,8 +25,8 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, Join], eJo
     val e = exceptional.exception(ex)
     this.exception = exception match
       case OptionA.None() => OptionA.Some(e::Nil)
-      case OptionA.NoneSome(old::Nil) => OptionA.Some(JoinValue.join(old, e)::Nil)
-      case OptionA.Some(old::Nil) => OptionA.Some(JoinValue.join(old, e)::Nil)
+      case OptionA.NoneSome(old::Nil) => OptionA.Some(Join(old, e)::Nil)
+      case OptionA.Some(old::Nil) => OptionA.Some(Join(old, e)::Nil)
       case _ => throw new IllegalStateException()
     throw AbstractException
 

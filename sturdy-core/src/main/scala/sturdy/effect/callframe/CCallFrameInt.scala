@@ -4,16 +4,11 @@ import sturdy.data.*
 
 import scala.reflect.ClassTag
 import scala.annotation.targetName
-import CCallFrameInt.*
-import sturdy.fix.{Widening, WidenEquiVector}
-
-object CCallFrameInt:
-  type State[Data, V] = (Data, Vars[V])
-  case class Vars[V](vs: Vector[V]) extends AnyVal
-  given WidenVars[V](using Widening[V]): Widening[Vars[V]] with
-    override def widen(old: Vars[V], now: Vars[V]): Vars[V] = Vars(WidenEquiVector().widen(old.vs, now.vs))
+import sturdy.values.Widen
 
 trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V]) extends CallFrame[Data, Int, V]:
+  import CCallFrameInt.*
+
   type CallFrameJoin[A] = NoJoin[A]
 
   private var data: Data = _data
@@ -21,16 +16,16 @@ trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V])
 
   def getFrameData: Data = data
 
-  def getFrameVars: Vars[V] = Vars(vars.toVector)
+  def getFrameVars: Vars[V] = vars.toSeq
   protected def setFrameVars(vs: Vars[V]): Unit =
     var ix = 0
-    for (v <- vs.vs) {
+    for (v <- vs) {
       vars(ix) = v
       ix += 1
     }
 
-  def getCallFrame: State[Data, V] = (data, getFrameVars)
-  protected def setCallFrame(s: State[Data, V]): Unit =
+  def getCallFrame: (Data, Seq[V]) = (data, getFrameVars)
+  protected def setCallFrame(s: (Data, Seq[V])): Unit =
     data = s._1
     setFrameVars(s._2)
 
@@ -52,6 +47,9 @@ trait CCallFrameInt[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V])
       this.data = snapshotData
       this.vars = snapshotVars
     }
+
+object CCallFrameInt:
+  type Vars[V] = Seq[V]
 
 trait CMutableCallFrameInt[Data, V](using ClassTag[V]) extends CCallFrameInt[Data, V] with MutableCallFrame[Data, Int, V]:
   override def setLocal(ix: Int, v: V): OptionC[Unit] =

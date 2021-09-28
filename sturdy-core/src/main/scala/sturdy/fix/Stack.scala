@@ -2,7 +2,7 @@ package sturdy.fix
 
 import sturdy.effect.AnalysisState
 import sturdy.effect.Effectful
-import sturdy.values.JoinValue
+import sturdy.values.Widen
 
 import scala.collection.mutable
 import scala.util.Failure
@@ -25,7 +25,7 @@ case object RecurrentCall extends Exception:
  *  finitely many calls. This property holds in particular if the set of contexts is finite.
  */
 final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, All], contextual: Contextual[Ctx, Dom, Codom])
-  (using widenCodom: Widening[Codom], widenIn: Widening[In], widenOut: Widening[Out], j: Effectful):
+  (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], j: Effectful):
 
   case class Frame(dom: Dom, ctx: Ctx)
 
@@ -134,7 +134,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
         println(s"${stackHeightIndent}## RECURRENT $frame -> $in")
       inCache += frame -> in
     case Some(previousIn) =>
-      val joinedIn = widenIn.widen(previousIn, in)
+      val joinedIn = widenIn(previousIn, in)
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}## RECURRENT $frame -> $joinedIn")
       inCache += frame -> joinedIn
@@ -142,7 +142,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
   @inline private def loadCorecurrentInput(frame: Frame, in: In): Unit = inCache.get(frame) match
     case None => inCache += frame -> in
     case Some(recurrentIn) =>
-      val joinedIn = widenIn.widen(in, recurrentIn)
+      val joinedIn = widenIn(in, recurrentIn)
       inCache += frame -> joinedIn
       state.setInState(joinedIn)
 
@@ -167,8 +167,8 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
         case (Failure(ex1), Failure(ex2)) => Failure(j.joinThrowables(ex1, ex2))
         case (Failure(_), Success(v)) => Success(v)
         case (Success(v), Failure(_)) => Success(v)
-        case (Success(v1), Success(v2)) => Success(widenCodom.widen(v1, v2))
-      val joinedOut = widenOut.widen(previousOut, state.getOutState())
+        case (Success(v1), Success(v2)) => Success(widenCodom(v1, v2))
+      val joinedOut = widenOut(previousOut, state.getOutState())
       state.setOutState(joinedOut)
       outCache += frame -> (joinedResult, joinedOut)
       if (Fixpoint.DEBUG)

@@ -2,11 +2,7 @@ package sturdy.values.ints
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.values.Abstractly
-import sturdy.values.Finite
-import sturdy.values.JoinValue
-import sturdy.values.PartialOrder
-import sturdy.values.Topped
+import sturdy.values.*
 import sturdy.values.relational.*
 
 enum IntSign:
@@ -43,8 +39,8 @@ given Abstractly[Int, IntSign] with
 given PartialOrder[IntSign] with
   override def lteq(x: IntSign, y: IntSign): Boolean = x == y || x < y
 
-given IntSignJoin: JoinValue[IntSign] with
-  override def joinValues(v1: IntSign, v2: IntSign): IntSign =
+given CombineIntSign[W <: Widening]: Combine[IntSign, W] with
+  override def apply(v1: IntSign, v2: IntSign): IntSign =
     if v1 == v2 then v1
     else if v1 < v2 then v2
     else if v2 < v1 then v1

@@ -5,7 +5,7 @@ import sturdy.Soundness
 import sturdy.data.*
 import sturdy.effect.Effectful
 import sturdy.values.Abstractly
-import sturdy.values.JoinValue
+import sturdy.values.Join
 import sturdy.values.MayMust
 
 
@@ -16,10 +16,10 @@ import sturdy.values.MayMust
  * have been (re)bound to optimize the join computation, since only values of dirty
  * variables need joining.
  */
-trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, MayMust[V]])(using j: JoinValue[V])
+trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, MayMust[V]])(using j: Join[V])
   extends Environment[Var, V], Effectful:
 
-  override type EnvJoin[A] = Join[A]
+  override type EnvJoin[A] = WithJoin[A]
 
   protected var env: Map[Var, MayMust[V]] = _init
   protected var dirtyVars: Set[Var] = Set()
@@ -79,10 +79,10 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, MayMust[V]])(using j: Joi
               // This binding is definite in f.
               joinedEnv += x -> newVal
               // If g does not definitely bind x, we must later mark this binding as non-definite _and_ join it with the old value (which is retained through g).
-              newDefiniteVarsInF += x -> oldVal.map(v => j.joinValues(v, newVal.get))
+              newDefiniteVarsInF += x -> oldVal.map(v => j(v, newVal.get))
             else
             // This binding is not definite in f
-              joinedEnv += x -> MayMust.May(j.joinValues(oldVal.get, newVal.get))
+              joinedEnv += x -> MayMust.May(j(oldVal.get, newVal.get))
       fResult
     } {
       env = snapshot
@@ -106,16 +106,16 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, MayMust[V]])(using j: Joi
 
             if (newVal.isMust) {
               // This binding is definite in g.
-              joinedEnv += x -> oldVal.map(v => j.joinValues(v, newVal.get))
+              joinedEnv += x -> oldVal.map(v => j(v, newVal.get))
             } else {
               // This binding is not definite in g
               newDefiniteVarsInF.get(x) match {
                 case scala.Some(weakenedFVal) =>
                   // Binding was definite in f, weaken it
-                  joinedEnv += x -> oldVal.map(_ => j.joinValues(weakenedFVal.get, newVal.get))
+                  joinedEnv += x -> oldVal.map(_ => j(weakenedFVal.get, newVal.get))
                 case scala.None =>
                   // Binding was not bound or non-definite in f
-                  joinedEnv += x -> oldVal.map(v => j.joinValues(v, newVal.get))
+                  joinedEnv += x -> oldVal.map(v => j(v, newVal.get))
               }
             }
             newDefiniteVarsInF -= x

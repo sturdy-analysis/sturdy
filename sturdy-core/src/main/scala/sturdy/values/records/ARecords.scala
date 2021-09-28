@@ -2,16 +2,9 @@ package sturdy.values.records
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.fix.Widening
 import sturdy.util.*
-import sturdy.values.JoinValue
-import sturdy.values.MayMust
-import sturdy.values.PartialOrder
-import sturdy.values.Top
-import sturdy.values.joinMayMust
-import sturdy.values.mayMustPO
+import sturdy.values.*
 import sturdy.values.relational.EqOps
-import sturdy.values.Topped
 
 import reflect.Selectable.reflectiveSelectable
 
@@ -19,7 +12,7 @@ enum ARecord[F, V]:
   case Top()
   case Map(m: Predef.Map[F, V])
 
-given ARecordOps[F, V](using Failure, JoinValue[V], Top[V])(using j: Effectful): RecordOps[F, V, ARecord[F, V]] with
+given ARecordOps[F, V](using Failure, Join[V], Top[V])(using j: Effectful): RecordOps[F, V, ARecord[F, V]] with
   override def makeRecord(fields: Seq[(F, V)]): ARecord[F, V] =
     ARecord.Map(fields.toMap)
   override def lookupRecordField(rec: ARecord[F, V], field: F): V = rec match
@@ -29,14 +22,14 @@ given ARecordOps[F, V](using Failure, JoinValue[V], Top[V])(using j: Effectful):
       case Some(v) => v
   override def updateRecordField(rec: ARecord[F, V], field: F, newval: V): ARecord[F, V] = rec match
     case ARecord.Top() =>
-      given Lazy[JoinValue[V]] = implicitly
+      given Lazy[Join[V]] = implicitly
       j.joinComputations(ARecord.Top())(UnboundRecordField(field).failedLookup(rec))
     case ARecord.Map(m) => m.get(field) match
       case None => UnboundRecordField(field).failedUpdate(rec)
       case Some(_) => ARecord.Map(m + (field -> newval))
 
-given ARecordJoin[F, V](using Lazy[JoinValue[V]]): JoinValue[ARecord[F, V]] with
-  override def joinValues(rec1: ARecord[F, V], rec2: ARecord[F, V]): ARecord[F, V] = (rec1, rec2) match
+given CombineARecord[F, V, W <: Widening](using Lazy[Combine[V, W]]): Combine[ARecord[F, V], W] with
+  override def apply(rec1: ARecord[F, V], rec2: ARecord[F, V]): ARecord[F, V] = (rec1, rec2) match
     case (ARecord.Top(), _ ) | (_, ARecord.Top()) => ARecord.Top()
     case (ARecord.Map(m1), ARecord.Map(m2)) =>
       if (m1.size != m2.size)
@@ -46,22 +39,7 @@ given ARecordJoin[F, V](using Lazy[JoinValue[V]]): JoinValue[ARecord[F, V]] with
         joined.get(f) match
           case None => return ARecord.Top()
           case Some(v1) =>
-            val joinedV = JoinValue.join(v1, v2)(using force)
-            joined += f -> joinedV
-      ARecord.Map(joined)
-
-given ARecordWidening[F, V](using Lazy[Widening[V]]): Widening[ARecord[F, V]] with
-  override def widen(rec1: ARecord[F, V], rec2: ARecord[F, V]): ARecord[F, V] = (rec1, rec2) match
-    case (ARecord.Top(), _ ) | (_, ARecord.Top()) => ARecord.Top()
-    case (ARecord.Map(m1), ARecord.Map(m2)) =>
-      if (m1.size != m2.size)
-        return ARecord.Top()
-      var joined =  m1
-      for ((f, v2) <- m2)
-        joined.get(f) match
-          case None => return ARecord.Top()
-          case Some(v1) =>
-            val joinedV = Widening.widen(v1, v2)(using force)
+            val joinedV = Combine[V, W](v1, v2)(using force)
             joined += f -> joinedV
       ARecord.Map(joined)
 

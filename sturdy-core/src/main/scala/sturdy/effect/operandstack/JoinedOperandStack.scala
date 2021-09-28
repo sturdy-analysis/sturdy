@@ -1,10 +1,9 @@
 package sturdy.effect.operandstack
 
-import sturdy.fix.Widening
-import sturdy.values.JoinValue
+import sturdy.values.Join
 
 /** Stacks of different execution branches are joined. */
-trait JoinedOperandStack[V <: AnyRef](using JoinValue[V]) extends GenericOperandStack[V]:
+trait JoinedOperandStack[V](using Join[V]) extends GenericOperandStack[V]:
   override def joinComputations[A](f: => A)(g: => A): Joined[A] =
     val snapshot = stack
     super.joinComputations(f) {
@@ -15,11 +14,10 @@ trait JoinedOperandStack[V <: AnyRef](using JoinValue[V]) extends GenericOperand
         stack = fStack.zipAll(stack, null.asInstanceOf[V], null.asInstanceOf[V]).map {
           case (null, v) => v
           case (v, null) => v
-          case (v1, v2) => JoinValue.join(v1, v2)
+          case (v1, v2) => Join(v1, v2)
         }
       }
     }
 
 object JoinedOperandStack:
-  type State[V] = GenericOperandStack.State[V]
-  given Widen[V](using Widening[V]): Widening[State[V]] = GenericOperandStack.Widen
+  type OperandState[V] = GenericOperandStack.OperandState[V]

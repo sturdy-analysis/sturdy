@@ -1,7 +1,7 @@
 package sturdy.language.wasm
 
 
-import sturdy.data.*
+import sturdy.data.{*, given}
 import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.CBoolBranching
@@ -23,7 +23,6 @@ import sturdy.values.functions.{*, given}
 import sturdy.values.ints.{*, given}
 import sturdy.values.longs.{*, given}
 import sturdy.values.relational.{*, given}
-import sturdy.values.unit
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -134,9 +133,9 @@ object ConcreteInterpreter extends Interpreter :
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends ConcreteOperandStack[Value]
-      with ConcreteMemory[Int]
+      with ConcreteMemory[MemoryAddr]
       with CSerialize
-      with ConcreteSymbolTable[Int, Int, FunctionInstance[Value]]
+      with ConcreteSymbolTable[TableAddr, Int, FunctionInstance[Value]]
       with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
       with CBoolBranching[Value]
       with ConcreteExcept[WasmException[Value]]

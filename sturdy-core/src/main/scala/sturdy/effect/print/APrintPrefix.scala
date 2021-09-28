@@ -4,7 +4,7 @@ import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.Effectful
 import sturdy.values.Finite
-import sturdy.values.JoinValue
+import sturdy.values.Join
 
 import scala.collection.mutable.ListBuffer
 
@@ -95,9 +95,9 @@ object APrintPrefix:
 // TODO this is a workaround. We don't need widening for PrintResult since it's stability does not influence the fixed point
 given finitePrintResult[A]: Finite[APrintPrefix.PrintResult[A]] with {}
 
-given joinPrintResult[A]: JoinValue[APrintPrefix.PrintResult[A]] with
+given JoinPrintResult[A]: Join[APrintPrefix.PrintResult[A]] with
   import APrintPrefix.*
-  override def joinValues(v1: PrintResult[A], v2: PrintResult[A]): PrintResult[A] = v1.join(v2)
+  override def apply(v1: PrintResult[A], v2: PrintResult[A]): PrintResult[A] = v1.join(v2)
 
 
 trait APrintPrefix[P] extends Print[P], Effectful:

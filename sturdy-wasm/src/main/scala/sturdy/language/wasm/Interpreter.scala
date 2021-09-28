@@ -1,10 +1,8 @@
 package sturdy.language.wasm
 
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.fix.Widening
 import sturdy.language.wasm.generic.*
-import sturdy.values.JoinValue
-import sturdy.values.Top
+import sturdy.values.*
 import sturdy.values.convert.LiftedConvert
 import sturdy.values.doubles.*
 import sturdy.values.floats.*
@@ -55,22 +53,13 @@ trait Interpreter:
   def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
 
-  given liftedJoinValue(using JoinValue[I32], JoinValue[I64], JoinValue[F32], JoinValue[F64]): JoinValue[Value] with
+  given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W], Combine[F32, W], Combine[F64, W]): Combine[Value, W] with
     import Value.*
-    override def joinValues(v1: Value, v2: Value): Value = (v1, v2) match
-      case (Int32(i1), Int32(i2)) => Int32(JoinValue.join(i1, i2))
-      case (Int64(l1), Int64(l2)) => Int64(JoinValue.join(l1, l2))
-      case (Float32(f1), Float32(f2)) => Float32(JoinValue.join(f1, f2))
-      case (Float64(d1), Float64(d2)) => Float64(JoinValue.join(d1, d2))
-      case _ => TopValue
-
-  given liftedWideningValue(using Widening[I32], Widening[I64], Widening[F32], Widening[F64]): Widening[Value] with
-    import Value.*
-    override def widen(v1: Value, v2: Value): Value = (v1, v2) match
-      case (Int32(i1), Int32(i2)) => Int32(Widening.widen(i1, i2))
-      case (Int64(l1), Int64(l2)) => Int64(Widening.widen(l1, l2))
-      case (Float32(f1), Float32(f2)) => Float32(Widening.widen(f1, f2))
-      case (Float64(d1), Float64(d2)) => Float64(Widening.widen(d1, d2))
+    override def apply(v1: Value, v2: Value): Value = (v1, v2) match
+      case (Int32(i1), Int32(i2)) => Int32(Combine[I32, W](i1, i2))
+      case (Int64(l1), Int64(l2)) => Int64(Combine[I64, W](l1, l2))
+      case (Float32(f1), Float32(f2)) => Float32(Combine[F32, W](f1, f2))
+      case (Float64(d1), Float64(d2)) => Float64(Combine[F64, W](d1, d2))
       case _ => TopValue
 
   type Addr

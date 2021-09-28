@@ -5,20 +5,18 @@ import sturdy.effect.{Effectful, AnalysisState}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.ABoolBranching
-import sturdy.effect.bytememory.ConstantAddressMemory.State
 import sturdy.effect.callframe.CCallFrameInt
 import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.*
 import sturdy.effect.operandstack.JoinedOperandStack
-import sturdy.effect.operandstack.JoinedOperandStack.State
-import sturdy.effect.symboltable.ToppedSymbolTable.State
+import sturdy.effect.operandstack.JoinedOperandStack.OperandState
 import sturdy.effect.symboltable.{ToppedSymbolTable, SymbolTable}
 import sturdy.fix
 import sturdy.fix.given
 import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
 import sturdy.language.wasm.abstractions.ConstantValues
-import sturdy.language.wasm.generic.*
+import sturdy.language.wasm.generic.{*, given}
 import sturdy.language.wasm.analyses.Fix.{*, given}
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
@@ -47,7 +45,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
   type FunV = Topped[Powerset[FunctionInstance[Value]]]
 
   given ConstantWasmOperations(using Failure): WasmOperations[Value, Addr, Size, FuncIx] with
-    override type WasmOpsJoin[A] = Join[A]
+    override type WasmOpsJoin[A] = WithJoin[A]
 
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
@@ -99,18 +97,18 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
 
   type InState =
     (CCallFrameInt.Vars[Value],
-      ConstantAddressMemory.State[Int, Topped[Byte]],
-      ToppedSymbolTable.State[Int, Int, FunV])
+      ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
+      ToppedSymbolTable.Tables[TableAddr, Int, FunV])
   type OutState =
-    (ConstantAddressMemory.State[Int, Topped[Byte]],
-      ToppedSymbolTable.State[Int, Int, FunV])
+    (ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
+      ToppedSymbolTable.Tables[TableAddr, Int, FunV])
   type AllState = InState
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends JoinedOperandStack[Value]
-      with ConstantAddressMemory[Int, Topped[Byte]](Topped.Actual(0))
+      with ConstantAddressMemory[MemoryAddr, Topped[Byte]](Topped.Actual(0))
       with ASerialize
-      with ToppedSymbolTable[Int, Int, FunV]
+      with ToppedSymbolTable[TableAddr, Int, FunV]
       with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
       with ABoolBranching[Value]
       with JoinedExcept[WasmException[Value], ExcV]
@@ -171,9 +169,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       effects.joinComputationsIterable(invokeAllFuns)
     val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
 
-
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
-      fix.contextSensitive(frameSensitive,
+      fix.contextSensitive[FrameData[Value], FixIn[Value], FixOut[Value]](frameSensitive,
         fix.filter(isFunOrWhile,
           fix.iter.topmost
         )

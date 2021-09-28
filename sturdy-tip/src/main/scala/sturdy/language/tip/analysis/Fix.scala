@@ -5,7 +5,7 @@ import sturdy.language.tip.GenericInterpreter.FixIn
 import sturdy.fix
 import sturdy.language.tip.GenericInterpreter.GenericEffects
 import sturdy.language.tip.Exp
-import sturdy.values.unit
+import sturdy.data.unit
 
 object Fix:
   final def isFunOrWhile(dom: FixIn): Int = dom match

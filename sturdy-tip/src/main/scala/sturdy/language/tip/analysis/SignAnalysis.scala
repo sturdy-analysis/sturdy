@@ -29,7 +29,7 @@ import Fix.*
 object SignAnalysis extends Interpreter,
   Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites:
 
-  given Lazy[JoinValue[Value]] = lazily(liftedJoinValue)
+  given Lazy[Join[Value]] = lazily(CombineValue)
 
   type InState = Store
   type OutState = (Store, APrintPrefix.PrintResult[Value])
@@ -71,7 +71,7 @@ object SignAnalysis extends Interpreter,
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
 
-    given Lazy[fix.Widening[Value]] = lazily(liftedWidening)
+    given Lazy[Widen[Value]] = lazily(CombineValue)
 
     val phi =
       fix.contextSensitive(parameters,

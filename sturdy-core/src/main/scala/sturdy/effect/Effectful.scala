@@ -4,7 +4,7 @@ import sturdy.effect.Effectful.StarvedJoin
 import sturdy.effect.except.ExceptException
 import sturdy.effect.failure.FailureException
 import sturdy.fix.RecurrentCall
-import sturdy.values.JoinValue
+import sturdy.values.Join
 
 import scala.util.Failure
 import scala.util.Success
@@ -12,7 +12,7 @@ import scala.util.Try
 
 trait Effectful:
 //  type JoinExceptions
-  type Joined[A] = JoinValue[A] ?=> A
+  type Joined[A] = Join[A] ?=> A
 
   final def joinThrowables(failA: Throwable, failB: Throwable): Throwable = (failA, failB) match
     case (failA: RuntimeException, _) => throw failA
@@ -32,7 +32,7 @@ trait Effectful:
       case (Failure(failA: RuntimeException), _) => throw failA
       case (_, Failure(failB: RuntimeException)) => throw failB
       case (Failure(failA), Failure(failB)) => throw joinThrowables(failA, failB)
-      case (Success(aF), Success(aG)) => summon[JoinValue[A]].joinValues(aF, aG)
+      case (Success(aF), Success(aG)) => Join(aF, aG)
       case (Success(aF), _) => aF
       case (_, Success(aG)) => aG
   }
@@ -58,6 +58,6 @@ trait Effectful:
     }
 
 object Effectful:
-  def join[A](f: => A)(g: => A)(using j: Effectful): JoinValue[A] ?=> A =
+  def join[A](f: => A)(g: => A)(using j: Effectful): Join[A] ?=> A =
     j.joinComputations(f)(g)
   case class StarvedJoin(ex1: Throwable, ex2: Throwable) extends Throwable(s"Starved Join with $ex1 and $ex2")

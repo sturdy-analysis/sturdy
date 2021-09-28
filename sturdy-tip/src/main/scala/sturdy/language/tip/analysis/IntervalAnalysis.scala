@@ -29,7 +29,7 @@ import Fix.*
 object IntervalAnalysis extends Interpreter,
   Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites:
 
-  given Lazy[JoinValue[Value]] = lazily(liftedJoinValue)
+  given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
   type InState = Store
   type OutState = (Store, APrintPrefix.PrintResult[Value])
@@ -72,8 +72,8 @@ object IntervalAnalysis extends Interpreter,
     final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
 
     var bounds: Set[Int] = Set.empty
-    given fix.Widening[IntInterval] = new IntIntervalWiden(bounds)
-    given Lazy[fix.Widening[Value]] = lazily(liftedWidening)
+    given Widen[IntInterval] = new IntIntervalWiden(bounds)
+    given Lazy[Widen[Value]] = lazily(CombineValue[Widening.Yes])
 
     override def execute(p: Program): Value =
       bounds = p.intLiterals

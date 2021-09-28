@@ -2,10 +2,8 @@ package sturdy.values.longs
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.values.Abstractly
-import sturdy.values.Topped
-import sturdy.values.JoinValue
-import sturdy.values.PartialOrder
+import sturdy.values.*
+import sturdy.values.Widening
 import sturdy.values.relational.*
 
 enum LongSign:
@@ -42,8 +40,8 @@ given Abstractly[Long, LongSign] with
 given PartialOrder[LongSign] with
   override def lteq(x: LongSign, y: LongSign): Boolean = x == y || x < y
 
-given LongSignJoin: JoinValue[LongSign] with
-  override def joinValues(v1: LongSign, v2: LongSign): LongSign =
+given CombineLongSign[W <: Widening]: Combine[LongSign, W] with
+  override def apply(v1: LongSign, v2: LongSign): LongSign =
     if v1 == v2 then v1
     else if v1 < v2 then v2
     else if v2 < v1 then v1

@@ -1,5 +1,6 @@
 package sturdy.language.wasm.generic
 
+import sturdy.data.unit
 import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
@@ -17,7 +18,6 @@ import sturdy.values.functions.FunctionOps
 import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
-import sturdy.values.unit
 import swam.FuncIdx
 import swam.FuncType
 import swam.syntax.*
@@ -39,9 +39,9 @@ enum WasmException[V]:
 
 type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV] =
   OperandStack[V]
-    with Memory[Int, Addr,Bytes,Size]
+    with Memory[MemoryAddr, Addr,Bytes,Size]
     with Serialize[V,Bytes,MemoryInst,MemoryInst]
-    with SymbolTable[Int, FuncIx, FunV]
+    with SymbolTable[TableAddr, FuncIx, FunV]
     with CMutableCallFrameInt[FrameData[V], V]
     with BoolBranching[V]
     with Except[WasmException[V], ExcV]
@@ -71,7 +71,6 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
 
   import effects.*
   val stack: OperandStack[V] = effects
-  val memory: Memory[Int, Addr,Bytes,Size] = effects
 
   val intOps: IntOps[V]
   val longOps: LongOps[V]
@@ -184,10 +183,10 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     case LoadN(_,n,_,_) => n / 8
     case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $inst")
 
-  def memoryIndex: Int =
+  def memoryIndex: MemoryAddr =
     module.memoryAddrs(0)
 
-  def tableIndex: Int =
+  def tableIndex: TableAddr =
     module.tableAddrs(0)
 
 
@@ -445,8 +444,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     // tables
     modInst.tableAddrs = module.tables.map {
       case TableType(_, Limits(min,max)) =>
-        addEmptyTable(tabCount)
-        val tabAddr = tabCount
+        val tabAddr = TableAddr(tabCount)
+        addEmptyTable(tabAddr)
         tabCount += 1
         tabAddr
     }
@@ -455,8 +454,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
       case MemType(Limits(min, max)) =>
         val initSize = valToSize(intOps.intLit(min))
         val sizeLimit = max.map(i => valToSize(intOps.intLit(i)))
-        addEmptyMemory(memCount, initSize, sizeLimit)
-        val memAddr = memCount
+        val memAddr = MemoryAddr(memCount)
+        addEmptyMemory(memAddr, initSize, sizeLimit)
         memCount += 1
         memAddr
     }
@@ -513,7 +512,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
             eval(i32.Add) // adds index to base
             val idx = stack.pop() // stack is empty
             val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
-            tableSet(tableIdx, valueToFuncIx(idx), funV)
+            tableSet(TableAddr(tableIdx), valueToFuncIx(idx), funV)
             // TODO add failure conditions for table writing
           }
      }

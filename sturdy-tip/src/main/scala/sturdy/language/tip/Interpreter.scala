@@ -1,9 +1,8 @@
 package sturdy.language.tip
 
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.fix.Widening
 import sturdy.language.tip.GenericInterpreter.{AllocationSite, FixIn, FixOut, GenericEffects, GenericPhi, TypeError}
-import sturdy.values.{Top, JoinValue}
+import sturdy.values.{Top, Widening, Combine}
 import sturdy.values.functions.{FunctionOps, LiftedFunctionOps}
 import sturdy.values.ints.{IntOps, LiftedIntOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
@@ -56,22 +55,13 @@ trait Interpreter:
   type Addr
   type Effects <: GenericEffects[Value, Addr]
 
-  given liftedJoinValue(using JoinValue[VInt], JoinValue[VFun], JoinValue[VRef], JoinValue[VRecord]): JoinValue[Value] with
+  given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VFun, W], Combine[VRef, W], Combine[VRecord, W]): Combine[Value, W] with
     import Value.*
-    override def joinValues(v1: Value, v2: Value): Value = (v1, v2) match
-      case (IntValue(i1), IntValue(i2)) => IntValue(JoinValue.join(i1, i2))
-      case (FunValue(funs1), FunValue(funs2)) => FunValue(JoinValue.join(funs1, funs2))
-      case (RefValue(addrs1), RefValue(addrs2)) => RefValue(JoinValue.join(addrs1, addrs2))
-      case (RecValue(rec1), RecValue(rec2)) => RecValue(JoinValue.join(rec1, rec2))
-      case _ => TopValue
-
-  given liftedWidening(using Widening[VInt], Widening[VFun], Widening[VRef], Widening[VRecord]): Widening[Value] with
-    import Value.*
-    override def widen(v1: Value, v2: Value): Value = (v1, v2) match
-      case (IntValue(i1), IntValue(i2)) => IntValue(Widening.widen(i1, i2))
-      case (FunValue(funs1), FunValue(funs2)) => FunValue(Widening.widen(funs1, funs2))
-      case (RefValue(addrs1), RefValue(addrs2)) => RefValue(Widening.widen(addrs1, addrs2))
-      case (RecValue(rec1), RecValue(rec2)) => RecValue(Widening.widen(rec1, rec2))
+    override def apply(v1: Value, v2: Value): Value = (v1, v2) match
+      case (IntValue(i1), IntValue(i2)) => IntValue(Combine[VInt, W](i1, i2))
+      case (FunValue(funs1), FunValue(funs2)) => FunValue(Combine[VFun, W](funs1, funs2))
+      case (RefValue(addrs1), RefValue(addrs2)) => RefValue(Combine[VRef, W](addrs1, addrs2))
+      case (RecValue(rec1), RecValue(rec2)) => RecValue(Combine[VRecord, W](rec1, rec2))
       case _ => TopValue
 
   type Instance <: GenericInstance

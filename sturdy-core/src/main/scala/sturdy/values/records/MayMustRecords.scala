@@ -2,11 +2,7 @@ package sturdy.values.records
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.values.JoinValue
-import sturdy.values.MayMust
-import sturdy.values.PartialOrder
-import sturdy.values.joinMayMust
-import sturdy.values.mayMustPO
+import sturdy.values.{*, given}
 import sturdy.values.relational.EqOps
 
 import scala.collection.immutable
@@ -17,7 +13,7 @@ case class MayMustRecord[F, V](m: Map[F, MayMust[V]]):
     case (f, MayMust.May(v)) => Right(f -> v)
   }
 
-given mayMustRecordOps[F, V] (using Failure, JoinValue[V])(using j: Effectful): RecordOps[F, V, MayMustRecord[F, V]] with
+given mayMustRecordOps[F, V](using Failure, Join[V])(using j: Effectful): RecordOps[F, V, MayMustRecord[F, V]] with
   override def makeRecord(fields: Seq[(F, V)]): MayMustRecord[F, V] =
     var rec = Map[F, MayMust[V]]()
     for ((field, v) <- fields)
@@ -32,14 +28,14 @@ given mayMustRecordOps[F, V] (using Failure, JoinValue[V])(using j: Effectful): 
     case Some(MayMust.Must(v)) => MayMustRecord(rec.m + (field -> MayMust.Must(newval)))
     case Some(MayMust.May(v)) => j.joinComputations(MayMustRecord(rec.m + (field -> MayMust.Must(newval))))(UnboundRecordField(field).failedUpdate(rec))
 
-given JoinMayMustRecord[F, V](using j: JoinValue[V]): JoinValue[MayMustRecord[F, V]] with
-  override def joinValues(rec1: MayMustRecord[F, V], rec2: MayMustRecord[F, V]): MayMustRecord[F, V] =
+given CombineMayMustRecord[F, V, W <: Widening](using j: Combine[V, W]): Combine[MayMustRecord[F, V], W] with
+  override def apply(rec1: MayMustRecord[F, V], rec2: MayMustRecord[F, V]): MayMustRecord[F, V] =
     var joined =  rec1.m
     for ((f, v2) <- rec2.m)
       joined.get(f) match
         case None => joined += f -> MayMust.May(v2.get)
         case Some(v1) =>
-          val joinedV = joinMayMust.joinValues(v1, v2)
+          val joinedV = Combine[MayMust[V], W](v1, v2)
           joined += f -> joinedV
     MayMustRecord(joined)
 

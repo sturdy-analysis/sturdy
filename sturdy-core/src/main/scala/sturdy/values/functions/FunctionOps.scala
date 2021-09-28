@@ -1,7 +1,7 @@
 package sturdy.values.functions
 
 import sturdy.effect.Effectful
-import sturdy.values.JoinValue
+import sturdy.values.Join
 import sturdy.values.Powerset
 
 /*

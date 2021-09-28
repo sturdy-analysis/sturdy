@@ -1,5 +1,6 @@
 package sturdy.language.scheme
 
+import sturdy.data.unit
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.environment.CEnvironment
@@ -10,7 +11,6 @@ import Op1Kinds.*
 import Op2Kinds.*
 import OpVarKinds.*
 import sturdy.util.Label
-import sturdy.values.unit
 import sturdy.values.config
 import sturdy.values.ints.*
 import sturdy.values.rationals.*

@@ -2,7 +2,7 @@ package sturdy.values.doubles
 
 import sturdy.effect.Effectful
 import sturdy.values.*
-import sturdy.values.JoinValue
+import sturdy.values.Widening
 import sturdy.values.relational.*
 
 enum DoubleSign:
@@ -39,8 +39,8 @@ given Abstractly[Double, DoubleSign] with
 given PartialOrder[DoubleSign] with
   override def lteq(x: DoubleSign, y: DoubleSign): Boolean = x == y || x < y
 
-given DoubleSignJoin: JoinValue[DoubleSign] with
-  override def joinValues(v1: DoubleSign, v2: DoubleSign): DoubleSign =
+given CombineDoubleSign[W <: Widening]: Combine[DoubleSign, W] with
+  override def apply(v1: DoubleSign, v2: DoubleSign): DoubleSign =
     if v1 == v2 then v1
     else if v1 < v2 then v2
     else if v2 < v1 then v1

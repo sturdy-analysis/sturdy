@@ -2,13 +2,13 @@ package sturdy.effect.branching
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.values.JoinValue
+import sturdy.values.Join
 import sturdy.values.Topped
 
 import reflect.Selectable.reflectiveSelectable
 
 trait ABoolBranching[V <: {def asBoolean(using Failure): Topped[Boolean]}] extends BoolBranching[V], Effectful, Failure:
-  type BoolBranchJoin[A] = JoinValue[A]
+  type BoolBranchJoin[A] = Join[A]
 
   def boolBranch[A](v: V, thn: => A, els: => A): BoolBranchJoin[A] ?=> A =
     val bool = v.asBoolean(using this)

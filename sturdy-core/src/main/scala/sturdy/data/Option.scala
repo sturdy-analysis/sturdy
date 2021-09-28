@@ -1,7 +1,7 @@
 package sturdy.data
 
 import sturdy.effect.Effectful
-import sturdy.values.JoinValue
+import sturdy.values.Join
 
 trait Option[J[_], A]:
   def option[B](default: => B)(f: A => B): J[B] ?=> B
@@ -28,16 +28,16 @@ object OptionC:
     case scala.Some(a) => OptionC.Some(a)
     case scala.None => OptionC.None()
 
-enum OptionA[A] extends Option[Join, A]:
+enum OptionA[A] extends Option[WithJoin, A]:
   case None()
   case NoneSome(as: Iterable[A])
   case Some(as: Iterable[A])
 
-  override def option[B](default: => B)(f: A => B): Join[B] ?=> B = this match
+  override def option[B](default: => B)(f: A => B): WithJoin[B] ?=> B = this match
     case Some(as) if as.nonEmpty =>
-      summon[Effectful].joinComputationsIterable(as.map(a => () => f(a)))
+      joinComputationsIterable(as.map(a => () => f(a)))
     case NoneSome(as) if as.nonEmpty =>
-      summon[Effectful].joinComputationsIterable(as.map(a => () => f(a)) ++ Iterable.single(() => default))
+      joinComputationsIterable(as.map(a => () => f(a)) ++ Iterable.single(() => default))
     case _ => default
 
   def +[AA <: A](a: AA): OptionA[A] = this match
@@ -56,16 +56,16 @@ enum OptionA[A] extends Option[Join, A]:
     case (Some(as1), NoneSome(as2)) => NoneSome(as1 ++ as2)
     case (Some(as1), Some(as2)) => Some(as1 ++ as2)
 
-  def joinDeep[AA <: A](that: OptionA[AA])(using JoinValue[A]): OptionA[A] = (this, that) match
+  def joinDeep[AA <: A](that: OptionA[AA])(using Join[A]): OptionA[A] = (this, that) match
     case (None(), None()) => None()
     case (None(), NoneSome(e2::Nil)) => NoneSome(e2::Nil)
     case (None(), Some(e2::Nil)) => NoneSome(e2::Nil)
     case (NoneSome(e1::Nil), None()) => NoneSome(e1::Nil)
-    case (NoneSome(e1::Nil), NoneSome(e2::Nil)) => NoneSome(JoinValue.join(e1,e2)::Nil)
-    case (NoneSome(e1::Nil), Some(e2::Nil)) => NoneSome(JoinValue.join(e1,e2)::Nil)
+    case (NoneSome(e1::Nil), NoneSome(e2::Nil)) => NoneSome(Join(e1,e2)::Nil)
+    case (NoneSome(e1::Nil), Some(e2::Nil)) => NoneSome(Join(e1,e2)::Nil)
     case (Some(e1::Nil), None()) => NoneSome(e1::Nil)
-    case (Some(e1::Nil), NoneSome(e2::Nil)) => NoneSome(JoinValue.join(e1,e2)::Nil)
-    case (Some(e1::Nil), Some(e2::Nil)) => Some(JoinValue.join(e1,e2)::Nil)
+    case (Some(e1::Nil), NoneSome(e2::Nil)) => NoneSome(Join(e1,e2)::Nil)
+    case (Some(e1::Nil), Some(e2::Nil)) => Some(Join(e1,e2)::Nil)
     case _ => throw new IllegalStateException()
 
 object OptionA:

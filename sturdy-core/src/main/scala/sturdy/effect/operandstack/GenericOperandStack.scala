@@ -1,16 +1,16 @@
 package sturdy.effect.operandstack
 
 import GenericOperandStack.*
-import sturdy.fix.WidenEquiList
-import sturdy.fix.Widening
+import sturdy.data.CombineEquiList
+import sturdy.values.*
 
 trait GenericOperandStack[V] extends OperandStack[V]:
   protected var stack: List[V] = Nil
   protected var framePointer: Int = 0
 
-  def getOperandFrame: State[V] = State(stack.take(stack.size - framePointer))
-  protected def setOperandFrame(s: State[V]): Unit =
-    this.stack = s.vals ++ stack.drop(stack.size - framePointer)
+  def getOperandFrame: OperandState[V] = stack.take(stack.size - framePointer)
+  protected def setOperandFrame(s: OperandState[V]): Unit =
+    this.stack = s ++ stack.drop(stack.size - framePointer)
 
   def push(v: V): Unit =
     stack = v :: stack
@@ -48,7 +48,7 @@ trait GenericOperandStack[V] extends OperandStack[V]:
     stack = stack.drop(stack.size - framePointer)
 
 object GenericOperandStack:
-  case class State[V](vals: List[V])
-  given Widen[V](using Widening[V]): Widening[State[V]] with
-    override def widen(v1: State[V], v2: State[V]): State[V] =
-      State(WidenEquiList().widen(v1.vals, v2.vals))
+  type OperandState[V] = List[V]
+//  case class OperandState[V](vals: List[V]) extends Combinable[OperandState[V]]:
+//    type CombineCtx[W] = Combine[V, W]
+//    def combine[W <: Widening](that: OperandState[V]) = OperandState(Combine[List[V], W](this.vals, that.vals))

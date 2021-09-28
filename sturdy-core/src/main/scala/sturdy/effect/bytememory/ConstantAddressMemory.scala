@@ -4,23 +4,23 @@ import sturdy.data.*
 import sturdy.effect.Effectful
 import sturdy.fix.*
 import sturdy.values.*
+import sturdy.values.Widening
 
 import scala.collection.mutable
 import scala.collection.IndexedSeqView
 import scala.reflect.ClassTag
 
-
 /** A memory that tracks byte properties `B` for memory accesses via possibly constant addresses `Topped[Int]`.
  */
-trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], JoinValue[B]) extends Memory[Key, Topped[Int], IndexedSeqView[B], Topped[Int]], Effectful:
-  import ConstantAddressMemory.*
+trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], Join[B]) extends Memory[Key, Topped[Int], IndexedSeqView[B], Topped[Int]], Effectful:
+  import ConstantAddressMemory.{*, given}
 
-  override type MemoryJoin[A] = Join[A]
+  override type MemoryJoin[A] = WithJoin[A]
 
   protected var memories: mutable.Map[Key, Topped[Mem[B]]] = mutable.Map()
   
-  def getMemories: State[Key, B] = memories.view.mapValues(_.map(_.clone())).toMap
-  protected def setMemories(s: State[Key, B]): Unit =
+  def getMemories: Memories[Key, B] = memories.view.mapValues(_.map(_.clone())).toMap
+  protected def setMemories(s: Memories[Key, B]): Unit =
     memories = mutable.Map() ++ s
 
   override def memRead(key: Key, addr: Topped[Int], length: Int): OptionA[IndexedSeqView[B]] =
@@ -89,11 +89,9 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], JoinValue
       val fmemories = memories
       memories = gmemories
       try g finally {
-        for ((key, fmemOpt) <- fmemories) gmemories.get(key) match
-          case Some(gmemOpt) => (fmemOpt, gmemOpt) match
-            case (Topped.Actual(fmem), Topped.Actual(gmem)) => memories += key -> fmem.join(gmem)
-            case _ => memories += key -> Topped.Top
-          case None => memories += key -> fmemOpt.map(_.copy(definite = false))
+        for ((key, fmem) <- fmemories) gmemories.get(key) match
+          case Some(gmem) => memories += key -> Join(fmem, gmem)
+          case None => memories += key -> fmem.map(_.copy(definite = false))
 
         val fkeys = fmemories.keySet
         for ((key, gmemOpt) <- gmemories)
@@ -104,17 +102,28 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], JoinValue
 
 
 object ConstantAddressMemory:
-  type State[Key, B] = Map[Key, Topped[Mem[B]]]
+  type Memories[Key, B] = Map[Key, Topped[Mem[B]]]
 
-  given Widen[Key, B](using Widening[B]): Widening[Map[Key, Topped[Mem[B]]]] =
-    new widenMap(using new Finite[Key] {}, new WidenMem)
-
-  given WidenMem[B](using w: Widening[B]): Widening[Topped[Mem[B]]] with
-    def widen(old: Topped[Mem[B]], now: Topped[Mem[B]]): Topped[Mem[B]] = (old, now) match
+  given CombineMem[B, W <: Widening](using j: Combine[B, W]): Combine[Topped[Mem[B]], W] with
+    def apply(old: Topped[Mem[B]], now: Topped[Mem[B]]): Topped[Mem[B]] = (old, now) match
       case (Topped.Top, _) | (_, Topped.Top) => Topped.Top
-      case (Topped.Actual(oldMem), Topped.Actual(nowMem)) => oldMem.widen(nowMem)
+      case (Topped.Actual(oldMem), Topped.Actual(nowMem)) =>
+        if (oldMem.bytes.length != nowMem.bytes.length)
+          Topped.Top
+        else if (oldMem.dirty.size >= nowMem.dirty.size)
+          Topped.Actual(joinSameSized(oldMem, nowMem))
+        else
+          Topped.Actual(joinSameSized(nowMem, oldMem))
+
+    private def joinSameSized(mem1: Mem[B], mem2: Mem[B]): Mem[B] =
+      val result = mem1.clone()
+      for (ix <- mem2.dirty)
+        result.bytes(ix) = Combine[B, W](result.bytes(ix), mem2.bytes(ix))
+      result.dirty |= mem2.dirty
+      result
 
   case class Mem[B](bytes: Array[B], dirty: mutable.BitSet, sizeLimit: scala.Option[Int], definite: Boolean = true):
+
     override def clone(): Mem[B] = Mem(bytes.clone(), dirty.clone(), sizeLimit)
     inline def size = bytes.length
     inline def pageNum: Int = (size / pageSize).toInt
@@ -130,23 +139,6 @@ object ConstantAddressMemory:
       case _ => false
 
     override def hashCode(): Int = this.bytes.toSeq.hashCode * 31 + this.dirty.hashCode * 17 + sizeLimit.hashCode + definite.hashCode
-
-    inline def join(that: Mem[B])(using j: JoinValue[B]) = combine(that, j.joinValues)
-    inline def widen(that: Mem[B])(using w: Widening[B]) = combine(that, w.widen)
-
-    private def combine(that: Mem[B], com: (B, B) => B): Topped[Mem[B]] =
-      if (this.bytes.length != that.bytes.length)
-        Topped.Top
-      else if (this.dirty.size >= that.dirty.size)
-        Topped.Actual(this.clone().joinSameSized(that, com))
-      else
-        Topped.Actual(that.clone().joinSameSized(this, com))
-
-    inline private def joinSameSized(that: Mem[B], combine: (B, B) => B): Mem[B] =
-      for (ix <- that.dirty)
-        this.bytes(ix) = combine(this.bytes(ix), that.bytes(ix))
-      this.dirty |= that.dirty
-      this
 
   val pageSize: Int = 65536
   val maxPageNum: Int = 65536

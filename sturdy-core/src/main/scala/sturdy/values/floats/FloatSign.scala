@@ -2,8 +2,6 @@ package sturdy.values.floats
 
 import sturdy.effect.Effectful
 import sturdy.values.*
-import sturdy.values.Topped
-import sturdy.values.JoinValue
 import sturdy.values.relational.*
 
 enum FloatSign:
@@ -40,8 +38,8 @@ given Abstractly[Float, FloatSign] with
 given PartialOrder[FloatSign] with
   override def lteq(x: FloatSign, y: FloatSign): Boolean = x == y || x < y
 
-given FloatSignJoin: JoinValue[FloatSign] with
-  override def joinValues(v1: FloatSign, v2: FloatSign): FloatSign =
+given CombineFloatSign[W <: Widening]: Combine[FloatSign, W] with
+  override def apply(v1: FloatSign, v2: FloatSign): FloatSign =
     if v1 == v2 then v1
     else if v1 < v2 then v2
     else if v2 < v1 then v1

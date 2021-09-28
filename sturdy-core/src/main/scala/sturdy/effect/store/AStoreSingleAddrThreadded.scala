@@ -19,7 +19,7 @@ trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])
 
   this.store = _init
   
-  override type StoreJoin[A] = Join[A]
+  override type StoreJoin[A] = WithJoin[A]
 
   override def read(x: Addr): OptionA[V] =
     store.get(x) match

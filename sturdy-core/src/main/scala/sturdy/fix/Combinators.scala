@@ -14,8 +14,8 @@ final class Const[Dom, Codom](c: Dom => Codom) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = c
 }
 
-def filter[Dom, Codom, Phi <: Combinator[Dom, Codom]](pred: Dom => Boolean, phi: Phi): Filter[Dom, Codom, Phi] = new Filter(pred, phi)
-final class Filter[Dom, Codom, Phi <: Combinator[Dom, Codom]](pred: Dom => Boolean, val phi: Phi) extends Combinator[Dom, Codom] {
+def filter[Dom, Codom](pred: Dom => Boolean, phi: Combinator[Dom, Codom]): Filter[Dom, Codom] = new Filter(pred, phi)
+final class Filter[Dom, Codom](pred: Dom => Boolean, val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
     if (pred(dom))
       phi(f)(dom)
@@ -23,8 +23,8 @@ final class Filter[Dom, Codom, Phi <: Combinator[Dom, Codom]](pred: Dom => Boole
       f(dom)
 }
 
-def unwind[Dom, Codom, Phi <: Combinator[Dom, Codom]](steps: Int, phi: Phi): Unwind[Dom, Codom, Phi] = new Unwind(steps, phi)
-final class Unwind[Dom, Codom, Phi <: Combinator[Dom, Codom]](steps: Int, val phi: Phi) extends Combinator[Dom, Codom] {
+def unwind[Dom, Codom](steps: Int, phi: Combinator[Dom, Codom]): Unwind[Dom, Codom] = new Unwind(steps, phi)
+final class Unwind[Dom, Codom](steps: Int, val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
   private var stepsLeft: Int = steps
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
     stepsLeft -= 1
@@ -34,11 +34,10 @@ final class Unwind[Dom, Codom, Phi <: Combinator[Dom, Codom]](steps: Int, val ph
       phi(f)(dom)
 }
 
-def dispatch[Dom, Codom, Phi <: Combinator[Dom, Codom]]
-  (choose: Dom => Int, phis: Iterable[Phi])
-  (using ClassTag[Phi])
-  : Dispatch[Dom, Codom, Phi] = new Dispatch(choose, phis.toArray)
-final class Dispatch[Dom, Codom, Phi <: Combinator[Dom, Codom]](choose: Dom => Int, val phis: Array[Phi]) extends Combinator[Dom, Codom] {
+def dispatch[Dom, Codom]
+  (choose: Dom => Int, phis: Iterable[Combinator[Dom, Codom]])
+  : Dispatch[Dom, Codom] = new Dispatch(choose, phis.toArray)
+final class Dispatch[Dom, Codom](choose: Dom => Int, val phis: Array[Combinator[Dom, Codom]]) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
     val ix = choose(dom)
     if (ix >= 0)
@@ -51,8 +50,8 @@ trait Logger[Dom]:
   def enter(d: Dom): Unit
   def exit(d: Dom): Unit
 
-def log[Dom, Codom, Phi <: Combinator[Dom, Codom]](logger: Logger[Dom], phi: Phi): Log[Dom, Codom, Phi] = new Log(logger, phi)
-final class Log[Dom, Codom, Phi <: Combinator[Dom, Codom]](logger: Logger[Dom], val phi: Phi) extends Combinator[Dom, Codom] {
+def log[Dom, Codom](logger: Logger[Dom], phi: Combinator[Dom, Codom]): Log[Dom, Codom] = new Log(logger, phi)
+final class Log[Dom, Codom](logger: Logger[Dom], val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
     logger.enter(dom)
     try phi(f)(dom) finally

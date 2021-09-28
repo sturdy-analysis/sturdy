@@ -1,11 +1,11 @@
 package sturdy.language.wasm.analyses
 
+import sturdy.data.CombineEquiList
 import sturdy.effect.callframe.CallFrame
 import sturdy.fix
-import sturdy.fix.WidenEquiList
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData}
-import sturdy.values.unit
+import sturdy.values.{Combine, Widening}
 import swam.syntax.{Loop, Call, Inst, CallIndirect}
 
 object Fix:
@@ -33,11 +33,10 @@ object Fix:
     case _ => None
   }
 
-  given widenFixOut[V](using w: fix.Widening[V]): fix.Widening[FixOut[V]] with
-    val wList = new WidenEquiList[V]()
-    override def widen(out1: FixOut[V], out2: FixOut[V]): FixOut[V] = (out1, out2) match
+  given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V], W] with
+    override def apply(out1: FixOut[V], out2: FixOut[V]): FixOut[V] = (out1, out2) match
       case (FixOut.Eval(), FixOut.Eval()) => FixOut.Eval()
-      case (FixOut.ExitWasmFunction(vs1), FixOut.ExitWasmFunction(vs2)) => FixOut.ExitWasmFunction(wList.widen(vs1, vs2))
+      case (FixOut.ExitWasmFunction(vs1), FixOut.ExitWasmFunction(vs2)) => FixOut.ExitWasmFunction(Combine[List[V], W](vs1, vs2))
       case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
 
 

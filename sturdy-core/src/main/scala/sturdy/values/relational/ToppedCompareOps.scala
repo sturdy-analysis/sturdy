@@ -1,6 +1,6 @@
 package sturdy.values.relational
 
-import sturdy.values.JoinValue
+import sturdy.values.Join
 import sturdy.values.Topped
 import sturdy.values.Topped.*
 

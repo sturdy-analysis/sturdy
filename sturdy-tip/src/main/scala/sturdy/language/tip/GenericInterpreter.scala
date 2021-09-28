@@ -16,7 +16,7 @@ import sturdy.values.records.RecordOps
 import sturdy.values.relational.{EqOps, CompareOps}
 import sturdy.fix
 import sturdy.values.*
-import sturdy.values.unit
+import sturdy.data.unit
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
@@ -57,21 +57,14 @@ object GenericInterpreter:
     case Run()
     case ExitFunction(ret: V)
 
-  given joinFixOut[V](using j: JoinValue[V]): JoinValue[FixOut[V]] with
-    override def joinValues(out1: FixOut[V], out2: FixOut[V]): FixOut[V] = (out1, out2) match
-      case (FixOut.Eval(v1), FixOut.Eval(v2)) => FixOut.Eval(j.joinValues(v1, v2))
-      case (FixOut.Run(), FixOut.Run()) => FixOut.Run()
-      case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => FixOut.ExitFunction(j.joinValues(v1, v2))
-      case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
-
   given finiteFixOut[V](using f: Finite[V]): Finite[FixOut[V]] with {}
 
-  given widenFixOut[V](using w: fix.Widening[V]): fix.Widening[FixOut[V]] with
-    override def widen(out1: FixOut[V], out2: FixOut[V]): FixOut[V] = (out1, out2) match
-      case (FixOut.Eval(v1), FixOut.Eval(v2)) => FixOut.Eval(w.widen(v1, v2))
+  given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V], W] with
+    override def apply(out1: FixOut[V], out2: FixOut[V]): FixOut[V] = (out1, out2) match
+      case (FixOut.Eval(v1), FixOut.Eval(v2)) => FixOut.Eval(Combine[V, W](v1, v2))
       case (FixOut.Run(), FixOut.Run()) => FixOut.Run()
-      case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => FixOut.ExitFunction(w.widen(v1, v2))
-      case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
+      case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => FixOut.ExitFunction(Combine[V, W](v1, v2))
+      case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
 
   type GenericPhi[V] = fix.Combinator[FixIn, FixOut[V]]
 

@@ -2,9 +2,9 @@ package sturdy.values.floats
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.fix.Widening
 import sturdy.values.Abstractly
-import sturdy.values.JoinValue
+import sturdy.values.Join
+import sturdy.values.Widen
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
 import sturdy.values.relational.*
@@ -39,12 +39,12 @@ given Abstractly[Float, FloatInterval] with
 given PartialOrder[FloatInterval] with
   override def lteq(x: FloatInterval, y: FloatInterval): Boolean = y.l <= x.l && x.h <= y.h
 
-given floatIntervalJoin: JoinValue[FloatInterval] with
-  override def joinValues(v1: FloatInterval, v2: FloatInterval): FloatInterval =
+given JoinFfloatInterval: Join[FloatInterval] with
+  override def apply(v1: FloatInterval, v2: FloatInterval): FloatInterval =
     FloatInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
 
-given floatIntervalWiden: Widening[FloatInterval] with
-  override def widen(v1: FloatInterval, v2: FloatInterval): FloatInterval =
+given WidenFloatInterval: Widen[FloatInterval] with
+  override def apply(v1: FloatInterval, v2: FloatInterval): FloatInterval =
     val low =
       if (v1.l <= v2.l)
         v1.l

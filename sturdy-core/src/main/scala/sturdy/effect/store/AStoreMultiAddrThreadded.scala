@@ -15,12 +15,12 @@ import reflect.Selectable.reflectiveSelectable
  * Internally, the store tracks dirty addresses that have been (re)writteb to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using JoinValue[V])
+trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V])
   extends Store[Powerset[Addr], V], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
 
-  override type StoreJoin[A] = Join[A]
+  override type StoreJoin[A] = WithJoin[A]
 
   override def read(xs: Powerset[Addr]): OptionA[V] = {
     var needsNotFound = false
