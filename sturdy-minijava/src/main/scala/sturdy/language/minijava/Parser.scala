@@ -1,25 +1,23 @@
 package sturdy.language.minijava
 
-import cats.parse.{Numbers, Parser as P, Parser0 as P0}
+import cats.parse.{Parser0 => P0, Parser => P, Numbers}
 
-import java.lang.reflect.AnnotatedTypeVariable
-import scala.collection.*
+import scala.collection._
 import scala.language.implicitConversions
 
-
-package object Parser {
+object Parser:
 
   def parse(source: String): Program =
-    Program.parseAll(source) match
+    program.parseAll(source) match
       case Right(p) => p
       case Left(err) => throw new IllegalArgumentException(err.toString)
 
-
   //LEXICAL
   // comments
+
   val lineComment: P[Unit] = P.string("//") *> P.charsWhile0(c => c != '\n' && c != '\r').void
-  val blockComment: P[Unit] = P.string("") *> P.recursive[Unit](rec =>
-    P.product01(P.charsWhile0(c => c != '*').void, P.string("") | P.char('*') ~ rec).void
+  val blockComment: P[Unit] = P.string("/*") *> P.recursive[Unit](rec =>
+    P.product01(P.charsWhile0(c => c != '*').void, P.string("*/") | P.char('*') ~ rec).void
   )
   val comment: P[Unit] = lineComment | blockComment
   val whitespace: P[Unit] = (P.charIn(" \t\r\n").void | comment)
@@ -153,17 +151,16 @@ package object Parser {
 
   lazy val atom: P[Exp] =
 
-      keyword(KNEW) *> variable | // new identifier
-      spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //<INTEGER_LITERAL>
-      inParens(recExpression) | //"(" Expressions ")"
-      variable | //Variablen
-      boolean | //BoolLiterals
-      (keyword(KNEW) *> (keyword(KINT) *> inBrackets(atom).map(e => Exp.AllocArray(e)))) | // new int [Exp] x
-      (keyword(KNEW) *> identifier).map(e => Exp.Alloc(e))  // new Identifier ()
+    (keyword(KNEW) *> identifier).map(e => Exp.Alloc(e)) | // new identifier
+    spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //<INTEGER_LITERAL>
+    inParens(recExpression) | //"(" Expressions ")"
+    variable | //Variablen
+    boolean | //BoolLiterals
+    (keyword(KNEW) *> (keyword(KINT) *> inBrackets(atom).map(e => Exp.AllocArray(e))))  // new int [Exp] x
 
 
   val access: P[Exp] =
-    ((variable| inParens(recExpression)|expression) ~ inParens(recExpression).rep).map{
+    ((variable| inParens(recExpression)|expression) ~ inParens(recExpression|expression).rep).map{
         case (e, fields) => fields.foldLeft(e)(Exp.AccessArray.apply) }
     .backtrack  // Exp[Exp]
 
@@ -182,6 +179,7 @@ package object Parser {
         (op("&&") *> recExpression).map(e2 => Exp.And(_, e2)) //Logical And
       ).?).map(maybeBinOp)
 
+
   lazy val expression: P[Exp] =
     (operation ~ (
       (op('>') *> operation).map(e2 => Exp.Gt(_, e2)) |
@@ -191,6 +189,8 @@ package object Parser {
       ((expression| inParens(recExpression)).map(Exp.ArrayLength.apply) <* op('.') <* keyword(KLEN)) | // Expression.length
     (((expression|recExpression) <* op(".")) ~ identifier ~ inParens(list0(expression|recExpression))).map{
       case( (fun, name), args) => Exp.Call(fun, name, args)}  //Funktionsaufruf Expression.Identifier((Expression(,Expression)*)?)
+
+
 
   val assignable: P[Assignable] =
     (identifier <* op("=")).map( s => Assignable.AVar(s)) | //Avar: x = ...
@@ -253,4 +253,4 @@ package object Parser {
       case((((cl1,main), cl2))) => Program(main, cl1++cl2)
     } <* P.end
 
-  }
+
