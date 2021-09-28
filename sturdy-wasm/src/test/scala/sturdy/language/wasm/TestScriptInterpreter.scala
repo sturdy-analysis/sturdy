@@ -18,6 +18,7 @@ import org.scalatest.Assertions.*
 import sturdy.language.wasm.generic.ExternalValue
 import sturdy.language.wasm.generic.ExternalValue
 import sturdy.language.wasm.generic.ExternalValue
+import sturdy.values.relational.EqOps
 import swam.text.unresolved.FreshId
 import swam.text.unresolved.NoId
 import swam.text.unresolved.SomeId
@@ -31,6 +32,9 @@ class TestScriptInterpreter:
   var current: ModuleInstance[Value] = null
 
   type Result = CFallible[List[Value]]
+
+  def eqVals(vs1: List[Value], vs2: List[Value]): Boolean =
+    vs1.size == vs2.size && vs1.zip(vs2).forall((v1,v2) => ConcreteInterpreter.asBoolean(interp.eqOps.equ(v1, v2))(using null))
 
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
@@ -57,7 +61,9 @@ class TestScriptInterpreter:
         // TODO
       case AssertReturn(action, expectedRes) =>
         val res = runAction(action)
-        assertResult(CFallible.Unfailing(constExprToVals(expectedRes)), c.toString)(res)
+        assert(!res.isFailing)
+        val expected = constExprToVals(expectedRes)
+        assert(eqVals(expected, res.get), c.toString)
       case AssertReturnCanonicalNaN(action) =>
         val res = runAction(action)
         checkNaN(res, c.toString)
@@ -113,7 +119,7 @@ def constExprToVal(inst: unresolved.Inst): Value =
     case unresolved.i64.Const(l) => Value.Int64(l)
     case unresolved.f32.Const(f) => Value.Float32(f)
     case unresolved.f64.Const(d) => Value.Float64(d)
-    case _ => throw IllegalArgumentException(s"Expcted constant instruction but got $inst")
+    case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
 
 def compileUnresovedModule(mod: unresolved.Module): Module =

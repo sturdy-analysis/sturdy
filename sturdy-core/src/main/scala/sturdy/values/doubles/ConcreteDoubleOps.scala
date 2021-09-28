@@ -4,7 +4,7 @@ import sturdy.values.convert.ConversionFailure
 import sturdy.values.convert.Convert
 import sturdy.values.config
 import sturdy.effect.failure.Failure
-import sturdy.values.Structural
+import sturdy.values.relational.EqOps
 import sturdy.values.config.UnsupportedConfiguration
 
 import scala.util.Random
@@ -38,7 +38,9 @@ given ConcreteDoubleOps: DoubleOps[Double] with
 
   def logNatural(v: Double): Double = Math.log(v)
 
-given Structural[Double] with {}
+given DoubleEqOps: EqOps[Double, Boolean] with
+  override def equ(v1: Double, v2: Double): Boolean = JDouble.doubleToLongBits(v1) == JDouble.doubleToLongBits(v2)
+  override def neq(v1: Double, v2: Double): Boolean = JDouble.doubleToLongBits(v1) != JDouble.doubleToLongBits(v2)
 
 given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] with
   /*

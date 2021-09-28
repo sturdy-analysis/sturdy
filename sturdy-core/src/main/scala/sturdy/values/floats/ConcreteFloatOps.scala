@@ -1,11 +1,11 @@
 package sturdy.values.floats
 
 import sturdy.effect.failure.Failure
-import sturdy.values.Structural
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.ConversionFailure
 import sturdy.values.convert.Convert
+import sturdy.values.relational.EqOps
 
 import scala.util.Random
 import java.lang.Float as JFloat
@@ -36,8 +36,9 @@ given ConcreteFloatOps: FloatOps[Float] with
       Math.copySign((Math.round(v / 2) * 2).toFloat, v)
   def copysign(v: Float, sign: Float): Float = Math.copySign(v, sign)
 
-
-given Structural[Float] with {}
+given DoubleEqOps: EqOps[Float, Boolean] with
+  override def equ(v1: Float, v2: Float): Boolean = JFloat.floatToIntBits(v1) == JFloat.floatToIntBits(v2)
+  override def neq(v1: Float, v2: Float): Boolean = JFloat.floatToIntBits(v1) != JFloat.floatToIntBits(v2)
 
 
 given ConcreteConvertFloatInt(using fa: Failure): ConvertFloatInt[Float, Int] with
