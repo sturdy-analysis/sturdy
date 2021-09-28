@@ -21,7 +21,7 @@
     (i32.sub (local.get 0) (i32.const 2))
   )
 
-  ;;(func (export "four") (type $U) (call $print (local.get 0)))
+  (func (export "four") (type $U) (call $print (local.get 0)))
 )
 
 (assert_return (invoke "one") (i32.const 13))

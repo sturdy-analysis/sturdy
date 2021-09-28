@@ -6,7 +6,7 @@ import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.fix
 import sturdy.effect.operandstack.OperandStack
-import sturdy.effect.bytememory.{Serialize, Memory}
+import sturdy.effect.bytememory.{Memory, Serialize}
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.SymbolTable
@@ -21,7 +21,9 @@ import sturdy.values.relational.*
 import swam.FuncIdx
 import swam.FuncType
 import swam.syntax.*
-import swam.{ValType, TableType, GlobalType, LabelIdx, MemType, OpCode, BlockType, Limits}
+import swam.{BlockType, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
+
+import scala.collection.mutable
 
 case class FrameData[V](returnArity: Int, module: ModuleInstance[V]):
   override def toString: String =
@@ -46,6 +48,8 @@ type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV] =
     with BoolBranching[V]
     with Except[WasmException[V], ExcV]
     with Failure
+
+type Imports[V] = mutable.Map[String, ModuleInstance[V]]
 
 enum FixIn[V]:
   case Eval(inst: Inst)
@@ -103,6 +107,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     convertFloatInt, convertFloatLong, convertFloatDouble,
     convertDoubleInt, convertDoubleLong, convertDoubleFloat)
 
+  private var memCount = 0
+  private var tabCount = 0
+  
   import wasmOps.*
   import exceptOps.*
 
@@ -425,15 +432,91 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
       stack.push(res)
     }
 
+  def resolveFunctionImports(module: Module, imports: Imports[V]): Vector[FunctionInstance[V]] =
+    module.imports.collect {
+      case Import.Function(modName, fieldName, tpe) =>
+        // get the module to import from
+        val from = imports.getOrElse(modName, throw new Error(s"No module with name $modName in imports." ))
+        // get the exported field
+        val (_,exp) = from.exports.find((name,_) => name == fieldName)
+          .getOrElse(throw new Error(s"No export with name $fieldName in module."))
+        // check if export has the correct type
+        exp match
+          case ExternalValue.Function(addr) =>
+            val expectedType = module.types(tpe)
+            val func = from.functions(addr)
+            if (expectedType == func.funcType) {
+              func
+            } else {
+              throw new Error(s"Type mismatch: expected $expectedType but found ${func.funcType}.")
+            }
+          case _ => throw new Error(s"Import mismatch: expected a function but found $exp.")
+    }
+
+  def resolveGlobalImports(module: Module, imports: Imports[V]): Vector[GlobalInstance[V]] =
+    module.imports.collect {
+      case Import.Global(modName, fieldName, GlobalType(tpe, mut)) =>
+        // get the module to import from
+        val from = imports.getOrElse(modName, throw new Error(s"No module with name $modName in imports." ))
+        // get the exported field
+        val (_,exp) = from.exports.find((name,_) => name == fieldName)
+          .getOrElse(throw new Error(s"No export with name $fieldName in module."))
+        // check if export has the correct type
+        exp match
+          case ExternalValue.Global(addr) =>
+            val glob = from.globals(addr)
+            // TODO: check mutability (=> add mut to GlobalInstance)
+            if (tpe == glob.tpe) {
+              glob
+            } else {
+              throw new Error(s"Type mismatch: expected $tpe but found ${glob.tpe}.")
+            }
+          case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
+    }
+
+  def resolveTableImport(module: Module, imports: Imports[V]): Vector[TableAddr] =
+    module.imports.collect {
+      case Import.Table(modName, fieldName, tpe) =>
+        // get the module to import from
+        val from = imports.getOrElse(modName, throw new Error(s"No module with name $modName in imports." ))
+        // get the exported field
+        val (_,exp) = from.exports.find((name,_) => name == fieldName)
+          .getOrElse(throw new Error(s"No export with name $fieldName in module."))
+        // check if export has the correct type
+        exp match
+          case ExternalValue.Table(addr) =>
+            val tab = from.tableAddrs(addr)
+            // TODO: check table type
+            tab
+          case _ => throw new Error(s"Import mismatch: expected a table but found $exp.")
+    }
+
+  def resolveMemoryImport(module: Module, imports: Imports[V]): Vector[MemoryAddr] =
+    module.imports.collect {
+      case Import.Memory(modName, fieldName, tpe) =>
+        // get the module to import from
+        val from = imports.getOrElse(modName, throw new Error(s"No module with name $modName in imports." ))
+        // get the exported field
+        val (_,exp) = from.exports.find((name,_) => name == fieldName)
+          .getOrElse(throw new Error(s"No export with name $fieldName in module."))
+        // check if export has the correct type
+        exp match
+          case ExternalValue.Memory(addr) =>
+            val mem = from.memoryAddrs(addr)
+            // TODO: check memory type
+            mem
+          case _ => throw new Error(s"Import mismatch: expected a memory but found $exp.")
+    }
+
   // we assume a valid module here
-  def initializeModule(module: Module): ModuleInstance[V] =
-    var memCount = 0
-    var tabCount = 0
-    if (module.imports.nonEmpty)
-      throw new UnsupportedOperationException(s"Imports not supported yet")
+  def initializeModule(module: Module, imports: Imports[V] = mutable.Map.empty): ModuleInstance[V] =
+//    if (module.imports.nonEmpty)
+//      throw new UnsupportedOperationException(s"Imports not supported yet")
     // we ignore imports an imports checking for now -> start with the empty module instance
     val modInst = new ModuleInstance[V] {}
     // compute the initilization values for globals
+    val globImports = resolveGlobalImports(module, imports)
+    modInst.globals = globImports
     val globValues = module.globals.map(glob => evalInstructionSequence(glob.init, modInst))
     // in the current swam version reference vectors are already provided via the elem fields of the module
     // -> we don't have to compute anything here for now
@@ -442,9 +525,10 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     // types
     modInst.functionTypes = module.types
     // functions
-    modInst.functions = module.funcs.map(func => FunctionInstance.Wasm(modInst,func,module.types(func.tpe)))
+    modInst.functions = resolveFunctionImports(module, imports) ++
+      module.funcs.map(func => FunctionInstance.Wasm(modInst,func,module.types(func.tpe)))
     // tables
-    modInst.tableAddrs = module.tables.map {
+    modInst.tableAddrs = resolveTableImport(module, imports) ++ module.tables.map {
       case TableType(_, Limits(min,max)) =>
         val tabAddr = TableAddr(tabCount)
         addEmptyTable(tabAddr)
@@ -452,7 +536,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
         tabAddr
     }
     // memory
-    modInst.memoryAddrs = module.mems.map {
+    modInst.memoryAddrs = resolveMemoryImport(module, imports) ++ module.mems.map {
       case MemType(Limits(min, max)) =>
         val initSize = valToSize(intOps.intLit(min))
         val sizeLimit = max.map(i => valToSize(intOps.intLit(i)))
@@ -462,7 +546,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
         memAddr
     }
     // globals
-    modInst.globals = module.globals.zip(globValues).map {
+    modInst.globals = modInst.globals :++ module.globals.zip(globValues).map {
       case (Global(GlobalType(tpe,_),_),value) => GlobalInstance(tpe,value)
     }
     // data
@@ -514,7 +598,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
             eval(i32.Add) // adds index to base
             val idx = stack.pop() // stack is empty
             val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
-            tableSet(TableAddr(tableIdx), valueToFuncIx(idx), funV)
+            tableSet(TableAddr(modInst.tableAddrs(tableIdx).addr), valueToFuncIx(idx), funV)
             // TODO add failure conditions for table writing
           }
      }

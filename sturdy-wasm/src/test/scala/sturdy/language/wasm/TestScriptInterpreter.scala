@@ -26,10 +26,17 @@ import swam.text.unresolved.SomeId
 import scala.collection.mutable
 
 
-class TestScriptInterpreter:
+class TestScriptInterpreter(spectest: Option[Module] = None):
   val interp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
   val modules: mutable.Map[String, ModuleInstance[Value]] = mutable.Map()
   var current: ModuleInstance[Value] = null
+  val imports: mutable.Map[String, ModuleInstance[Value]] = mutable.Map()
+  
+  spectest.foreach{ mod => 
+    val modInst = interp.initializeModule(mod)
+    current = modInst
+    imports += "spectest" -> modInst
+  }
 
   type Result = CFallible[List[Value]]
 
@@ -54,13 +61,13 @@ class TestScriptInterpreter:
         // validate and compile module
         val mod = compileUnresovedModule(m)
         // initialize module
-        val modInst = interp.initializeModule(mod)
+        val modInst = interp.initializeModule(mod, imports)
         m.id match
           case NoId | FreshId(_) => // nothing
           case SomeId(name) => modules += name -> modInst
         current = modInst
       case Register(s, id) =>
-        modules += s -> getModule(id)
+        imports += s -> getModule(id)
       case BinaryModule(id, bytes) =>
         // TODO
       case QuotedModule(id, text) =>
@@ -79,12 +86,24 @@ class TestScriptInterpreter:
       case AssertTrap(action: Action, message: String) =>
         val res = runAction(action)
         assert(res.isFailing, c.toString)
+      case AssertModuleTrap(mod,_) =>
+        val res = instantiate(mod)
+        assert(res.isFailing, c.toString)
+      case _: AssertUnlinkable => // TODO
       case _: AssertInvalid => // skip
       case _: AssertMalformed => // skip
-      case _: AssertUnlinkable => // skip
-      case _: AssertModuleTrap => // skip
       case _: AssertExhaustion => // skip
       case action: Action => runAction(action)
+
+  def instantiate(t: TestModule): CFallible[ModuleInstance[Value]] =
+    t match
+      case ValidModule(m) =>
+        val mod = compileUnresovedModule(m)
+        interp.effects.fallible {
+          interp.initializeModule(mod, imports)
+        }
+      case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
+      case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")
 
   def runAction(a: Action): Result = a match {
     case Invoke(modName, fun, expr) => evalInvoke(modName, fun, constExprToVals(expr))
