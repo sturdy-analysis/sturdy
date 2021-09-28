@@ -150,19 +150,23 @@ object Parser:
       (identifier.map(s => Type.Identifier(s)) <* variable) //  Identifier x
 
   lazy val atom: P[Exp] =
-
     (keyword(KNEW) *> identifier).map(e => Exp.Alloc(e)) | // new identifier
     spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //<INTEGER_LITERAL>
     inParens(recExpression) | //"(" Expressions ")"
     variable | //Variablen
     boolean | //BoolLiterals
-    (keyword(KNEW) *> (keyword(KINT) *> inBrackets(atom).map(e => Exp.AllocArray(e))))  // new int [Exp] x
+    (keyword(KNEW) *> (keyword(KINT) *> inBrackets(recExpression).map(e => Exp.AllocArray(e))))  // new int [Exp] x
 
 
   val access: P[Exp] =
-    ((variable| inParens(recExpression)|expression) ~ inParens(recExpression|expression).rep).map{
-        case (e, fields) => fields.foldLeft(e)(Exp.AccessArray.apply) }
-    .backtrack  // Exp[Exp]
+    ((variable| inParens(recExpression)) ~ inBrackets(recExpression).rep).map{
+      case (e, fields) => fields.foldLeft(e)(Exp.AccessArray.apply) }
+      .backtrack
+    // Exp[Exp]
+
+
+  /*((variable| inParens(recExpression)) ~ inParens(recExpression)).map{
+      case(e1, e2) => Exp.AccessArray(e1: Exp, e2: Exp) } Exp[Exp] */
 
 
   val term: P[Exp] =
@@ -179,18 +183,15 @@ object Parser:
         (op("&&") *> recExpression).map(e2 => Exp.And(_, e2)) //Logical And
       ).?).map(maybeBinOp)
 
-
   lazy val expression: P[Exp] =
     (operation ~ (
       (op('>') *> operation).map(e2 => Exp.Gt(_, e2)) |
         (op("==") *> operation).map(e2 => Exp.Eq(_, e2))
       ).?).map(maybeBinOp) |
-      (op('!') *> (expression| inParens(recExpression))).map(e => Exp.Not(e)) | // Logical Not
-      ((expression| inParens(recExpression)).map(Exp.ArrayLength.apply) <* op('.') <* keyword(KLEN)) | // Expression.length
-    (((expression|recExpression) <* op(".")) ~ identifier ~ inParens(list0(expression|recExpression))).map{
-      case( (fun, name), args) => Exp.Call(fun, name, args)}  //Funktionsaufruf Expression.Identifier((Expression(,Expression)*)?)
-
-
+      (op('!') *> inParens(recExpression)).map(e => Exp.Not(e)) | // Logical Not
+      ( inParens(recExpression).map(Exp.ArrayLength.apply) <* op('.') <* keyword(KLEN)) | // Expression.length
+      (((recExpression) <* op(".")) ~ identifier ~ inParens(list0(recExpression))).map{
+      case((fun, name), args) => Exp.Call(fun, name, args)}  //Funktionsaufruf Expression.Identifier((Expression(,Expression)*)?)
 
   val assignable: P[Assignable] =
     (identifier <* op("=")).map( s => Assignable.AVar(s)) | //Avar: x = ...
