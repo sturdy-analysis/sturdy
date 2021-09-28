@@ -429,6 +429,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
   def initializeModule(module: Module): ModuleInstance[V] =
     var memCount = 0
     var tabCount = 0
+    if (module.imports.nonEmpty)
+      throw new UnsupportedOperationException(s"Imports not supported yet")
     // we ignore imports an imports checking for now -> start with the empty module instance
     val modInst = new ModuleInstance[V] {}
     // compute the initilization values for globals

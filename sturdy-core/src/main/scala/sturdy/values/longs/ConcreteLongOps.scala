@@ -7,6 +7,8 @@ import sturdy.values.config
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.Convert
+import sturdy.values.relational.CompareOps
+import sturdy.values.relational.EqOps
 
 import java.lang.Float as JFloat
 import java.lang.Long as JLong
@@ -54,7 +56,17 @@ given ConcreteLongOps(using f: Failure): LongOps[Long] with
   def countTrailinZeros(v: Long): Long = JLong.numberOfTrailingZeros(v)
   def nonzeroBitCount(v: Long): Long = JLong.bitCount(v)
 
-given Structural[Long] with {}
+given Structural[Int] with {}
+
+given EqOps[Long, Boolean] with
+  override def equ(v1: Long, v2: Long): Boolean = v1 == v2
+  override def neq(v1: Long, v2: Long): Boolean = v1 != v2
+
+given CompareOps[Long, Boolean] with
+  def lt(v1: Long, v2: Long): Boolean = v1 < v2
+  def le(v1: Long, v2: Long): Boolean = v1 <= v2
+  def ge(v1: Long, v2: Long): Boolean = v1 >= v2
+  def gt(v1: Long, v2: Long): Boolean = v1 > v2
 
 given ConcreteConvertLongInt: ConvertLongInt[Long, Int] with
   /*

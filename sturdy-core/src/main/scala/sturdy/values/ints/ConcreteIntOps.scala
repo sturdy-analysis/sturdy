@@ -3,8 +3,10 @@ package sturdy.values.ints
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.convert.Convert
+import sturdy.values.relational.EqOps
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.relational.CompareOps
 
 import scala.util.Random
 import java.lang.Float as JFloat
@@ -68,6 +70,16 @@ given ConcreteIntOps(using f: Failure): IntOps[Int] with
   def nonzeroBitCount(v: Int): Int = Integer.bitCount(v)
 
 given Structural[Int] with {}
+
+given EqOps[Int, Boolean] with
+  override def equ(v1: Int, v2: Int): Boolean = v1 == v2
+  override def neq(v1: Int, v2: Int): Boolean = v1 != v2
+
+given CompareOps[Int, Boolean] with
+  def lt(v1: Int, v2: Int): Boolean = v1 < v2
+  def le(v1: Int, v2: Int): Boolean = v1 <= v2
+  def ge(v1: Int, v2: Int): Boolean = v1 >= v2
+  def gt(v1: Int, v2: Int): Boolean = v1 > v2
 
 given ConcreteConvertIntLong: ConvertIntLong[Int, Long] with
   /*

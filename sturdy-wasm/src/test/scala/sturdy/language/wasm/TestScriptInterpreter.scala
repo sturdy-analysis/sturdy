@@ -34,7 +34,13 @@ class TestScriptInterpreter:
   type Result = CFallible[List[Value]]
 
   def eqVals(vs1: List[Value], vs2: List[Value]): Boolean =
-    vs1.size == vs2.size && vs1.zip(vs2).forall((v1,v2) => ConcreteInterpreter.asBoolean(interp.eqOps.equ(v1, v2))(using null))
+    vs1.size == vs2.size && vs1.zip(vs2).forall {
+      case (Value.Int32(i1), Value.Int32(i2)) => i1 == i2
+      case (Value.Int64(l1), Value.Int64(l2)) => l1 == l2
+      case (Value.Float32(f1), Value.Float32(f2)) => f1.isNaN && f2.isNaN || f1 == f2
+      case (Value.Float64(d1), Value.Float64(d2)) => d1.isNaN && d2.isNaN || d1 == d2
+      case _ => false
+    }
 
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
@@ -63,7 +69,7 @@ class TestScriptInterpreter:
         val res = runAction(action)
         assert(!res.isFailing)
         val expected = constExprToVals(expectedRes)
-        assert(eqVals(expected, res.get), c.toString)
+        assert(eqVals(expected, res.get), c.toString + s" but $expected != ${res.get}")
       case AssertReturnCanonicalNaN(action) =>
         val res = runAction(action)
         checkNaN(res, c.toString)
