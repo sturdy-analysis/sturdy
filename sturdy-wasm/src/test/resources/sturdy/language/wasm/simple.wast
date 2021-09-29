@@ -7,6 +7,8 @@
     )
   )
 
+  (global (mut i32) (i32.const 0))
+
   (type $out-i32 (func (result i32)))
 
   (func (export "const") (param i32) (result i32)
@@ -341,4 +343,16 @@
   )
 
   ;;(func (f32.const nan:0x1) drop)
+  (func (export "test-global") (param i32) (result i32)
+    (if (i32.eq (local.get 0) (i32.const 0))
+      (then
+        i32.const 1
+        global.set 0)
+      (else
+        i32.const 2
+        global.set 0)
+    )
+    global.get 0
+  )
+
 )
