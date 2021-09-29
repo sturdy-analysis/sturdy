@@ -56,6 +56,11 @@ object IntIntervalApron:
     val abstractDomain = apron.Abstract0(manager, 1, 0, Array(one.interval))
     abstractDomain.join(manager, other.abstractDomain)
     IntIntervalApron(abstractDomain.getBound(manager, 1))
+
+  def meetCopy(one: IntIntervalApron, other: IntIntervalApron): IntIntervalApron = 
+    val abstractDomain = apron.Abstract0(manager, 1, 0, Array(one.interval))
+    abstractDomain.meet(manager, other.abstractDomain)
+    IntIntervalApron(abstractDomain.getBound(manager, 1))
   
   
 
