@@ -69,7 +69,7 @@ object ConcreteInterpreter extends Interpreter :
         case _: i64.Load16S => Int64(dat.getShort())
         case _: i64.Load16U => Int64(dat.getShort() & 0xFFFFL)
         case _: i64.Load32S => Int64(dat.getInt())
-        case _: i64.Load32U => Int64(dat.getInt() & 0xFFFFFFFFFL)
+        case _: i64.Load32U => Int64(dat.getInt() & 0XFFFFFFFFL)
         case _: f32.Load => Float32(dat.getFloat())
         case _: f64.Load => Float64(dat.getDouble())
         case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $decInfo.")
