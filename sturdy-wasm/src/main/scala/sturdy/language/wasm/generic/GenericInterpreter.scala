@@ -23,6 +23,7 @@ import swam.FuncType
 import swam.syntax.*
 import swam.{BlockType, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
 
+import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable
 
 case class FrameData[V](returnArity: Int, module: ModuleInstance[V]):
@@ -431,91 +432,66 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     } {
       stack.push(res)
     }
+  
+  def resolveImports(module: Module, imports: Imports[V]):
+    (Vector[FunctionInstance[V]], Vector[GlobalInstance[V]], Vector[TableAddr], Vector[MemoryAddr]) =
+    val funcs: VectorBuilder[FunctionInstance[V]] = VectorBuilder()
+    val globs: VectorBuilder[GlobalInstance[V]] = VectorBuilder()
+    val tabs: VectorBuilder[TableAddr] = VectorBuilder()
+    val mems: VectorBuilder[MemoryAddr] = VectorBuilder()
 
-  def resolveFunctionImports(module: Module, imports: Imports[V]): Vector[FunctionInstance[V]] =
-    module.imports.collect {
-      case Import.Function(modName, fieldName, tpe) =>
-        // get the module to import from
-        val from = imports.getOrElse(modName, throw new Error(s"No module with name $modName in imports." ))
-        // get the exported field
-        val (_,exp) = from.exports.find((name,_) => name == fieldName)
-          .getOrElse(throw new Error(s"No export with name $fieldName in module."))
-        // check if export has the correct type
-        exp match
-          case ExternalValue.Function(addr) =>
-            val expectedType = module.types(tpe)
-            val func = from.functions(addr)
-            if (expectedType == func.funcType) {
-              func
-            } else {
-              throw new Error(s"Type mismatch: expected $expectedType but found ${func.funcType}.")
-            }
-          case _ => throw new Error(s"Import mismatch: expected a function but found $exp.")
+    module.imports.foreach { imp =>
+      // get the module to import from
+      val from = imports.getOrElse(imp.moduleName, throw new Error(s"No module with name ${imp.moduleName} in imports." ))
+      // get the exported field
+      val (_,exp) = from.exports.find((name,_) => name == imp.fieldName)
+        .getOrElse(throw new Error(s"No export with name ${imp.fieldName} in module."))
+      imp match
+        case Import.Function(_,_,tpe) =>
+          exp match
+            case ExternalValue.Function(addr) =>
+              val expectedType = module.types(tpe)
+              val func = from.functions(addr)
+              if (expectedType == func.funcType) {
+                funcs += func
+              } else {
+                throw new Error(s"Type mismatch: expected $expectedType but found ${func.funcType}.")
+              }
+            case _ => throw new Error(s"Import mismatch: expected a function but found $exp.")
+        case Import.Global(_,_,GlobalType(tpe, mut)) =>
+          exp match
+            case ExternalValue.Global(addr) =>
+              val glob = from.globals(addr)
+              // TODO: check mutability (=> add mut to GlobalInstance)
+              if (tpe == glob.tpe) {
+                globs += glob
+              } else {
+                throw new Error(s"Type mismatch: expected $tpe but found ${glob.tpe}.")
+              }
+            case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
+        case Import.Table(_,_,tpe) =>
+          exp match
+            case ExternalValue.Table(addr) =>
+              val tab = from.tableAddrs(addr)
+              // TODO: check table type
+              tabs += tab
+            case _ => throw new Error(s"Import mismatch: expected a table but found $exp.")
+        case Import.Memory(_,_,tpe) =>
+          exp match
+            case ExternalValue.Memory(addr) =>
+              val mem = from.memoryAddrs(addr)
+              // TODO: check memory type
+              mems += mem
+            case _ => throw new Error(s"Import mismatch: expected a memory but found $exp.")
     }
 
-  def resolveGlobalImports(module: Module, imports: Imports[V]): Vector[GlobalInstance[V]] =
-    module.imports.collect {
-      case Import.Global(modName, fieldName, GlobalType(tpe, mut)) =>
-        // get the module to import from
-        val from = imports.getOrElse(modName, throw new Error(s"No module with name $modName in imports." ))
-        // get the exported field
-        val (_,exp) = from.exports.find((name,_) => name == fieldName)
-          .getOrElse(throw new Error(s"No export with name $fieldName in module."))
-        // check if export has the correct type
-        exp match
-          case ExternalValue.Global(addr) =>
-            val glob = from.globals(addr)
-            // TODO: check mutability (=> add mut to GlobalInstance)
-            if (tpe == glob.tpe) {
-              glob
-            } else {
-              throw new Error(s"Type mismatch: expected $tpe but found ${glob.tpe}.")
-            }
-          case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
-    }
-
-  def resolveTableImport(module: Module, imports: Imports[V]): Vector[TableAddr] =
-    module.imports.collect {
-      case Import.Table(modName, fieldName, tpe) =>
-        // get the module to import from
-        val from = imports.getOrElse(modName, throw new Error(s"No module with name $modName in imports." ))
-        // get the exported field
-        val (_,exp) = from.exports.find((name,_) => name == fieldName)
-          .getOrElse(throw new Error(s"No export with name $fieldName in module."))
-        // check if export has the correct type
-        exp match
-          case ExternalValue.Table(addr) =>
-            val tab = from.tableAddrs(addr)
-            // TODO: check table type
-            tab
-          case _ => throw new Error(s"Import mismatch: expected a table but found $exp.")
-    }
-
-  def resolveMemoryImport(module: Module, imports: Imports[V]): Vector[MemoryAddr] =
-    module.imports.collect {
-      case Import.Memory(modName, fieldName, tpe) =>
-        // get the module to import from
-        val from = imports.getOrElse(modName, throw new Error(s"No module with name $modName in imports." ))
-        // get the exported field
-        val (_,exp) = from.exports.find((name,_) => name == fieldName)
-          .getOrElse(throw new Error(s"No export with name $fieldName in module."))
-        // check if export has the correct type
-        exp match
-          case ExternalValue.Memory(addr) =>
-            val mem = from.memoryAddrs(addr)
-            // TODO: check memory type
-            mem
-          case _ => throw new Error(s"Import mismatch: expected a memory but found $exp.")
-    }
+    (funcs.result(), globs.result(), tabs.result(), mems.result())
 
   // we assume a valid module here
   def initializeModule(module: Module, imports: Imports[V] = mutable.Map.empty): ModuleInstance[V] =
-//    if (module.imports.nonEmpty)
-//      throw new UnsupportedOperationException(s"Imports not supported yet")
-    // we ignore imports an imports checking for now -> start with the empty module instance
     val modInst = new ModuleInstance[V] {}
     // compute the initilization values for globals
-    val globImports = resolveGlobalImports(module, imports)
+    val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports)
     modInst.globals = globImports
     val globValues = module.globals.map(glob => evalInstructionSequence(glob.init, modInst))
     // in the current swam version reference vectors are already provided via the elem fields of the module
@@ -525,10 +501,10 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     // types
     modInst.functionTypes = module.types
     // functions
-    modInst.functions = resolveFunctionImports(module, imports) ++
+    modInst.functions = funcImports ++
       module.funcs.map(func => FunctionInstance.Wasm(modInst,func,module.types(func.tpe)))
     // tables
-    modInst.tableAddrs = resolveTableImport(module, imports) ++ module.tables.map {
+    modInst.tableAddrs = tabImports ++ module.tables.map {
       case TableType(_, Limits(min,max)) =>
         val tabAddr = TableAddr(tabCount)
         addEmptyTable(tabAddr)
@@ -536,7 +512,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
         tabAddr
     }
     // memory
-    modInst.memoryAddrs = resolveMemoryImport(module, imports) ++ module.mems.map {
+    modInst.memoryAddrs = memImpors ++ module.mems.map {
       case MemType(Limits(min, max)) =>
         val initSize = valToSize(intOps.intLit(min))
         val sizeLimit = max.map(i => valToSize(intOps.intLit(i)))
