@@ -99,14 +99,18 @@ case class IntIntervalApron(val interval: apron.Interval):
     }
 
 
-//todo
-  implicit def toLinExpr0(): Linexpr0 = { // implicitly convert IntIntervalApron to Linexpr0
-    var coeffArray = new Array[Coeff](1)
-    coeffArray(0) = this.interval
+//todo: falscher ansatz, besser: konstanten über die texpr0cstnode klasse erstellen
+  // implicit def toLinExpr0(): Linexpr0 = { // implicitly convert IntIntervalApron to Linexpr0
+  //   var coeffArray = new Array[Coeff](1)
+  //   coeffArray(0) = this.interval
+  //   Linexpr0(coeffArray, this.interval) 
+  // }
 
-    Linexpr0(coeffArray, this.interval) 
-      
-  }
+  implicit def toCstNode0(): apron.Texpr0CstNode = {
+    Texpr0CstNode(Coeff(this.interval))
+  } 
+
+
 
   def joinCopy(other: IntIntervalApron): IntIntervalApron =
     // gibt überaproximierendes Intervall-Array um das abstracte objekt herum zurück
@@ -129,6 +133,7 @@ case class IntIntervalApron(val interval: apron.Interval):
     update(UpdateCases.ADN)
  
   def +(y: IntIntervalApron): IntIntervalApron =
+    var ourNode = Texpr0BinNode(OP_ADD, TYPE_INT, RDIR_NEAREST, this.interval, y)
     IntIntervalApron.bounded({
       val tmp = l.clone
       tmp add y.l
