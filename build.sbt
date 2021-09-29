@@ -61,7 +61,7 @@ lazy val sturdy_minijava = (project in file("sturdy-minijava"))
     )
   )
 
-val swamCommit = "cfa636d5974b26fc6ebdeeec60f4e72677f2557c"
+val swamCommit = "39999a1751076c6dbfe2a92c874f17683730d14e"
 val swam = uri(s"https://gitlab.rlp.net/plmz/external/swam.git#$swamCommit")
 
 lazy val sturdy_wasm = (project in file("sturdy-wasm"))

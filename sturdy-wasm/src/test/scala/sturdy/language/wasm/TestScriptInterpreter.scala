@@ -19,9 +19,12 @@ import sturdy.language.wasm.generic.ExternalValue
 import sturdy.language.wasm.generic.ExternalValue
 import sturdy.language.wasm.generic.ExternalValue
 import sturdy.values.relational.EqOps
+import swam.ModuleLoader
+import swam.binary.ModuleParser
 import swam.text.unresolved.FreshId
 import swam.text.unresolved.NoId
 import swam.text.unresolved.SomeId
+import swam.validation.Validator
 
 import scala.collection.mutable
 
@@ -59,19 +62,18 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
   def eval(c: Command): Unit = c match
       case ValidModule(m) =>
         // validate and compile module
-        val mod = compileUnresovedModule(m)
-        // initialize module
-        val modInst = interp.initializeModule(mod, imports)
-        m.id match
-          case NoId | FreshId(_) => // nothing
-          case SomeId(name) => modules += name -> modInst
-        current = modInst
+        val mod = readModule(m)
+        val id = m.id match
+          case SomeId(name) => Some(name)
+          case _ => None
+        loadModule(id, mod)
       case Register(s, id) =>
         imports += s -> getModule(id)
       case BinaryModule(id, bytes) =>
-        // TODO
+        val mod = readBinaryModule(bytes)
+        loadModule(id, mod)
       case QuotedModule(id, text) =>
-        // TODO
+        ???
       case AssertReturn(action, expectedRes) =>
         val res = runAction(action)
         assert(!res.isFailing)
@@ -89,16 +91,24 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
       case AssertModuleTrap(mod,_) =>
         val res = instantiate(mod)
         assert(res.isFailing, c.toString)
-      case _: AssertUnlinkable => // TODO
+      case _: AssertUnlinkable => // skip
       case _: AssertInvalid => // skip
       case _: AssertMalformed => // skip
       case _: AssertExhaustion => // skip
       case action: Action => runAction(action)
+      case _: Meta => // skip
+
+  def loadModule(id: Option[String], mod: Module): Unit =
+    val modInst = interp.initializeModule(mod, imports)
+    id match
+      case None => // nothing
+      case Some(name) => modules += name -> modInst
+    current = modInst
 
   def instantiate(t: TestModule): CFallible[ModuleInstance[Value]] =
     t match
       case ValidModule(m) =>
-        val mod = compileUnresovedModule(m)
+        val mod = readModule(m)
         interp.effects.fallible {
           interp.initializeModule(mod, imports)
         }
@@ -147,7 +157,7 @@ def constExprToVal(inst: unresolved.Inst): Value =
     case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
 
-def compileUnresovedModule(mod: unresolved.Module): Module =
+def readModule(mod: unresolved.Module): Module =
   implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
   Blocker[IO].use { blocker =>
     for {
@@ -156,14 +166,16 @@ def compileUnresovedModule(mod: unresolved.Module): Module =
     } yield mod
   }.unsafeRunSync()
 
-//def compileBinaryModule(bytes: Array[Byte]): Module =
-//  implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
-//  Blocker[IO].use { blocker =>
-//    for {
-//      compiler <- Compiler[IO](blocker)
-//      mod <- compiler.compile(mod)
-//    } yield mod
-//  }.unsafeRunSync()
+def readBinaryModule(bytes: Array[Byte]): Module =
+  implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
+  Blocker[IO].use { blocker =>
+    for {
+      validator <- Validator[IO](blocker)
+      loader = new ModuleLoader[IO]()
+      binaryParser = new ModuleParser[IO](validator)
+      mod <- binaryParser.parse(loader.sections(bytes))
+    } yield mod
+  }.unsafeRunSync()
 
 def isNaN(value: Value): Boolean =
   value match
