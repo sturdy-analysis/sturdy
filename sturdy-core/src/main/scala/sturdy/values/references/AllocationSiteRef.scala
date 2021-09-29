@@ -31,9 +31,6 @@ object AllocationSiteAddr:
   case class AllocRelative(lab: Label, name: String)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
   case class Variable(name: String)(managed: Boolean) extends AllocationSiteAddr with ManageableAddr(managed)
 
-given Structural[AllocationSiteRef] with {}
-given Structural[AllocationSiteAddr] with {}
-
 given Finite[AllocationSiteRef] with {}
 given Finite[AllocationSiteAddr] with {}
 

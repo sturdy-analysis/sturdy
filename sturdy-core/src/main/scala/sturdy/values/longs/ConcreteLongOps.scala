@@ -2,12 +2,13 @@ package sturdy.values.longs
 
 import scala.util.Random
 import sturdy.effect.failure.Failure
+import sturdy.values.Structural
 import sturdy.values.config
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.Convert
 
-import java.lang.{Double => JDouble, Float as JFloat, Long as JLong}
+import java.lang.{Float as JFloat, Long as JLong, Double as JDouble}
 
 
 given ConcreteLongOps(using f: Failure): LongOps[Long] with
@@ -49,6 +50,7 @@ given ConcreteLongOps(using f: Failure): LongOps[Long] with
   def countTrailinZeros(v: Long): Long = JLong.numberOfTrailingZeros(v)
   def nonzeroBitCount(v: Long): Long = JLong.bitCount(v)
 
+given Structural[Long] with {}
 
 given ConcreteConvertLongInt: ConvertLongInt[Long, Int] with
   /*

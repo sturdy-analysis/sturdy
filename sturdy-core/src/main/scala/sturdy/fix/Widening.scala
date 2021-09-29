@@ -3,6 +3,9 @@ package sturdy.fix
 import sturdy.values.Finite
 import sturdy.values.JoinValue
 
+object Widening:
+  def widen[T](old: T, now: T)(using w: Widening[T]): T = w.widen(old, now)
+
 trait Widening[T]:
   def widen(old: T, now: T): T
 

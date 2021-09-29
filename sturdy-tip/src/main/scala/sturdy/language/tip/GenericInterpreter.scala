@@ -46,6 +46,7 @@ object GenericInterpreter:
     case Eval(e: Exp)
     case Run(s: Stm)
     case EnterFunction(f: Function)
+
     override def toString: String = this match
       case Eval(e) => s"eval $e"
       case Run(s) => s"run $s"
@@ -77,21 +78,22 @@ object GenericInterpreter:
 import GenericInterpreter.*
 
 trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
-  (using val effectOps: Effects)
-  (using intOps: IntOps[V], compareOps: CompareOps[V, V], eqOps: EqOps[V, V], functionOps: FunctionOps[Function, V, V, V], refOps: ReferenceOps[Addr, V], recOps: RecordOps[String, V, V])
-  (using effectOps.StoreJoin[V], effectOps.StoreJoinComp, effectOps.StoreJoin[Unit], effectOps.BoolBranchJoin[Unit]):
+  (val effects: Effects)
+  (using effects.StoreJoin[V], effects.StoreJoinComp, effects.StoreJoin[Unit], effects.BoolBranchJoin[Unit]):
 
-  import intOps._
-  import compareOps._
-  import eqOps._
-  import effectOps._
-  import functionOps._
-  import recOps._
-  import refOps._
-
+  import effects._
+  
+  val intOps: IntOps[V]; import intOps._
+  val compareOps: CompareOps[V, V]; import compareOps._
+  val eqOps: EqOps[V, V]; import eqOps._
+  val functionOps: FunctionOps[Function, V, V, V]; import functionOps._
+  val refOps: ReferenceOps[Addr, V]; import refOps._
+  val recOps: RecordOps[String, V, V]; import recOps._
+  
   val phi: GenericPhi[V]
 
-  private var functions: Map[String, Function] = Map()
+  protected var functions: Map[String, Function] = Map()
+  def getFunctions: Iterable[Function] = functions.values
 
   private lazy val fixed = fix.Fixpoint { (rec: FixIn => FixOut[V]) =>
     def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
