@@ -1,7 +1,6 @@
 package sturdy
 
 import org.scalatest._
-import org.scalatest.flatspec.AnyFlatSpec
 import apron.Abstract0 //default; for domains without environments
 import apron.Box
 import apron.Interval
@@ -17,7 +16,6 @@ import sturdy.fix.Widening
 import sturdy.effect.failure.Failure
 import sturdy.effect.JoinComputation
 import scala.language.postfixOps
-import org.scalatest.freespec.AnyFreeSpec
 import sturdy.values.ints.IntOps
 
 val ourAbstractManager = apron.Box()
@@ -67,6 +65,84 @@ class ApronTest extends AnyFreeSpec, Matchers:
     for (member <- rest) result === member //todo: testausgabe hierfür
   }
 
+
+  "Interval must have lower bound 0 and upper bound 1" in {
+    var ourInterval = apron.Interval(0, 1)
+    //val abstractDomain = Abstract0(manager, 1, 0, Array(ourInterval))
+    assert(ourInterval.inf.isEqual(0)) 
+    assert(ourInterval.sup.isEqual(1))
+  }
+
+
+
+  "Interval addition of intervals (0,1) and (-2,0) must have result (-2,1)" in {
+    val manager = apron.Box()
+    var ourInterval1 = apron.Interval(0, 1)
+    var ourInterval2 = apron.Interval(-2, 0)
+    val abstractDomain = Abstract0(manager, 2, 0, Array(ourInterval1, ourInterval2))
+
+    var ourNode = apron.Texpr0BinNode(apron.Texpr0BinNode.OP_ADD, apron.Texpr0Node.RTYPE_INT, apron.Texpr0Node.RDIR_NEAREST, apron.Texpr0CstNode(ourInterval1), apron.Texpr0CstNode(ourInterval2))
+    var result = abstractDomain.getBound(manager, apron.Texpr0Intern(ourNode)) //gibt floats zurück
+    Console.printf("Resulting interval should be (-2,1) and is (%s, %s) \n", result.inf, result.sup)
+    var minusTwo = apron.Scalar.create()
+    var one = apron.Scalar.create()
+    minusTwo.set(-2)
+    one.set(1)
+    assert(result.inf.isEqual(minusTwo))
+    assert(result.sup.isEqual(one))
+  }
+
+  "Interval subtraction of intervals (1,2) and (-2,0) must have result (1,4)" in {
+    val manager = apron.Box()
+    var ourInterval1 = apron.Interval(1, 2)
+    var ourInterval2 = apron.Interval(-2, 0)
+    val abstractDomain = Abstract0(manager, 2, 0, Array(ourInterval1, ourInterval2))
+
+    var ourNode = apron.Texpr0BinNode(apron.Texpr0BinNode.OP_SUB, apron.Texpr0Node.RTYPE_INT, apron.Texpr0Node.RDIR_NEAREST, apron.Texpr0CstNode(ourInterval1), apron.Texpr0CstNode(ourInterval2))
+    var result = abstractDomain.getBound(manager, apron.Texpr0Intern(ourNode)) //gibt floats zurück
+    Console.printf("Resulting interval should be (1,4) and is (%s, %s) \n", result.inf, result.sup)
+    var four = apron.Scalar.create()
+    var one = apron.Scalar.create()
+    four.set(4)
+    one.set(1)
+    assert(result.inf.isEqual(one))
+    assert(result.sup.isEqual(four))
+  }
+
+  "Interval multiplication of intervals (1,2) and (0,1) must have result (0,2)" in {
+    val manager = apron.Box()
+    var ourInterval1 = apron.Interval(1, 2)
+    var ourInterval2 = apron.Interval(0,1)
+    val abstractDomain = Abstract0(manager, 2, 0, Array(ourInterval1, ourInterval2))
+
+    var ourNode = apron.Texpr0BinNode(apron.Texpr0BinNode.OP_MUL, apron.Texpr0Node.RTYPE_INT, apron.Texpr0Node.RDIR_NEAREST, apron.Texpr0CstNode(ourInterval1), apron.Texpr0CstNode(ourInterval2))
+    var result = abstractDomain.getBound(manager, apron.Texpr0Intern(ourNode)) //gibt floats zurück
+    Console.printf("Resulting interval should be (0,2) and is (%s, %s) \n", result.inf, result.sup)
+    var zero = apron.Scalar.create()
+    var two = apron.Scalar.create()
+    zero.set(0)
+    two.set(2)
+    assert(result.inf.isEqual(zero))
+    assert(result.sup.isEqual(two))
+  }
+
+  "Interval division of intervals (0,2) and (1,1) must have result (0,2)" in {
+    val manager = apron.Box()
+    var ourInterval1 = apron.Interval(0, 2)
+    var ourInterval2 = apron.Interval(1,1)
+    val abstractDomain = Abstract0(manager, 2, 0, Array(ourInterval1, ourInterval2))
+
+    var ourNode = apron.Texpr0BinNode(apron.Texpr0BinNode.OP_DIV, apron.Texpr0Node.RTYPE_INT, apron.Texpr0Node.RDIR_NEAREST, apron.Texpr0CstNode(ourInterval1), apron.Texpr0CstNode(ourInterval2))
+    var result = abstractDomain.getBound(manager, apron.Texpr0Intern(ourNode)) //gibt floats zurück
+    Console.printf("Resulting interval should be (0,2) and is (%s, %s) \n", result.inf, result.sup)
+    var zero = apron.Scalar.create()
+    var two = apron.Scalar.create()
+    zero.set(0)
+    two.set(2)
+    assert(result.inf.isEqual(zero))
+    assert(result.sup.isEqual(two))
+  }  
+
   // "Apron Intervals" must "perform addition" in {
 
   //   testDefault(add)
@@ -96,7 +172,7 @@ class ApronTest extends AnyFreeSpec, Matchers:
   // it must "compare" in { // TODO
   //   //assertEquals(IntIntervalApron(0,10) meet IntIntervalApron(-10,5), IntIntervalApron(0, 5))
   // }
-  implicit val f: Failure = fail()
+/*   implicit val f: Failure = fail()
   implicit val j: JoinComputation = ??? // TODO
   "Functions of IntIntervalApron must behave like those of IntInterval" - {
     "addition" in {
@@ -111,10 +187,10 @@ class ApronTest extends AnyFreeSpec, Matchers:
     "division" in {
       parityIItoIIA(ApronIntervalIntOps.div, IntervalIntOps.div, 0,1, -1,0)
     }
-  }
+  } */
     
   //   "sturdy.IntIntervalApron join must behave like sturdy.IntInterval join" in {
-      parityIItoIIA((ApronInterval.joinCopy, (IntInterval.join), 0,1, -1,0) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
+  //    parityIItoIIA((ApronInterval.joinCopy, (IntInterval.join), 0,1, -1,0) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
   //   }
   // "sturdy.IntIntervalApron meet must behave like sturdy.IntInterval meet" in {
   //     parityIItoIIA(ApronIntervalIntOps.meet, IntervalIntOps.meet, 0,1, -1,0)
