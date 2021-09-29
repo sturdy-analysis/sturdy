@@ -93,6 +93,16 @@ case class IntIntervalApron(val interval: apron.Interval):
       } 
     }
 
+
+//todo
+  implicit def toLinExpr0(): Linexpr0 = { // implicitly convert IntIntervalApron to Linexpr0
+    var coeffArray = new Array[Coeff](1)
+    coeffArray(0) = this.interval
+
+    Linexpr0(coeffArray, this.interval) 
+      
+  }
+
   def joinCopy(other: IntIntervalApron): IntIntervalApron =
     // gibt überaproximierendes Intervall-Array um das abstracte objekt herum zurück
     // oder direkt: Abstract0(Manager man, int intdim, int realdim, Interval[] box) - Creates a new abstract element from a box.
@@ -164,9 +174,9 @@ given IntIntervalApronWiden(using bounds: => Set[Int]): Widening[IntIntervalApro
     IntIntervalApron(v1.abstractDomain.widening(manager, v2.abstractDomain).getBound(manager, 1))
 
 given ApronIntervalIntOps(using f: Failure, j: JoinComputation): IntOps[IntIntervalApron] with
+
   def intLit(i: Int): IntIntervalApron = new IntIntervalApron(i, i)
-  //def intLit(i: Int): de.poiu.apron.Interval
-  def randomInt(): IntIntervalApron = IntIntervalApron.Top
+    def randomInt(): IntIntervalApron = IntIntervalApron.Top
   def add(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = v1 + v2
   def sub(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = v1 - v2
   def mul(v1: IntIntervalApron, v2: IntIntervalApron): IntIntervalApron = v1 * v2
