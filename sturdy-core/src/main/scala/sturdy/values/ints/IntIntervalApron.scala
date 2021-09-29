@@ -116,8 +116,12 @@ case class IntIntervalApron(val interval: apron.Interval):
     abstractDomain.join(manager, other.abstractDomain)
     update(UpdateCases.ADN)
   
-  def meet(other: IntIntervalApron): IntIntervalApron = 
+  def meetCopy(other: IntIntervalApron): IntIntervalApron = 
     IntIntervalApron(abstractDomain.meetCopy(manager, other.abstractDomain).getBound(manager, 1))
+
+  def meet(other: IntIntervalApron): Unit = 
+    abstractDomain.meet(manager, other.abstractDomain)
+    update(UpdateCases.ADN)
  
   def +(y: IntIntervalApron): IntIntervalApron =
     IntIntervalApron.bounded({
