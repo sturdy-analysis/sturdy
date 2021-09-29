@@ -47,6 +47,7 @@ object IntIntervalApron:
   def apply(l: gmp.Mpq, h: gmp.Mpq) = new IntIntervalApron(apron.Interval(l, h))
   def apply(l: gmp.Mpq, h: Int) = new IntIntervalApron(apron.Interval(l, gmp.Mpq(h)))
   def apply(l: Int, h: gmp.Mpq) = new IntIntervalApron(apron.Interval(gmp.Mpq(l), h))
+  def apply(interval: IntInterval) = new IntIntervalApron(interval.l, interval.h)
 
   def unapply(interval: IntIntervalApron): Some[(Int, Int)] =
     Some(interval.l.doubleValue.toInt, interval.h.doubleValue.toInt)
@@ -104,6 +105,9 @@ case class IntIntervalApron(val interval: apron.Interval):
     // es ist nicht möglich, dass diese Implementation schneller ist, als die von IntInterval
     abstractDomain.join(manager, other.abstractDomain)
     update(UpdateCases.ADN)
+  
+  def meet(other: IntIntervalApron): IntIntervalApron = 
+    IntIntervalApron(abstractDomain.meetCopy(manager, other.abstractDomain).getBound(manager, 1))
  
   def +(y: IntIntervalApron): IntIntervalApron =
     IntIntervalApron.bounded({
