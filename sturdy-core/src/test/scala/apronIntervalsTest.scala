@@ -26,8 +26,8 @@ val ourAbstractDomain = apron.Abstract0(ourAbstractManager, 1, 0, Array(apron.In
 
 // TODO: use lazy vals for test definitons (currently defined in tests)
 // TODO: add tests for all use cases/functions
-//anyflatspec wird unten benutzt (texte, die den test definieren)
-class ApronTest extends AnyFlatSpec, Matchers:
+// AnyFreeSpec wird unten benutzt (texte, die den test definieren)
+class ApronTest extends AnyFreeSpec, Matchers:
   
   lazy val add = Seq(IntIntervalApron(-1, 1), op2IIA(_+_, 0,1, -1,0))
   lazy val sub = Seq(IntIntervalApron(1, 1), op2IIA(_-_, 0,1, -1,0))
@@ -46,7 +46,7 @@ class ApronTest extends AnyFlatSpec, Matchers:
   lazy val join0 = Seq(IntIntervalApron(-10, 10), op2IIA(_ joinCopy _, 0,10, -10,5))
   
 
-  // TODO: for a given trait
+  // parity test for any binary function (operation)
   def parityIItoIIA(apron_f: ((IntIntervalApron, IntIntervalApron) => IntIntervalApron), intInterval_f:((IntInterval, IntInterval) => IntInterval),
                       v1_l: Int, v1_h: Int, v2_l: Int, v2_h: Int) =
                         assert(op2IIA(apron_f, v1_l,v1_h, v2_l,v2_h) === op2IItoIIA(intInterval_f, v1_l,v1_h, v2_l,v2_h))
@@ -55,11 +55,13 @@ class ApronTest extends AnyFlatSpec, Matchers:
   def op2IIA(f: (IntIntervalApron, IntIntervalApron) => IntIntervalApron, l0: Int, l1: Int, r0: Int, r1: Int): IntIntervalApron = {
     f(IntIntervalApron.bounded(l0, l1), IntIntervalApron.bounded(r0, r1))
   }
+  //todo: für join, meet, widen die signaturen in objektfunktionsaufrufe abändern
 
    def op2IItoIIA(f: (IntInterval, IntInterval) => IntInterval, l0: Int, l1: Int, r0: Int, r1: Int): IntIntervalApron = {
     IntIntervalApron(f(IntInterval.bounded(l0, l1), IntInterval.bounded(r0, r1)))
   }
 
+  @Deprecated
   def testDefault(testSequence: Seq[Matchable]) = {
     val (result, rest) = testSequence match { case Seq(result, rest @ _*) => (result, rest) } //muss die sequence noch sortiert werden vor dem match?
     for (member <- rest) result === member //todo: testausgabe hierfür
@@ -94,17 +96,35 @@ class ApronTest extends AnyFlatSpec, Matchers:
   // it must "compare" in { // TODO
   //   //assertEquals(IntIntervalApron(0,10) meet IntIntervalApron(-10,5), IntIntervalApron(0, 5))
   // }
-
-  "sturdy.IntIntervalApron ADDITION" must "behave like sturdy.IntInterval ADDITION" in{
-    
-      implicit val f: Failure = fail()
-      implicit val j: JoinComputation = ??? // TODO
-      parityIItoIIA(ApronIntervalIntOps.add, IntervalIntOps.add, 0,1, -1, 0)
-      //assert(add, IntIntervalApron(IntInterval(0,1) + IntInterval(-1,0)))
+  implicit val f: Failure = fail()
+  implicit val j: JoinComputation = ??? // TODO
+  "Functions of IntIntervalApron must behave like those of IntInterval" - {
+    "addition" in {
+      parityIItoIIA(ApronIntervalIntOps.add, IntervalIntOps.add, 0,1, -1,0) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
     }
-    // "for substraction" in {}
-    // "for multiplication" in {}
-    // "for division" in {}
+    "substraction" in {
+      parityIItoIIA(ApronIntervalIntOps.sub, IntervalIntOps.sub, 0,1, -1,0)
+    }
+    "multiplication" in {
+      parityIItoIIA(ApronIntervalIntOps.mul, IntervalIntOps.mul, 0,1, -1,0) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
+    }
+    "division" in {
+      parityIItoIIA(ApronIntervalIntOps.div, IntervalIntOps.div, 0,1, -1,0)
+    }
+  }
+    
+  //   "sturdy.IntIntervalApron join must behave like sturdy.IntInterval join" in {
+      parityIItoIIA((ApronInterval.joinCopy, (IntInterval.join), 0,1, -1,0) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
+  //   }
+  // "sturdy.IntIntervalApron meet must behave like sturdy.IntInterval meet" in {
+  //     parityIItoIIA(ApronIntervalIntOps.meet, IntervalIntOps.meet, 0,1, -1,0)
+  //   }
+  //   "sturdy.IntIntervalApron widen must behave like sturdy.IntInterval widen" in {
+  //     parityIItoIIA(ApronIntervalIntOps.widen, IntervalIntOps.widen, 0,1, -1,0) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
+  //   }
+
+    
+
     // "for join" in {}
     // "for meet" in {}
     // "for widen" in {}
