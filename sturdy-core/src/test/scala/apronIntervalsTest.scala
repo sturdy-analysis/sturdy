@@ -143,6 +143,34 @@ class ApronTest extends AnyFreeSpec, Matchers:
     assert(result.sup.isEqual(two))
   }  
 
+  "Interval join of intervals (0,2) and (-9,5) must have result (-9,5)" in {
+    val manager = apron.Box()
+    manager.setPreferedScalarType(0) //2 sets pref scalar type to mpfr. 1 t0 mpq and 0 to double - double is fastest but least precise
+    var ourInterval1 = apron.Interval(0, 2)
+    var ourInterval2 = apron.Interval(-9,5)
+    val abstractDomain1 = Abstract0(manager, 1, 0, Array(ourInterval1))
+    val abstractDomain2 = Abstract0(manager, 1, 0, Array(ourInterval2))
+    var result = abstractDomain1.joinCopy(manager, abstractDomain2).getBound(manager, 1) //gibt floats zurück
+    Console.printf("Resulting interval should be (-9,5) and is (%s, %s) \n", result.inf, result.sup)
+    var minusNine = apron.Scalar.create()
+    var five = apron.Scalar.create()
+    minusNine.set(-9)
+    five.set(5)
+    assert(result.inf.isEqual(minusNine))
+    assert(result.sup.isEqual(five))
+  }    
+  
+
+  /*static public final int FUNID_MEET = 32;
+    static public final int FUNID_MEET_ARRAY = 33;
+    static public final int FUNID_MEET_LINCONS_ARRAY = 34;
+    static public final int FUNID_MEET_TCONS_ARRAY = 35;
+    static public final int FUNID_JOIN = 36;
+    static public final int FUNID_JOIN_ARRAY = 37; 
+    static public final int FUNID_EXPAND = 47;
+    static public final int FUNID_FOLD = 48;
+    static public final int FUNID_WIDENING = 49;
+    static public final int FUNID_CLOSURE = 50;*/
   // "Apron Intervals" must "perform addition" in {
 
   //   testDefault(add)
