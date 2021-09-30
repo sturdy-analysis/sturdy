@@ -10,8 +10,6 @@ import scala.collection.immutable.TreeSet
 
 object LongInterval:
   val Top = LongInterval(Long.MinValue, Long.MaxValue)
-  def bounded(l: Long, h: Long): LongInterval =
-    LongInterval(Math.max(l, Long.MinValue).toLong, Math.min(h, Long.MaxValue).toLong)
 
 case class LongInterval(l: Long, h: Long):
   if (l > h)
@@ -19,9 +17,15 @@ case class LongInterval(l: Long, h: Long):
 
   def join(other: LongInterval): LongInterval =
     LongInterval(Math.min(l, other.l), Math.max(h, other.h))
-  def +(y: LongInterval): LongInterval = LongInterval.bounded(l.toLong + y.l, h.toLong + y.h)
-  def -(y: LongInterval): LongInterval = LongInterval.bounded(l.toLong - y.l, h.toLong - y.h)
-  def *(y: LongInterval): LongInterval = withBounds2(_*_, y)
+  def +(y: LongInterval): LongInterval =
+    try LongInterval(StrictMath.addExact(l, y.l), StrictMath.addExact(h.toLong, y.h))
+    catch case _: ArithmeticException => LongInterval.Top
+  def -(y: LongInterval): LongInterval =
+    try LongInterval(StrictMath.subtractExact(l, y.l), StrictMath.subtractExact(h.toLong, y.h))
+    catch case _: ArithmeticException => LongInterval.Top
+  def *(y: LongInterval): LongInterval =
+    try withBounds2(StrictMath.multiplyExact, y)
+    catch case _: ArithmeticException => LongInterval.Top
   def /(y: LongInterval): LongInterval = withBounds2(_/_, y)
   def withBounds2(f: (Long, Long) => Long, that: LongInterval): LongInterval = {
     val v1 = f(this.l, that.l)
@@ -30,7 +34,7 @@ case class LongInterval(l: Long, h: Long):
     val v4 = f(this.h, that.h)
     val low = Math.min(v1, Math.min(v2, Math.min(v3, v4)))
     val high = Math.max(v1, Math.max(v2, Math.max(v3, v4)))
-    LongInterval.bounded(low, high)
+    LongInterval(low, high)
   }
   override def toString: String = s"[$l,$h]"
 
