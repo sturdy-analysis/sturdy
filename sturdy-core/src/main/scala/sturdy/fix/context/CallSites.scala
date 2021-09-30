@@ -2,15 +2,17 @@ package sturdy.fix.context
 
 import sturdy.fix.Logger
 
+import scala.util.Try
+
 def callSites[Dom, Call](call: Dom => Option[Call]): CallSiteLogger[Dom, Call] = new CallSiteLogger(call)
-class CallSiteLogger[Dom, Call](getCall: Dom => Option[Call]) extends Logger[Dom]:
+class CallSiteLogger[Dom, Call](getCall: Dom => Option[Call]) extends Logger[Dom, Any]:
   private var calls = List[Call]()
 
-  def enter(d: Dom): Unit = getCall(d) match
+  def enter(dom: Dom): Unit = getCall(dom) match
     case Some(c) => calls = c :: calls
     case _ => // nothing
 
-  def exit(d: Dom): Unit = getCall(d) match
+  def exit(dom: Dom, codom: Try[Any]): Unit = getCall(dom) match
     case Some(c) => calls = calls.tail
     case _ => // nothing
 

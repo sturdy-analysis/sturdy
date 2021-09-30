@@ -17,8 +17,8 @@ trait Effectful:
   final def joinThrowables(failA: Throwable, failB: Throwable): Throwable = (failA, failB) match
     case (failA: RuntimeException, _) => throw failA
     case (_, failB: RuntimeException) => throw failB
-    case (RecurrentCall, _) => failB
-    case (_, RecurrentCall) => failA
+    case (_: RecurrentCall[_, _], _) => failB
+    case (_, _: RecurrentCall[_, _]) => failA
     case _ => if (failA == failB) failA else StarvedJoin(failA, failB)
 
   /* This is the default join for pure computations f and g.

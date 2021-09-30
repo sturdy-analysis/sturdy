@@ -1,6 +1,7 @@
 package sturdy.fix
 
 import scala.reflect.ClassTag
+import scala.util.Try
 
 trait Combinator[Dom, Codom] extends Function[Dom => Codom, Dom => Codom]
 
@@ -46,14 +47,15 @@ final class Dispatch[Dom, Codom](choose: Dom => Int, val phis: Array[Combinator[
       f(dom)
 }
 
-trait Logger[Dom]:
+trait Logger[-Dom, -Codom]:
   def enter(d: Dom): Unit
-  def exit(d: Dom): Unit
+  def exit(dom: Dom, codom: Try[Codom]): Unit
 
-def log[Dom, Codom](logger: Logger[Dom], phi: Combinator[Dom, Codom]): Log[Dom, Codom] = new Log(logger, phi)
-final class Log[Dom, Codom](logger: Logger[Dom], val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
+def log[Dom, Codom](logger: Logger[Dom, Codom], phi: Combinator[Dom, Codom]): Log[Dom, Codom] = new Log(logger, phi)
+final class Log[Dom, Codom](logger: Logger[Dom, Codom], val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
   override def apply(f: Dom => Codom): Dom => Codom = dom =>
     logger.enter(dom)
-    try phi(f)(dom) finally
-      logger.exit(dom)
+    val codom = Try(phi(f)(dom))
+    logger.exit(dom, codom)
+    codom.get
 }
