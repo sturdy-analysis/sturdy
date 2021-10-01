@@ -77,7 +77,7 @@ def runIntervalAnalysis(p: Path, steps: Int) =
   }
 
 object RunIntervalAnalysis extends App {
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/while_short_if.tip").toURI();
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/factorial_recursive.tip").toURI();
   val (res, analysis) = runIntervalAnalysis(Paths.get(uri), 10)
   println(res)
   println(analysis.effects.getCallFrame)

@@ -98,7 +98,7 @@ object IntervalAnalysis extends Interpreter,
           fix.log(cfg.logger,
             fix.dispatch(isFunOrWhile, Seq(
               // call
-              fix.iter.topmost,
+              fix.iter.innermost,
               // while
               fix.unwind(steps,
                 fix.iter.innermost
