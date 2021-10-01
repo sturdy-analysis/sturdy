@@ -6,6 +6,7 @@ import sturdy.fix
 import sturdy.language.tip.GenericInterpreter.GenericEffects
 import sturdy.language.tip.Exp
 import sturdy.data.unit
+import sturdy.language.tip.Function
 
 object Fix:
   final def isFunOrWhile(dom: FixIn): Int = dom match
@@ -23,3 +24,8 @@ object Fix:
       case FixIn.EnterFunction(f) => Some(f.params.map(p => effects.getLocal(p).get))
       case _ => None
     }
+
+  enum CfgNode:
+    case Statement(s: Stm)
+    case Enter(fun: Function) extends CfgNode, fix.ImportantControlNode
+    case Exit(fun: Function) extends CfgNode, fix.ImportantControlNode

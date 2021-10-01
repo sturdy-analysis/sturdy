@@ -73,9 +73,9 @@ enum Stm extends Labeled:
     case Error(e) => e.intLiterals
 
   override def toString: String = this match
-    case Assign(x, _) => s"Assign(x)@${this.label}"
-    case If(c, t, e) => s"If(c)@${this.label}"
-    case While(c, b) => s"While(c)@${this.label}"
+    case Assign(x, _) => s"Assign($x)@${this.label}"
+    case If(c, t, e) => s"If($c)@${this.label}"
+    case While(c, b) => s"While($c)@${this.label}"
     case Block(body) => s"Block@${this.label}"
     case Output(e) => s"Output@${this.label}"
     case Error(e) => s"Error@${this.label}"

@@ -10,7 +10,7 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-trait Effectful:
+trait Effectful extends ObservableJoin:
 //  type JoinExceptions
   type Joined[A] = Join[A] ?=> A
 
@@ -25,8 +25,11 @@ trait Effectful:
    * Subclasses must override join to join effects and call super.join
    */
   def joinComputations[A](f: => A)(g: => A): Joined[A] = {
+    this.joinStart()
     val triedF = Try(f)
+    this.joinSwitch()
     val triedG = Try(g)
+    this.joinEnd()
 
     (triedF, triedG) match
       case (Failure(failA: RuntimeException), _) => throw failA

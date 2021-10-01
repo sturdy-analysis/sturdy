@@ -61,42 +61,29 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
     }
 
-  def runAnalysis(p: Path, steps: Int) =
-    val file = Source.fromURI(p.toUri)
-    val sourceCode = file.getLines().mkString("\n")
-    file.close()
-    val program = Parser.parse(sourceCode)
+def runIntervalAnalysis(p: Path, steps: Int) =
+  val file = Source.fromURI(p.toUri)
+  val sourceCode = file.getLines().mkString("\n")
+  file.close()
+  val program = Parser.parse(sourceCode)
 
-    if (program.funs.exists(_.name == "main")) {
-//      println(s"Running ${p.getFileName}")
+  if (program.funs.exists(_.name == "main")) {
+    //      println(s"Running ${p.getFileName}")
 
-      val analysis = IntervalAnalysis(Map(), Map(), steps)
-      (analysis.effects.fallible(analysis.execute(program)), analysis.effects)
-    } else {
-      null
-    }
-
+    val analysis = IntervalAnalysis(Map(), Map(), steps)
+    (analysis.effects.fallible(analysis.execute(program)), analysis)
+  } else {
+    null
+  }
 
 object RunIntervalAnalysis extends App {
-  def runAnalysis(p: Path, steps: Int) =
-    val file = Source.fromURI(p.toUri)
-    val sourceCode = file.getLines().mkString("\n")
-    file.close()
-    val program = Parser.parse(sourceCode)
-
-    if (program.funs.exists(_.name == "main")) {
-      //      println(s"Running ${p.getFileName}")
-
-      val analysis = IntervalAnalysis(Map(), Map(), steps)
-      (analysis.effects.fallible(analysis.execute(program)), analysis.effects)
-    } else {
-      null
-    }
-
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/mccarthy91.tip").toURI();
-  val (res, effects) = runAnalysis(Paths.get(uri), 10)
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/while_short_if.tip").toURI();
+  val (res, analysis) = runIntervalAnalysis(Paths.get(uri), 10)
   println(res)
-  println(effects.getCallFrame)
-  println(effects.getStore)
-  println(effects.getPrinted)
+  println(analysis.effects.getCallFrame)
+  println(analysis.effects.getStore)
+  println(analysis.effects.getPrinted)
+  println(analysis.cfg.getNodes)
+  println(analysis.cfg.getEdgesFlat)
+  println(analysis.cfg.toGraphViz)
 }
