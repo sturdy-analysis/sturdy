@@ -1,11 +1,11 @@
 package sturdy.language.wasm
 
 
-import sturdy.data.{*, given}
+import sturdy.data.*
 import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.CBoolBranching
-import sturdy.effect.callframe.{CMutableCallFrameInt, CCallFrameInt}
+import sturdy.effect.callframe.{CCallFrameInt, CMutableCallFrameInt}
 import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.{CFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
@@ -16,13 +16,13 @@ import sturdy.language.wasm.generic.*
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
-import sturdy.values.doubles.{*, given}
-import sturdy.values.exceptions.{*, given}
-import sturdy.values.floats.{*, given}
-import sturdy.values.functions.{*, given}
-import sturdy.values.ints.{*, given}
-import sturdy.values.longs.{*, given}
-import sturdy.values.relational.{*, given}
+import sturdy.values.doubles.*
+import sturdy.values.exceptions.*
+import sturdy.values.floats.*
+import sturdy.values.functions.*
+import sturdy.values.ints.*
+import sturdy.values.longs.*
+import sturdy.values.relational.*
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -52,6 +52,14 @@ object ConcreteInterpreter extends Interpreter :
   override type ExcV = WasmException[Value]
   override type FuncIx = Int
   override type FunV = FunctionInstance[Value]
+
+  enum Symbol:
+    case Function(ix: FuncIx)
+    case Global(ix: GlobalAddr)
+
+  enum Entry:
+    case Function(fun: FunV)
+    case Global(glob: GlobalInstance[Value])
 
   trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst], Failure :
     import Value.*
@@ -116,13 +124,21 @@ object ConcreteInterpreter extends Interpreter :
           buf.putDouble(0, v.asFloat64)
         case _ => throw new IllegalArgumentException(s"Expected store instruction, but got $encInfo.")
 
-  given ConcreteWasmOperations(using Failure): WasmOperations[Value, Addr, Size, FuncIx] with
+  given ConcreteWasmOperations(using Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry] with
     override type WasmOpsJoin[A] = NoJoin[A]
 
     override def valueToAddr(v: Value): Int = v.asInt32
     override def valueToFuncIx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Int32(sz)
+
+    override def funcIxToSymbol(funcIx: Int): Symbol = ???
+    override def globIxToSymbol(globalIdx: GlobalAddr): Symbol = ???
+
+    override def funVToEntry(funV: FunctionInstance[Value]): Entry = ???
+    override def globIToEntry(globI: GlobalInstance[Value]): Entry = ???
+    override def entryToFuncV(entry: Entry): FunctionInstance[Value] = ???
+    override def entryToGlobI(entry: Entry): GlobalInstance[Value] = ???
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): OptionC[A] =
       val i = ix.asInt32
@@ -135,7 +151,7 @@ object ConcreteInterpreter extends Interpreter :
     extends ConcreteOperandStack[Value]
       with ConcreteMemory[MemoryAddr]
       with CSerialize
-      with ConcreteSymbolTable[TableAddr, Int, FunctionInstance[Value]]
+      with ConcreteSymbolTable[TableAddr, Symbol, Entry]
       with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
       with CBoolBranching[Value]
       with ConcreteExcept[WasmException[Value]]

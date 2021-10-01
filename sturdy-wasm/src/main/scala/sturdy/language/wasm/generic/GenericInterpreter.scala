@@ -18,10 +18,8 @@ import sturdy.values.functions.FunctionOps
 import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
-import swam.FuncIdx
-import swam.FuncType
+import swam.{BlockType, FuncIdx, FuncType, GlobalIdx, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
 import swam.syntax.*
-import swam.{BlockType, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
 
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable
@@ -40,11 +38,14 @@ enum WasmException[V]:
   case Jump(labelIndex: LabelIdx, operands: List[V])
   case Return(operands: List[V])
 
-type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV] =
+
+
+type GenericEffects[V, Addr, Bytes, Size, ExcV, Symbol, Entry] =
   OperandStack[V]
     with Memory[MemoryAddr, Addr,Bytes,Size]
     with Serialize[V,Bytes,MemoryInst,MemoryInst]
-    with SymbolTable[TableAddr, FuncIx, FunV]
+    with SymbolTable[TableAddr, Symbol, Entry]
+    //with SymbolTable[TableAddr, GlobalIdx, GlobalInstance[V]]
     with CMutableCallFrameInt[FrameData[V], V]
     with BoolBranching[V]
     with Except[WasmException[V], ExcV]
@@ -66,9 +67,9 @@ enum FixOut[V]:
   case Eval()
   case ExitWasmFunction(vals: List[V])
 
-trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, FuncIx, FunV]]
+trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, Symbol, Entry]]
   (val effects: Effects)
-  (using wasmOps: WasmOperations[V, Addr, Size, FuncIx],
+  (using wasmOps: WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry],
          exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin])
   (using effects.BoolBranchJoin[Unit], effects.ExceptJoin[Unit],
    effects.MemoryJoin[Unit], effects.MemoryJoin[V],
@@ -110,7 +111,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
 
   private var memCount = 0
   private var tabCount = 0
-  
+  private var globCount = 0
+
   import wasmOps.*
   import exceptOps.*
 
@@ -131,12 +133,20 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
       val v = stack.peek()
       setLocal(ix, v).getOrElse(fail(UnboundLocal, ix.toString))
     case GlobalGet(globalIx) =>
-      val global = module.globals.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
-      stack.push(global.value)
+      val globalIdx = module.globalAddrs.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
+      tableGet(globalTableIndex, globIxToSymbol(globalIdx)).orElseAndThen(fail(UnboundGlobal, globalIdx.toString)) { entry =>
+        val global = entryToGlobI(entry)
+        stack.push(global.value)
+      }
     case GlobalSet(globalIx) =>
-      val global = module.globals.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
+      val globalIdx = module.globalAddrs.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
       val v = stack.pop()
-      global.value = v
+      // TODO: do we need tableGet + tableSet or is it enough to modify the globalInstance returned by tableGet?
+      tableGet(globalTableIndex, globIxToSymbol(globalIdx)).orElseAndThen(fail(UnboundGlobal, globalIdx.toString)) { entry =>
+        val global = entryToGlobI(entry)
+        global.value = v
+        tableSet(globalTableIndex, globIxToSymbol(globalIdx), globIToEntry(global))
+      }
 
   def evalMemoryInst(inst: Inst): Unit = inst match
     case i: LoadInst => load(i)
@@ -196,6 +206,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
 
   def tableIndex: TableAddr =
     module.tableAddrs(0)
+
+  val globalTableIndex: TableAddr = TableAddr(0)
 
 
 
@@ -269,7 +281,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
       case CallIndirect(typeIx) =>
         val ftExpected = module.functionTypes(typeIx)
         val funcIx = stack.pop()
-        tableGet(tableIndex, valueToFuncIx(funcIx)).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
+        tableGet(tableIndex, funcIxToSymbol(valueToFuncIx(funcIx))).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { entry =>
+          val func = entryToFuncV(entry)
           if (func == null)
             fail(UninitializedFunction, funcIx.toString)
           invokeIndirect(func, ftExpected, funcIx)
@@ -434,9 +447,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     }
   
   def resolveImports(module: Module, imports: Imports[V]):
-    (Vector[FunctionInstance[V]], Vector[GlobalInstance[V]], Vector[TableAddr], Vector[MemoryAddr]) =
+    (Vector[FunctionInstance[V]], Vector[GlobalAddr], Vector[TableAddr], Vector[MemoryAddr]) =
     val funcs: VectorBuilder[FunctionInstance[V]] = VectorBuilder()
-    val globs: VectorBuilder[GlobalInstance[V]] = VectorBuilder()
+    val globs: VectorBuilder[GlobalAddr] = VectorBuilder()
     val tabs: VectorBuilder[TableAddr] = VectorBuilder()
     val mems: VectorBuilder[MemoryAddr] = VectorBuilder()
 
@@ -461,13 +474,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
         case Import.Global(_,_,GlobalType(tpe, mut)) =>
           exp match
             case ExternalValue.Global(addr) =>
-              val glob = from.globals(addr)
+              val glob = from.globalAddrs(addr)
               // TODO: check mutability (=> add mut to GlobalInstance)
-              if (tpe == glob.tpe) {
-                globs += glob
-              } else {
-                throw new Error(s"Type mismatch: expected $tpe but found ${glob.tpe}.")
-              }
+              globs += glob
             case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
         case Import.Table(_,_,tpe) =>
           exp match
@@ -492,7 +501,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     val modInst = new ModuleInstance[V] {}
     // compute the initilization values for globals
     val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports)
-    modInst.globals = globImports
+    modInst.globalAddrs = globImports
     val globValues = module.globals.map(glob => evalInstructionSequence(glob.init, modInst))
     // in the current swam version reference vectors are already provided via the elem fields of the module
     // -> we don't have to compute anything here for now
@@ -503,6 +512,19 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
     // functions
     modInst.functions = funcImports ++
       module.funcs.map(func => FunctionInstance.Wasm(modInst,func,module.types(func.tpe)))
+    // globals
+    // add empty table at addr 0 for global variables
+    assert(TableAddr(tabCount) == globalTableIndex)
+    addEmptyTable(globalTableIndex)
+    tabCount += 1
+    modInst.globalAddrs = modInst.globalAddrs :++ module.globals.zip(globValues).map {
+      case (Global(GlobalType(tpe,_),_),value) =>
+        val globalAddr = GlobalAddr(globCount)
+        globCount += 1
+        val newGlobal = GlobalInstance(tpe,value)
+        tableSet(globalTableIndex, globIxToSymbol(globalAddr), globIToEntry(newGlobal))
+        globalAddr
+    }
     // tables
     modInst.tableAddrs = tabImports ++ module.tables.map {
       case TableType(_, Limits(min,max)) =>
@@ -520,10 +542,6 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
         addEmptyMemory(memAddr, initSize, sizeLimit)
         memCount += 1
         memAddr
-    }
-    // globals
-    modInst.globals = modInst.globals :++ module.globals.zip(globValues).map {
-      case (Global(GlobalType(tpe,_),_),value) => GlobalInstance(tpe,value)
     }
     // data
     modInst.data = module.data.map {
@@ -574,7 +592,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Effects <: Generi
             eval(i32.Add) // adds index to base
             val idx = stack.pop() // stack is empty
             val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
-            tableSet(TableAddr(modInst.tableAddrs(tableIdx).addr), valueToFuncIx(idx), funV)
+            tableSet(TableAddr(modInst.tableAddrs(tableIdx).addr), funcIxToSymbol(valueToFuncIx(idx)), funVToEntry(funV))
             // TODO add failure conditions for table writing
           }
      }

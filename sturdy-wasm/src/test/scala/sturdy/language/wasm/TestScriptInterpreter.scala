@@ -132,7 +132,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
     assert(exp.isDefined, s"export $name not found in ${module.getOrElse("current")}")
     exp.get._2 match
       case Global(addr) =>
-        val value = modInst.globals(addr).value
+        val value = modInst.globalAddrs(addr).value
         CFallible.Unfailing(List(value))
       case ext =>
         throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")
