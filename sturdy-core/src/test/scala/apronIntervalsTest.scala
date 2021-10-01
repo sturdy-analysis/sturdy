@@ -291,8 +291,10 @@ class ApronTest extends AnyFreeSpec, Matchers:
   // it must "compare" in { // TODO
   //   //assertEquals(IntIntervalApron(0,10) meet IntIntervalApron(-10,5), IntIntervalApron(0, 5))
   // }
-/*   implicit val f: Failure = fail()
-  implicit val j: JoinComputation = ??? // TODO
+  
+  /*
+  implicit val f: Failure = fail() // TODO: new AFailure {}
+  implicit val j: JoinComputation = new JoinComputation {} 
   "Functions of IntIntervalApron must behave like those of IntInterval" - {
     "addition" in {
       parityIItoIIA(ApronIntervalIntOps.add, IntervalIntOps.add, 0,1, -1,0) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
