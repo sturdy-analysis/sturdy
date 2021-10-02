@@ -1,6 +1,6 @@
 package sturdy.language.wasm.analyses
 
-import sturdy.data.*
+import sturdy.data.{*, given}
 import sturdy.effect.{AnalysisState, Effectful}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.Serialize
@@ -8,7 +8,7 @@ import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.callframe.CCallFrameInt
 import sturdy.effect.callframe.CMutableCallFrameInt
 import sturdy.effect.except.JoinedExcept
-import sturdy.effect.failure.*
+import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinedOperandStack
 import sturdy.effect.operandstack.JoinedOperandStack.OperandState
 import sturdy.effect.symboltable.{SymbolTable, ToppedSymbolTable}
@@ -16,20 +16,20 @@ import sturdy.fix
 import sturdy.fix
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.ConstantValues
-import sturdy.language.wasm.generic.*
-import sturdy.language.wasm.analyses.Fix.*
+import sturdy.language.wasm.generic.{*, given}
+import sturdy.language.wasm.analyses.Fix.{*, given}
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
 import sturdy.values.convert.ToppedConvert
-import sturdy.values.doubles.*
-import sturdy.values.exceptions.*
-import sturdy.values.functions.*
-import sturdy.values.floats.*
-import sturdy.values.ints.*
-import sturdy.values.longs.*
-import sturdy.values.relational.*
-import sturdy.values.*
+import sturdy.values.doubles.{*, given}
+import sturdy.values.exceptions.{*, given}
+import sturdy.values.functions.{*, given}
+import sturdy.values.floats.{*, given}
+import sturdy.values.ints.{*, given}
+import sturdy.values.longs.{*, given}
+import sturdy.values.relational.{*, given}
+import sturdy.values.{*, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder

@@ -1,7 +1,7 @@
 package sturdy.language.wasm
 
 
-import sturdy.data.*
+import sturdy.data.{*, given}
 import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.CBoolBranching
@@ -16,13 +16,13 @@ import sturdy.language.wasm.generic.*
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
-import sturdy.values.doubles.*
-import sturdy.values.exceptions.*
-import sturdy.values.floats.*
-import sturdy.values.functions.*
-import sturdy.values.ints.*
-import sturdy.values.longs.*
-import sturdy.values.relational.*
+import sturdy.values.doubles.{*, given}
+import sturdy.values.exceptions.{*, given}
+import sturdy.values.floats.{*, given}
+import sturdy.values.functions.{*, given}
+import sturdy.values.ints.{*, given}
+import sturdy.values.longs.{*, given}
+import sturdy.values.relational.{*, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
