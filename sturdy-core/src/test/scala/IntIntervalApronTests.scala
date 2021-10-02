@@ -1,6 +1,3 @@
-// Unused, only parity tests with IntInterval required
-
-/*
 package sturdy.test
 
 import org.scalatest._
@@ -41,7 +38,7 @@ class IntIntervalApronTests extends AnyFreeSpec, Matchers:
     Seq(IntIntervalApron(-10, 10), op2IIA(_ joinCopy _, 0, 10, -10, 5))
 
   // parity test for any binary function (operation)
- 
+
   //binary operation cunstructor for IntIntervalApron using bounded to ensure valid intervals
   def op2IIA(
       f: (IntIntervalApron, IntIntervalApron) => IntIntervalApron,
@@ -60,7 +57,7 @@ class IntIntervalApronTests extends AnyFreeSpec, Matchers:
     } //muss die sequence noch sortiert werden vor dem match?
     for (member <- rest) result === member //todo: testausgabe hierfür
   }
-
+/*
   "Apron Intervals" must "perform addition" in {
 
     testDefault(add)
@@ -81,7 +78,7 @@ class IntIntervalApronTests extends AnyFreeSpec, Matchers:
     testDefault(join0)
   }
   it must "meet" in {
-    assert((IntIntervalApron(0,10) meet IntIntervalApron(-10,5)) === IntIntervalApron(0, 5)) 
+    assert((IntIntervalApron(0,10) meet IntIntervalApron(-10,5)) === IntIntervalApron(0, 5))
   }
   it must "widen" in { // TODO
     implicit var bounds: Set[Int] = Set.empty
@@ -90,4 +87,5 @@ class IntIntervalApronTests extends AnyFreeSpec, Matchers:
   it must "compare" in { // TODO
     //assertEquals(IntIntervalApron(0,10) meet IntIntervalApron(-10,5), IntIntervalApron(0, 5))
   }
-  
+
+ */
