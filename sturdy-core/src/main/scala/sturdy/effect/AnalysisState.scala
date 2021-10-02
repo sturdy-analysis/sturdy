@@ -2,7 +2,7 @@ package sturdy.effect
 
 import sturdy.fix.Fixpoint
 
-trait AnalysisState[In, Out, All]:
+trait AnalysisState[In, Out, All] extends Effectful:
   def getInState(): In
   def setInState(in: In): Unit
 

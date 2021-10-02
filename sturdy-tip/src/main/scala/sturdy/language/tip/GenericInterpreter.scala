@@ -91,6 +91,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   private lazy val fixed = fix.Fixpoint { (rec: FixIn => FixOut[V]) =>
     inline def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
     inline def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case v => throw new IllegalStateException()}
+    inline def enterFunction(fun: Function) = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
 
     def eval_open(e: Exp): V = e match {
       case Exp.NumLit(n) => intLit(n)
@@ -184,10 +185,7 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
       }
       inNewFrame((), locals) {
         paramAddrs.zip(args).map(write)
-        try
-          rec(FixIn.EnterFunction(fun)) match
-            case FixOut.ExitFunction(v) => v
-            case _ => throw new IllegalStateException()
+        try enterFunction(fun)
         finally {
           paramAddrs.foreach(free)
           localsAddrs.foreach(free)

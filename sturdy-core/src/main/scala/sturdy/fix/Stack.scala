@@ -74,6 +74,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
         previousInCache = inCache
         previousOutCache = outCache
         state.setAllState(originalState)
+        state.repeating()
       }
     }
     throw new IllegalStateException()

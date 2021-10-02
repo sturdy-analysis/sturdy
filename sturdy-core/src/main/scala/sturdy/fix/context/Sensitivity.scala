@@ -33,3 +33,9 @@ def none[Dom] = new Sensitivity[Dom, Unit] {
   override def switchCall(dom: Dom): Boolean = false
   override def apply(dom: Dom) = ()
 }
+
+def nonePoly[Dom, Ctx] = new Sensitivity[Dom, Ctx] {
+  override def emptyContext = null.asInstanceOf[Ctx]
+  override def switchCall(dom: Dom): Boolean = false
+  override def apply(dom: Dom) = null.asInstanceOf[Ctx]
+}

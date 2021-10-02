@@ -80,17 +80,7 @@ object IntervalAnalysis extends Interpreter,
       super.execute(p)
 
     val callSites = callSitesLogger()
-
-
-    val cfg = fix.control[List[Exp.Call], FixIn, FixOut[Value], CfgNode] {
-      case FixIn.Run(Stm.Block(_)) => None
-      case FixIn.Run(s) => Some(CfgNode.Statement(s))
-      case FixIn.EnterFunction(f) => Some(CfgNode.Enter(f))
-      case _ => None
-    } {
-      case (FixIn.EnterFunction(f), FixOut.ExitFunction(_)) => Some(CfgNode.Exit(f))
-      case _ => None
-    }
+    val cfg = control[List[Exp.Call], Value](sensitive = true, allStatements = false)
 
     val phi =
       fix.log(callSites,
@@ -98,7 +88,7 @@ object IntervalAnalysis extends Interpreter,
           fix.log(cfg.logger,
             fix.dispatch(isFunOrWhile, Seq(
               // call
-              fix.iter.innermost,
+              fix.iter.topmost,
               // while
               fix.unwind(steps,
                 fix.iter.innermost
