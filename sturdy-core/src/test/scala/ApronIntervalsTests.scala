@@ -186,7 +186,7 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
   // generally, testing an external library should be done there
   // and so should documentation be
   // however, here it was part of the assignment
-  "Interval bounds must be as defined" - { // TODO: maybe evaluate tests where lower > higher
+  "Interval bounds must be as defined" - {
     "if lower <= higher bounds" in {
       val signSet = Set(
         -1,
@@ -197,6 +197,21 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
       signSet.foreach(x =>
         signSet
           .filter(_ >= x)
+          .foreach(y => testApronIntervalBounds(x, y))
+      )
+    }
+    "if lower > higher bounds" in {
+      val signSet = Set(
+        -5,
+        -1,
+        0,
+        1,
+        5
+      ) // a set describing different types of bounds (negative, zero, positive)
+
+      signSet.foreach(x =>
+        signSet
+          .filter(_ < x)  // may result in non-canonical empty intervals
           .foreach(y => testApronIntervalBounds(x, y))
       )
     }
