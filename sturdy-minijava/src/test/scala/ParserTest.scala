@@ -42,7 +42,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
     println(tree)
     //assert(tree.isRight)
   }
-*/
+
 
   val ListOfFunCall = List("new x().do()", "true.do()", "(someArry).length","Object.do(10, true, 2)")
   for (a <- ListOfFunCall){
@@ -60,7 +60,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
 
 
 
-  /*
+
   val ListOfAccess = List("x[1]", "someIterable[index]" )
 
   for (a <- ListOfAccess){
@@ -87,7 +87,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
     //assert(tree.isRight)
   }
 
-  /*
+
 
   val ListOfOps = List("x * y + 5", "42", "true && false", "(a + b) * 2", "!false && true", "var1 || var2" )
   for (a <- ListOfOps){
@@ -201,7 +201,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
    }
 
 
-*/
+
   def parse(s: String): Either[P.Error, Program] =
     Parser.program.parseAll(s)
 

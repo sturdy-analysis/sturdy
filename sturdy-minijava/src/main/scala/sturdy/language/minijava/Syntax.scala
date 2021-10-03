@@ -21,7 +21,7 @@ enum Exp extends Labeled:
   case BoolLit(b: String)  //case BoolLit(b: Boolean)                 // true und false
 
   // this expression                      // "this"
-
+  case This(u:Unit)
 
   case Not (e: Exp)                       // !Expression
   case And (e1: Exp, e2: Exp)             // Expression ("&&") Expression
@@ -65,6 +65,8 @@ enum Exp extends Labeled:
     case Not(e) => s"logicalNOT@${this.label}"
     case And(e1,e2) => s"logicalAND@${this.label}"
     case Or(e1,e2) => s"logicalOr@${this.label}"
+
+    case This(u) => "this"
 
 
 enum Stm extends Labeled:

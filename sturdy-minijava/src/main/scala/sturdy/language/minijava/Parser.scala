@@ -27,6 +27,7 @@ object Parser:
     p <* whitespaces0
 
   object LanguageKeywords{
+    val KTHIS = "this"
     val KNEW = "new"
     val KWHILE = "while"
     val KIF = "if"
@@ -42,7 +43,6 @@ object Parser:
     val KSTATIC = "static"
     val KPRIVATE = "private"
     val KPUBLIC = "public"
-    val KTHIS = "this"
     val KPRINTLINE = "System.out.println"
     val KTRUE = "true"
     val KFALSE = "false"
@@ -52,6 +52,7 @@ object Parser:
   import LanguageKeywords.*
 
   val keywords = Set(
+    KTHIS,
     KNEW,
     KINT,
     KBOOLEAN,
@@ -67,7 +68,6 @@ object Parser:
     KSTATIC,
     KPRIVATE,
     KPUBLIC,
-    KTHIS,
     KPRINTLINE,
     KTRUE,
     KFALSE,
@@ -162,6 +162,7 @@ object Parser:
   lazy val atom: P[Exp] =
     spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //<INTEGER_LITERAL>
       inParens(recExpression).backtrack | //"(" Expressions ")"
+      keyword(KTHIS).map(Exp.This.apply) |
       variable.backtrack| //Variablen
       boolean.backtrack | //BoolLiterals
       (keyword(KNEW) *> keyword(KINT) *> op("[") *> recExpression <* op("]")).map(Exp.AllocArray.apply).backtrack |  // new int[Exp]
