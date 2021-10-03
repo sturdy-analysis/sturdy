@@ -26,12 +26,11 @@ object Parser:
   def spaced[A](p: P[A]): P[A] =
     p <* whitespaces0
 
-  object LanguageKeywords {
+  object LanguageKeywords{
     val KNEW = "new"
     val KWHILE = "while"
     val KIF = "if"
     val KELSE = "else"
-    val KVAR = "var"
     val KRETURN = "return"
     val KVOID = "void"
     val KINT = "int"
@@ -60,7 +59,6 @@ object Parser:
     KWHILE,
     KIF,
     KELSE,
-    KVAR,
     KRETURN,
     KVOID,
     KCLASS,
@@ -76,27 +74,32 @@ object Parser:
     KLEN
   )
 
+
+
+
   def keyword(s: String): P[Unit] =
     spaced(P.string(s))
 
   val letter: P[Unit] = P.ignoreCaseCharIn('a' to 'z').void
   val digit: P[Unit] = P.charIn('0' to '9').void
-  val letterDigit: P[Unit] = P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).void
+  val letterDigit: P[Unit] = P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9') ++ Set('_')).void
   val True: P[Unit] = P.string("true")
   val False: P[Unit] = P.string("false")
-//  val int_type: P[Unit] = P.string("int")
-//  val boolean_type = P.string("boolean")
+
+
 
   val id: P[String] =
-    (letter ~ letterDigit.rep0)
+    (letter ~ letterDigit.rep0 )
       .string
-      .filter(s => !keywords.contains(s)).backtrack
+      .filter(s => (!keywords.contains(s)) ).backtrack
 
   val identifier: P[String] =
     spaced(id)
 
+
   val bool_val: P[String] =
-    True.string.filter(s => !keywords.contains(s)).backtrack | False.string.filter(s => !keywords.contains(s)).backtrack
+    True.string.filter(b=> true).backtrack |
+      False.string.filter(b => true).backtrack
 
   val bool: P[String] =
     spaced(bool_val)
@@ -121,6 +124,9 @@ object Parser:
   val semi: P[Unit] =
     op(';')
 
+  val dot: P[Unit] =
+    op('.')
+
   def op(c: Char): P[Unit] =
     spaced(P.char(c))
 
@@ -134,125 +140,136 @@ object Parser:
     case (e1, Some(f)) => f(e1)
   }
 
- // private val recAtom: P[Exp] = P.defer(atom)
+  private val recAtom: P[Exp] = P.defer(atom)
   private val recExpression = P.defer(expression)
   private val recStatement = P.defer(statement)
 
 
-  val variable: P[Exp] = identifier.map(Exp.Var.apply)
+  val variable: P[Exp] =
+    identifier.map(Exp.Var.apply)
 
-  val boolean: P[Exp] = bool.map(Exp.BoolLit.apply)
+  val boolean: P[Exp] =
+    bool.map(Exp.BoolLit.apply)
 
-  val typed : P[Type] =
-      keyword(KINT).map(_ => Type.Int()) |  // int
+  val types : P[Type] =
+    keyword(KINTARR).map(_ => Type.IntArray()).backtrack | // int[]
+      keyword(KINT).map(_ => Type.Int())|  // int
       keyword(KBOOLEAN).map(_ => Type.Boolean()) |  // boolean
-      keyword(KINTARR).map(_ => Type.IntArray()) | // int[]
-      (identifier.map(s => Type.Identifier(s)) <* variable) //  Identifier x
+      identifier.map(s => Type.Identifier(s)) //  Identifier x
 
   lazy val atom: P[Exp] =
-    (keyword(KNEW) *> identifier).map(e => Exp.Alloc(e)) | // new identifier
     spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //<INTEGER_LITERAL>
-    inParens(recExpression) | //"(" Expressions ")"
-    variable | //Variablen
-    boolean | //BoolLiterals
-    (keyword(KNEW) *> (keyword(KINT) *> inBrackets(recExpression).map(e => Exp.AllocArray(e))))  // new int [Exp] x
+      inParens(recExpression) | //"(" Expressions ")"
+      variable| //Variablen
+      boolean | //BoolLiterals
+      (keyword(KNEW) *> keyword(KINT) *> op("[") *> recExpression <* op("]")).map(Exp.AllocArray.apply).backtrack |  // new int[Exp]
+      (keyword(KNEW) *> identifier <* op("(") <* op(")")).map(Exp.Alloc.apply).backtrack  // new identifier()
 
 
   val access: P[Exp] =
-    ((variable| inParens(recExpression)) ~ inBrackets(recExpression).rep).map{
-      case (e, fields) => fields.foldLeft(e)(Exp.AccessArray.apply) }
-      .backtrack
-    // Exp[Exp]
+    ((variable | inParens(recExpression)) ~ (op('[') *> recExpression <* op(']')).rep)
+      .map { case (e, fields) => fields.foldLeft(e)(Exp.AccessArray.apply) }
+      .backtrack // Exp[Exp]
 
 
-  /*((variable| inParens(recExpression)) ~ inParens(recExpression)).map{
-      case(e1, e2) => Exp.AccessArray(e1: Exp, e2: Exp) } Exp[Exp] */
+  val funCall: P[Exp] =
+    ((variable | inParens(recExpression)) <* (op(".") <* keyword(KLEN)) ).map(
+      Exp.ArrayLength.apply).backtrack| //Exp.length
+      (((variable | inParens(recExpression)) <* op(".")) ~ (identifier ~ (op("(")  *> recExpression.rep0 <* op(")")))).backtrack.map{
+        case(fun, (name, args)) => Exp.Call(fun, name, args)} // Expression "." Identifier "(" ( Expression ( "," Expression )* )? ")"
 
 
   val term: P[Exp] =
-    access |
+      funCall|
+      access |
       (atom ~ (
         (op('*') *> recExpression).map(e2 => Exp.Mul(_, e2)) | // * operation
-          (op('/') *> recExpression).map(e2 => Exp.Div(_, e2)) // / operation
-        ).?).map(maybeBinOp)
+          (op('/') *> recExpression).map(e2 => Exp.Div(_, e2))
+        ).?).map(maybeBinOp) |
+      (op('!') *> recExpression).map(e => Exp.Not(e))
+
 
   val operation: P[Exp] =
     (term ~ (
       (op('+') *> recExpression).map(e2 => Exp.Add(_, e2)) | // + operation
-        (op('-') *> recExpression).map(e2 => Exp.Sub(_, e2)) | // - operation
-        (op("&&") *> recExpression).map(e2 => Exp.And(_, e2)) //Logical And
+        (op('-') *> recExpression).map(e2 => Exp.Sub(_, e2)) | //- operation
+        (op("&&") *> recExpression).map(e2 => Exp.And(_, e2)) | // logical and
+        (op("||") *> recExpression).map(e2 => Exp.Or(_, e2))
       ).?).map(maybeBinOp)
+
 
   lazy val expression: P[Exp] =
     (operation ~ (
       (op('>') *> operation).map(e2 => Exp.Gt(_, e2)) |
         (op("==") *> operation).map(e2 => Exp.Eq(_, e2))
-      ).?).map(maybeBinOp) |
-      (op('!') *> inParens(recExpression)).map(e => Exp.Not(e)) | // Logical Not
-      ( inParens(recExpression).map(Exp.ArrayLength.apply) <* op('.') <* keyword(KLEN)) | // Expression.length
-      (((recExpression) <* op(".")) ~ identifier ~ inParens(list0(recExpression))).map{
-      case((fun, name), args) => Exp.Call(fun, name, args)}  //Funktionsaufruf Expression.Identifier((Expression(,Expression)*)?)
+      ).?).map(maybeBinOp)
 
   val assignable: P[Assignable] =
-    (identifier <* op("=")).map( s => Assignable.AVar(s)) | //Avar: x = ...
-      ((identifier ~ inBraces(expression|recExpression)) <* op("=")).map{
-        case (s, exp) => Assignable.AArray(s,exp)
-      } // AArray : id[Exp] = ...
+    ((identifier ~ (op("[") *> recExpression <* op("]")))).map(
+      (name,e) => Assignable.AArray(name,e)).backtrack |
+      (identifier).map( name => Assignable.AVar(name)) //Avar: Id = Exp
+
 
   lazy val statement: P[Stm] =
     (keyword(KIF) *> inParens(recExpression) ~ recStatement ~ (keyword(KELSE) *> recStatement).?)
       .map { case ((c, t), e) => Stm.If(c, t, e) } | // If-Else
-      (keyword(KWHILE) *> inParens(recExpression) ~ recStatement).map(Stm.While.apply) | //While
+      (keyword(KWHILE) *> inParens(recExpression) ~ recStatement).map( (cond, stm) => Stm.While(cond, stm)) | //While
       inBraces(recStatement.rep0).map(Stm.Block.apply) | // Block
-      (keyword(KPRINTLINE) *> inParens(recExpression <* semi).map(Stm.Output.apply)) | //"System.out.println" "(" Expression ")" ";"
-    ((assignable <* op('=')) ~ recExpression <* semi).map(Stm.Assign.apply) // Identifier	::=	<IDENTIFIER>
+      (keyword(KPRINTLINE) *> inParens(recExpression) <* semi).map(Stm.Output.apply) | //"System.out.println" "(" Expression ")" ";"
+      ((assignable <* op('='))  ~ recExpression <* semi).map(Stm.Assign.apply) // Identifier	::=	<IDENTIFIER>
 
 
   val varDecl: P[varDeclaration] =
-    ((typed ~ identifier) <* op('=')).map{case (t , name) => varDeclaration(t,name)} // type id = ...
+    (types ~ identifier <* semi).map{case (t , name) => varDeclaration(t,name)}.backtrack // type id;
 
 
   //MethodDecl -> public Type id ( FormalList ) { VarDecl* Statement* return Exp ; }
+  //"public" Type Identifier "(" ( Type Identifier ( "," Type Identifier )* )? ")" "{" ( VarDeclaration )* ( Statement )* "return" Expression ";" "}"
   // FormalList = ( Type1 id1, Type2 id2 ,....)
   val function: P[Function] =
-   ( keyword(KPUBLIC) *> typed ~ identifier ~ inParens(list0( typed ~ identifier)) ~
+  (keyword(KPUBLIC) *>(types ~ identifier ~ inParens(list0(types ~ identifier)) ~
     inBraces(
-        varDecl.rep0 ~
-          statement.rep0 ~
-          (keyword(KRETURN) *> expression <* semi)
-      )
-      ).map { case (((returnType, name), params), ((locals, body), ret)) =>
-      Function(returnType, name, params, locals, Stm.Block(body), ret)
-    }
+      varDecl.rep0 ~
+        statement.rep0 ~
+        (keyword(KRETURN) *> expression <* semi)
+    )
+    )).map { case ( ((return_type,name), params), ((locals, body), ret)) =>
+    Function(return_type, name, params, locals, Stm.Block(body), ret)
+  }
 
+  val main_methode :P[MainFunction] =
+    (keyword(KPUBLIC) *> keyword(KSTATIC) *> keyword(KVOID) *> keyword(KMAIN) *>
+      inParens(op("String") *> op("[") *> op("]") *> identifier) ~ inBraces(
+        varDecl.rep0 ~
+          statement.rep0
+      )).map{ case(arg,(locals, body)) => MainFunction(arg, locals, Stm.Block(body)) }.backtrack
+
+  //normal class
+  // "class" Identifier ( "extends" Identifier )? "{" ( VarDeclaration )* ( MethodDeclaration )* "}"
+  val Class: P[classDeclaration] =
+  ((keyword(KCLASS) *> identifier) ~ (keyword(KEXT) *> identifier).? ~ inBraces(
+    varDecl.rep0 ~
+      function.rep0 )).map {
+    case ((name, extend), (locals, funs))
+    => classDeclaration(name, extend, locals, funs)
+  }
 
   //main class
   // "class" Identifier "{" "public" "static" "void" "main" "(" "String" "[" "]" Identifier ")" "{" Statement "}" "}"
   val MainClass : P[mainClass] =
-    (keyword(KCLASS) *> identifier ~ inBraces(
-      keyword(KPUBLIC) *> keyword(KSTATIC) *> keyword(KVOID) *> keyword(KMAIN) *>
-        inParens(op("String []") ~ list0(identifier)) ~ inBraces(statement))).map {
-      case( (name, ((kw, params), body))) => mainClass(name, params, body)
-    }
-
-
-  //class
-  // "class" Identifier ( "extends" Identifier )? "{" ( VarDeclaration )* ( MethodDeclaration )* "}"
-  val Class: P[classDeclaration] =
-    ((keyword(KCLASS) *> identifier) ~ inParens(keyword(KEXT) *> list0(identifier)) ~ inBraces(
-        varDecl.rep0 ~
-        function.rep0 )).map {
-      case ((name, extend), (locals, funs))
-      => classDeclaration(name, extend, locals, funs)
-    }
+  (keyword(KCLASS) *> identifier ~ inBraces(
+    main_methode ~
+      (varDecl.rep0 ~
+        function.rep0)
+  )).map{
+    case(name, (mainfun,(locals, body))) => mainClass(name, mainfun, locals, body)
+  }
 
 
   //Programm
   //	MainClass ( ClassDeclaration )* <EOF>
   val program: P0[Program] =
-    whitespaces0 *> (list0(Class) ~ MainClass ~ list0(Class)).map{
-    case((((cl1,main), cl2))) => Program(main, cl1++cl2)
+  (whitespaces0 *> MainClass ~ Class.rep0 <* whitespaces0).map{
+    case(main, other_classes) => Program(main, other_classes)
   } <* P.end
-
-
-
+// whitespaces0 *> MainClass.rep0.map(Program.apply) <* P.end

@@ -12,7 +12,7 @@ enum Exp extends Labeled:
   case Div(e1: Exp, e2: Exp)            // Expression ("/") Expression
   case Gt(e1: Exp, e2: Exp)             // Expression ("<") Expression
   case Eq(e1: Exp, e2: Exp)             // Expression ("==") Expression
-  case Call(fun: Exp, name: String, args: Seq[Exp])   // Expression.Identifier((Expression(,Expression)*)?)
+  case Call(obj : Exp, name: String, args: Seq[Exp])   // Expression.Identifier((Expression(,Expression)*)?)
   case Alloc(name: String)                // new Identifier()
 
   case AllocArray(e: Exp)                 // new int [Expression]
@@ -25,7 +25,7 @@ enum Exp extends Labeled:
 
   case Not (e: Exp)                       // !Expression
   case And (e1: Exp, e2: Exp)             // Expression ("&&") Expression
-
+  case Or (e1: Exp, e2: Exp)              //Expression ("||") Expression
 
 
 
@@ -64,6 +64,7 @@ enum Exp extends Labeled:
     case BoolLit(b) => s"$b@${this.label}"
     case Not(e) => s"logicalNOT@${this.label}"
     case And(e1,e2) => s"logicalAND@${this.label}"
+    case Or(e1,e2) => s"logicalOr@${this.label}"
 
 
 enum Stm extends Labeled:
@@ -97,27 +98,32 @@ enum Assignable:
   case AArray(name: String, e: Exp)
 
 enum Type:
+  case Void() // case Void()
   case Int() // case Int(n: Int)
   case Boolean() // case Boolean(b: Boolean)
   case IntArray() //IntArray(a: Array[Int])
   case Identifier(name: String) //case Identifier(name: String)
-
-// Program besteht aus MainClass und ClassDeclarations
-case class Program(main: mainClass, classes: Seq[classDeclaration]):
-  def intLiterals: Set[Int] = main.intLiterals ++ classes.flatMap(_.intLiterals).toSet
-
-// Main Class mit Identifier, psvm, String[args] und statements
-case class mainClass(name: String, params: Seq[String], body: Stm):
-  def intLiterals: Set[Int] = body.intLiterals
-
-// Class declarations haben identifier, können erben, mehrere varDeclarations und MethodDeclarations
-case class classDeclaration(name: String, extend: Seq[String], locals: Seq[varDeclaration], funs: Seq[Function]):
-  def intLiterals: Set[Int] = funs.flatMap(_.intLiterals).toSet
 
 // varDeclarations haben identifier und type
 case class varDeclaration(t: Type, name: String)
 
 // methodDeclarations haben identifier, return type, mehrere Identifier,Type paare für arguments
 // außerdem mehrere varDeclarations und statements und eine return EXP
-case class Function(returnType: Type, name: String,  params: Seq[Tuple2[Type,String]], locals: Seq[varDeclaration], body: Stm, ret: Exp):
+case class Function(retType: Type, name: String,  params: Seq[Tuple2[Type,String]], locals: Seq[varDeclaration], body: Stm, ret: Exp):
   def intLiterals: Set[Int] = body.intLiterals ++ ret.intLiterals
+
+// MainMethode
+case class MainFunction(arg: String, locals: Seq[varDeclaration],  body: Stm):
+  def intLiterals: Set[Int] = body.intLiterals
+
+// Class declarations haben identifier, können erben, mehrere varDeclarations und MethodDeclarations
+case class classDeclaration(name: String, extend: Option[String], locals: Seq[varDeclaration], funs: Seq[Function]):
+  def intLiterals: Set[Int] = funs.flatMap(_.intLiterals).toSet
+
+// Main Class
+case class mainClass(name: String, mainFun : MainFunction, locals: Seq[varDeclaration], funs: Seq[Function]):
+  def intLiterals: Set[Int] = funs.flatMap(_.intLiterals).toSet
+
+// Program besteht aus MainClass und ClassDeclarations
+case class Program(main: mainClass, classes: Seq[classDeclaration]):
+  def intLiterals: Set[Int] = main.intLiterals ++ classes.flatMap(_.intLiterals).toSet
