@@ -157,13 +157,15 @@ object Parser:
       keyword(KBOOLEAN).map(_ => Type.Boolean()) |  // boolean
       identifier.map(s => Type.Identifier(s)) //  Identifier x
 
+
+
   lazy val atom: P[Exp] =
     spaced(Numbers.signedIntString.map(s => Exp.NumLit(s.toInt))) | //<INTEGER_LITERAL>
-      inParens(recExpression) | //"(" Expressions ")"
-      variable| //Variablen
-      boolean | //BoolLiterals
+      inParens(recExpression).backtrack | //"(" Expressions ")"
+      variable.backtrack| //Variablen
+      boolean.backtrack | //BoolLiterals
       (keyword(KNEW) *> keyword(KINT) *> op("[") *> recExpression <* op("]")).map(Exp.AllocArray.apply).backtrack |  // new int[Exp]
-      (keyword(KNEW) *> identifier <* op("(") <* op(")") <* op(".").? ).map(Exp.Alloc.apply) // new identifier()
+      (keyword(KNEW) *> identifier <* op("(") <* op(")") ).map(Exp.Alloc.apply).backtrack // new identifier()
 
 
   val access: P[Exp] =
@@ -173,13 +175,12 @@ object Parser:
 
 
   val funCall: P[Exp] =
-    ((variable | inParens(recExpression)) <* (op(".") <* keyword(KLEN)) ).map(
+    (atom <* (op(".") <* keyword(KLEN)) ).map(
       Exp.ArrayLength.apply).backtrack| //Exp.length
-      (((variable | inParens(recExpression)) <* op(".")) ~ (identifier ~ (op("(")  *> recExpression.rep0 <* op(")")))).backtrack.map{
-        case(fun, (name, args)) => Exp.Call(fun, name, args)} // Expression "." Identifier "(" ( Expression ( "," Expression )* )? ")"
+      ((atom <* op(".")) ~ (identifier ~ (op("(")  *> list0(recExpression) <* op(")")))).backtrack.map{
+        case(fun, (name, args)) => Exp.Call(fun, name, args)}  // Expression "." Identifier "(" ( Expression ( "," Expression )* )? ")"
 
   val term: P[Exp] =
-    funCall |
     access |
     (atom ~ (
       (op('*') *> recExpression).map(e2 => Exp.Mul(_, e2)) | // * operation
@@ -198,6 +199,7 @@ object Parser:
 
 
   lazy val expression: P[Exp] =
+    funCall |
     (operation ~ (
       (op('>') *> operation).map(e2 => Exp.Gt(_, e2)) |
         (op("==") *> operation).map(e2 => Exp.Eq(_, e2))

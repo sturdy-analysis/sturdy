@@ -34,20 +34,30 @@ class ParserTest extends AnyFlatSpec, Matchers:
   }
 
 
+
+
   val ListOfAtoms = List("1","-4", "(true)", "false", "new int[4+3]", "new someObject()")
   for (a <- ListOfAtoms){
     val tree = parseAtom(a)
     println(tree)
     //assert(tree.isRight)
   }
-
 */
-  val ListOfFunCall = List( "(someArry).length","Object.do(10)", "new Object.do()")
+
+  val ListOfFunCall = List("new x().do()", "true.do()", "(someArry).length","Object.do(10, true, 2)")
   for (a <- ListOfFunCall){
     val tree = parseFunCall(a)
     println(tree)
     //assert(tree.isRight)
   }
+
+  val ListOfExpr = List("Fac.ComputeFac(10 +1, true && !false)",  "x.methode(1)", "expr.length", "5 == true", "10> 9"  )
+  for (a <- ListOfExpr){
+    val tree = parseExp(a)
+    println(tree)
+    //assert(tree.isRight)
+  }
+
 
 
   /*
@@ -61,6 +71,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
 
 
 */
+  /*
 
   val ListOfTerms = List(
     "mylist[20]",
@@ -190,7 +201,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
    }
 
 
-
+*/
   def parse(s: String): Either[P.Error, Program] =
     Parser.program.parseAll(s)
 
