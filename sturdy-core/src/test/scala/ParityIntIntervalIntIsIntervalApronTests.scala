@@ -21,6 +21,7 @@ import sturdy.fix.finiteJoinWidening
 import sturdy.values.JoinValue
 import sturdy.values.ints.IntIntervalApron
 import sturdy.values.Finite
+import sturdy.effect.failure.AFailureCollect
 
 class ParityIntIntervalIsIntIntervalApronTests extends AnyFreeSpec, Matchers:
   def op2IIA(
@@ -74,8 +75,10 @@ class ParityIntIntervalIsIntIntervalApronTests extends AnyFreeSpec, Matchers:
     assert(testIIA.toIntInterval() === testII)
   }
 
-  implicit val failure: Failure = summon[Failure]
-  implicit val joinComputation: JoinComputation = summon[JoinComputation]
+  // failure: summon[Failure], new AFailureCollect {} or implicitly
+  implicit val failure: Failure = implicitly
+  // joinComputation cannot be implicit. Why?
+  implicit val joinComputation: JoinComputation = new JoinComputation {}
 
   "Functions of IntIntervalApron must behave like those of IntInterval" - {
 
