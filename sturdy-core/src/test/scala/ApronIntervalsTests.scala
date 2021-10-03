@@ -20,14 +20,12 @@ val ourAbstractManager = apron.Box()
 val ourAbstractDomain =
   apron.Abstract0(ourAbstractManager, 1, 0, Array(apron.Interval()))
 
-// TODO: use lazy vals for test definitons (currently defined in tests)
-// TODO: add tests for all use cases/functions
 // AnyFreeSpec wird unten benutzt (texte, die den test definieren)
 class ApronIntervalsTest extends AnyFreeSpec, Matchers:
   val manager = Box() // global manager
   manager.setPreferedScalarType(
     1
-  ) // 2 - mpfr (multi-precision floating real); 1 - mpq (rational); 0 - double
+  ) // 2 - mpfr (multi-precision float); 1 - mpq (rational number); 0 - double
 
   // Test created interval bounds
   def testApronIntervalBounds(
