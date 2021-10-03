@@ -22,7 +22,7 @@ import sturdy.values.JoinValue
 import sturdy.values.ints.IntIntervalApron
 import sturdy.values.Finite
 
-class ParityIntIntervalIsIntIntervalApronTest extends AnyFreeSpec, Matchers:
+class ParityIntIntervalIsIntIntervalApronTests extends AnyFreeSpec, Matchers:
   def op2IIA(
       f: (IntIntervalApron, IntIntervalApron) => IntIntervalApron,
       l0: Int,
@@ -33,6 +33,16 @@ class ParityIntIntervalIsIntIntervalApronTest extends AnyFreeSpec, Matchers:
     f(IntIntervalApron.bounded(l0, l1), IntIntervalApron.bounded(r0, r1))
   }
 
+  def op2II(
+      f: (IntInterval, IntInterval) => IntInterval,
+      l0: Int,
+      l1: Int,
+      r0: Int,
+      r1: Int
+  ): IntInterval = {
+    f(IntInterval.bounded(l0, l1), IntInterval.bounded(r0, r1))
+  }
+
   def op2IItoIIA(
       f: (IntInterval, IntInterval) => IntInterval,
       l0: Int,
@@ -41,67 +51,46 @@ class ParityIntIntervalIsIntIntervalApronTest extends AnyFreeSpec, Matchers:
       r1: Int
   ): IntIntervalApron = {
     IntIntervalApron(
-      f(IntInterval.bounded(l0, l1), IntInterval.bounded(r0, r1))
+      op2II(f, l0, l1, r0, r1)
     )
   }
 
-  def parityIItoIIA(
-      apron_f: ((IntIntervalApron, IntIntervalApron) => IntIntervalApron),
+  def parityIItoIIA( // compare results of IntIntervalApron and IntInterval with same initialized values converted to each other
+      apronIntInterval_f: (
+          (
+              IntIntervalApron,
+              IntIntervalApron
+          ) => IntIntervalApron
+      ),
       intInterval_f: ((IntInterval, IntInterval) => IntInterval),
       v1_l: Int,
       v1_h: Int,
       v2_l: Int,
       v2_h: Int
   ) = {
-    assert(
-      op2IIA(apron_f, v1_l, v1_h, v2_l, v2_h) === op2IItoIIA(
-        intInterval_f,
-        v1_l,
-        v1_h,
-        v2_l,
-        v2_h
-      )
-    )
+    val testIIA = op2IIA(apronIntInterval_f, v1_l, v1_h, v2_l, v2_h)
+    val testII = op2II(intInterval_f, v1_l, v1_h, v2_l, v2_h)
+    assert(testIIA === IntIntervalApron(testII))
+    assert(testIIA.toIntInterval() === testII)
   }
 
-  "Functions of IntIntervalApron must behave like those of IntInterval" - {
-    implicit val failure: Failure = summon[Failure]
-    implicit val joinComputation: JoinComputation = summon[JoinComputation]
-    implicit val joinValue: JoinValue[Any] = summon[JoinValue[Any]]
-    implicit val implicitSet: Set[Int] = summon[Set[Int]]
+  implicit val failure: Failure = summon[Failure]
+  implicit val joinComputation: JoinComputation = summon[JoinComputation]
 
-    //** commented out implicit vals below are for widening as a given, same as with implicit set above.
-    //** however, IntIntervalWiden changed from given to class, so probably not needed anymore
-    // implicit val wideningIIA: Widening[IntIntervalApron] = summon[Widening[IntIntervalApron]]
-    // implicit val wideningII: Widening[IntInterval] = summon[Widening[IntInterval]]
-    // implicit val finiteII: Finite[IntInterval] = summon[Finite[IntInterval]]
-    // implicit val finiteIIA: Finite[IntIntervalApron] = summon[Finite[IntIntervalApron]]
+  "Functions of IntIntervalApron must behave like those of IntInterval" - {
 
     "addition" in {
-      parityIItoIIA(
-        ApronIntervalIntOps.add,
-        IntervalIntOps.add,
-        0,
-        1,
-        -1,
-        0
-      ) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
+      parityIItoIIA(ApronIntervalIntOps.add, IntervalIntOps.add, 0, 1, -1, 0)
+
     }
     "substraction" in {
       parityIItoIIA(ApronIntervalIntOps.sub, IntervalIntOps.sub, 0, 1, -1, 0)
     }
     "multiplication" in {
-      parityIItoIIA(
-        ApronIntervalIntOps.mul,
-        IntervalIntOps.mul,
-        0,
-        1,
-        -1,
-        0
-      ) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
+      parityIItoIIA(ApronIntervalIntOps.mul, IntervalIntOps.mul, 0, 1, -1, 0)
     }
-    "division" in {
-      parityIItoIIA(ApronIntervalIntOps.div, IntervalIntOps.div, 0, 1, -1, 0)
+    "division" in { // TODO: Fails because failure and joinComputation are null (NPE)
+      parityIItoIIA(ApronIntervalIntOps.div, IntervalIntOps.div, 0, 1, -1, 1)
     }
     "joinValues" in {
       parityIItoIIA(
@@ -111,15 +100,16 @@ class ParityIntIntervalIsIntIntervalApronTest extends AnyFreeSpec, Matchers:
         1,
         -1,
         0
-      ) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
+      )
     }
     // meet not implemented in IntInterval
     // "meet" in {
     //   parityIItoIIA(ApronIntervalIntOps.meet, IntervalIntOps.meet, 0,1, -1,0)
     // }
-    "widen" in { // TODO: IntIntervalWiden is now a class and not a given (changed with rebase from upstream)
+    "widen" in {
+      var explicitBounds: Set[Int] = Set.empty
       parityIItoIIA(
-        IntIntervalApronWiden.widen,
+        IntIntervalApronWiden(explicitBounds).widen,
         IntIntervalWiden(explicitBounds).widen,
         0,
         1,
@@ -128,7 +118,3 @@ class ParityIntIntervalIsIntIntervalApronTest extends AnyFreeSpec, Matchers:
       ) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
     }
   }
-
-/*
-
- */

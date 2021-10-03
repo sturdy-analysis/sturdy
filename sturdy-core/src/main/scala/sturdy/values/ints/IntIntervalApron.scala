@@ -40,8 +40,8 @@ object IntIntervalApron:
     IntIntervalApron((l max Int.MinValue).toInt, (h min Int.MaxValue).toInt)
   def bounded(l: gmp.Mpq, h: gmp.Mpq): IntIntervalApron =
     IntIntervalApron(
-      maxMpq(l, gmp.Mpq(Int.MaxValue, 1)),
-      maxMpq(h, gmp.Mpq(Int.MinValue, 1))
+      maxMpq(l, gmp.Mpq(Int.MinValue, 1)),
+      minMpq(h, gmp.Mpq(Int.MaxValue, 1))
     )
 
   def apply(l: Int, h: Int) = new IntIntervalApron(apron.Interval(l, h))
@@ -80,19 +80,19 @@ object IntIntervalApron:
 case class IntIntervalApron(val interval: apron.Interval):
   val abstractDomain = Abstract0(manager, 1, 0, Array(this.interval))
   val l: gmp.Mpq = {
-    var tmp: gmp.Mpq = null; interval.inf.toMpq(tmp, 0); tmp.canonicalize; tmp
+    var tmp: gmp.Mpq = gmp.Mpq(0); interval.inf.toMpq(tmp, 0)
+    tmp
   }
   val h: gmp.Mpq = {
-    var tmp: gmp.Mpq = null; interval.sup.toMpq(tmp, 0); tmp.canonicalize; tmp
+    var tmp: gmp.Mpq = gmp.Mpq(0); interval.sup.toMpq(tmp, 0)
+    tmp
   }
 
-  if ((interval.inf cmp interval.sup) < 0)
+  if ((interval.inf cmp interval.sup) > 0)
     throw new IllegalArgumentException(s"Empty intervals are illegal $this")
   if (
-    !(Set(0, 1) contains l.getDen.intValue) || !(Set(
-      0,
-      1
-    ) contains h.getDen.intValue)
+    !(Set(0, 1) contains l.getDen.intValue) ||
+    !(Set(0, 1) contains h.getDen.intValue)
   )
     throw new IllegalArgumentException(s"Non-Integer bounds are illegal $this")
 
@@ -108,6 +108,10 @@ case class IntIntervalApron(val interval: apron.Interval):
     new IntInterval(this.l.doubleValue.toInt, this.h.doubleValue.toInt)
   }
 
+  implicit def toCstNode0(interval: Interval): apron.Texpr0CstNode = {
+    Texpr0CstNode(interval)
+  }
+
   private enum UpdateCases:
     case ADN
 
@@ -118,26 +122,15 @@ case class IntIntervalApron(val interval: apron.Interval):
         this.interval.setInf(interval.inf)
         this.interval.setSup(interval.sup)
         this.l.set({
-          var tmp: gmp.Mpq = null; interval.inf.toMpq(tmp, 0); tmp.canonicalize;
+          var tmp: gmp.Mpq = gmp.Mpq(0); interval.inf.toMpq(tmp, 0)
           tmp
         })
         this.h.set({
-          var tmp: gmp.Mpq = null; interval.sup.toMpq(tmp, 0); tmp.canonicalize;
+          var tmp: gmp.Mpq = gmp.Mpq(0); interval.sup.toMpq(tmp, 0)
           tmp
         })
       }
     }
-
-//todo: falscher ansatz, besser: konstanten über die texpr0cstnode klasse erstellen
-  // implicit def toLinExpr0(): Linexpr0 = { // implicitly convert IntIntervalApron to Linexpr0
-  //   var coeffArray = new Array[Coeff](1)
-  //   coeffArray(0) = this.interval
-  //   Linexpr0(coeffArray, this.interval)
-  // }
-
-  implicit def toCstNode0(interval: Interval): apron.Texpr0CstNode = {
-    Texpr0CstNode(interval)
-  }
 
   def joinCopy(other: IntIntervalApron): IntIntervalApron =
     // gibt überaproximierendes Intervall-Array um das abstracte objekt herum zurück
@@ -182,13 +175,13 @@ case class IntIntervalApron(val interval: apron.Interval):
   def -(y: IntIntervalApron): IntIntervalApron =
     IntIntervalApron.bounded(
       {
-        val tmp = l.clone
-        tmp sub y.l
-        tmp
+        val tmp_l = l.clone
+        tmp_l sub y.l
+        tmp_l
       }, {
-        val tmp = h.clone
-        tmp sub y.h
-        tmp
+        val tmp_h = h.clone
+        tmp_h sub y.h
+        tmp_h
       }
     )
   def *(y: IntIntervalApron): IntIntervalApron = withBounds2(_ mul _, y)
@@ -228,9 +221,8 @@ given IntIntervalApronJoin: JoinValue[IntIntervalApron] with
   ): IntIntervalApron =
     IntIntervalApron(minMpq(v1.l, v2.l), maxMpq(v1.h, v2.h))
 
-given IntIntervalApronWiden(using
-    bounds: => Set[Int]
-): Widening[IntIntervalApron] with
+class IntIntervalApronWiden(bounds: => Set[Int]) // TODO: needs to be fixed, no parity with IntInterval, bounds unused
+    extends Widening[IntIntervalApron]:
   override def widen(
       v1: IntIntervalApron,
       v2: IntIntervalApron
@@ -238,7 +230,7 @@ given IntIntervalApronWiden(using
     IntIntervalApron(
       v1.abstractDomain
         .widening(manager, v2.abstractDomain)
-        .getBound(manager, 1)
+        .getBound(manager, 0)
     )
 
 given ApronIntervalIntOps(using
