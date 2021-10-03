@@ -92,7 +92,7 @@ class ParityIntIntervalIsIntIntervalApronTests extends AnyFreeSpec, Matchers:
     "multiplication" in {
       parityIItoIIA(ApronIntervalIntOps.mul, IntervalIntOps.mul, 0, 1, -1, 0)
     }
-    "division" in { // TODO: Fails because failure and joinComputation are null (NPE)
+    "division" in {
       parityIItoIIA(ApronIntervalIntOps.div, IntervalIntOps.div, 0, 1, -1, 1)
     }
     "joinValues" in {
