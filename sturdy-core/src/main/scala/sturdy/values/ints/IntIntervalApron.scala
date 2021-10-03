@@ -38,6 +38,7 @@ object IntIntervalApron:
 
   val Top = IntIntervalApron(gmp.Mpq(-1, 0), gmp.Mpq(1, 0))
 
+  //possibly unneccesary because apron has negative and positive infinity
   def bounded(l: Long, h: Long): IntIntervalApron =
     IntIntervalApron((l max Int.MinValue).toInt, (h min Int.MaxValue).toInt)
   def bounded(l: gmp.Mpq, h: gmp.Mpq): IntIntervalApron =
@@ -46,6 +47,7 @@ object IntIntervalApron:
       minMpq(h, gmp.Mpq(Int.MaxValue, 1))
     )
 
+  //needed if we cannot be sure that we only call constructor with Ints
   def apply(l: Int, h: Int) = new IntIntervalApron(apron.Interval(l, h))
   def apply(inf: apron.MpqScalar, sup: apron.MpqScalar) = new IntIntervalApron(
     apron.Interval(inf, sup)
@@ -175,32 +177,38 @@ case class IntIntervalApron(val interval: apron.Interval):
     )
 
   def -(y: IntIntervalApron): IntIntervalApron =
-    IntIntervalApron.bounded(
-      {
-        val tmp_l = l.clone
-        tmp_l sub y.l
-        tmp_l
-      }, {
-        val tmp_h = h.clone
-        tmp_h sub y.h
-        tmp_h
-      }
+    var ourNode = Texpr0BinNode(
+      Texpr0BinNode.OP_SUB,
+      Texpr0Node.RTYPE_INT,
+      Texpr0Node.RDIR_NEAREST,
+      this.interval,
+      y.interval
     )
-  def *(y: IntIntervalApron): IntIntervalApron = withBounds2(_ mul _, y)
-  def /(y: IntIntervalApron): IntIntervalApron = withBounds2(_ div _, y)
-  def withBounds2(
-      f: (gmp.Mpq, gmp.Mpq) => Unit,
-      that: IntIntervalApron
-  ): IntIntervalApron = {
-    val v1 = gmp.Mpq(0); v1.add(l); f(v1, that.l)
-    val v2 = gmp.Mpq(0); v2.add(l); f(v2, that.h)
-    val v3 = gmp.Mpq(0); v3.add(h); f(v3, that.l)
-    val v4 = gmp.Mpq(0); v4.add(h); f(v4, that.h)
-
-    val low = minMpq(v1, minMpq(v2, minMpq(v3, v4)))
-    val high = maxMpq(v1, maxMpq(v2, maxMpq(v3, v4)))
-    IntIntervalApron.bounded(low, high)
-  }
+    IntIntervalApron(
+      this.abstractDomain.getBound(manager, Texpr0Intern(ourNode))
+    )
+  def *(y: IntIntervalApron): IntIntervalApron =
+    var ourNode = Texpr0BinNode(
+      Texpr0BinNode.OP_MUL,
+      Texpr0Node.RTYPE_INT,
+      Texpr0Node.RDIR_NEAREST,
+      this.interval,
+      y.interval
+    )
+    IntIntervalApron(
+      this.abstractDomain.getBound(manager, Texpr0Intern(ourNode))
+    )
+  def /(y: IntIntervalApron): IntIntervalApron =
+    var ourNode = Texpr0BinNode(
+      Texpr0BinNode.OP_DIV,
+      Texpr0Node.RTYPE_INT,
+      Texpr0Node.RDIR_NEAREST,
+      this.interval,
+      y.interval
+    )
+    IntIntervalApron(
+      this.abstractDomain.getBound(manager, Texpr0Intern(ourNode))
+    )
 
   def widen(other: IntIntervalApron): Unit =
     this.abstractDomain.widening(manager, other.abstractDomain)
