@@ -8,6 +8,7 @@ import sturdy.values.JoinValue
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
 import sturdy.values.relational.*
+import sturdy.values.ints.IntIntervalLike
 
 import scala.collection.immutable.TreeSet
 

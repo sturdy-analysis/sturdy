@@ -2,25 +2,25 @@ package sturdy.language.tip.abstractions
 
 import sturdy.values.relational.EqOps
 import sturdy.values.Topped
-import sturdy.values.ints.{IntInterval, IntSign, given}
+import sturdy.values.ints.{IntInterval, IntIntervalApron, IntSign, given}
 import sturdy.language.tip.Interpreter
 
 object Ints:
   trait Interval extends Interpreter :
     final type VBool = Topped[Boolean]
-    final type VInt = IntInterval
+    final type VInt = IntIntervalApron
 
-    final def topInt(using Interpreter): IntInterval = IntInterval.Top
+    final def topInt(using Interpreter): IntIntervalApron = IntIntervalApron.Top
 
     final def asBoolean(v: Value): VBool = v match
-      case Value.IntValue(i) => EqOps.equ(i, IntInterval(0, 0)).map(!_)
+      case Value.IntValue(i) => EqOps.equ(i, IntIntervalApron(0, 0)).map(!_)
       case Value.TopValue => Topped.Top
       case _ => throw new IllegalArgumentException(s"Expected Int but got $this")
 
     final def boolean(b: VBool): Value = Value.IntValue(b match
-      case Topped.Top => IntInterval(0, 1)
-      case Topped.Actual(true) => IntInterval(1, 1)
-      case Topped.Actual(false) => IntInterval(0, 0)
+      case Topped.Top => IntIntervalApron(0, 1)
+      case Topped.Actual(true) => IntIntervalApron(1, 1)
+      case Topped.Actual(false) => IntIntervalApron(0, 0)
     )
 
   trait Sign extends Interpreter :

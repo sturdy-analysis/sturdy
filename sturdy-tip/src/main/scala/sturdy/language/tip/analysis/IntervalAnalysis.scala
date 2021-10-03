@@ -36,7 +36,7 @@ object IntervalAnalysis extends Interpreter,
       with AStoreMultiAddrThreadded[AllocationSiteAddr, Value](initStore)
       with AAllocationFromContext[AllocationSite, Addr](fromAllocationSite)
       with APrintPrefix[Value]
-      with AUserInput[Value](Value.IntValue(IntInterval.Top))
+      with AUserInput[Value](Value.IntValue(IntIntervalApron.Top))
       with AFailureCollect
       with AnalysisState[Store, (Store, APrintPrefix.PrintResult[Value])]:
     override def getInState(): InState = getStore
@@ -68,7 +68,7 @@ object IntervalAnalysis extends Interpreter,
     final val vrecOps: RecordOps[String, Value, VRecord] = implicitly
 
     var bounds: Set[Int] = Set.empty
-    given fix.Widening[IntInterval] = new IntIntervalWiden(bounds)
+    given fix.Widening[IntIntervalApron] = new IntIntervalApronWiden(bounds)
     given Lazy[fix.Widening[Value]] = lazily(liftedWidening)
 
     override def execute(p: Program): Value =

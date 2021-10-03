@@ -11,6 +11,7 @@ import sturdy.values.Topped.*
 import sturdy.values.relational.*
 import scala.language.implicitConversions
 import scala.math.Ordered.orderingToOrdered
+import sturdy.values.ints.IntIntervalLikeCompanion
 
 import scala.collection.immutable.TreeSet
 
@@ -34,6 +35,7 @@ def minMpq(one: gmp.Mpq, other: gmp.Mpq) = {
 }
 
 object IntIntervalApron:
+
   val Top = IntIntervalApron(gmp.Mpq(-1, 0), gmp.Mpq(1, 0))
 
   def bounded(l: Long, h: Long): IntIntervalApron =
@@ -221,7 +223,9 @@ given IntIntervalApronJoin: JoinValue[IntIntervalApron] with
   ): IntIntervalApron =
     IntIntervalApron(minMpq(v1.l, v2.l), maxMpq(v1.h, v2.h))
 
-class IntIntervalApronWiden(bounds: => Set[Int]) // TODO: needs to be fixed, no parity with IntInterval, bounds unused
+class IntIntervalApronWiden(
+    bounds: => Set[Int]
+) // TODO: needs to be fixed, no parity with IntInterval
     extends Widening[IntIntervalApron]:
   override def widen(
       v1: IntIntervalApron,
