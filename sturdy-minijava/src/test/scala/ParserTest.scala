@@ -41,6 +41,16 @@ class ParserTest extends AnyFlatSpec, Matchers:
     //assert(tree.isRight)
   }
 
+*/
+  val ListOfFunCall = List( "(someArry).length","Object.do(10)", "new Object.do()")
+  for (a <- ListOfFunCall){
+    val tree = parseFunCall(a)
+    println(tree)
+    //assert(tree.isRight)
+  }
+
+
+  /*
   val ListOfAccess = List("x[1]", "someIterable[index]" )
 
   for (a <- ListOfAccess){
@@ -49,20 +59,16 @@ class ParserTest extends AnyFlatSpec, Matchers:
     //assert(tree.isRight)
   }
 
+
 */
 
   val ListOfTerms = List(
-    "new Fac().ComputeFac(10)",
-    "Fac.do()",
     "mylist[20]",
     "42",
     "6*x",
     "100/5",
     "a",
-    "!true",
-    "myIntArray.length",
-    "Object.doSomethingPlz(10)"
-  )
+    "!true")
 
   for (a <- ListOfTerms){
     val tree = parseTerm(a)
@@ -70,6 +76,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
     //assert(tree.isRight)
   }
 
+  /*
 
   val ListOfOps = List("x * y + 5", "42", "true && false", "(a + b) * 2", "!false && true", "var1 || var2" )
   for (a <- ListOfOps){
@@ -79,7 +86,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
   }
 
 
-  val ListOfExpr = List( "x.methode(1)", "expr.length", "5 == true", "10> 9"  )
+  val ListOfExpr = List("new Fac().ComputeFac(10)",  "x.methode(1)", "expr.length", "5 == true", "10> 9"  )
   for (a <- ListOfExpr){
     val tree = parseExp(a)
     println(tree)
@@ -110,9 +117,6 @@ class ParserTest extends AnyFlatSpec, Matchers:
     println(tree)
     //assert(tree.isRight)
   }
-
-
-
 
 
 
@@ -161,16 +165,14 @@ class ParserTest extends AnyFlatSpec, Matchers:
   }
 
 
-
-
-  val ListOfMainClass = List( "class Simple {public static void main(String[] arg ){ System.out.println(1);} int a;}")
+  val ListOfMainClass = List( "class Simple {public static void main(String[] arg ){ System.out.println(1);}}")
   for (a <- ListOfMainClass){
     val tree = parseMainClass(a)
     println(tree)
     //assert(tree.isRight)
   }
 
-
+*/
 
 
 
@@ -183,7 +185,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
        file.close()
        val tree = parse(sourceCode)
        println(tree)
-       //assert(tree.isRight)
+       assert(tree.isRight)
      }
    }
 
@@ -205,6 +207,8 @@ class ParserTest extends AnyFlatSpec, Matchers:
   def parseAccess(s:String): Either[P.Error, Exp] =
     Parser.access.parseAll(s)
 
+  def parseFunCall(s:String): Either[P.Error, Exp] =
+    Parser.funCall.parseAll(s)
 
   def parseTerm(s:String): Either[P.Error, Exp] =
     Parser.term.parseAll(s)

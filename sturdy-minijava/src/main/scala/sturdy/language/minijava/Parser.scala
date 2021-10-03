@@ -163,7 +163,7 @@ object Parser:
       variable| //Variablen
       boolean | //BoolLiterals
       (keyword(KNEW) *> keyword(KINT) *> op("[") *> recExpression <* op("]")).map(Exp.AllocArray.apply).backtrack |  // new int[Exp]
-      (keyword(KNEW) *> identifier <* op("(") <* op(")")).map(Exp.Alloc.apply).backtrack  // new identifier()
+      (keyword(KNEW) *> identifier <* op("(") <* op(")") <* op(".").? ).map(Exp.Alloc.apply) // new identifier()
 
 
   val access: P[Exp] =
@@ -178,13 +178,12 @@ object Parser:
       (((variable | inParens(recExpression)) <* op(".")) ~ (identifier ~ (op("(")  *> recExpression.rep0 <* op(")")))).backtrack.map{
         case(fun, (name, args)) => Exp.Call(fun, name, args)} // Expression "." Identifier "(" ( Expression ( "," Expression )* )? ")"
 
-
   val term: P[Exp] =
-      funCall|
-      access |
-      (atom ~ (
-        (op('*') *> recExpression).map(e2 => Exp.Mul(_, e2)) | // * operation
-          (op('/') *> recExpression).map(e2 => Exp.Div(_, e2))
+    funCall |
+    access |
+    (atom ~ (
+      (op('*') *> recExpression).map(e2 => Exp.Mul(_, e2)) | // * operation
+        (op('/') *> recExpression).map(e2 => Exp.Div(_, e2))
         ).?).map(maybeBinOp) |
       (op('!') *> recExpression).map(e => Exp.Not(e))
 
@@ -258,11 +257,8 @@ object Parser:
   // "class" Identifier "{" "public" "static" "void" "main" "(" "String" "[" "]" Identifier ")" "{" Statement "}" "}"
   val MainClass : P[mainClass] =
   (keyword(KCLASS) *> identifier ~ inBraces(
-    main_methode ~
-      (varDecl.rep0 ~
-        function.rep0)
-  )).map{
-    case(name, (mainfun,(locals, body))) => mainClass(name, mainfun, locals, body)
+    main_methode)).map{
+    case(name, mainfun) => mainClass(name, mainfun)
   }
 
 

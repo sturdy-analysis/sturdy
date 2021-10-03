@@ -121,8 +121,8 @@ case class classDeclaration(name: String, extend: Option[String], locals: Seq[va
   def intLiterals: Set[Int] = funs.flatMap(_.intLiterals).toSet
 
 // Main Class
-case class mainClass(name: String, mainFun : MainFunction, locals: Seq[varDeclaration], funs: Seq[Function]):
-  def intLiterals: Set[Int] = funs.flatMap(_.intLiterals).toSet
+case class mainClass(name: String, mainFun : MainFunction):
+  def intLiterals: Set[Int] = mainFun.intLiterals
 
 // Program besteht aus MainClass und ClassDeclarations
 case class Program(main: mainClass, classes: Seq[classDeclaration]):
