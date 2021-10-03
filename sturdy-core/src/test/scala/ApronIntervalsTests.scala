@@ -39,6 +39,17 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
     assert(testApronInterval.sup.isEqual(higher))
   }
 
+  def texprOPNameAsString(texpr0BinNodeOperation: Int) =
+    texpr0BinNodeOperation match {
+
+      case Texpr0BinNode.OP_SUB => "sub"
+      case Texpr0BinNode.OP_MUL => "mul"
+      case Texpr0BinNode.OP_DIV => "div"
+      case Texpr0BinNode.OP_MOD => "mod"
+      case Texpr0BinNode.OP_POW => "pow"
+      case Texpr0BinNode.OP_ADD => "add"
+    }
+
   // Test binary node operations on intervals
   def testApronIntervalTexpr0BinNodeOP(
       texpr0BinNodeOperation: Int, // TODO: Confirm function
@@ -71,8 +82,13 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
       Texpr0Intern(testNode)
     )
 
-    assert(result.inf.isEqual(expectedResultLower))
-    assert(result.sup.isEqual(expectedResultHigher))
+    assert(
+      result.inf.isEqual(expectedResultLower) &&
+        result.sup.isEqual(expectedResultHigher),
+      "with expected result [" + expectedResultLower + "," + expectedResultHigher + "] for term [" + leftIntervalLower + "," + leftIntervalHigher + "] " + texprOPNameAsString(
+        texpr0BinNodeOperation
+      ) + " [" + rightIntervalLower + "," + rightIntervalHigher + "]. \n The result was " + result + " instead"
+    )
   }
 
   // sugar-overload
@@ -197,37 +213,57 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
       * Where: operation: Int, operations are defined in apron.Texpr0BinNode
       * result, leftInterval, rightInterval: Tuple2[Int, Int] for each or 6
       * separate Integers
+      * 
+      * An interval is empty if interval.inf > interval.sup
+      * in that case the expected result is the canonical empty interval [1,-1]
       */
     "for addition" - { // TODO: formulate test for each addition case
       val op = Texpr0BinNode.OP_ADD
 
-      "left interval is (+,+)" in { // TODO: if there's a difference between an empty and non-empty interval, additional cases should be made for empty (+,+) intervals
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (+,-))
+      "left interval is (+,+) (not empty)" in { 
+        testApronIntervalTexpr0BinNodeOP(op, (2, 3), (1, 2), (1, 1))
 
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (0,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (0,-))
+        testApronIntervalTexpr0BinNodeOP(op, (5, 8), (5, 6), (0, 2))
+        testApronIntervalTexpr0BinNodeOP(op, (1, 1), (1, 1), (0, 0))
 
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (-,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (-,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (-,-))
+        testApronIntervalTexpr0BinNodeOP(op, (1, 10), (6, 9), (-5, 1))
+        testApronIntervalTexpr0BinNodeOP(op, (-11, 3), (1, 3), (-12, 0))
+        testApronIntervalTexpr0BinNodeOP(op, (-6, 1), (3, 5), (-9, -4))
       }
+      "left interval is (+,+) (empty)" in { 
+        val result = (1, -1)
+
+        testApronIntervalTexpr0BinNodeOP(op, result, (3, 2), (1, 1))
+        testApronIntervalTexpr0BinNodeOP(op, result, (2, 5), (3, 0)) 
+        testApronIntervalTexpr0BinNodeOP(op, result, (5, 1), (2, -3))
+
+        testApronIntervalTexpr0BinNodeOP(op, result, (7, 6), (0, 2))
+        testApronIntervalTexpr0BinNodeOP(op, result, (2, 1), (0, 0))
+        testApronIntervalTexpr0BinNodeOP(op, result, (4, 1), (0, -2))
+
+        testApronIntervalTexpr0BinNodeOP(op, result, (10, 9), (-5, 1))
+        testApronIntervalTexpr0BinNodeOP(op, result, (5, 3), (-12, 0))
+        testApronIntervalTexpr0BinNodeOP(op, result, (3, 5), (-4, -9))
+      }
+
       "left interval is (+,0) (empty)" in {
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,0), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,0), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,0), (+,-))
+        val result = (1, -1)
 
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,0), (0,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,0), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,0), (0,-))
+        testApronIntervalTexpr0BinNodeOP(op, result, (1,0), (1,6))
+        testApronIntervalTexpr0BinNodeOP(op, result, (2,0), (2,0))
+        testApronIntervalTexpr0BinNodeOP(op, result, (3,0), (3,-7))
 
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,0), (-,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,0), (-,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,0), (-,-))
+        testApronIntervalTexpr0BinNodeOP(op, result, (4,0), (0,4))
+        testApronIntervalTexpr0BinNodeOP(op, result, (5,0), (0,0))
+        testApronIntervalTexpr0BinNodeOP(op, result, (6,0), (0,-8))
+
+        testApronIntervalTexpr0BinNodeOP(op, result, (7,0), (-9,5))
+        testApronIntervalTexpr0BinNodeOP(op, result, (8,0), (-10,0))
+        testApronIntervalTexpr0BinNodeOP(op, result, (9,0), (-11,-12))
       }
       "left interval is (+,-) (empty)" in {
+        val result = (1, -1)
+
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,-), (+,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,-), (+,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,-), (+,-))
@@ -240,33 +276,29 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,-), (-,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,-), (-,-))
       }
-      "left interval is (0,+)" in {
+      "left interval is (0,+) (not empty)" in {
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (+,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (0,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (0,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (-,+))
         testApronIntervalTexpr0BinNodeOP(op, (-2, 1), (0, 1), (-2, 0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (-,-))
       }
-      "left interval is (0,0)" in {
+      "left interval is (0,0) (not empty)" in {
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (+,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (0,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (0,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (-,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (-,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (-,-))
       }
       "left interval is (0,-) (empty)" in {
+        val result = (1, -1)
+
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,-), (+,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,-), (+,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,-), (+,-))
@@ -279,20 +311,17 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,-), (-,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,-), (-,-))
       }
-      "left interval is (-,+)" in {
+      "left interval is (-,+) (not empty)" in {
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (+,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (0,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (0,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (-,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (-,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (-,-))
       }
-      "left interval is (-,0)" in {
+      "left interval is (-,0) (not empty)" in {
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (+,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (+,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (+,-))
@@ -305,7 +334,22 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (-,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (-,-))
       }
-      "left interval is (-,-)" in {
+      "left interval is (-,-) (not empty)" in {
+        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (+,+))
+        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (+,0))
+        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (+,-))
+
+        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (0,+))
+        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (0,0))
+        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (0,-))
+
+        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (-,+))
+        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (-,0))
+        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (-,-))
+      }
+      "left interval is (-,-) (empty)" in {
+        val result = (1, -1)
+
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (+,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (+,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (+,-))
@@ -323,14 +367,11 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
     "for substraction" - {
       val op = Texpr0BinNode.OP_SUB
 
-      "left interval is (+,+)" in { // TODO: if there's a difference between an empty and non-empty interval, additional cases should be made for empty (+,+) intervals
+      "left interval is (+,+) (not empty)" in { 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (+,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (0,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (0,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,+), (-,+))
         testApronIntervalTexpr0BinNodeOP(op, (1, 4), (1, 2), (-2, 0))
@@ -362,27 +403,21 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,-), (-,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (+,-), (-,-))
       }
-      "left interval is (0,+)" in {
+      "left interval is (0,+) (not empty)" in {
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (+,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (0,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (0,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (-,+))
         testApronIntervalTexpr0BinNodeOP(op, (0, 3), (0, 1), (-2, 0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,+), (-,-))
       }
-      "left interval is (0,0)" in {
+      "left interval is (0,0) (not empty)" in {
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (+,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (0,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (0,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (-,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,0), (-,0))
@@ -401,40 +436,31 @@ class ApronIntervalsTest extends AnyFreeSpec, Matchers:
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,-), (-,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (0,-), (-,-))
       }
-      "left interval is (-,+)" in {
+      "left interval is (-,+) (not empty)" in {
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (+,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (0,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (0,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (-,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (-,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,+), (-,-))
       }
-      "left interval is (-,0)" in {
+      "left interval is (-,0) (not empty)" in {
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (+,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (0,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (0,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (-,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (-,0))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,0), (-,-))
       }
-      "left interval is (-,-)" in {
+      "left interval is (-,-) (not empty)" in {
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (+,+))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (+,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (+,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (0,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (0,0))
-        // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (0,-))
 
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (-,+))
         // testApronIntervalTexpr0BinNodeOP(op, (result), (-,-), (-,0))
