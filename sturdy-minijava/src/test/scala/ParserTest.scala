@@ -14,6 +14,14 @@ import scala.jdk.StreamConverters.*
 class ParserTest extends AnyFlatSpec, Matchers:
   behavior of "MiniJava parser"
 
+  it should "parse expressions" in {
+    assert(parseExp("1").isRight)
+    assert(parseExp("foo.length").isRight)
+    assert(parseExp("foo.bar()").isRight)
+    assert(parseExp("foo.bar(1)").isRight)
+    assert(parseExp("foo.bar(1, 2, 3)").isRight)
+  }
+
 
   /*
 

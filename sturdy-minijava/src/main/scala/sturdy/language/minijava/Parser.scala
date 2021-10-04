@@ -175,19 +175,14 @@ object Parser:
       .backtrack // Exp[Exp]
 
 
-  val funCall: P[Exp] =
-    (atom <* (op(".") <* keyword(KLEN)) ).map(
-      Exp.ArrayLength.apply).backtrack| //Exp.length
-      ((atom <* op(".")) ~ (identifier ~ (op("(")  *> list0(recExpression) <* op(")")))).backtrack.map{
-        case(fun, (name, args)) => Exp.Call(fun, name, args)}  // Expression "." Identifier "(" ( Expression ( "," Expression )* )? ")"
-
   val term: P[Exp] =
     access |
+    (op('!') *> recExpression).map(e => Exp.Not(e)) |
     (atom ~ (
       (op('*') *> recExpression).map(e2 => Exp.Mul(_, e2)) | // * operation
         (op('/') *> recExpression).map(e2 => Exp.Div(_, e2))
-        ).?).map(maybeBinOp) |
-      (op('!') *> recExpression).map(e => Exp.Not(e))
+        ).?).map(maybeBinOp)
+
 
 
   val operation: P[Exp] =
@@ -198,12 +193,17 @@ object Parser:
         (op("||") *> recExpression).map(e2 => Exp.Or(_, e2))
       ).?).map(maybeBinOp)
 
+  val funCall: P[Exp] =
+    ((atom <* op(".")).backtrack ~ (
+      keyword(KLEN).map(_ => Exp.ArrayLength.apply) |
+        (identifier ~ inParens(list0(recExpression))).map((name, args) => Exp.Call(_, name, args))
+    )).map((e, f) => f(e))
 
   lazy val expression: P[Exp] =
     funCall |
     (operation ~ (
-      (op('>') *> operation).map(e2 => Exp.Gt(_, e2)) |
-        (op("==") *> operation).map(e2 => Exp.Eq(_, e2))
+      (op('>') *> recExpression).map(e2 => Exp.Gt(_, e2)) |
+        (op("==") *> recExpression).map(e2 => Exp.Eq(_, e2))
       ).?).map(maybeBinOp)
 
   val assignable: P[Assignable] =

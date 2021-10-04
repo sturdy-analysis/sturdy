@@ -241,16 +241,9 @@ trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
   def run(s: Stm): Unit = fixed(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
 
   def execute(p: Program): V =
-<<<<<<< HEAD
-    functions = p.funs.map(f => f.name -> f).toMap
-    val main = functions("main")
-    val args = main.params.map(_ => Exp.Input())
-    eval(Exp.Call(Exp.Var("main"), args))
-*/
-=======
     classTable = p.classes.map(c => c.name -> c).toMap
     val main = p.main
     //Wie geht man mit den main class params um?
     //val args = main.params.map
     run(main.body)
->>>>>>> d62f129a6c5feb1e8d13bddb7bfee3c838bc4e4c
+*/
