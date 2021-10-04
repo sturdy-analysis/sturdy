@@ -1,4 +1,4 @@
-package sturdy.language.tip.analysis
+package sturdy.language.tip.abstractions
 
 import sturdy.language.tip.{Stm, Program}
 import sturdy.language.tip.GenericInterpreter.{FixIn, FixOut, GenericEffects}

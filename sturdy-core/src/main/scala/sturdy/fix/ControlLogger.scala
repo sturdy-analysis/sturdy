@@ -110,6 +110,13 @@ class ControlLogger[Ctx, Dom, Codom, Node]
   private val nodes: mutable.Set[CNode[Node, Ctx]] = mutable.Set(startCNode)
   private val edges: mutable.Map[CNode[Node, Ctx], Set[CNode[Node, Ctx]]] = mutable.Map()
 
+  def clear(): Unit =
+    predecessors = Set(startCNode)
+    trace = List()
+    nodes.clear()
+    nodes += startCNode
+    edges.clear()
+
   inline private def addEdgeFromPredecessors(to: CNode[Node, Ctx]): Unit =
     predecessors.foreach(from => addEdge(from, to))
 
@@ -153,4 +160,5 @@ class ControlLogger[Ctx, Dom, Codom, Node]
 
 /** Marker trait for important control nodes, used during GrpahViz generation */
 trait ImportantControlNode
-trait CallReturnNode[Node](val callNode: Node)
+trait CallReturnNode[Node]:
+  val callNode: Node

@@ -579,12 +579,12 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
           val bytes = init.toByteVector.toIterable
           bytes.zipWithIndex.foreach { (byte,byteIdx) =>
             stack.push(base)
-            eval(i32.Const(byte.toInt))
-            eval(i32.Store8(0, byteIdx))
+            stack.push(num.evalNumeric(i32.Const(byte.toInt)))
+            evalMemoryInst(i32.Store8(0, byteIdx))
           }
           // in case we want to use memory.init here:
-          //eval(i32.Const(0))
-          //eval(i32.Const((init.size / 8).toInt)) //is it ok to convert long to int here?
+          //stack.push(num.evalNumeric(i32.Const(0)))
+          //stack.push(num.evalNumeric(i32.Const((init.size / 8).toInt))) //is it ok to convert long to int here?
           //memoryInit(i)
           // memoryDrop(i) for the current wasm version
       }
@@ -595,8 +595,8 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
           val base = stack.pop()
           init.zipWithIndex.foreach { (funcIx,i) =>
             stack.push(base)
-            eval(i32.Const(i))
-            eval(i32.Add) // adds index to base
+            stack.push(num.evalNumeric(i32.Const(i)))
+            stack.push(num.evalNumeric(i32.Add)) // adds index to base
             val idx = stack.pop() // stack is empty
             val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
             tableSet(TableAddr(modInst.tableAddrs(tableIdx).addr), funcIxToSymbol(valueToFuncIx(idx)), funVToEntry(funV))

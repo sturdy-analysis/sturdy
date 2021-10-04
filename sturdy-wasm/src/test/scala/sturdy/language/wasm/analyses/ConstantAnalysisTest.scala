@@ -120,10 +120,13 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     }
 
 
-def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[Iterable[Value]] =
-  val module = wasm.parse(path)
-  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)
-  val modInst = interp.initializeModule(module)
-  interp.effects.fallible(
-    interp.invokeExported(modInst, funName, args)
-  )
+  def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
+    val module = wasm.parse(path)
+    val onlyCalls = false
+    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
+    val modInst = interp.initializeModule(module)
+    val result = interp.effects.fallible(
+      interp.invokeExported(modInst, funName, args)
+    )
+    println(interp.cfg.toGraphViz)
+    result

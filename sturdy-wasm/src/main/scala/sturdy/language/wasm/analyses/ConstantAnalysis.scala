@@ -15,9 +15,8 @@ import sturdy.effect.symboltable.{SymbolTable, ToppedSymbolTable}
 import sturdy.fix
 import sturdy.fix
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
-import sturdy.language.wasm.abstractions.ConstantValues
+import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.generic.{*, given}
-import sturdy.language.wasm.analyses.Fix.{*, given}
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
@@ -35,7 +34,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantAnalysis extends Interpreter, ConstantValues:
+object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
 
   type Addr = Topped[Int]
   type Bytes = IndexedSeqView[Topped[Byte]]
@@ -159,12 +158,12 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
     def setAllState(all: AllState) = setInState(all)
   }
 
-  def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =
+  def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value], onlyCalls: Boolean): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
     given Effects = effects
-    new Instance(effects)
+    new Instance(effects, onlyCalls)
 
-  class Instance(effects: Effects)(using Failure, Effectful)
+  class Instance(effects: Effects, onlyCalls: Boolean)(using Failure, Effectful)
     extends GenericInstance[Effects] with GenericInterpreter(effects) :
 
     given Effects = effects
@@ -201,9 +200,18 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
       effects.joinComputationsIterable(invokeAllFuns)
     val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
 
+    val cfg = control[FrameData[Value]](sensitive = true, onlyCalls)
+
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
-      fix.contextSensitive[FrameData[Value], FixIn[Value], FixOut[Value]](frameSensitive,
-        fix.filter(isFunOrWhile,
-          fix.iter.topmost
+      fix.contextSensitive(frameSensitive,
+        fix.log(cfg.logger,
+          fix.filter(isFunOrWhile,
+            fix.iter.topmost
+          )
         )
       )
+
+    def initializeModule(module: Module): ModuleInstance[Value] =
+      val modInst = super.initializeModule(module)
+      cfg.clear()
+      modInst
