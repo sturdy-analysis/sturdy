@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.language.tip.Stm
+import sturdy.language.tip.{Stm, Program}
 import sturdy.language.tip.GenericInterpreter.{FixIn, FixOut, GenericEffects}
 import sturdy.fix
 import sturdy.language.tip.Exp
@@ -8,7 +8,7 @@ import sturdy.data.unit
 import sturdy.effect.ObservableJoin
 import sturdy.language.tip.Function
 
-object Fix:
+trait Fix:
   final def isFunOrWhile(dom: FixIn): Int = dom match
     case FixIn.EnterFunction(_) => 0
     case FixIn.Run(Stm.While(_, _)) => 1
@@ -43,3 +43,14 @@ object Fix:
     case (FixIn.Eval(c: Exp.Call), _) => Some(CfgNode.CallReturn(c))
     case _ => None
   }
+
+  def allCfgNodes(prog: Program, allStatements: Boolean): Set[CfgNode] =
+    prog.fold(using {
+      case fun => Set(CfgNode.Enter(fun), CfgNode.Exit(fun))
+    }, {
+      case Stm.Block(_) => Set()
+      case s => if (allStatements) Set(CfgNode.Statement(s)) else Set()
+    }, {
+      case c: Exp.Call => Set(CfgNode.Call(c), CfgNode.CallReturn(c))
+      case _ => Set()
+    })

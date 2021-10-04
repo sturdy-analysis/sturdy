@@ -31,53 +31,41 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".tip")).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName}" in {
-      runFile(p, 10)
+      runSignAnalysis(p, 10)
     }
   }
 
-  def runFile(p: Path, steps: Int): Unit =
+  def runSignAnalysis(p: Path, steps: Int) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
+      val cfgAllStatements = true
+      val analysis = SignAnalysis(Map(), Map(), steps, cfgAllStatements)
+      val aresult = analysis.effects.fallible(analysis.execute(program))
+
+      val deadNodes = analysis.cfg.filterDeadNodes(SignAnalysis.allCfgNodes(program, cfgAllStatements))
+      if (deadNodes.nonEmpty)
+        println(s"Found dead code: $deadNodes")
+
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.effects.fallible(interp.execute(program))
-//      println("\n" + cresult)
-//      println(interp.effects.getPrinted)
-//      println(interp.effects.getStore)
-//      println(interp.effects.getAddressContexts.map{case (i,AllocationSite.Alloc(a)) => (i,a.label); case a => a})
-
-      val analysis = SignAnalysis(Map(), Map(), steps)
-      val aresult = analysis.effects.fallible(analysis.execute(program))
-//      println("\n" + analysis.effects.getPrinted)
-//      println(analysis.effects.getStore)
-
       given CAllocationIntIncrement[AllocationSite] = interp.effects
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
-    }
-
-object RunSignAnalysis extends App {
-  def runAnalysis(p: Path, steps: Int) =
-    val file = Source.fromURI(p.toUri)
-    val sourceCode = file.getLines().mkString("\n")
-    file.close()
-    val program = Parser.parse(sourceCode)
-
-    if (program.funs.exists(_.name == "main")) {
-      //      println(s"Running ${p.getFileName}")
-
-      val analysis = SignAnalysis(Map(), Map(), steps)
-      (analysis.effects.fallible(analysis.execute(program)), analysis.effects)
+      (aresult, analysis)
     } else {
       null
     }
 
+object RunSignAnalysis extends App {
   val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/record3.tip").toURI();
-  val (res, effects) = runAnalysis(Paths.get(uri), 10)
+  val (res, analysis) = new SignAnalysisTest().runSignAnalysis(Paths.get(uri), 10)
   println(res)
-  println(effects.getCallFrame)
-  println(effects.getStore)
+  println(analysis.effects.getCallFrame)
+  println(analysis.effects.getStore)
+  println(analysis.effects.getPrinted)
+  println(analysis.cfg.toGraphViz)
 }

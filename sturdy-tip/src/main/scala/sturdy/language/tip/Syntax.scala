@@ -3,6 +3,8 @@ package sturdy.language.tip
 import sturdy.util.Labeled
 import sturdy.values.{Structural, Finite}
 
+import cats.Monoid
+
 enum Exp extends Labeled:
   case NumLit(n: Int)
   case Input()
@@ -21,20 +23,23 @@ enum Exp extends Labeled:
   case Record(fields: Seq[(String, Exp)])
   case FieldAccess(rec: Exp, field: String)
 
-  def intLiterals: Set[Int] = this match
-    case NumLit(n: Int) => Set(n)
-    case Add(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
-    case Sub(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
-    case Mul(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
-    case Div(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
-    case Gt(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
-    case Eq(e1: Exp, e2: Exp) => e1.intLiterals ++ e2.intLiterals
-    case Call(fun: Exp, args: Seq[Exp]) => fun.intLiterals ++ args.flatMap(_.intLiterals)
-    case Alloc(e: Exp) => e.intLiterals
-    case Deref(e: Exp) => e.intLiterals
-    case Record(fields: Seq[(String, Exp)]) => fields.flatMap(f => f._2.intLiterals).toSet
-    case FieldAccess(rec: Exp, field: String) => rec.intLiterals
-    case _ => Set()
+  def fold[A](using f: Exp => A)(using m: Monoid[A]): A = this match
+    case NumLit(_) => f(this)
+    case Input() => f(this)
+    case Var(_) => f(this)
+    case Add(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
+    case Sub(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
+    case Mul(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
+    case Div(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
+    case Gt(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
+    case Eq(e1, e2) => m.combine(f(this), m.combine(e1.fold, e2.fold))
+    case Call(fun, args) => m.combine(f(this), m.combine(fun.fold, m.combineAll(args.view.map(f))))
+    case Alloc(e) => m.combine(f(this), e.fold)
+    case VarRef(_) => f(this)
+    case Deref(e) => m.combine(f(this), e.fold)
+    case NullRef() => f(this)
+    case Record(fields) => m.combine(f(this), m.combineAll(fields.view.map(kv => f(kv._2))))
+    case FieldAccess(rec, field) => m.combine(f(this), rec.fold)
 
   override def toString: String = this match
     case NumLit(n) => s"$n@${this.label}"
@@ -64,13 +69,13 @@ enum Stm extends Labeled:
   case Output(e: Exp)
   case Error(e: Exp)
 
-  def intLiterals: Set[Int] = this match
-    case Assign(_, e) => e.intLiterals
-    case If(c, t, e) => c.intLiterals ++ t.intLiterals ++ e.map(_.intLiterals).getOrElse(Set())
-    case While(c, b) => c.intLiterals ++ b.intLiterals
-    case Block(body) => body.flatMap(_.intLiterals).toSet
-    case Output(e) => e.intLiterals
-    case Error(e) => e.intLiterals
+  def fold[A](using f: Stm => A, g: Exp => A)(using m: Monoid[A]): A = this match
+    case Assign(_, e) => m.combine(f(this), e.fold)
+    case If(c, t, e) => m.combine(f(this), m.combine(c.fold, Monoid.maybeCombine(t.fold, e.map(f))))
+    case While(c, b) => m.combine(f(this), m.combine(c.fold, b.fold))
+    case Block(body) => m.combine(f(this), m.combineAll(body.view.map(f)))
+    case Output(e) => m.combine(f(this), e.fold)
+    case Error(e) => m.combine(f(this), e.fold)
 
   override def toString: String = this match
     case Assign(x, _) => s"Assign($x)@${this.label}"
@@ -88,10 +93,17 @@ enum Assignable:
 
 case class Function(name: String, params: Seq[String], locals: Seq[String], body: Stm, ret: Exp):
   override def toString: String = s"function $name"
-  def intLiterals: Set[Int] = body.intLiterals ++ ret.intLiterals
+  def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
+    m.combine(fun(this), m.combine(body.fold, ret.fold))
 
 case class Program(funs: Seq[Function]):
-  def intLiterals: Set[Int] = funs.flatMap(_.intLiterals).toSet
+  def fold[A](using fun: Function => A, f: Stm => A, g: Exp => A)(using m: Monoid[A]): A =
+    m.combineAll(funs.map(_.fold))
+
+  def intLiterals: Set[Int] = fold(using _ => Set(), _ => Set(), {
+    case Exp.NumLit(n: Int) => Set(n)
+    case _ => Set()
+  })
 
 
 given StructuralFunction: Structural[Function] with {}

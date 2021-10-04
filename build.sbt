@@ -33,6 +33,7 @@ lazy val sturdy_tip = (project in file("sturdy-tip"))
     name := "sturdy-tip",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-parse" % "0.3.4",
+      "org.typelevel" %% "cats-core" % "2.6.1",
       // test
       "org.scalatest" %% "scalatest" % "3.2.9" % "test"
     )

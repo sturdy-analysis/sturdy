@@ -31,59 +31,41 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
   
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".tip")).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName}" in {
-      runFile(p, 10)
+      runIntervalAnalysis(p, 10)
     }
   }
 
-  def runFile(p: Path, steps: Int): Unit =
+  def runIntervalAnalysis(p: Path, steps: Int) =
     val file = Source.fromURI(p.toUri)
     val sourceCode = file.getLines().mkString("\n")
     file.close()
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-//      println(s"Running ${p.getFileName} ...")
+      val cfgAllStatements = true
+      val analysis = IntervalAnalysis(Map(), Map(), steps, cfgAllStatements)
+      val aresult = analysis.effects.fallible(analysis.execute(program))
+
+      val deadNodes = analysis.cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, cfgAllStatements))
+      if (deadNodes.nonEmpty)
+        println(s"Found dead code: $deadNodes")
+
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
       val cresult = interp.effects.fallible(interp.execute(program))
-      //      println("\n" + cresult)
-      //      println(interp.effectOps.getPrinted)
-      //      println(interp.effectOps.getStore)
-      //      println(interp.effectOps.getAddressContexts.map{case (i,AllocationSite.Alloc(a)) => (i,a.label); case a => a})
-
-      val analysis = IntervalAnalysis(Map(), Map(), steps)
-      val aresult = analysis.effects.fallible(analysis.execute(program))
-//      println(aresult)
-//      println(analysis.effectOps.getPrinted)
-//      println(analysis.effectOps.getStore)
-
       given CAllocationIntIncrement[AllocationSite] = interp.effects
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
+      (aresult, analysis)
+    } else {
+      null
     }
 
-def runIntervalAnalysis(p: Path, steps: Int) =
-  val file = Source.fromURI(p.toUri)
-  val sourceCode = file.getLines().mkString("\n")
-  file.close()
-  val program = Parser.parse(sourceCode)
-
-  if (program.funs.exists(_.name == "main")) {
-    //      println(s"Running ${p.getFileName}")
-
-    val analysis = IntervalAnalysis(Map(), Map(), steps)
-    (analysis.effects.fallible(analysis.execute(program)), analysis)
-  } else {
-    null
-  }
-
 object RunIntervalAnalysis extends App {
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/factorial_recursive.tip").toURI();
-  val (res, analysis) = runIntervalAnalysis(Paths.get(uri), 10)
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/cfgloop.tip").toURI();
+  val (res, analysis) = new IntervalAnalysisTest().runIntervalAnalysis(Paths.get(uri), 10)
   println(res)
   println(analysis.effects.getCallFrame)
   println(analysis.effects.getStore)
   println(analysis.effects.getPrinted)
-  println(analysis.cfg.getNodes)
-  println(analysis.cfg.getEdgesFlat)
   println(analysis.cfg.toGraphViz)
 }

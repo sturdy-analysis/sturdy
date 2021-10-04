@@ -24,10 +24,9 @@ import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.GenericInterpreter.{FixIn, GenericPhi, AllocationSite, FixOut}
 import sturdy.language.tip.abstractions.*
-import Fix.*
 
 object IntervalAnalysis extends Interpreter,
-  Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites:
+  Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
@@ -51,12 +50,12 @@ object IntervalAnalysis extends Interpreter,
     override def getAllState() = getOutState()
     override def setAllState(all: AllState) = setOutState(all)
 
-  def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
+  def apply(initEnvironment: Environment, initStore: Store, steps: Int, cfgAllStatements: Boolean): Instance =
     val effects = new Effects(initEnvironment, initStore)
     given Effects = effects
-    new Instance(effects, steps)
+    new Instance(effects, steps, cfgAllStatements)
 
-  class Instance(effects: Effects, steps: Int)(using Failure, Effectful)
+  class Instance(effects: Effects, steps: Int, cfgAllStatements: Boolean)(using Failure, Effectful)
     extends GenericInstance with GenericInterpreter[Value, Addr, Effects](effects):
 
     given Effects = effects
@@ -80,7 +79,7 @@ object IntervalAnalysis extends Interpreter,
       super.execute(p)
 
     val callSites = callSitesLogger()
-    val cfg = control[List[Exp.Call], Value](sensitive = true, allStatements = false)
+    val cfg = control[List[Exp.Call], Value](sensitive = true, cfgAllStatements)
 
     val phi =
       fix.log(callSites,

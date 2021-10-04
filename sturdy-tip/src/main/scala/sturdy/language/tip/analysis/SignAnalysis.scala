@@ -24,10 +24,9 @@ import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
 import sturdy.language.tip.GenericInterpreter.{AllocationSite, GenericPhi, FixIn, FixOut, given}
 import sturdy.language.tip.abstractions.*
-import Fix.*
 
 object SignAnalysis extends Interpreter,
-  Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites:
+  Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
@@ -51,12 +50,12 @@ object SignAnalysis extends Interpreter,
     override def getAllState() = getOutState()
     override def setAllState(all: AllState) = setOutState(all)
 
-  def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
+  def apply(initEnvironment: Environment, initStore: Store, steps: Int, cfgAllStatements: Boolean): Instance =
     val effects = new Effects(initEnvironment, initStore)
     given Effects = effects
-    new Instance(effects, steps)
+    new Instance(effects, steps, cfgAllStatements)
 
-  class Instance(effects: Effects, steps: Int)(using Failure, Effectful)
+  class Instance(effects: Effects, steps: Int, cfgAllStatements: Boolean)(using Failure, Effectful)
     extends GenericInstance with GenericInterpreter[Value, Addr, Effects](effects):
 
     given Effects = effects
@@ -73,15 +72,19 @@ object SignAnalysis extends Interpreter,
 
     given Lazy[Widen[Value]] = lazily(CombineValue)
 
+    val cfg = control[Map[Addr, Value], Value](sensitive = true, cfgAllStatements)
+
     val phi =
       fix.contextSensitive(parameters,
-        fix.dispatch(isFunOrWhile, Seq(
-          // call
-          fix.iter.topmost,
-          // while
-          fix.unwind(steps,
-            fix.iter.innermost
-          )
-        ))
+        fix.log(cfg.logger,
+          fix.dispatch(isFunOrWhile, Seq(
+            // call
+            fix.iter.topmost,
+            // while
+            fix.unwind(steps,
+              fix.iter.innermost
+            )
+          ))
+        )
       )
 
