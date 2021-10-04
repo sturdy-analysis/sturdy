@@ -28,7 +28,7 @@ trait Fix:
   enum CfgNode:
     case Statement(s: Stm)
     case Call(call: Exp.Call)
-    case CallReturn(call: Exp.Call) extends CfgNode, fix.CallReturnNode(Call(call))
+    case CallReturn(callNode: Call) extends CfgNode, fix.CallReturnNode[Call]
     case Enter(fun: Function) extends CfgNode, fix.ImportantControlNode
     case Exit(fun: Function) extends CfgNode, fix.ImportantControlNode
 
@@ -40,7 +40,7 @@ trait Fix:
     case _ => None
   } {
     case (FixIn.EnterFunction(f), FixOut.ExitFunction(_)) => Some(CfgNode.Exit(f))
-    case (FixIn.Eval(c: Exp.Call), _) => Some(CfgNode.CallReturn(c))
+    case (FixIn.Eval(c: Exp.Call), _) => Some(CfgNode.CallReturn(CfgNode.Call(c)))
     case _ => None
   }
 
@@ -51,6 +51,6 @@ trait Fix:
       case Stm.Block(_) => Set()
       case s => if (allStatements) Set(CfgNode.Statement(s)) else Set()
     }, {
-      case c: Exp.Call => Set(CfgNode.Call(c), CfgNode.CallReturn(c))
+      case c: Exp.Call => Set(CfgNode.Call(c), CfgNode.CallReturn(CfgNode.Call(c)))
       case _ => Set()
     })
