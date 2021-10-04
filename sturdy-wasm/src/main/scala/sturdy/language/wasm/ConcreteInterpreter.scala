@@ -132,13 +132,17 @@ object ConcreteInterpreter extends Interpreter :
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Int32(sz)
 
-    override def funcIxToSymbol(funcIx: Int): Symbol = ???
-    override def globIxToSymbol(globalIdx: GlobalAddr): Symbol = ???
+    override def funcIxToSymbol(funcIx: FuncIx): Symbol = Symbol.Function(funcIx)
+    override def globIxToSymbol(globalIdx: GlobalAddr): Symbol = Symbol.Global(globalIdx)
 
-    override def funVToEntry(funV: FunctionInstance[Value]): Entry = ???
-    override def globIToEntry(globI: GlobalInstance[Value]): Entry = ???
-    override def entryToFuncV(entry: Entry): FunctionInstance[Value] = ???
-    override def entryToGlobI(entry: Entry): GlobalInstance[Value] = ???
+    override def funVToEntry(funV: FunctionInstance[Value]): Entry = Entry.Function(funV)
+    override def globIToEntry(globI: GlobalInstance[Value]): Entry = Entry.Global(globI)
+    override def entryToFuncV(entry: Entry): FunctionInstance[Value] = entry match
+      case Entry.Function(funV) => funV
+      case Entry.Global(_) => throw new IllegalArgumentException(s"Expected a function, but got $entry.")
+    override def entryToGlobI(entry: Entry): GlobalInstance[Value] = entry match
+      case Entry.Global(globI) => globI
+      case Entry.Function(_) => throw new IllegalArgumentException(s"Expected a global, but got $entry.")
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): OptionC[A] =
       val i = ix.asInt32

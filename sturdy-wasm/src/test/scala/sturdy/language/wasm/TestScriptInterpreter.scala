@@ -1,23 +1,19 @@
 package sturdy.language.wasm
 
-import cats.effect.{IO, Blocker}
+import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.{CFailureException, CFallible}
-import sturdy.language.wasm.generic.FrameData
+import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
 import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.ModuleInstance
 import ConcreteInterpreter.Value
 
-import java.nio.file.{Path, Paths, Files}
+import java.nio.file.{Files, Path, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 import swam.syntax.Module
 import swam.text.*
 import org.scalatest.Assertions.*
-import sturdy.language.wasm.generic.ExternalValue
-import sturdy.language.wasm.generic.ExternalValue
-import sturdy.language.wasm.generic.ExternalValue
 import sturdy.values.relational.EqOps
 import swam.ModuleLoader
 import swam.binary.ModuleParser
@@ -132,7 +128,8 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
     assert(exp.isDefined, s"export $name not found in ${module.getOrElse("current")}")
     exp.get._2 match
       case Global(addr) =>
-        val value = ??? // TODO modInst.globalAddrs(addr).value
+        val globalIdx = modInst.globalAddrs.lift(addr).getOrElse(throw new Error(s"Unbound global $addr"))
+        val value = interp.getGlobalValue(globalIdx)
         CFallible.Unfailing(List(value))
       case ext =>
         throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")

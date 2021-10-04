@@ -113,6 +113,11 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
   private var tabCount = 0
   private var globCount = 0
 
+  // add empty table at addr 0 for global variables
+  assert(TableAddr(tabCount) == globalTableIndex)
+  addEmptyTable(globalTableIndex)
+  tabCount += 1
+
   import wasmOps.*
   import exceptOps.*
 
@@ -141,11 +146,10 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
     case GlobalSet(globalIx) =>
       val globalIdx = module.globalAddrs.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
       val v = stack.pop()
-      // TODO: do we need tableGet + tableSet or is it enough to modify the globalInstance returned by tableGet?
       tableGet(globalTableIndex, globIxToSymbol(globalIdx)).orElseAndThen(fail(UnboundGlobal, globalIdx.toString)) { entry =>
         val global = entryToGlobI(entry)
-        global.value = v
-        tableSet(globalTableIndex, globIxToSymbol(globalIdx), globIToEntry(global))
+        val newGlobal = GlobalInstance(global.tpe,v)
+        tableSet(globalTableIndex, globIxToSymbol(globalIdx), globIToEntry(newGlobal))
       }
 
   def evalMemoryInst(inst: Inst): Unit = inst match
@@ -208,6 +212,13 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
     module.tableAddrs(0)
 
   val globalTableIndex: TableAddr = TableAddr(0)
+
+  def getGlobalValue(index: GlobalAddr): V =
+    tableGet(globalTableIndex, globIxToSymbol(index)).orElseAndThen(fail(UnboundGlobal, index.toString)) { entry =>
+      val global = entryToGlobI(entry)
+      stack.push(global.value)
+    }
+    stack.pop()
 
 
 
@@ -513,10 +524,6 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
     modInst.functions = funcImports ++
       module.funcs.map(func => FunctionInstance.Wasm(modInst,func,module.types(func.tpe)))
     // globals
-    // add empty table at addr 0 for global variables
-    assert(TableAddr(tabCount) == globalTableIndex)
-    addEmptyTable(globalTableIndex)
-    tabCount += 1
     modInst.globalAddrs = modInst.globalAddrs :++ module.globals.zip(globValues).map {
       case (Global(GlobalType(tpe,_),_),value) =>
         val globalAddr = GlobalAddr(globCount)

@@ -72,13 +72,17 @@ object ConstantAnalysis extends Interpreter, ConstantValues:
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Int32(sz)
 
-    override def funcIxToSymbol(funcIx: FuncIx): Symbol = ???
-    override def globIxToSymbol(globalIdx: GlobalAddr): Symbol = ???
+    override def funcIxToSymbol(funcIx: FuncIx): Symbol = Topped.Actual(SymbolUntopped.Function(funcIx))
+    override def globIxToSymbol(globalIdx: GlobalAddr): Symbol = Topped.Actual(SymbolUntopped.Global(globalIdx))
 
-    override def funVToEntry(funV: FunV): Entry = ???
-    override def globIToEntry(globI: GlobalInstance[Value]): Entry = ???
-    override def entryToFuncV(entry: Entry): FunV = ???
-    override def entryToGlobI(entry: Entry): GlobalInstance[Value] = ???
+    override def funVToEntry(funV: FunV): Entry = Entry.Function(funV)
+    override def globIToEntry(globI: GlobalInstance[Value]): Entry = Entry.Global(globI)
+    override def entryToFuncV(entry: Entry): FunV = entry match
+      case Entry.Function(funV) => funV
+      case _ => throw new IllegalArgumentException(s"Expected a function, but got $entry.")
+    override def entryToGlobI(entry: Entry): GlobalInstance[Value] = entry match
+      case Entry.Global(globI) => globI 
+      case _ => throw new IllegalArgumentException(s"Expected a global, but got $entry.")
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): OptionA[A] =
       ix.asInt32 match
