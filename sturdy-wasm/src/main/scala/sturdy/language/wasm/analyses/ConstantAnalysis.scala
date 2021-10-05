@@ -200,7 +200,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
       effects.joinComputationsIterable(invokeAllFuns)
     val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
 
-    val cfg = control[FrameData[Value]](sensitive = true, onlyCalls)
+    val cfg = control[FrameData[Value]](sensitive = false, onlyCalls)
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
       fix.contextSensitive(frameSensitive,

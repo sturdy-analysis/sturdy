@@ -23,6 +23,8 @@ trait ModuleInstance[V]:
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
+  override def toString: Name = Integer.toHexString(this.hashCode)
+
 enum FunctionInstance[V]:
   case Wasm(module: ModuleInstance[V], func: Func, ft: FuncType)
   //  case HostX(...)

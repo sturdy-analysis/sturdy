@@ -6,15 +6,15 @@ import sturdy.effect.callframe.CallFrame
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, FuncId, InstLoc}
 import sturdy.values.{Combine, Widening}
 import swam.FuncIdx
-import swam.syntax.{Loop, Call, Inst, CallIndirect}
+import swam.syntax.{Block, Call, CallIndirect, Inst, Loop, If}
 
 trait Fix extends Interpreter:
   final def isFunOrWhile(dom: FixIn[Value]): Boolean = dom match
     case _: FixIn.EnterWasmFunction[Value] => true
-    case FixIn.Eval(_: Loop) => true
+    case FixIn.Eval(_: Loop, _) => true
     case _ => false
 
   final def frameSensitive(using frame: CallFrame[FrameData[Value], _, _]): Sensitivity[FixIn[Value], FrameData[Value]] = new Sensitivity {
@@ -29,12 +29,12 @@ trait Fix extends Interpreter:
 
   final def casesFunOrWhile(dom: FixIn[Value]): Int = dom match
     case _: FixIn.EnterWasmFunction[Value] => 0
-    case FixIn.Eval(_: Loop) => 1
+    case FixIn.Eval(_: Loop, _) => 1
     case _ => -1
 
   final def callSitesLogger() = fix.context.callSites[FixIn[Value], Inst] {
-    case FixIn.Eval(c: Call) => Some(c)
-    case FixIn.Eval(c: CallIndirect) => Some(c)
+    case FixIn.Eval(c: Call, _) => Some(c)
+    case FixIn.Eval(c: CallIndirect, _) => Some(c)
     case _ => None
   }
 
@@ -45,31 +45,31 @@ trait Fix extends Interpreter:
       case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
 
   enum CfgNode:
-    case Instruction(inst: Inst)
-    case Call(inst: swam.syntax.Call | CallIndirect)
+    case Instruction(inst: Inst, loc: InstLoc[_])
+    case Call(inst: swam.syntax.Call | CallIndirect, loc: InstLoc[_])
     case CallReturn(callNode: Call) extends CfgNode, fix.CallReturnNode[Call]
-    case Enter(funId: Either[FuncIdx, Value]) extends CfgNode, fix.ImportantControlNode
-    case Exit(funId: Either[FuncIdx, Value]) extends CfgNode, fix.ImportantControlNode
+    case Enter(funId: FuncId[Value]) extends CfgNode, fix.ImportantControlNode
+    case Exit(funId: FuncId[Value]) extends CfgNode, fix.ImportantControlNode
 
     override def toString: String = this match
-      case Instruction(inst) => inst.toString
-      case Call(inst) => inst.toString
-      case CallReturn(inst) => s"CallReturn($inst)"
-      case Enter(funId) => funId match
-        case Left(ix) => s"enter direct $ix"
-        case Right(v) => s"enter indirect $v"
-      case Exit(funId) => funId match
-        case Left(ix) => s"exit direct $ix"
-        case Right(v) => s"exit indirect $v"
+      case Instruction(inst, loc) => inst match
+        case Block(_, _) => s"Block @$loc"
+        case Loop(_, _) => s"Loop @$loc"
+        case If(_, _, _) => s"If @$loc"
+        case _ => s"$inst @$loc"
+      case Call(inst, loc) => s"$inst @$loc"
+      case CallReturn(call) => s"CallReturn(${call.inst}) @${call.loc}"
+      case Enter(funId) => s"enter $funId"
+      case Exit(funId) => s"exit $funId"
 
   def control[Ctx](sensitive: Boolean, onlyCalls: Boolean)(using effect: ObservableJoin) = fix.control[Ctx, FixIn[Value], FixOut[Value], CfgNode](sensitive) {
-    case FixIn.Eval(c: Call) => Some(CfgNode.Call(c))
-    case FixIn.Eval(c: CallIndirect) => Some(CfgNode.Call(c))
-    case FixIn.Eval(inst) => if (onlyCalls) None else Some(CfgNode.Instruction(inst))
+    case FixIn.Eval(c: Call, loc) => Some(CfgNode.Call(c, loc))
+    case FixIn.Eval(c: CallIndirect, loc) => Some(CfgNode.Call(c, loc))
+    case FixIn.Eval(inst, loc) => if (onlyCalls) None else Some(CfgNode.Instruction(inst, loc))
     case FixIn.EnterWasmFunction(id, _, _) => Some(CfgNode.Enter(id))
   } {
     case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
-    case (FixIn.Eval(c: (Call | CallIndirect)), _) => Some(CfgNode.CallReturn(CfgNode.Call(c)))
+    case (FixIn.Eval(c: (Call | CallIndirect), loc), _) => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
     case _ => None
   }
 

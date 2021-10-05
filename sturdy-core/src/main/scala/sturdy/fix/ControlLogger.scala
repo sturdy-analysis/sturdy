@@ -65,7 +65,7 @@ trait ControlFlowGraph[Node, Ctx]:
        |""".stripMargin
 
   protected def nodeToGraphViz(n: CNode[Node, Ctx]): String =
-    n.toString.replaceAll("@|\\(|\\)|\\ |,|\\|", "_")
+    n.toString.replaceAll("[^a-zA-Z0-9]", "_")
   protected def nodeGraphVizAttributes(from: CNode[Node, Ctx]): String =
     if (from.isStartNode)
       s"fillcolor=red, style=filled, fontcolor=black"
@@ -153,8 +153,9 @@ class ControlLogger[Ctx, Dom, Codom, Node]
             addEdgeFromPredecessors(cnode)
             predecessors = Set(cnode)
           case None => // nothing
-        case Failure(_) =>
+        case Failure(_: RecurrentCall[_, _]) =>
           predecessors = Set()
+        case _ => // nothing
   }
 
 

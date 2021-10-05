@@ -27,9 +27,9 @@ import scala.collection.mutable
 case class FrameData[V](returnArity: Int, module: ModuleInstance[V]):
   override def toString: String =
     if (module == null)
-      s"module null, rt $returnArity"
+      s"null:$returnArity"
     else
-      s"module ${Integer.toHexString(module.hashCode())}, rt $returnArity"
+      s"$module:$returnArity"
 
 object FrameData:
   def empty[V]: FrameData[V] = FrameData[V](0, null)
@@ -53,15 +53,37 @@ type GenericEffects[V, Addr, Bytes, Size, ExcV, Symbol, Entry] =
 
 type Imports[V] = mutable.Map[String, ModuleInstance[V]]
 
-enum FixIn[V]:
-  case Eval(inst: Inst)
-  case EnterWasmFunction(id: Either[FuncIdx, V], func: swam.syntax.Func, ft: swam.FuncType)
+enum InstLoc[V]:
+  case InFunction(mod: ModuleInstance[V], func: FuncId[V], pc: Int)
+  case InInit(mod: ModuleInstance[V], pc: Int)
 
   override def toString: String = this match
-    case Eval(i) => s"eval ${i.getClass.getSimpleName} ${Integer.toHexString(i.hashCode())}"
-    case EnterWasmFunction(id, _, _) => id match
-      case Left(ix) => s"enter direct $ix"
-      case Right(v) => s"enter indirect $v"
+    case InFunction(mod, func, pc) => s"$mod.$func:$pc"
+    case InInit(mod, pc) => s"$mod.INIT:$pc"
+
+  def +(i: Int): InstLoc[V] = this match
+    case InFunction(mod, func, pc) => InFunction(mod, func, pc + i)
+    case InInit(mod, pc) => InInit(mod, pc + i)
+
+  def withLoc(insts: Vector[Inst], offset: Int = 0): Vector[(Inst, InstLoc[V])] =
+    insts.zipWithIndex.map((i, ix) => (i, this + ix + 1 + offset))
+
+
+enum FuncId[V]:
+  case Direct(ix: FuncIdx)
+  case Indirect(v: V)
+
+  override def toString: String = this match
+    case Direct(ix) => ix.toString
+    case Indirect(v) => s"indirect($v)"
+
+enum FixIn[V]:
+  case Eval(inst: Inst, loc: InstLoc[V])
+  case EnterWasmFunction(id: FuncId[V], func: Func, ft: FuncType)
+
+  override def toString: String = this match
+    case Eval(i, loc) => s"eval $i $loc"
+    case EnterWasmFunction(id, _, _) => id.toString
 
 enum FixOut[V]:
   case Eval()
@@ -223,19 +245,19 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
 
 
   private lazy val fixed = fix.Fixpoint { (rec: FixIn[V] => FixOut[V]) =>
-    inline def eval(inst: Inst): FixOut[V] =
-      rec(FixIn.Eval(inst))
-    inline def enterFunction(id: Either[FuncIdx, V], func: Func, ft: FuncType): FixOut[V] =
+    def eval(inst: Inst, loc: InstLoc[V]): FixOut[V] =
+      rec(FixIn.Eval(inst, loc))
+    inline def enterFunction(id: FuncId[V], func: Func, ft: FuncType): FixOut[V] =
       rec(FixIn.EnterWasmFunction(id, func, ft))
 
-    def eval_open(inst: Inst): Unit =
+    def eval_open(inst: Inst, loc: InstLoc[V]): Unit =
       val opcode = inst.opcode
       if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)
         stack.push(num.evalNumeric(inst))
       else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
         evalMemoryInst(inst)
       else if (opcode >= OpCode.Unreachable && opcode <= OpCode.CallIndirect)
-        evalControlInst(inst)
+        evalControlInst(inst, loc)
       else inst match
         case i: VarInst => evalVarInst(i)
         case op: Miscop =>
@@ -253,22 +275,22 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
           }
         case _ => throw new IllegalArgumentException(s"Unexpected instruction $inst")
 
-    def evalControlInst(inst: Inst): Unit = inst match
+    def evalControlInst(inst: Inst, loc: InstLoc[V]): Unit = inst match
       case Nop => // nothing
       case Unreachable => fail(UnreachableInstruction, inst.toString)
       case Block(bt, insts) =>
-        label(paramsArity(bt), returnArity(bt), insts, None)
+        label(paramsArity(bt), returnArity(bt), loc.withLoc(insts), None)
       case l@Loop(bt, insts) =>
         val pt = paramsArity(bt)
-        label(pt, pt, insts, Some(l))
+        label(pt, pt, loc.withLoc(insts), Some((l, loc)))
       case If(bt, thnInsts, elsInsts) =>
         val isZero = num.evalNumeric(i32.Eqz)
         val rt = returnArity(bt)
         boolBranch[Unit](isZero) {
           // v == 0: else branch
-          label(paramsArity(bt), rt, elsInsts, None)
+          label(paramsArity(bt), rt, loc.withLoc(elsInsts, offset = thnInsts.length), None)
         } {
-          label(paramsArity(bt), rt, thnInsts, None)
+          label(paramsArity(bt), rt, loc.withLoc(thnInsts), None)
         }
       case Br(labelIndex) =>
         branch(labelIndex)
@@ -288,7 +310,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
         throws(WasmException.Return(operands))
       case Call(funcIx) =>
         val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-        invoke(func, Left(funcIx))
+        invoke(func, FuncId.Direct(funcIx))
       case CallIndirect(typeIx) =>
         val ftExpected = module.functionTypes(typeIx)
         val funcIx = stack.pop()
@@ -317,11 +339,11 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
    *   - stack: A g0 ... gok needs to become A
    *   - we don't know k, so we need to remember size of stack A
    */
-    def label(paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[Inst]): Unit =
+    def label(paramsArity: Int, returnArity: Int, insts: Iterable[(Inst, InstLoc[V])], branchTarget: Option[(Inst, InstLoc[V])]): Unit =
       stack.withFreshOperandFrame {
         tryCatch {
           labelStack.pushLabel(returnArity)
-          try insts.foreach(eval(_))
+          try insts.foreach(eval)
           finally labelStack.popLabel()
         } { ex =>
           stack.clearCurrentOperandFrame()
@@ -329,7 +351,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
             case WasmException.Jump(labelIndex, operands) =>
               if (labelIndex == 0) {
                 stack.pushN(operands)
-                branchTarget.foreach(eval(_))
+                branchTarget.foreach(eval)
               } else {
                 throws(WasmException.Jump(labelIndex - 1, operands))
               }
@@ -345,7 +367,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
     //    - stack A g0 ... gk needs to become A op0 ... opm
     //    - we don't know k, so we need to remember size of stack A
     // catch Jump(...) => error
-    def invoke(fun: FunctionInstance[V], funcIx: Either[FuncIdx, V]): Unit =
+    def invoke(fun: FunctionInstance[V], funcIx: FuncId[V]): Unit =
       fun match
         case FunctionInstance.Wasm(mod, func, funcType) =>
           val args = stack.popN(funcType.params.size)
@@ -355,10 +377,11 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
             enterFunction(funcIx, func, funcType)
           }))
 
-    def enterFunction_open(func: Func, funcType: FuncType): List[V] =
+    def enterFunction_open(id: FuncId[V], func: Func, funcType: FuncType): List[V] =
       val returnN = funcType.t.size
       tryCatch {
-        label(0, returnN, func.body, None)
+        val loc = InstLoc.InFunction(module, id, 0)
+        label(0, returnN, loc.withLoc(func.body), None)
       } { ex =>
         stack.clearCurrentOperandFrame()
         ex match {
@@ -376,19 +399,19 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
           val ftActual = func.funcType
           if (ftExpected != ftActual)
             fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
-          invoke(func, Right(funcIx))
+          invoke(func, FuncId.Indirect(funcIx))
       }
 
     phi {
-      case FixIn.Eval(inst) =>
-        eval_open(inst); FixOut.Eval()
+      case FixIn.Eval(inst, loc) =>
+        eval_open(inst, loc); FixOut.Eval()
       case FixIn.EnterWasmFunction(id, func, funcType) =>
-        FixOut.ExitWasmFunction(enterFunction_open(func, funcType))
+        FixOut.ExitWasmFunction(enterFunction_open(id, func, funcType))
     }
   }
 
-  def eval(inst: Inst): FixOut[V] = fixed(FixIn.Eval(inst))
-  def enterFunction(id: Either[FuncIdx, V], func: Func, ft: FuncType): FixOut[V] = fixed(FixIn.EnterWasmFunction(id, func, ft))
+  def eval(inst: Inst, loc: InstLoc[V]): FixOut[V] = fixed(FixIn.Eval(inst, loc))
+  def enterFunction(id: FuncId[V], func: Func, ft: FuncType): FixOut[V] = fixed(FixIn.EnterWasmFunction(id, func, ft))
 
 
   def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] =
@@ -405,7 +428,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
             val frameData = FrameData(funcType.t.size, mod)
             val vars = args.view ++ func.locals.map(num.defaultValue)
             labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
-              val res = enterFunction(Left(funcIx), func, funcType)
+              val res = enterFunction(FuncId.Direct(funcIx), func, funcType)
 //              println(s"invoke exported $funcName = $res should have $rtLength values")
 //              println(func)
             }))
@@ -439,10 +462,10 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
 //    // TODO WIP
 //    ???
 
-  def evalInstructionSequence(instructions: Expr, mod: ModuleInstance[V]): V =
+  def evalInstructionSequence(insts: Vector[(Inst, InstLoc[V])], mod: ModuleInstance[V]): V =
     val frameData = FrameData(1,mod)
     labelStack.withFresh(withFreshOperandStack(inNewFrameNoIndex(frameData, Vector.empty[V]){
-      instructions.foreach(eval)
+      insts.foreach(eval(_, _))
       stack.pop()
     }))
 
@@ -510,10 +533,15 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
   // we assume a valid module here
   def initializeModule(module: Module, imports: Imports[V] = mutable.Map.empty): ModuleInstance[V] =
     val modInst = new ModuleInstance[V] {}
+    var loc = InstLoc.InInit(modInst, 0)
     // compute the initilization values for globals
     val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports)
     modInst.globalAddrs = globImports
-    val globValues = module.globals.map(glob => evalInstructionSequence(glob.init, modInst))
+    val globValues = module.globals.map { glob =>
+      val insts = loc.withLoc(glob.init)
+      loc = loc + glob.init.length
+      evalInstructionSequence(insts, modInst)
+    }
     // in the current swam version reference vectors are already provided via the elem fields of the module
     // -> we don't have to compute anything here for now
 
@@ -574,7 +602,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
       module.data.zipWithIndex.foreach {
         case (Data(memIdx, off, init),i) =>
           assert(memIdx == 0)
-          off.foreach(eval)
+          val insts = loc.withLoc(off)
+          loc = loc + off.length
+          insts.foreach(eval)
           val base = stack.pop()
           val bytes = init.toByteVector.toIterable
           bytes.zipWithIndex.foreach { (byte,byteIdx) =>
@@ -591,7 +621,9 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
       // tables
       module.elem.zipWithIndex.foreach {
         case (Elem(tableIdx, off, init), i) =>
-          off.foreach(eval)
+          val insts = loc.withLoc(off)
+          loc = loc + off.length
+          insts.foreach(eval)
           val base = stack.pop()
           init.zipWithIndex.foreach { (funcIx,i) =>
             stack.push(base)
@@ -614,7 +646,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
             val frameData = FrameData(funcType.t.size, mod)
             val vars = func.locals.map(num.defaultValue)
             labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
-              val res = enterFunction(Left(funcIdx), func, funcType)
+              val res = enterFunction(FuncId.Direct(funcIdx), func, funcType)
 //              println(s"invoke exported $funcName = $res should have $rtLength values")
 //              println(func)
             }))
