@@ -32,9 +32,9 @@ trait Fix:
     case Enter(fun: Function) extends CfgNode, fix.ImportantControlNode
     case Exit(fun: Function) extends CfgNode, fix.ImportantControlNode
 
-  def control[Ctx, V](sensitive: Boolean, allStatements: Boolean)(using effect: ObservableJoin) = fix.control[Ctx, FixIn, FixOut[V], CfgNode](sensitive) {
+  def control[Ctx, V](sensitive: Boolean, onlyCalls: Boolean)(using effect: ObservableJoin) = fix.control[Ctx, FixIn, FixOut[V], CfgNode](sensitive) {
     case FixIn.Run(Stm.Block(_)) => None
-    case FixIn.Run(s) => if (allStatements) Some(CfgNode.Statement(s)) else None
+    case FixIn.Run(s) => if (onlyCalls) None else Some(CfgNode.Statement(s))
     case FixIn.EnterFunction(f) => Some(CfgNode.Enter(f))
     case FixIn.Eval(c: Exp.Call) => Some(CfgNode.Call(c))
     case _ => None
@@ -44,12 +44,12 @@ trait Fix:
     case _ => None
   }
 
-  def allCfgNodes(prog: Program, allStatements: Boolean): Set[CfgNode] =
+  def allCfgNodes(prog: Program, onlyCalls: Boolean): Set[CfgNode] =
     prog.fold(using {
       case fun => Set(CfgNode.Enter(fun), CfgNode.Exit(fun))
     }, {
       case Stm.Block(_) => Set()
-      case s => if (allStatements) Set(CfgNode.Statement(s)) else Set()
+      case s => if (onlyCalls) Set() else Set(CfgNode.Statement(s))
     }, {
       case c: Exp.Call => Set(CfgNode.Call(c), CfgNode.CallReturn(CfgNode.Call(c)))
       case _ => Set()

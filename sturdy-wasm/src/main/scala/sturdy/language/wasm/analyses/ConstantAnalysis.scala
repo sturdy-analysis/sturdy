@@ -158,12 +158,12 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
     def setAllState(all: AllState) = setInState(all)
   }
 
-  def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value], onlyCalls: Boolean): Instance =
+  def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value], cfgOnlyCalls: Boolean): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
     given Effects = effects
-    new Instance(effects, onlyCalls)
+    new Instance(effects, cfgOnlyCalls)
 
-  class Instance(effects: Effects, onlyCalls: Boolean)(using Failure, Effectful)
+  class Instance(effects: Effects, cfgOnlyCalls: Boolean)(using Failure, Effectful)
     extends GenericInstance[Effects] with GenericInterpreter(effects) :
 
     given Effects = effects
@@ -200,7 +200,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
       effects.joinComputationsIterable(invokeAllFuns)
     val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
 
-    val cfg = control[FrameData[Value]](sensitive = false, onlyCalls)
+    val cfg = control[FrameData[Value]](sensitive = false, cfgOnlyCalls)
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
       fix.contextSensitive(frameSensitive,
@@ -213,5 +213,4 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
 
     def initializeModule(module: Module): ModuleInstance[Value] =
       val modInst = super.initializeModule(module)
-      cfg.clear()
       modInst

@@ -42,11 +42,11 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
-      val cfgAllStatements = true
-      val analysis = IntervalAnalysis(Map(), Map(), steps, cfgAllStatements)
+      val onlyCalls = false
+      val analysis = IntervalAnalysis(Map(), Map(), steps, onlyCalls)
       val aresult = analysis.effects.fallible(analysis.execute(program))
 
-      val deadNodes = analysis.cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, cfgAllStatements))
+      val deadNodes = analysis.cfg.filterDeadNodes(IntervalAnalysis.allCfgNodes(program, onlyCalls))
       if (deadNodes.nonEmpty)
         println(s"Found dead code: $deadNodes")
 

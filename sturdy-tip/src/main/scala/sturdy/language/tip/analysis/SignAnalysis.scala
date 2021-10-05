@@ -50,12 +50,12 @@ object SignAnalysis extends Interpreter,
     override def getAllState() = getOutState()
     override def setAllState(all: AllState) = setOutState(all)
 
-  def apply(initEnvironment: Environment, initStore: Store, steps: Int, cfgAllStatements: Boolean): Instance =
+  def apply(initEnvironment: Environment, initStore: Store, steps: Int, cfgOnlyCalls: Boolean): Instance =
     val effects = new Effects(initEnvironment, initStore)
     given Effects = effects
-    new Instance(effects, steps, cfgAllStatements)
+    new Instance(effects, steps, cfgOnlyCalls)
 
-  class Instance(effects: Effects, steps: Int, cfgAllStatements: Boolean)(using Failure, Effectful)
+  class Instance(effects: Effects, steps: Int, cfgOnlyCalls: Boolean)(using Failure, Effectful)
     extends GenericInstance with GenericInterpreter[Value, Addr, Effects](effects):
 
     given Effects = effects
@@ -72,7 +72,7 @@ object SignAnalysis extends Interpreter,
 
     given Lazy[Widen[Value]] = lazily(CombineValue)
 
-    val cfg = control[Map[Addr, Value], Value](sensitive = true, cfgAllStatements)
+    val cfg = control[Map[Addr, Value], Value](sensitive = true, cfgOnlyCalls)
 
     val phi =
       fix.contextSensitive(parameters,
