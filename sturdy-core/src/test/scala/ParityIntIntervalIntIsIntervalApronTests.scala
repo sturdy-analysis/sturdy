@@ -22,6 +22,7 @@ import sturdy.values.JoinValue
 import sturdy.values.ints.IntIntervalApron
 import sturdy.values.Finite
 import sturdy.effect.failure.AFailureCollect
+import gmp.Mpq
 
 class ParityIntIntervalIsIntIntervalApronTests extends AnyFreeSpec, Matchers:
   def op2IIA(
@@ -31,7 +32,7 @@ class ParityIntIntervalIsIntIntervalApronTests extends AnyFreeSpec, Matchers:
       r0: Int,
       r1: Int
   ): IntIntervalApron = {
-    f(IntIntervalApron.bounded(l0, l1), IntIntervalApron.bounded(r0, r1))
+    f(IntIntervalApron(l0, l1), IntIntervalApron(r0, r1))
   }
 
   def op2II(
@@ -68,11 +69,40 @@ class ParityIntIntervalIsIntIntervalApronTests extends AnyFreeSpec, Matchers:
       v1_h: Int,
       v2_l: Int,
       v2_h: Int
-  ) = {
+  ): Assertion = {
     val testIIA = op2IIA(apronIntInterval_f, v1_l, v1_h, v2_l, v2_h)
     val testII = op2II(intInterval_f, v1_l, v1_h, v2_l, v2_h)
-    assert(testIIA === IntIntervalApron(testII))
-    assert(testIIA.toIntInterval() === testII)
+
+    assert(testIIA === IntIntervalApron(testII) && testIIA.toIntInterval() === testII)
+  }
+
+  def expectedInfinityParityIItoIIA( // same as above, but only for values where infinity is an expected bound in result for IIA
+      apronIntInterval_f: (
+          (
+              IntIntervalApron,
+              IntIntervalApron
+          ) => IntIntervalApron
+      ),
+      intInterval_f: ((IntInterval, IntInterval) => IntInterval),
+      v1_l: Int,
+      v1_h: Int,
+      v2_l: Int,
+      v2_h: Int
+  ): Assertion = {
+    def inftyBoundsComparator(boundIIA: apron.Scalar, boundII: Int): Boolean =
+      boundIIA.isInfty match {
+        case -1 => boundII == Int.MinValue
+        case 1 => boundII == Int.MaxValue
+        case 0 => boundIIA.cmp(boundII) == 0
+      }
+
+    val testIIA: IntIntervalApron = op2IIA(apronIntInterval_f, v1_l, v1_h, v2_l, v2_h)
+    val testII: IntInterval = op2II(intInterval_f, v1_l, v1_h, v2_l, v2_h)
+    
+    val inf = testIIA.interval.inf
+    val sup = testIIA.interval.sup
+    
+    assert(inftyBoundsComparator(inf, testII.l) && inftyBoundsComparator(sup, testII.h))
   }
 
   // failure: summon[Failure], new AFailureCollect {} or implicitly
@@ -111,7 +141,7 @@ class ParityIntIntervalIsIntIntervalApronTests extends AnyFreeSpec, Matchers:
     // }
     "widen" in {
       var explicitBounds: Set[Int] = Set.empty
-      parityIItoIIA(
+      val negativeInfinityAssertion = expectedInfinityParityIItoIIA(
         IntIntervalApronWiden(explicitBounds).widen,
         IntIntervalWiden(explicitBounds).widen,
         0,
@@ -119,5 +149,7 @@ class ParityIntIntervalIsIntIntervalApronTests extends AnyFreeSpec, Matchers:
         -1,
         0
       ) // compare result of the addition of aproninterval (0,1) and aproninterval (-1,0) with the result of intinterval
+      
+    
     }
   }
