@@ -56,14 +56,17 @@ type Imports[V] = mutable.Map[String, ModuleInstance[V]]
 enum InstLoc[V]:
   case InFunction(mod: ModuleInstance[V], func: FuncId[V], pc: Int)
   case InInit(mod: ModuleInstance[V], pc: Int)
+  case InvokeExported(mod: ModuleInstance[V], funName: String)
 
   override def toString: String = this match
     case InFunction(mod, func, pc) => s"$mod.$func:$pc"
     case InInit(mod, pc) => s"$mod.INIT:$pc"
+    case InvokeExported(mod, funName) => s"$mod.$funName"
 
   def +(i: Int): InstLoc[V] = this match
     case InFunction(mod, func, pc) => InFunction(mod, func, pc + i)
     case InInit(mod, pc) => InInit(mod, pc + i)
+    case InvokeExported(mod, funName) => throw new IllegalStateException
 
   def withLoc(insts: Vector[Inst], offset: Int = 0): Vector[(Inst, InstLoc[V])] =
     insts.zipWithIndex.map((i, ix) => (i, this + ix + 1 + offset))
@@ -417,21 +420,16 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
   def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] =
     modInst.exports.find((name, _) => name == funcName) match
       case Some((_, ExternalValue.Function(funcIx))) =>
-        val func = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-        val paramTys = func.funcType.params
+        val fun = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+        val paramTys = fun.funcType.params
         if (paramTys.length != args.length)
           throw new Error(s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}.")
         // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
-        val rtLength = func.funcType.t.length
-        func match
-          case FunctionInstance.Wasm(mod, func, funcType) =>
-            val frameData = FrameData(funcType.t.size, mod)
-            val vars = args.view ++ func.locals.map(num.defaultValue)
-            labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
-              val res = enterFunction(FuncId.Direct(funcIx), func, funcType)
-//              println(s"invoke exported $funcName = $res should have $rtLength values")
-//              println(func)
-            }))
+        val rtLength = fun.funcType.t.length
+        stack.pushN(args)
+        inNewFrameNoIndex(FrameData(0, modInst), Iterable.empty) {
+          eval(Call(funcIx), InstLoc.InvokeExported(modInst, funcName))
+        }
         stack.popN(rtLength)
       case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
 
