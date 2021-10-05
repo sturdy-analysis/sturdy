@@ -151,6 +151,16 @@ object ConcreteInterpreter extends Interpreter :
       else
         OptionC.none
 
+
+    val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(
+      HostFunction.Exit() -> { args =>
+        throw new HostFunction.ExitException(args.head)
+      }
+    )
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =
+      runtime(hostFunc)(args)
+
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends ConcreteOperandStack[Value]
       with ConcreteMemory[MemoryAddr]

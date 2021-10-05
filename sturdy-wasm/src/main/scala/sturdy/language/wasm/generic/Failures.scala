@@ -14,3 +14,4 @@ case object TableAccessOutOfBounds extends FailureKind
 case object InvocationError extends FailureKind
 case object InvalidModule extends FailureKind
 case object TypeError extends FailureKind
+case class ProcExit[V](exitCode: V) extends FailureKind

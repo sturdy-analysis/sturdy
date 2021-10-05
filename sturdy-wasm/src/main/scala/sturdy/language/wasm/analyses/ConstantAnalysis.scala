@@ -20,6 +20,7 @@ import sturdy.language.wasm.generic.{*, given}
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
+import swam.FuncType
 import sturdy.values.convert.ToppedConvert
 import sturdy.values.doubles.{*, given}
 import sturdy.values.exceptions.{*, given}
@@ -92,6 +93,15 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
             OptionA.None()
         case Topped.Top =>
           OptionA.NoneSome(vec)
+
+    val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(
+      HostFunction.Exit() -> { args =>
+        throw new HostFunction.ExitException(args.head)
+      }
+    )
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] =
+      runtime(hostFunc)(args)
 
   trait ASerialize extends Serialize[Value, Bytes, MemoryInst, MemoryInst], Failure:
     val cSerialize = new ConcreteInterpreter.CSerialize with Failure {

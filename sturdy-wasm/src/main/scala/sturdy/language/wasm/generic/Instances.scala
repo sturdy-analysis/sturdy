@@ -27,10 +27,11 @@ trait ModuleInstance[V]:
 
 enum FunctionInstance[V]:
   case Wasm(module: ModuleInstance[V], func: Func, ft: FuncType)
-  //  case HostX(...)
+  case Host(hf: HostFunction)
 
   def funcType: FuncType = this match
     case Wasm(_, _ , ft) => ft
+    case Host(hf) => hf.funcType
 
 case class TableInstance[V](tableType: TableType, functions: Vector[FunctionInstance[V]])
 case class GlobalInstance[V](tpe: ValType, var value: V)

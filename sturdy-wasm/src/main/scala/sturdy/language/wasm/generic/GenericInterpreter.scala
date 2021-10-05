@@ -379,6 +379,18 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
           labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
             enterFunction(funcIx, func, funcType)
           }))
+        case FunctionInstance.Host(hostFunc) =>
+          val args = stack.popN(hostFunc.funcType.params.size)
+          try {
+            val res = invokeHostFunction(hostFunc, args)
+            val expectedSize = hostFunc.funcType.t.size
+            if (res.length != expectedSize) {
+              throw new Error(s"Host function returned the wrong number of results: expected $expectedSize, but got ${res.length}.")
+            }
+            stack.pushN(res)
+          } catch {
+            case HostFunction.ExitException(exitCode) => fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
+          }
 
     def enterFunction_open(id: FuncId[V], func: Func, funcType: FuncType): List[V] =
       val returnN = funcType.t.size
@@ -431,6 +443,18 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
           eval(Call(funcIx), InstLoc.InvokeExported(modInst, funcName))
         }
         stack.popN(rtLength)
+        // TODO host functions
+          //case FunctionInstance.Host(hostFunc) =>
+          //  try {
+          //    val res = invokeHostFunction(hostFunc, args)
+          //    val expectedSize = hostFunc.funcType.t.size
+          //    if (res.length != expectedSize)
+          //      throw new Error(s"Host function returned the wrong number of results: expected $expectedSize, but got ${res.length}.")
+          //    res
+          //  } catch {
+          //    case HostFunction.ExitException(exitCode) => fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
+          //  }
+
       case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
 
 
@@ -486,44 +510,55 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
     val mems: VectorBuilder[MemoryAddr] = VectorBuilder()
 
     module.imports.foreach { imp =>
-      // get the module to import from
-      val from = imports.getOrElse(imp.moduleName, throw new Error(s"No module with name ${imp.moduleName} in imports." ))
-      // get the exported field
-      val (_,exp) = from.exports.find((name,_) => name == imp.fieldName)
-        .getOrElse(throw new Error(s"No export with name ${imp.fieldName} in module."))
-      imp match
-        case Import.Function(_,_,tpe) =>
-          exp match
-            case ExternalValue.Function(addr) =>
-              val expectedType = module.types(tpe)
-              val func = from.functions(addr)
-              if (expectedType == func.funcType) {
-                funcs += func
-              } else {
-                throw new Error(s"Type mismatch: expected $expectedType but found ${func.funcType}.")
-              }
-            case _ => throw new Error(s"Import mismatch: expected a function but found $exp.")
-        case Import.Global(_,_,GlobalType(tpe, mut)) =>
-          exp match
-            case ExternalValue.Global(addr) =>
-              val glob = from.globalAddrs(addr)
-              // TODO: check mutability (=> add mut to GlobalInstance)
-              globs += glob
-            case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
-        case Import.Table(_,_,tpe) =>
-          exp match
-            case ExternalValue.Table(addr) =>
-              val tab = from.tableAddrs(addr)
-              // TODO: check table type
-              tabs += tab
-            case _ => throw new Error(s"Import mismatch: expected a table but found $exp.")
-        case Import.Memory(_,_,tpe) =>
-          exp match
-            case ExternalValue.Memory(addr) =>
-              val mem = from.memoryAddrs(addr)
-              // TODO: check memory type
-              mems += mem
-            case _ => throw new Error(s"Import mismatch: expected a memory but found $exp.")
+      // handle host functions
+      if (imp.moduleName == "runtime") {
+        imp match
+          case Import.Function(_,funcName, funcType) =>
+            val hf = HostFunction.nameToHostFunction(funcName)
+            if (hf.funcType != module.types(funcType))
+              throw new Error(s"Importing host function with wrong type: expected ${hf.funcType}, but got ${module.types(funcType)}")
+            funcs += FunctionInstance.Host(hf)
+          case _ => throw new Error(s"Import from runtime: expected a function, but got ${imp}.")
+      } else {
+        // get the module to import from
+        val from = imports.getOrElse(imp.moduleName, throw new Error(s"No module with name ${imp.moduleName} in imports."))
+        // get the exported field
+        val (_, exp) = from.exports.find((name, _) => name == imp.fieldName)
+          .getOrElse(throw new Error(s"No export with name ${imp.fieldName} in module."))
+        imp match
+          case Import.Function(_, _, tpe) =>
+            exp match
+              case ExternalValue.Function(addr) =>
+                val expectedType = module.types(tpe)
+                val func = from.functions(addr)
+                if (expectedType == func.funcType) {
+                  funcs += func
+                } else {
+                  throw new Error(s"Type mismatch: expected $expectedType but found ${func.funcType}.")
+                }
+              case _ => throw new Error(s"Import mismatch: expected a function but found $exp.")
+          case Import.Global(_, _, GlobalType(tpe, mut)) =>
+            exp match
+              case ExternalValue.Global(addr) =>
+                val glob = from.globalAddrs(addr)
+                // TODO: check mutability (=> add mut to GlobalInstance)
+                globs += glob
+              case _ => throw new Error(s"Import mismatch: expected a global but found $exp.")
+          case Import.Table(_, _, tpe) =>
+            exp match
+              case ExternalValue.Table(addr) =>
+                val tab = from.tableAddrs(addr)
+                // TODO: check table type
+                tabs += tab
+              case _ => throw new Error(s"Import mismatch: expected a table but found $exp.")
+          case Import.Memory(_, _, tpe) =>
+            exp match
+              case ExternalValue.Memory(addr) =>
+                val mem = from.memoryAddrs(addr)
+                // TODO: check memory type
+                mems += mem
+              case _ => throw new Error(s"Import mismatch: expected a memory but found $exp.")
+      }
     }
 
     (funcs.result(), globs.result(), tabs.result(), mems.result())
@@ -648,6 +683,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
 //              println(s"invoke exported $funcName = $res should have $rtLength values")
 //              println(func)
             }))
+          case _: FunctionInstance.Host[V] => ??? // TODO: is it allowed to use host functions as start function?
     }
 
     modInst

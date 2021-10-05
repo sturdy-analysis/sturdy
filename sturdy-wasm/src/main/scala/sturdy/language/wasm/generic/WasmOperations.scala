@@ -1,7 +1,7 @@
 package sturdy.language.wasm.generic
 
 import sturdy.data.Option
-import swam.GlobalIdx
+import swam.{FuncType, GlobalIdx}
 
 /** Operations specific to Wasm */
 trait WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry]:
@@ -22,3 +22,5 @@ trait WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry]:
   def entryToGlobI(entry: Entry): GlobalInstance[V]
   
   def indexLookup[A](ix: V, vec: Vector[A]): Option[WasmOpsJoin, A]
+
+  def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]
