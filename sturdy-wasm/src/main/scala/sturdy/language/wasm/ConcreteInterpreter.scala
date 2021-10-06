@@ -124,7 +124,7 @@ object ConcreteInterpreter extends Interpreter :
           buf.putDouble(0, v.asFloat64)
         case _ => throw new IllegalArgumentException(s"Expected store instruction, but got $encInfo.")
 
-  given ConcreteWasmOperations(using Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry] with
+  given ConcreteWasmOperations(using f: Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry] with
     override type WasmOpsJoin[A] = NoJoin[A]
 
     override def valueToAddr(v: Value): Int = v.asInt32
@@ -154,7 +154,8 @@ object ConcreteInterpreter extends Interpreter :
 
     val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(
       HostFunction.Exit() -> { args =>
-        throw new HostFunction.ExitException(args.head)
+        val exitCode = args.head
+        f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
       }
     )
 

@@ -64,7 +64,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
   given EntryTopped: Top[Entry] with
     override def top: Entry = Entry.Top
 
-  given ConstantWasmOperations(using Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry] with
+  given ConstantWasmOperations(using f: Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry] with
     override type WasmOpsJoin[A] = WithJoin[A]
 
     override def valueToAddr(v: Value): Addr = v.asInt32
@@ -96,7 +96,8 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
 
     val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(
       HostFunction.Exit() -> { args =>
-        throw new HostFunction.ExitException(args.head)
+        val exitCode = args.head
+        f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
       }
     )
 

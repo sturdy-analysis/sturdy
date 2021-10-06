@@ -381,16 +381,12 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
           }))
         case FunctionInstance.Host(hostFunc) =>
           val args = stack.popN(hostFunc.funcType.params.size)
-          try {
-            val res = invokeHostFunction(hostFunc, args)
-            val expectedSize = hostFunc.funcType.t.size
-            if (res.length != expectedSize) {
-              throw new Error(s"Host function returned the wrong number of results: expected $expectedSize, but got ${res.length}.")
-            }
-            stack.pushN(res)
-          } catch {
-            case HostFunction.ExitException(exitCode) => fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
+          val res = invokeHostFunction(hostFunc, args)
+          val expectedSize = hostFunc.funcType.t.size
+          if (res.length != expectedSize) {
+            throw new Error(s"Host function returned the wrong number of results: expected $expectedSize, but got ${res.length}.")
           }
+          stack.pushN(res)
 
     def enterFunction_open(id: FuncId[V], func: Func, funcType: FuncType): List[V] =
       val returnN = funcType.t.size
