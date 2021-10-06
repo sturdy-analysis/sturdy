@@ -30,3 +30,9 @@ class BinarytreeTest extends AnyFlatSpec, Matchers:
     println(interp.cfg.toGraphViz)
     println(result)
   }
+
+  //val concreteExitCode = 0
+  //it must s"execute $funcName with concrete interpreter returning exit code $concreteExitCode" in {
+  //  val res = runWasmFunction(path, funcName, List.empty)
+  //  println(res)
+  //}

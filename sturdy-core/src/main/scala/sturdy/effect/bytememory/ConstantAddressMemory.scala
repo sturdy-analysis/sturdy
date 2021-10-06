@@ -12,7 +12,7 @@ import scala.reflect.ClassTag
 
 /** A memory that tracks byte properties `B` for memory accesses via possibly constant addresses `Topped[Int]`.
  */
-trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], Join[B]) extends Memory[Key, Topped[Int], IndexedSeqView[B], Topped[Int]], Effectful:
+trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: Join[B]) extends Memory[Key, Topped[Int], IndexedSeqView[B], Topped[Int]], Effectful:
   import ConstantAddressMemory.{*, given}
 
   override type MemoryJoin[A] = WithJoin[A]
@@ -43,7 +43,9 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using Top[B], Join[B]) 
       case Topped.Actual(mem) => addr match
         case Topped.Top =>
           // any byte of the memory might be affected, set the memory to top
-          memories += key -> Topped.Top
+          //memories += key -> Topped.Top
+          mem.bytes.map(_ => tb)
+          mem.dirty.addAll(0 until mem.size)
           OptionA.noneSome(())
         case Topped.Actual(a) =>
           if (a + bytes.size < mem.size) {
