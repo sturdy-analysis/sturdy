@@ -14,7 +14,7 @@ import java.nio.file.{Path, Paths}
 class BinarytreeTest extends AnyFlatSpec, Matchers:
   behavior of "BinaryTree"
 
-  val uri = classOf[BinarytreeTest].getResource("/sturdy/language/wasm/benchmarksgame/binarytrees.wast").toURI();
+  val uri = classOf[BinarytreeTest].getResource("/sturdy/language/wasm/benchmarksgame/mandelbrot.wast").toURI();
   val path = Paths.get(uri)
 
   val funcName = "_start"
@@ -28,4 +28,5 @@ class BinarytreeTest extends AnyFlatSpec, Matchers:
       interp.invokeExported(modInst, funcName, List.empty)
     )
     println(interp.cfg.toGraphViz)
+    println(result)
   }
