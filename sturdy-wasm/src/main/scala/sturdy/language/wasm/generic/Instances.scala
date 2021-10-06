@@ -35,6 +35,10 @@ case class GlobalInstance[V](tpe: ValType, var value: V)
 case class DataInstance(data: ByteVector)
 case class ElemInstance[V](functions: Vector[FunctionInstance[V]])
 
+def mapGlobalInstance[A,B](f: A => B)(x: GlobalInstance[A]): GlobalInstance[B] = GlobalInstance(x.tpe, f(x.value))
+//def mapFunctionInstance[A,B](f: A => B)(x: FunctionInstance[A]): FunctionInstance[B] = x match
+//  case Wasm(mod, fun, ft) => Wasm(mod.mapModuleInstance(f), fun, ft)
+
 given JoinGlobalInstance[V](using j: Join[V]): Join[GlobalInstance[V]] with
   override def apply(g1: GlobalInstance[V], g2: GlobalInstance[V]): GlobalInstance[V] = (g1, g2) match
     case (GlobalInstance(t1,v1), GlobalInstance(t2,v2)) =>
