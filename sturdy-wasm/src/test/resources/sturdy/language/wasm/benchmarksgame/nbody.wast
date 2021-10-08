@@ -2,7 +2,7 @@
   (type (;0;) (func))
   (type (;1;) (func (param i32)))
   (type (;2;) (func (result i32)))
-  (import "runtime" "proc_exit" (func (;0;) (type 1)))
+  (import "wasi_snapshot_preview1" "proc_exit" (func (;0;) (type 1)))
   (func (;1;) (type 0)
     (local i32)
     call 3

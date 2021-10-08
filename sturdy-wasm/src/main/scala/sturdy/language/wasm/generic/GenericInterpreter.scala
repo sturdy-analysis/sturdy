@@ -507,7 +507,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
 
     module.imports.foreach { imp =>
       // handle host functions
-      if (imp.moduleName == "runtime") {
+      if (imp.moduleName == "wasi_snapshot_preview1") {
         imp match
           case Import.Function(_,funcName, funcType) =>
             val hf = HostFunction.nameToHostFunction(funcName)

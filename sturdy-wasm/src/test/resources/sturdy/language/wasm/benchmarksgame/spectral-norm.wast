@@ -3,7 +3,7 @@
   (type (;1;) (func))
   (type (;2;) (func (param i32)))
   (type (;3;) (func (result i32)))
-  (import "runtime" "proc_exit" (func (;0;) (type 2)))
+  (import "wasi_snapshot_preview1" "proc_exit" (func (;0;) (type 2)))
   (func (;1;) (type 1)
     (local i32)
     call 4
@@ -218,4 +218,5 @@
   (memory (;0;) 2)
   (global (;0;) (mut i32) (i32.const 66560))
   (export "memory" (memory 0))
-  (export "_start" (func 1)))
+  (export "_start" (func 1))
+  (export "main" (func 4)))

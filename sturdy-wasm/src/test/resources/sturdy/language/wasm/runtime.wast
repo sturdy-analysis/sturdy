@@ -4,7 +4,7 @@
   (type (;2;) (func (param i32) (result i32)))
   (type (;3;) (func (param f64) (result f64)))
   (type (;4;) (func))
-  (import "runtime" "proc_exit" (func (;0;) (type 0)))
+  (import "wasi_snapshot_preview1" "proc_exit" (func (;0;) (type 0)))
   (func (;1;) (type 4)
     (local i32)
     i32.const 42
