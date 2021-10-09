@@ -94,45 +94,21 @@ enum FixOut[V]:
 
 trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, Symbol, Entry]]
   (val effects: Effects)
-  (using wasmOps: WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry],
-         exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin])
+  (using wasmOperations: WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry],
+   exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin])
   (using effects.BoolBranchJoin[Unit], effects.ExceptJoin[Unit],
    effects.MemoryJoin[Unit], effects.MemoryJoin[V],
-   effects.TableJoin[Unit], wasmOps.WasmOpsJoin[Unit]):
+   effects.TableJoin[Unit], wasmOperations.WasmOpsJoin[Unit]):
 
   import effects.*
   val stack: OperandStack[V] = effects
 
-  val intOps: IntOps[V]
-  val longOps: LongOps[V]
-  val floatOps: FloatOps[V]
-  val doubleOps: DoubleOps[V]
-  val eqOps: EqOps[V, V]
-  val compareOps: CompareOps[V, V]
-  val unsignedCompareOps: UnsignedCompareOps[V, V]
-  val convertIntLong: ConvertIntLong[V, V]
-  val convertIntFloat: ConvertIntFloat[V, V]
-  val convertIntDouble: ConvertIntDouble[V, V]
-  val convertLongInt: ConvertLongInt[V, V]
-  val convertLongFloat: ConvertLongFloat[V, V]
-  val convertLongDouble: ConvertLongDouble[V, V]
-  val convertFloatInt: ConvertFloatInt[V, V]
-  val convertFloatLong: ConvertFloatLong[V, V]
-  val convertFloatDouble: ConvertFloatDouble[V, V]
-  val convertDoubleInt: ConvertDoubleInt[V, V]
-  val convertDoubleLong: ConvertDoubleLong[V, V]
-  val convertDoubleFloat: ConvertDoubleFloat[V, V]
-  val functionOps: FunctionOps[FunctionInstance[V], Nothing, Unit, FunV]
+  val wasmOps: WasmOps[V, FunV]
+  import wasmOps.*
 
   val phi: fix.Combinator[FixIn[V], FixOut[V]]
 
-  lazy val num = new GenericInterpreterNumerics[V](
-    effects,
-    intOps, longOps, floatOps, doubleOps, eqOps, compareOps, unsignedCompareOps,
-    convertIntLong, convertIntFloat, convertIntDouble,
-    convertLongInt, convertLongFloat, convertLongDouble,
-    convertFloatInt, convertFloatLong, convertFloatDouble,
-    convertDoubleInt, convertDoubleLong, convertDoubleFloat)
+  lazy val num = new GenericInterpreterNumerics[V](effects, wasmOps)
 
   private var memCount = 0
   private var tabCount = 0
@@ -143,14 +119,14 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
   addEmptyTable(globalTableIndex)
   tabCount += 1
 
-  import wasmOps.*
+  import wasmOperations.*
   import exceptOps.*
 
   val labelStack = new LabelStack
 
   inline private def fail(k: FailureKind, what: String) = effects.fail(k, s"$what in $module")
 
-  protected def module: ModuleInstance[V] = getFrameData.module
+  def module: ModuleInstance[V] = getFrameData.module
 
   def evalVarInst(inst: VarInst): Unit = inst match
     case LocalGet(ix) =>

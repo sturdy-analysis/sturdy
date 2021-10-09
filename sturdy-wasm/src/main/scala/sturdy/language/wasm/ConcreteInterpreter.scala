@@ -168,41 +168,15 @@ object ConcreteInterpreter extends Interpreter :
       with CSerialize
       with ConcreteSymbolTable[TableAddr, Symbol, Entry]
       with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
-      with CBoolBranching[Value]
+      with CBoolBranching[Value](using _.asBoolean)
       with ConcreteExcept[WasmException[Value]]
       with CFailure
 
   class Instance(effects: Effects)(using Failure)
-    extends GenericInstance[Effects] with GenericInterpreter(effects) :
+    extends GenericInstance with GenericInterpreter(effects) :
 
-    def i32Ops: IntOps[I32] = implicitly
-    def i64Ops: LongOps[I64] = implicitly
-    def f32Ops: FloatOps[F32] = implicitly
-    def f64Ops: DoubleOps[F64] = implicitly
-    def i32EqOps: EqOps[I32, Bool] = implicitly
-    def i64EqOps: EqOps[I64, Bool] = implicitly
-    def f32EqOps: EqOps[F32, Bool] = implicitly
-    def f64EqOps: EqOps[F64, Bool] = implicitly
-    def i32CompareOps: CompareOps[I32, Bool] = implicitly
-    def i64CompareOps: CompareOps[I64, Bool] = implicitly
-    def f32CompareOps: CompareOps[F32, Bool] = implicitly
-    def f64CompareOps: CompareOps[F64, Bool] = implicitly
-    def i32UnsignedCompareOps: UnsignedCompareOps[I32, Bool] = implicitly
-    def i64UnsignedCompareOps: UnsignedCompareOps[I64, Bool] = implicitly
-    def convertI32I64: ConvertIntLong[I32, I64] = implicitly
-    def convertI32F32: ConvertIntFloat[I32, F32] = implicitly
-    def convertI32F64: ConvertIntDouble[I32, F64] = implicitly
-    def convertI64I32: ConvertLongInt[I64, I32] = implicitly
-    def convertI64F32: ConvertLongFloat[I64, F32] = implicitly
-    def convertI64F64: ConvertLongDouble[I64, F64] = implicitly
-    def convertF32I32: ConvertFloatInt[F32, I32] = implicitly
-    def convertF32I64: ConvertFloatLong[F32, I64] = implicitly
-    def convertF32F64: ConvertFloatDouble[F32, F64] = implicitly
-    def convertF64I32: ConvertDoubleInt[F64, I32] = implicitly
-    def convertF64I64: ConvertDoubleLong[F64, I64] = implicitly
-    def convertF64F32: ConvertDoubleFloat[F64, F32] = implicitly
-    val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
-    
+    val wasmOps: WasmOps[Value, FunV] = implicitly
+
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] = fix.identity
 
   def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =

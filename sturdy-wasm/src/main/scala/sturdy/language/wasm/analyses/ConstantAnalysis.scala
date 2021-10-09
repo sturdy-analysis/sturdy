@@ -35,7 +35,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
+object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue, Fix:
 
   type Addr = Topped[Int]
   type Bytes = IndexedSeqView[Topped[Byte]]
@@ -81,7 +81,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
       case Entry.Function(funV) => funV
       case _ => throw new IllegalArgumentException(s"Expected a function, but got $entry.")
     override def entryToGlobI(entry: Entry): GlobalInstance[Value] = entry match
-      case Entry.Global(globI) => globI 
+      case Entry.Global(globI) => globI
       case _ => throw new IllegalArgumentException(s"Expected a global, but got $entry.")
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): OptionA[A] =
@@ -152,7 +152,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
       with ASerialize
       with ToppedSymbolTable[TableAddr, SymbolUntopped, Entry]
       with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
-      with ABoolBranching[Value]
+      with ABoolBranching[Value](using _.asBoolean)
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
       with AnalysisState[InState, OutState, AllState] {
@@ -175,41 +175,11 @@ object ConstantAnalysis extends Interpreter, ConstantValues, Fix:
     new Instance(effects, cfgOnlyCalls)
 
   class Instance(effects: Effects, cfgOnlyCalls: Boolean)(using Failure, Effectful)
-    extends GenericInstance[Effects] with GenericInterpreter(effects) :
+    extends GenericInstance with GenericInterpreter(effects) :
 
-    given Effects = effects
-
-    def i32Ops: IntOps[I32] = implicitly
-    def i64Ops: LongOps[I64] = implicitly
-    def f32Ops: FloatOps[F32] = implicitly
-    def f64Ops: DoubleOps[F64] = implicitly
-    def i32EqOps: EqOps[I32, Bool] = implicitly
-    def i64EqOps: EqOps[I64, Bool] = implicitly
-    def f32EqOps: EqOps[F32, Bool] = implicitly
-    def f64EqOps: EqOps[F64, Bool] = implicitly
-    def i32CompareOps: CompareOps[I32, Bool] = implicitly
-    def i64CompareOps: CompareOps[I64, Bool] = implicitly
-    def f32CompareOps: CompareOps[F32, Bool] = implicitly
-    def f64CompareOps: CompareOps[F64, Bool] = implicitly
-    def i32UnsignedCompareOps: UnsignedCompareOps[I32, Bool] = implicitly
-    def i64UnsignedCompareOps: UnsignedCompareOps[I64, Bool] = implicitly
-    def convertI32I64: ConvertIntLong[I32, I64] = implicitly
-    def convertI32F32: ConvertIntFloat[I32, F32] = implicitly
-    def convertI32F64: ConvertIntDouble[I32, F64] = implicitly
-    def convertI64I32: ConvertLongInt[I64, I32] = implicitly
-    def convertI64F32: ConvertLongFloat[I64, F32] = implicitly
-    def convertI64F64: ConvertLongDouble[I64, F64] = implicitly
-    def convertF32I32: ConvertFloatInt[F32, I32] = implicitly
-    def convertF32I64: ConvertFloatLong[F32, I64] = implicitly
-    def convertF32F64: ConvertFloatDouble[F32, F64] = implicitly
-    def convertF64I32: ConvertDoubleInt[F64, I32] = implicitly
-    def convertF64I64: ConvertDoubleLong[F64, I64] = implicitly
-    def convertF64F32: ConvertDoubleFloat[F64, F32] = implicitly
-
-    implicit def topFunctionCall(args: Seq[Nothing], invoke: (FunctionInstance[Value], Seq[Nothing]) => Unit): Unit =
-      val invokeAllFuns = module.functions.map(fun => () => invoke(fun, args))
-      effects.joinComputationsIterable(invokeAllFuns)
-    val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = implicitly
+    private given Effects = effects
+    private given Instance = this
+    val wasmOps: WasmOps[Value, FunV] = implicitly
 
     val cfg = control[FrameData[Value]](sensitive = false, cfgOnlyCalls)
 

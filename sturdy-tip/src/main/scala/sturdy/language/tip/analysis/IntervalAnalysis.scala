@@ -35,7 +35,7 @@ object IntervalAnalysis extends Interpreter,
   type AllState = OutState
 
   class Effects(initEnvironment: Environment, initStore: Store)
-    extends ABoolBranching[Value]
+    extends ABoolBranching[Value](using _.asBoolean)
       with CCallFrame[Unit, String, Addr]((), initEnvironment)
       with AStoreMultiAddrThreadded[AllocationSiteAddr, Value](initStore)
       with AAllocationFromContext[AllocationSite, Addr](fromAllocationSite)

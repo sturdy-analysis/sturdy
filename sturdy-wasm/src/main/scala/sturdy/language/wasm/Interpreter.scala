@@ -6,6 +6,7 @@ import sturdy.values.*
 import sturdy.values.convert.LiftedConvert
 import sturdy.values.doubles.*
 import sturdy.values.floats.*
+import sturdy.values.functions.FunctionOps
 import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
@@ -72,39 +73,38 @@ trait Interpreter:
   type Entry
   type Effects <: GenericEffects[Value, Addr, Bytes, Size, ExcV, Symbol, Entry]
 
-  type Instance <: GenericInstance[Effects]
+  given ValueWasmOps
+    (using failure: Failure
+         , i32Ops: IntOps[I32]
+         , i64Ops: LongOps[I64]
+         , f32Ops: FloatOps[F32]
+         , f64Ops: DoubleOps[F64]
+         , i32EqOps: EqOps[I32, Bool]
+         , i64EqOps: EqOps[I64, Bool]
+         , f32EqOps: EqOps[F32, Bool]
+         , f64EqOps: EqOps[F64, Bool]
+         , i32CompareOps: CompareOps[I32, Bool]
+         , i64CompareOps: CompareOps[I64, Bool]
+         , f32CompareOps: CompareOps[F32, Bool]
+         , f64CompareOps: CompareOps[F64, Bool]
+         , i32UnsignedCompareOps: UnsignedCompareOps[I32, Bool]
+         , i64UnsignedCompareOps: UnsignedCompareOps[I64, Bool]
+         , convertI32I64: ConvertIntLong[I32, I64]
+         , convertI32F32: ConvertIntFloat[I32, F32]
+         , convertI32F64: ConvertIntDouble[I32, F64]
+         , convertI64I32: ConvertLongInt[I64, I32]
+         , convertI64F32: ConvertLongFloat[I64, F32]
+         , convertI64F64: ConvertLongDouble[I64, F64]
+         , convertF32I32: ConvertFloatInt[F32, I32]
+         , convertF32I64: ConvertFloatLong[F32, I64]
+         , convertF32F64: ConvertFloatDouble[F32, F64]
+         , convertF64I32: ConvertDoubleInt[F64, I32]
+         , convertF64I64: ConvertDoubleLong[F64, I64]
+         , convertF64F32: ConvertDoubleFloat[F64, F32]
+         , funOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV]
+         ): WasmOps[Value, FunV] with
 
-  trait GenericInstance[Effects <: GenericEffects[Value, Addr, Bytes, Size, ExcV, Symbol, Entry]]
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, Effects]:
-    
-    implicit def i32Ops: IntOps[I32]
-    implicit def i64Ops: LongOps[I64]
-    implicit def f32Ops: FloatOps[F32]
-    implicit def f64Ops: DoubleOps[F64]
-    implicit def i32EqOps: EqOps[I32, Bool]
-    implicit def i64EqOps: EqOps[I64, Bool]
-    implicit def f32EqOps: EqOps[F32, Bool]
-    implicit def f64EqOps: EqOps[F64, Bool]
-    implicit def i32CompareOps: CompareOps[I32, Bool]
-    implicit def i64CompareOps: CompareOps[I64, Bool]
-    implicit def f32CompareOps: CompareOps[F32, Bool]
-    implicit def f64CompareOps: CompareOps[F64, Bool]
-    implicit def i32UnsignedCompareOps: UnsignedCompareOps[I32, Bool]
-    implicit def i64UnsignedCompareOps: UnsignedCompareOps[I64, Bool]
-    implicit def convertI32I64: ConvertIntLong[I32, I64]
-    implicit def convertI32F32: ConvertIntFloat[I32, F32]
-    implicit def convertI32F64: ConvertIntDouble[I32, F64]
-    implicit def convertI64I32: ConvertLongInt[I64, I32]
-    implicit def convertI64F32: ConvertLongFloat[I64, F32]
-    implicit def convertI64F64: ConvertLongDouble[I64, F64]
-    implicit def convertF32I32: ConvertFloatInt[F32, I32]
-    implicit def convertF32I64: ConvertFloatLong[F32, I64]
-    implicit def convertF32F64: ConvertFloatDouble[F32, F64]
-    implicit def convertF64I32: ConvertDoubleInt[F64, I32]
-    implicit def convertF64I64: ConvertDoubleLong[F64, I64]
-    implicit def convertF64F32: ConvertDoubleFloat[F64, F32]
-
-    given Failure = this.effects
+    final val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = funOps
 
     final val intOps: IntOps[Value] = new LiftedIntOps(_.asInt32, Value.Int32.apply)
     final val longOps: LongOps[Value] = new LiftedLongOps(_.asInt64, Value.Int64.apply)
@@ -185,3 +185,6 @@ trait Interpreter:
     final val convertDoubleLong: ConvertDoubleLong[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int64.apply)
     final val convertDoubleFloat: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, Value.Float32.apply)
 
+  type Instance <: GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, Effects]
+
+  trait GenericInstance extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, Effects]

@@ -4,10 +4,10 @@ import java.lang.Long as JLong
 
 /** Extra compare ops for integers */
 trait UnsignedCompareOps[V, B]:
-  def ltUnsigned(v1: V, v2: V): B = ???
-  def leUnsigned(v1: V, v2: V): B = ???
-  def geUnsigned(v1: V, v2: V): B = ???
-  def gtUnsigned(v1: V, v2: V): B = ???
+  def ltUnsigned(v1: V, v2: V): B
+  def leUnsigned(v1: V, v2: V): B
+  def geUnsigned(v1: V, v2: V): B
+  def gtUnsigned(v1: V, v2: V): B
 
 object UnsignedCompareOps:
   def ltUnsigned[V, B](v1: V, v2: V)(using ops: UnsignedCompareOps[V, B]): B =
