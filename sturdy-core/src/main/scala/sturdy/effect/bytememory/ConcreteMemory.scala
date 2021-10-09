@@ -2,8 +2,6 @@ package sturdy.effect.bytememory
 
 import sturdy.data.*
 
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
 import scala.collection.mutable
 
 
@@ -18,18 +16,20 @@ trait ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int]:
     val mem = memories(key)
     // since collections are indexed by signed integers, we have to check here for addr >= 0
     // this means our maximum memory size is half of the allowed size in wasm
-    if (addr >= 0 && addr + length <= mem.size)
-      val buf = ByteBuffer.wrap(mem.bytes, addr, length)
-      OptionC.Some(buf.array().toSeq)
+    val end = addr + length
+    if (addr >= 0 && end <= mem.size)
+      OptionC.Some(mem.bytes.slice(addr, end).toSeq)
     else
       OptionC.none
 
   override def memStore(key: Key, addr: Int, bytes: Seq[Byte]): OptionC[Unit] =
-    val buf = ByteBuffer.wrap(bytes.toArray)
     val mem = memories(key)
-    val length = buf.capacity()
-    if (addr >= 0 && addr + length <= mem.size) {
-      buf.get(mem.bytes, addr, length)
+    if (addr >= 0 && addr + bytes.size <= mem.size) {
+      var i = addr
+      for (b <- bytes) {
+        mem.bytes(i) = b
+        i += 1
+      }
       OptionC.Some(())
     } else {
       OptionC.none

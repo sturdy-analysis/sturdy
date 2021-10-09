@@ -111,10 +111,10 @@ given ConcreteConvertLongBytes: ConvertLongBytes[Long, Seq[Byte]] with
     val buf = ByteBuffer.allocate(conf._1.bytes)
     buf.order(conf._2)
     conf._1 match
-      case config.BytesSize.Byte => buf.put((from % (1 << 8)).toByte)
-      case config.BytesSize.Short => buf.putShort((from % (1 << 16)).toShort)
-      case config.BytesSize.Int => buf.putInt((from % (1 << 32)).toInt)
-      case config.BytesSize.Long => buf.putLong(from)
+      case config.BytesSize.Byte => buf.put(0, (from % (1L << 8)).toByte)
+      case config.BytesSize.Short => buf.putShort(0, (from % (1L << 16)).toShort)
+      case config.BytesSize.Int => buf.putInt(0, (from % (1L << 32)).toInt)
+      case config.BytesSize.Long => buf.putLong(0, from)
     buf.array().toSeq
 
 given ConcreteConvertBytesLong: ConvertBytesLong[Seq[Byte], Long] with

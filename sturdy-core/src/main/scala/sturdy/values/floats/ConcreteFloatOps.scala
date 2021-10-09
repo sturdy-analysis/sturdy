@@ -163,7 +163,7 @@ given ConcreteConvertFloatBytes: ConvertFloatBytes[Float, Seq[Byte]] with
   override def apply(from: Float, conf: ByteOrder): Seq[Byte] =
     val buf = ByteBuffer.allocate(4)
     buf.order(conf)
-    buf.putFloat(from)
+    buf.putFloat(0, from)
     buf.array().toSeq
 
 given ConcreteConvertBytesFloat: ConvertBytesFloat[Seq[Byte], Float] with
