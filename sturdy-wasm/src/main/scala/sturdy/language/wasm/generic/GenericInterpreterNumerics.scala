@@ -11,31 +11,25 @@ import swam.ValType
 import swam.syntax.*
 
 class GenericInterpreterNumerics[V]
-  (stack: OperandStack[V],
-   ints: IntOps[V], longs: LongOps[V], floats: FloatOps[V], doubles: DoubleOps[V],
-   eqOps: EqOps[V, V], compareOps: CompareOps[V, V], unsignedCompareOps: UnsignedCompareOps[V, V],
-   intLong: ConvertIntLong[V, V], intFloat: ConvertIntFloat[V, V], intDouble: ConvertIntDouble[V, V],
-   longInt: ConvertLongInt[V, V], longFloat: ConvertLongFloat[V, V], longDouble: ConvertLongDouble[V, V],
-   floatInt: ConvertFloatInt[V, V], floatLong: ConvertFloatLong[V, V], floatDouble: ConvertFloatDouble[V, V],
-   doubleInt: ConvertDoubleInt[V, V], doubleLong: ConvertDoubleLong[V, V], doubleFloat: ConvertDoubleFloat[V, V]
-  ):
+  (stack: OperandStack[V], wasmOps: WasmOps[V, _]):
 
+  import wasmOps.*
   import eqOps.*
   import compareOps.*
   import unsignedCompareOps.*
-  import intLong.*
-  import intDouble.*
-  import longDouble.*
-  import intFloat.*
-  import longFloat.*
-  import floatDouble.*
+  import convertIntLong.*
+  import convertIntDouble.*
+  import convertLongDouble.*
+  import convertIntFloat.*
+  import convertLongFloat.*
+  import convertFloatDouble.*
   
   def evalNumeric(inst: Inst): V =
     inst match
-      case i32.Const(v) => ints.intLit(v)
-      case i64.Const(v) => longs.longLit(v)
-      case f32.Const(v) => floats.floatLit(v)
-      case f64.Const(v) => doubles.doubleLit(v)
+      case i32.Const(v) => intOps.intLit(v)
+      case i64.Const(v) => longOps.longLit(v)
+      case f32.Const(v) => floatOps.floatLit(v)
+      case f64.Const(v) => doubleOps.doubleLit(v)
       case op: IUnop =>
         val v = stack.pop()
         evalIUnop(op, v)
@@ -64,65 +58,65 @@ class GenericInterpreterNumerics[V]
 
 
   inline def evalTestop(op: Testop, v: V): V = op match
-    case i32.Eqz => equ(v, ints.intLit(0))
-    case i64.Eqz => equ(v, longs.longLit(0))
+    case i32.Eqz => equ(v, intOps.intLit(0))
+    case i64.Eqz => equ(v, longOps.longLit(0))
 
   inline def evalIUnop(op: IUnop, v: V): V = op match
-    case i32.Clz => ints.countLeadingZeros(v)
-    case i32.Ctz => ints.countTrailinZeros(v)
-    case i32.Popcnt => ints.nonzeroBitCount(v)
+    case i32.Clz => intOps.countLeadingZeros(v)
+    case i32.Ctz => intOps.countTrailinZeros(v)
+    case i32.Popcnt => intOps.nonzeroBitCount(v)
     case i32.Extend8S =>
-      val shift = ints.intLit(24)
-      ints.shiftRight(ints.shiftLeft(v, shift), shift)
+      val shift = intOps.intLit(24)
+      intOps.shiftRight(intOps.shiftLeft(v, shift), shift)
     case i32.Extend16S =>
-      val shift = ints.intLit(16)
-      ints.shiftRight(ints.shiftLeft(v, shift), shift)
+      val shift = intOps.intLit(16)
+      intOps.shiftRight(intOps.shiftLeft(v, shift), shift)
 
-    case i64.Clz => longs.countLeadingZeros(v)
-    case i64.Ctz => longs.countTrailinZeros(v)
-    case i64.Popcnt => longs.nonzeroBitCount(v)
+    case i64.Clz => longOps.countLeadingZeros(v)
+    case i64.Ctz => longOps.countTrailinZeros(v)
+    case i64.Popcnt => longOps.nonzeroBitCount(v)
     case i64.Extend8S =>
-      val shift = longs.longLit(56)
-      longs.shiftRight(longs.shiftLeft(v, shift), shift)
+      val shift = longOps.longLit(56)
+      longOps.shiftRight(longOps.shiftLeft(v, shift), shift)
     case i64.Extend16S =>
-      val shift = longs.longLit(48)
-      longs.shiftRight(longs.shiftLeft(v, shift), shift)
+      val shift = longOps.longLit(48)
+      longOps.shiftRight(longOps.shiftLeft(v, shift), shift)
     case i64.Extend32S =>
-      val shift = longs.longLit(32)
-      longs.shiftRight(longs.shiftLeft(v, shift), shift)
+      val shift = longOps.longLit(32)
+      longOps.shiftRight(longOps.shiftLeft(v, shift), shift)
 
   inline def evalIBinop(op: IBinop, v1: V, v2: V): V = op match
-    case i32.Add => ints.add(v1, v2)
-    case i32.Sub => ints.sub(v1, v2)
-    case i32.Mul => ints.mul(v1, v2)
-    case i32.DivS => ints.div(v1, v2)
-    case i32.DivU => ints.divUnsigned(v1, v2)
-    case i32.RemS => ints.remainder(v1, v2)
-    case i32.RemU => ints.remainderUnsigned(v1, v2)
-    case i32.And => ints.bitAnd(v1, v2)
-    case i32.Or => ints.bitOr(v1, v2)
-    case i32.Xor => ints.bitXor(v1, v2)
-    case i32.Shl => ints.shiftLeft(v1, ints.remainder(v2, ints.intLit(32)))
-    case i32.ShrS => ints.shiftRight(v1, ints.remainder(v2, ints.intLit(32)))
-    case i32.ShrU => ints.shiftRightUnsigned(v1, ints.remainder(v2, ints.intLit(32)))
-    case i32.Rotl => ints.rotateLeft(v1, ints.remainder(v2, ints.intLit(32)))
-    case i32.Rotr => ints.rotateRight(v1, ints.remainder(v2, ints.intLit(32)))
+    case i32.Add => intOps.add(v1, v2)
+    case i32.Sub => intOps.sub(v1, v2)
+    case i32.Mul => intOps.mul(v1, v2)
+    case i32.DivS => intOps.div(v1, v2)
+    case i32.DivU => intOps.divUnsigned(v1, v2)
+    case i32.RemS => intOps.remainder(v1, v2)
+    case i32.RemU => intOps.remainderUnsigned(v1, v2)
+    case i32.And => intOps.bitAnd(v1, v2)
+    case i32.Or => intOps.bitOr(v1, v2)
+    case i32.Xor => intOps.bitXor(v1, v2)
+    case i32.Shl => intOps.shiftLeft(v1, intOps.remainder(v2, intOps.intLit(32)))
+    case i32.ShrS => intOps.shiftRight(v1, intOps.remainder(v2, intOps.intLit(32)))
+    case i32.ShrU => intOps.shiftRightUnsigned(v1, intOps.remainder(v2, intOps.intLit(32)))
+    case i32.Rotl => intOps.rotateLeft(v1, intOps.remainder(v2, intOps.intLit(32)))
+    case i32.Rotr => intOps.rotateRight(v1, intOps.remainder(v2, intOps.intLit(32)))
 
-    case i64.Add => longs.add(v1, v2)
-    case i64.Sub => longs.sub(v1, v2)
-    case i64.Mul => longs.mul(v1, v2)
-    case i64.DivS => longs.div(v1, v2)
-    case i64.DivU => longs.divUnsigned(v1, v2)
-    case i64.RemS => longs.remainder(v1, v2)
-    case i64.RemU => longs.remainderUnsigned(v1, v2)
-    case i64.And => longs.bitAnd(v1, v2)
-    case i64.Or => longs.bitOr(v1, v2)
-    case i64.Xor => longs.bitXor(v1, v2)
-    case i64.Shl => longs.shiftLeft(v1, longs.remainder(v2, longs.longLit(64)))
-    case i64.ShrS => longs.shiftRight(v1, longs.remainder(v2, longs.longLit(64)))
-    case i64.ShrU => longs.shiftRightUnsigned(v1, longs.remainder(v2, longs.longLit(64)))
-    case i64.Rotl => longs.rotateLeft(v1, longs.remainder(v2, longs.longLit(64)))
-    case i64.Rotr => longs.rotateRight(v1, longs.remainder(v2, longs.longLit(64)))
+    case i64.Add => longOps.add(v1, v2)
+    case i64.Sub => longOps.sub(v1, v2)
+    case i64.Mul => longOps.mul(v1, v2)
+    case i64.DivS => longOps.div(v1, v2)
+    case i64.DivU => longOps.divUnsigned(v1, v2)
+    case i64.RemS => longOps.remainder(v1, v2)
+    case i64.RemU => longOps.remainderUnsigned(v1, v2)
+    case i64.And => longOps.bitAnd(v1, v2)
+    case i64.Or => longOps.bitOr(v1, v2)
+    case i64.Xor => longOps.bitXor(v1, v2)
+    case i64.Shl => longOps.shiftLeft(v1, longOps.remainder(v2, longOps.longLit(64)))
+    case i64.ShrS => longOps.shiftRight(v1, longOps.remainder(v2, longOps.longLit(64)))
+    case i64.ShrU => longOps.shiftRightUnsigned(v1, longOps.remainder(v2, longOps.longLit(64)))
+    case i64.Rotl => longOps.rotateLeft(v1, longOps.remainder(v2, longOps.longLit(64)))
+    case i64.Rotr => longOps.rotateRight(v1, longOps.remainder(v2, longOps.longLit(64)))
 
   inline def evalIRelop(op: IRelop, v1: V, v2: V): V = op match
     case i32.Eq => equ(v1, v2)
@@ -149,38 +143,38 @@ class GenericInterpreterNumerics[V]
 
 
   inline def evalFUnop(op: FUnop, v: V): V = op match
-    case f32.Abs => floats.absolute(v)
-    case f32.Neg => floats.negated(v)
-    case f32.Sqrt => floats.sqrt(v)
-    case f32.Ceil => floats.ceil(v)
-    case f32.Floor => floats.floor(v)
-    case f32.Trunc => floats.truncate(v)
-    case f32.Nearest => floats.nearest(v)
+    case f32.Abs => floatOps.absolute(v)
+    case f32.Neg => floatOps.negated(v)
+    case f32.Sqrt => floatOps.sqrt(v)
+    case f32.Ceil => floatOps.ceil(v)
+    case f32.Floor => floatOps.floor(v)
+    case f32.Trunc => floatOps.truncate(v)
+    case f32.Nearest => floatOps.nearest(v)
 
-    case f64.Abs => doubles.absolute(v)
-    case f64.Neg => doubles.negated(v)
-    case f64.Sqrt => doubles.sqrt(v)
-    case f64.Ceil => doubles.ceil(v)
-    case f64.Floor => doubles.floor(v)
-    case f64.Trunc => doubles.truncate(v)
-    case f64.Nearest => doubles.nearest(v)
+    case f64.Abs => doubleOps.absolute(v)
+    case f64.Neg => doubleOps.negated(v)
+    case f64.Sqrt => doubleOps.sqrt(v)
+    case f64.Ceil => doubleOps.ceil(v)
+    case f64.Floor => doubleOps.floor(v)
+    case f64.Trunc => doubleOps.truncate(v)
+    case f64.Nearest => doubleOps.nearest(v)
 
   inline def evalFBinop(op: FBinop, v1: V, v2: V): V = op match
-    case f32.Add => floats.add(v1, v2)
-    case f32.Sub => floats.sub(v1, v2)
-    case f32.Mul => floats.mul(v1, v2)
-    case f32.Div => floats.div(v1, v2)
-    case f32.Min => floats.min(v1, v2)
-    case f32.Max => floats.max(v1, v2)
-    case f32.Copysign => floats.copysign(v1, v2)
+    case f32.Add => floatOps.add(v1, v2)
+    case f32.Sub => floatOps.sub(v1, v2)
+    case f32.Mul => floatOps.mul(v1, v2)
+    case f32.Div => floatOps.div(v1, v2)
+    case f32.Min => floatOps.min(v1, v2)
+    case f32.Max => floatOps.max(v1, v2)
+    case f32.Copysign => floatOps.copysign(v1, v2)
 
-    case f64.Add => doubles.add(v1, v2)
-    case f64.Sub => doubles.sub(v1, v2)
-    case f64.Mul => doubles.mul(v1, v2)
-    case f64.Div => doubles.div(v1, v2)
-    case f64.Min => doubles.min(v1, v2)
-    case f64.Max => doubles.max(v1, v2)
-    case f64.Copysign => doubles.copysign(v1, v2)
+    case f64.Add => doubleOps.add(v1, v2)
+    case f64.Sub => doubleOps.sub(v1, v2)
+    case f64.Mul => doubleOps.mul(v1, v2)
+    case f64.Div => doubleOps.div(v1, v2)
+    case f64.Min => doubleOps.min(v1, v2)
+    case f64.Max => doubleOps.max(v1, v2)
+    case f64.Copysign => doubleOps.copysign(v1, v2)
 
   inline def evalFRelop(op: FRelop, v1: V, v2: V): V = op match
     case f32.Eq => equ(v1, v2)
@@ -198,42 +192,42 @@ class GenericInterpreterNumerics[V]
     case f64.Ge => ge(v1, v2)
 
   inline def evalConvertop(op: Convertop, v: V): V = op match
-    case i32.WrapI64 => longInt(v, ())
-    case i32.TruncSF32 => floatInt(v  , (config.Overflow.Fail, config.Bits.Signed))
-    case i32.TruncUF32 => floatInt(v, (config.Overflow.Fail, config.Bits.Unsigned))
-    case i32.TruncSF64 => doubleInt(v, (config.Overflow.Fail, config.Bits.Signed))
-    case i32.TruncUF64 => doubleInt(v, (config.Overflow.Fail, config.Bits.Unsigned))
-    case i32.ReinterpretF32 => floatInt(v, (config.Overflow.Allow, config.Bits.Raw))
-    case i64.ExtendSI32 => intLong(v, config.Bits.Signed)
-    case i64.ExtendUI32 => intLong(v, config.Bits.Unsigned)
-    case i64.TruncSF32 => floatLong(v, (config.Overflow.Fail, config.Bits.Signed))
-    case i64.TruncUF32 => floatLong(v, (config.Overflow.Fail, config.Bits.Unsigned))
-    case i64.TruncSF64 => doubleLong(v, (config.Overflow.Fail, config.Bits.Signed))
-    case i64.TruncUF64 => doubleLong(v, (config.Overflow.Fail, config.Bits.Unsigned))
-    case i64.ReinterpretF64 => doubleLong(v, (config.Overflow.Allow, config.Bits.Raw))
+    case i32.WrapI64 => convertLongInt(v, ())
+    case i32.TruncSF32 => convertFloatInt(v  , (config.Overflow.Fail, config.Bits.Signed))
+    case i32.TruncUF32 => convertFloatInt(v, (config.Overflow.Fail, config.Bits.Unsigned))
+    case i32.TruncSF64 => convertDoubleInt(v, (config.Overflow.Fail, config.Bits.Signed))
+    case i32.TruncUF64 => convertDoubleInt(v, (config.Overflow.Fail, config.Bits.Unsigned))
+    case i32.ReinterpretF32 => convertFloatInt(v, (config.Overflow.Allow, config.Bits.Raw))
+    case i64.ExtendSI32 => convertIntLong(v, config.Bits.Signed)
+    case i64.ExtendUI32 => convertIntLong(v, config.Bits.Unsigned)
+    case i64.TruncSF32 => convertFloatLong(v, (config.Overflow.Fail, config.Bits.Signed))
+    case i64.TruncUF32 => convertFloatLong(v, (config.Overflow.Fail, config.Bits.Unsigned))
+    case i64.TruncSF64 => convertDoubleLong(v, (config.Overflow.Fail, config.Bits.Signed))
+    case i64.TruncUF64 => convertDoubleLong(v, (config.Overflow.Fail, config.Bits.Unsigned))
+    case i64.ReinterpretF64 => convertDoubleLong(v, (config.Overflow.Allow, config.Bits.Raw))
 
-    case f32.DemoteF64 => doubleFloat(v, ())
-    case f32.ConvertSI32 => intFloat(v, config.Bits.Signed)
-    case f32.ConvertUI32 => intFloat(v, config.Bits.Unsigned)
-    case f32.ConvertSI64 => longFloat(v, config.Bits.Signed)
-    case f32.ConvertUI64 => longFloat(v, config.Bits.Unsigned)
-    case f32.ReinterpretI32 => intFloat(v, config.Bits.Raw)
-    case f64.PromoteF32 => floatDouble(v, ())
-    case f64.ConvertSI32 => intDouble(v, config.Bits.Signed)
-    case f64.ConvertUI32 => intDouble(v, config.Bits.Unsigned)
-    case f64.ConvertSI64 => longDouble(v, config.Bits.Signed)
-    case f64.ConvertUI64 => longDouble(v, config.Bits.Unsigned)
-    case f64.ReinterpretI64 => longDouble(v, config.Bits.Raw)
+    case f32.DemoteF64 => convertDoubleFloat(v, ())
+    case f32.ConvertSI32 => convertIntFloat(v, config.Bits.Signed)
+    case f32.ConvertUI32 => convertIntFloat(v, config.Bits.Unsigned)
+    case f32.ConvertSI64 => convertLongFloat(v, config.Bits.Signed)
+    case f32.ConvertUI64 => convertLongFloat(v, config.Bits.Unsigned)
+    case f32.ReinterpretI32 => convertIntFloat(v, config.Bits.Raw)
+    case f64.PromoteF32 => convertFloatDouble(v, ())
+    case f64.ConvertSI32 => convertIntDouble(v, config.Bits.Signed)
+    case f64.ConvertUI32 => convertIntDouble(v, config.Bits.Unsigned)
+    case f64.ConvertSI64 => convertLongDouble(v, config.Bits.Signed)
+    case f64.ConvertUI64 => convertLongDouble(v, config.Bits.Unsigned)
+    case f64.ReinterpretI64 => convertLongDouble(v, config.Bits.Raw)
 
   inline def evalMiscop(op: Miscop, v: V): V = op match
-    case i32.TruncSatSF32 => floatInt(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
-    case i32.TruncSatUF32 => floatInt(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
-    case i32.TruncSatSF64 => doubleInt(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
-    case i32.TruncSatUF64 => doubleInt(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
-    case i64.TruncSatSF32 => floatLong(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
-    case i64.TruncSatUF32 => floatLong(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
-    case i64.TruncSatSF64 => doubleLong(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
-    case i64.TruncSatUF64 => doubleLong(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
+    case i32.TruncSatSF32 => convertFloatInt(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
+    case i32.TruncSatUF32 => convertFloatInt(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
+    case i32.TruncSatSF64 => convertDoubleInt(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
+    case i32.TruncSatUF64 => convertDoubleInt(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
+    case i64.TruncSatSF32 => convertFloatLong(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
+    case i64.TruncSatUF32 => convertFloatLong(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
+    case i64.TruncSatSF64 => convertDoubleLong(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
+    case i64.TruncSatUF64 => convertDoubleLong(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
 
   def defaultValue(ty: ValType): V = ty match
     case ValType.I32 => evalNumeric(i32.Const(0))

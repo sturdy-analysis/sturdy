@@ -18,7 +18,7 @@ enum Taint:
 
 import sturdy.values.taint.Taint.*
 
-given TaintTop[W <: Widening]: Top[Taint] with
+given TaintTop: Top[Taint] with
   override def top: Taint = TopTaint
 
 given CombineTaint[W <: Widening]: Combine[Taint, W] with
@@ -30,11 +30,11 @@ given CombineTaint[W <: Widening]: Combine[Taint, W] with
 case class TaintProduct[V](taint: Taint, value: V):
 
   inline def binary[B, A >: V](f: (V, A) => B, other: TaintProduct[A]): TaintProduct[B] =
-    TaintProduct(Combine.apply(this.taint,other.taint), f(this.value,other.value))
+    TaintProduct(Combine(this.taint,other.taint), f(this.value,other.value))
 
   inline def unary[B](f: V => B): TaintProduct[B] = TaintProduct(this.taint, f(this.value))
 
-  inline def replace[B](b: B): TaintProduct[B] = TaintProduct(this.taint, b)
+  inline def copyTaint[B](b: B): TaintProduct[B] = TaintProduct(this.taint, b)
 
 def untainted[V](v: V) = TaintProduct(Untainted, v)
 def tainted[V](v: V) = TaintProduct(Tainted, v)
@@ -44,7 +44,7 @@ given TaintProductTop[V, W <: Widening](using vTop: Top[V]): Top[TaintProduct[V]
 
 given CombineTaintProduct[V, W <: Widening](using comb: Combine[V, W]): Combine[TaintProduct[V], W] with
   override def apply(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] =
-    TaintProduct(Combine.apply(v1.taint, v2.taint), comb.apply(v1.value, v2.value))
+    TaintProduct(Combine(v1.taint, v2.taint), comb.apply(v1.value, v2.value))
 
 given TaintIntOps[V](using ops: IntOps[V]): IntOps[TaintProduct[V]] with
   def intLit(i: Int): TaintProduct[V] = untainted(ops.intLit(i))
@@ -77,7 +77,7 @@ given TaintIntOps[V](using ops: IntOps[V]): IntOps[TaintProduct[V]] with
   def countTrailinZeros(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.countTrailinZeros)
   def nonzeroBitCount(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nonzeroBitCount)
 
-given ToppedLongOps[V](using ops: LongOps[V], f: Failure): LongOps[TaintProduct[V]] with
+given TaintLongOps[V](using ops: LongOps[V], f: Failure): LongOps[TaintProduct[V]] with
   def longLit(l: Long): TaintProduct[V] = untainted(ops.longLit(l))
   def randomLong(): TaintProduct[V] = untainted(ops.randomLong())
 
@@ -144,23 +144,23 @@ given TaintFloatOps[V](using ops: FloatOps[V]): FloatOps[TaintProduct[V]] with
   def nearest(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nearest)
   def copysign(v: TaintProduct[V], sign: TaintProduct[V]): TaintProduct[V] = v.binary(ops.copysign, sign)
 
-given taintEqOps[A,B](using ops: EqOps[A,B]): EqOps[TaintProduct[A],TaintProduct[B]] with
+given TaintEqOps[A,B](using ops: EqOps[A,B]): EqOps[TaintProduct[A],TaintProduct[B]] with
   override def equ(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.equ, v2)
   override def neq(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.neq, v2)
 
-given taintCompareOps[A,B](using ops: CompareOps[A,B]): CompareOps[TaintProduct[A],TaintProduct[B]] with
+given TaintCompareOps[A,B](using ops: CompareOps[A,B]): CompareOps[TaintProduct[A],TaintProduct[B]] with
   override def lt(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.lt, v2)
   override def le(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.le, v2)
   override def ge(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.ge, v2)
   override def gt(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.gt, v2)
 
-given taintUnsignedCompareOps[A,B](using ops: UnsignedCompareOps[A,B]): UnsignedCompareOps[TaintProduct[A],TaintProduct[B]] with
+given TaintUnsignedCompareOps[A,B](using ops: UnsignedCompareOps[A,B]): UnsignedCompareOps[TaintProduct[A],TaintProduct[B]] with
   override def ltUnsigned(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.ltUnsigned, v2)
   override def leUnsigned(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.leUnsigned, v2)
   override def geUnsigned(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.geUnsigned, v2)
   override def gtUnsigned(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.gtUnsigned, v2)
 
-given taintConvert[From, To, VFrom, VTo, Config](using conv: Convert[From, To, VFrom, VTo, Config]):
+given TaintConvert[From, To, VFrom, VTo, Config](using conv: Convert[From, To, VFrom, VTo, Config]):
   Convert[From, To, TaintProduct[VFrom], TaintProduct[VTo], Config] with
   override def apply(from: TaintProduct[VFrom], conf: Config): TaintProduct[VTo] =
     from.unary(x => conv.apply(x, conf))

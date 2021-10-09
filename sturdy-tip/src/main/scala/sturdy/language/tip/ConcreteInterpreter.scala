@@ -44,7 +44,7 @@ object ConcreteInterpreter extends Interpreter:
   type Store = Map[Int, Value]
 
   class Effects(initEnvironment: Environment, initStore: Store, nextInput: () => Value)
-    extends CBoolBranching[Value]
+    extends CBoolBranching[Value](using _.asBoolean)
       with CCallFrame[Unit, String, Int]((), initEnvironment)
       with CStore[Int, Value](initStore)
       with CAllocationIntIncrement[AllocationSite]
