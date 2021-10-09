@@ -13,6 +13,8 @@ import sturdy.values.relational.EqOps
 import java.lang.Float as JFloat
 import java.lang.Long as JLong
 import java.lang.Double as JDouble
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 
 given ConcreteLongOps(using f: Failure): LongOps[Long] with
@@ -103,4 +105,29 @@ given ConcreteConvertLongDouble: ConvertLongDouble[Long, Double] with
       else
         ((l >>> 1) | (l & 1L)) * 2.0d
     case config.Bits.Raw => JDouble.longBitsToDouble(l)
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+
+given ConcreteConvertLongBytes: ConvertLongBytes[Long, Seq[Byte]] with
+  override def apply(from: Long, conf: (config.BytesSize, ByteOrder)): Seq[Byte] =
+    val buf = ByteBuffer.allocate(conf._1.bytes)
+    buf.order(conf._2)
+    conf._1 match
+      case config.BytesSize.Byte => buf.put((from % (1 << 8)).toByte)
+      case config.BytesSize.Short => buf.putShort((from % (1 << 16)).toShort)
+      case config.BytesSize.Int => buf.putInt((from % (1 << 32)).toInt)
+      case config.BytesSize.Long => buf.putLong(from)
+    buf.array().toSeq
+
+given ConcreteConvertBytesLong: ConvertBytesLong[Seq[Byte], Long] with
+  override def apply(from: Seq[Byte], conf: (config.BytesSize, ByteOrder, config.Bits)): Long =
+    val buf = ByteBuffer.wrap(from.toArray)
+    buf.order(conf._2)
+    (conf._1, conf._3) match
+      case (config.BytesSize.Byte, config.Bits.Signed) => buf.get.toLong
+      case (config.BytesSize.Byte, config.Bits.Unsigned) => buf.get & 0xFFL
+      case (config.BytesSize.Short, config.Bits.Signed) => buf.getShort.toLong
+      case (config.BytesSize.Short, config.Bits.Unsigned) => buf.getShort & 0xFFFFL
+      case (config.BytesSize.Int, config.Bits.Signed) => buf.getInt.toLong
+      case (config.BytesSize.Int, config.Bits.Unsigned) => buf.getInt & 0xFFFFFFFFL
+      case (config.BytesSize.Long, _) => buf.getLong()
+      case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+

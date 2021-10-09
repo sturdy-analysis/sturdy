@@ -6,7 +6,7 @@ import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.fix
 import sturdy.effect.operandstack.OperandStack
-import sturdy.effect.bytememory.{Memory, Serialize}
+import sturdy.effect.bytememory.Memory
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.SymbolTable
@@ -43,7 +43,6 @@ enum WasmException[V]:
 type GenericEffects[V, Addr, Bytes, Size, ExcV, Symbol, Entry] =
   OperandStack[V]
     with Memory[MemoryAddr, Addr,Bytes,Size]
-    with Serialize[V,Bytes,MemoryInst,MemoryInst]
     with SymbolTable[TableAddr, Symbol, Entry]
     //with SymbolTable[TableAddr, GlobalIdx, GlobalInstance[V]]
     with CMutableCallFrameInt[FrameData[V], V]
@@ -103,7 +102,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
   import effects.*
   val stack: OperandStack[V] = effects
 
-  val wasmOps: WasmOps[V, FunV]
+  val wasmOps: WasmOps[V, FunV, Bytes]
   import wasmOps.*
 
   val phi: fix.Combinator[FixIn[V], FixOut[V]]
@@ -172,7 +171,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
       stack.push(res)
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
-  def load(inst: MemoryInst): Unit =
+  def load(inst: LoadInst | LoadNInst): Unit =
     // add offset to base address (which is already on the stack)
     stack.push(intOps.intLit(inst.offset))
     addWithOverflowCheck
@@ -187,7 +186,7 @@ trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Ef
         val v = decode(b, inst)
         stack.push(v)}
 
-  def store(inst: MemoryInst): Unit =
+  def store(inst: StoreInst | StoreNInst): Unit =
     val v = stack.pop()
     val bytes = encode(v, inst)
 

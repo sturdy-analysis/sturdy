@@ -3,7 +3,6 @@ package sturdy.language.wasm
 
 import sturdy.data.{*, given}
 import sturdy.effect.bytememory.ConcreteMemory
-import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.{CCallFrameInt, CMutableCallFrameInt}
 import sturdy.effect.except.ConcreteExcept
@@ -16,6 +15,7 @@ import sturdy.language.wasm.generic.*
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
+import sturdy.values.convert.*
 import sturdy.values.doubles.{*, given}
 import sturdy.values.exceptions.{*, given}
 import sturdy.values.floats.{*, given}
@@ -47,7 +47,7 @@ object ConcreteInterpreter extends Interpreter :
       Value.Int32(0)
 
   override type Addr = Int
-  override type Bytes = ByteBuffer
+  override type Bytes = Seq[Byte]
   override type Size = Int
   override type ExcV = WasmException[Value]
   override type FuncIx = Int
@@ -60,69 +60,6 @@ object ConcreteInterpreter extends Interpreter :
   enum Entry:
     case Function(fun: FunV)
     case Global(glob: GlobalInstance[Value])
-
-  trait CSerialize extends Serialize[Value, ByteBuffer, MemoryInst, MemoryInst], Failure :
-    import Value.*
-    override def decode(dat: ByteBuffer, decInfo: MemoryInst): Value =
-      dat.order(ByteOrder.LITTLE_ENDIAN)
-      decInfo match
-        case _: i32.Load => Int32(dat.getInt())
-        case _: i32.Load8S => Int32(dat.get())
-        case _: i32.Load8U => Int32(dat.get() & 0xFF)
-        case _: i32.Load16S => Int32(dat.getShort())
-        case _: i32.Load16U => Int32(dat.getShort() & 0xFFFF)
-        case _: i64.Load => Int64(dat.getLong())
-        case _: i64.Load8S => Int64(dat.get())
-        case _: i64.Load8U => Int64(dat.get() & 0xFFL)
-        case _: i64.Load16S => Int64(dat.getShort())
-        case _: i64.Load16U => Int64(dat.getShort() & 0xFFFFL)
-        case _: i64.Load32S => Int64(dat.getInt())
-        case _: i64.Load32U => Int64(dat.getInt() & 0XFFFFFFFFL)
-        case _: f32.Load => Float32(dat.getFloat())
-        case _: f64.Load => Float64(dat.getDouble())
-        case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $decInfo.")
-
-    private def newByteBuffer(cap: Int): ByteBuffer =
-      val buf = ByteBuffer.allocate(cap)
-      buf.order(ByteOrder.LITTLE_ENDIAN)
-      buf
-
-    given Failure = this
-    override def encode(v: Value, encInfo: MemoryInst): ByteBuffer =
-      encInfo match
-        case _: i32.Store =>
-          val buf = newByteBuffer(4)
-          buf.putInt(0, v.asInt32)
-        case _: i32.Store8 =>
-          val buf = newByteBuffer(1)
-          val b = (v.asInt32 % (1 << 8)).toByte
-          buf.put(0, b)
-        case _: i32.Store16 =>
-          val buf = newByteBuffer(2)
-          val s = (v.asInt32 % (1 << 16)).toShort
-          buf.putShort(0, s)
-        case _: i64.Store =>
-          val buf = newByteBuffer(8)
-          buf.putLong(0, v.asInt64)
-        case _: i64.Store8 =>
-          val buf = newByteBuffer(1)
-          val b = (v.asInt64 % (1L << 8)).toByte
-          buf.put(0, b)
-        case _: i64.Store16 =>
-          val buf = newByteBuffer(2)
-          val s = (v.asInt64 % (1L << 16)).toShort
-          buf.putShort(0, s)
-        case _: i64.Store32 =>
-          val buf = newByteBuffer(4)
-          val i = (v.asInt64 % (1L << 32)).toInt
-          buf.putInt(0, i)
-        case _: f32.Store =>
-          val buf = newByteBuffer(4)
-          buf.putFloat(0, v.asFloat32)
-        case _: f64.Store =>
-          val buf = newByteBuffer(8)
-          buf.putDouble(0, v.asFloat64)
-        case _ => throw new IllegalArgumentException(s"Expected store instruction, but got $encInfo.")
 
   given ConcreteWasmOperations(using f: Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry] with
     override type WasmOpsJoin[A] = NoJoin[A]
@@ -165,7 +102,6 @@ object ConcreteInterpreter extends Interpreter :
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends ConcreteOperandStack[Value]
       with ConcreteMemory[MemoryAddr]
-      with CSerialize
       with ConcreteSymbolTable[TableAddr, Symbol, Entry]
       with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
       with CBoolBranching[Value](using _.asBoolean)
@@ -175,7 +111,7 @@ object ConcreteInterpreter extends Interpreter :
   class Instance(effects: Effects)(using Failure)
     extends GenericInstance with GenericInterpreter(effects) :
 
-    val wasmOps: WasmOps[Value, FunV] = implicitly
+    val wasmOps: WasmOps[Value, FunV, Bytes] = implicitly
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] = fix.identity
 

@@ -2,6 +2,7 @@ package sturdy.language.wasm.generic
 
 import sturdy.data.Option
 import swam.{FuncType, GlobalIdx}
+import sturdy.values.convert.*
 import sturdy.values.doubles.*
 import sturdy.values.floats.*
 import sturdy.values.functions.FunctionOps
@@ -10,8 +11,13 @@ import sturdy.values.longs.*
 import sturdy.values.relational.CompareOps
 import sturdy.values.relational.EqOps
 import sturdy.values.relational.UnsignedCompareOps
+import swam.syntax.LoadInst
+import swam.syntax.LoadNInst
+import swam.syntax.MemoryInst
+import swam.syntax.StoreInst
+import swam.syntax.StoreNInst
 
-trait WasmOps[V, FunV]:
+trait WasmOps[V, FunV, Bytes]:
   val intOps: IntOps[V]
   val longOps: LongOps[V]
   val floatOps: FloatOps[V]
@@ -32,6 +38,9 @@ trait WasmOps[V, FunV]:
   val convertDoubleLong: ConvertDoubleLong[V, V]
   val convertDoubleFloat: ConvertDoubleFloat[V, V]
   val functionOps: FunctionOps[FunctionInstance[V], Nothing, Unit, FunV]
+  val encode: Convert[V, Seq[Byte], V, Bytes, StoreInst | StoreNInst]
+  val decode: Convert[Seq[Byte], V, Bytes, V, LoadInst | LoadNInst]
+
 
 /** Operations specific to Wasm */
 trait WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry]:

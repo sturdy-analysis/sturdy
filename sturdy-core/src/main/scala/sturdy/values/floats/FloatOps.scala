@@ -3,6 +3,8 @@ package sturdy.values.floats
 import sturdy.values.config
 import sturdy.values.convert.Convert
 
+import java.nio.ByteOrder
+
 trait FloatOps[V]:
   def floatLit(f: Float): V
   def randomFloat(): V
@@ -26,3 +28,5 @@ trait FloatOps[V]:
 type ConvertFloatInt[VFrom, VTo] = Convert[Float, Int, VFrom, VTo, (config.Overflow, config.Bits)]
 type ConvertFloatLong[VFrom, VTo] = Convert[Long, Int, VFrom, VTo, (config.Overflow, config.Bits)]
 type ConvertFloatDouble[VFrom, VTo] = Convert[Float, Double, VFrom, VTo, Unit]
+type ConvertFloatBytes[VFrom, VTo] = Convert[Float, Seq[Byte], VFrom, VTo, ByteOrder]
+type ConvertBytesFloat[VFrom, VTo] = Convert[Seq[Byte], Float, VFrom, VTo, ByteOrder]

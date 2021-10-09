@@ -3,13 +3,22 @@ package sturdy.language.wasm
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.language.wasm.generic.*
 import sturdy.values.*
-import sturdy.values.convert.LiftedConvert
+import sturdy.values.config.UnsupportedConfiguration
+import sturdy.values.convert.*
 import sturdy.values.doubles.*
 import sturdy.values.floats.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
+import swam.syntax.LoadInst
+import swam.syntax.LoadNInst
+import swam.syntax.MemoryInst
+import swam.syntax.StoreInst
+import swam.syntax.StoreNInst
+import swam.syntax.{f32, f64, i64, i32}
+
+import java.nio.ByteOrder
 
 trait Interpreter:
   type I32
@@ -102,7 +111,15 @@ trait Interpreter:
          , convertF64I64: ConvertDoubleLong[F64, I64]
          , convertF64F32: ConvertDoubleFloat[F64, F32]
          , funOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV]
-         ): WasmOps[Value, FunV] with
+         , encodeI32: ConvertIntBytes[I32, Bytes]
+         , encodeI64: ConvertLongBytes[I64, Bytes]
+         , encodeF32: ConvertFloatBytes[F32, Bytes]
+         , encodeF64: ConvertDoubleBytes[F64, Bytes]
+         , decodeI32: ConvertBytesInt[Bytes, I32]
+         , decodeI64: ConvertBytesLong[Bytes, I64]
+         , decodeF32: ConvertBytesFloat[Bytes, F32]
+         , decodeF64: ConvertBytesDouble[Bytes, F64]
+         ): WasmOps[Value, FunV, Bytes] with
 
     final val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = funOps
 
@@ -184,6 +201,36 @@ trait Interpreter:
     final val convertDoubleInt: ConvertDoubleInt[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int32.apply)
     final val convertDoubleLong: ConvertDoubleLong[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int64.apply)
     final val convertDoubleFloat: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, Value.Float32.apply)
+
+    override final val encode: Convert[Value, Seq[Byte], Value, Bytes, StoreInst | StoreNInst] = new Convert:
+      override def apply(from: Value, conf: StoreInst | StoreNInst): Bytes = (from, conf) match
+        case (Value.Int32(i), _: i32.Store8) => encodeI32(i, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN))
+        case (Value.Int32(i), _: i32.Store16) => encodeI32(i, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN))
+        case (Value.Int32(i), _: i32.Store) => encodeI32(i, (config.BytesSize.Int, ByteOrder.LITTLE_ENDIAN))
+        case (Value.Int64(l), _: i64.Store8) => encodeI64(l, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN))
+        case (Value.Int64(l), _: i64.Store16) => encodeI64(l, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN))
+        case (Value.Int64(l), _: i64.Store32) => encodeI64(l, (config.BytesSize.Int, ByteOrder.LITTLE_ENDIAN))
+        case (Value.Int64(l), _: i64.Store) => encodeI64(l, (config.BytesSize.Long, ByteOrder.LITTLE_ENDIAN))
+        case (Value.Float32(f), _: f32.Store) => encodeF32(f, ByteOrder.LITTLE_ENDIAN)
+        case (Value.Float64(d), _: f64.Store) => encodeF64(d, ByteOrder.LITTLE_ENDIAN)
+        case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+
+    override final val decode: Convert[Seq[Byte], Value, Bytes, Value, LoadInst | LoadNInst] = new Convert:
+      override def apply(from: Bytes, conf: LoadInst | LoadNInst): Value = conf match
+        case _: i32.Load8S => Value.Int32(decodeI32(from, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
+        case _: i32.Load8U => Value.Int32(decodeI32(from, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN, config.Bits.Unsigned)))
+        case _: i32.Load16S => Value.Int32(decodeI32(from, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
+        case _: i32.Load16U => Value.Int32(decodeI32(from, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN, config.Bits.Unsigned)))
+        case _: i32.Load => Value.Int32(decodeI32(from, (config.BytesSize.Int, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
+        case _: i64.Load8S => Value.Int64(decodeI64(from, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
+        case _: i64.Load8U => Value.Int64(decodeI64(from, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN, config.Bits.Unsigned)))
+        case _: i64.Load16S => Value.Int64(decodeI64(from, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
+        case _: i64.Load16U => Value.Int64(decodeI64(from, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN, config.Bits.Unsigned)))
+        case _: i64.Load32S => Value.Int64(decodeI64(from, (config.BytesSize.Int, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
+        case _: i64.Load32U => Value.Int64(decodeI64(from, (config.BytesSize.Int, ByteOrder.LITTLE_ENDIAN, config.Bits.Unsigned)))
+        case _: i64.Load => Value.Int64(decodeI64(from, (config.BytesSize.Long, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
+        case _: f32.Load => Value.Float32(decodeF32(from, ByteOrder.LITTLE_ENDIAN))
+        case _: f64.Load => Value.Float64(decodeF64(from, ByteOrder.LITTLE_ENDIAN))
 
   type Instance <: GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, Effects]
 

@@ -2,6 +2,13 @@ package sturdy.values.ints
 
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
+import sturdy.values.config
+import sturdy.values.config.Bits
+import sturdy.values.config.BytesSize
+import sturdy.values.config.UnsupportedConfiguration
+
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 given ToppedIntOps[T](using ops: IntOps[T], f: Failure): IntOps[Topped[T]] with
   def intLit(i: Int): Topped[T] = Topped.Actual(ops.intLit(i))
@@ -33,4 +40,3 @@ given ToppedIntOps[T](using ops: IntOps[T], f: Failure): IntOps[Topped[T]] with
   def countLeadingZeros(v: Topped[T]): Topped[T] = v.unary(ops.countLeadingZeros)
   def countTrailinZeros(v: Topped[T]): Topped[T] = v.unary(ops.countTrailinZeros)
   def nonzeroBitCount(v: Topped[T]): Topped[T] = v.unary(ops.nonzeroBitCount)
-  

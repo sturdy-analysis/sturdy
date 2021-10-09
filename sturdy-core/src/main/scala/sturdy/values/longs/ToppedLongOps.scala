@@ -2,6 +2,9 @@ package sturdy.values.longs
 
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
+import sturdy.values.config
+
+import java.nio.ByteOrder
 
 given ToppedLongOps[T](using ops: LongOps[T], f: Failure): LongOps[Topped[T]] with
   def longLit(l: Long): Topped[T] = Topped.Actual(ops.longLit(l))
@@ -28,4 +31,3 @@ given ToppedLongOps[T](using ops: LongOps[T], f: Failure): LongOps[Topped[T]] wi
   def countLeadingZeros(v: Topped[T]): Topped[T] = v.unary(ops.countLeadingZeros)
   def countTrailinZeros(v: Topped[T]): Topped[T] = v.unary(ops.countTrailinZeros)
   def nonzeroBitCount(v: Topped[T]): Topped[T] = v.unary(ops.nonzeroBitCount)
-  

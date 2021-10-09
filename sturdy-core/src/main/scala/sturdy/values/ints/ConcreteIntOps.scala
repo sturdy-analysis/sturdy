@@ -10,6 +10,8 @@ import sturdy.values.relational.CompareOps
 
 import scala.util.Random
 import java.lang.Float as JFloat
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 given ConcreteIntOps(using f: Failure): IntOps[Int] with
   def intLit(i: Int): Int = i
@@ -104,7 +106,6 @@ given ConcreteConvertIntFloat: ConvertIntFloat[Int, Float] with
       else
         ((i >>> 1) | (i & 1)).toFloat * 2.0f
     case config.Bits.Raw => JFloat.intBitsToFloat(i)
-    case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
 given ConcreteConvertIntDouble: ConvertIntDouble[Int, Double] with
   /*
@@ -116,4 +117,25 @@ given ConcreteConvertIntDouble: ConvertIntDouble[Int, Double] with
     case config.Bits.Unsigned => (i & 0X00000000FFFFFFFFL).toDouble
     case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
+given ConcreteConvertIntBytes: ConvertIntBytes[Int, Seq[Byte]] with
+  override def apply(from: Int, conf: (config.BytesSize, ByteOrder)): Seq[Byte] =
+    val buf = ByteBuffer.allocate(conf._1.bytes)
+    buf.order(conf._2)
+    conf._1 match
+      case config.BytesSize.Byte => buf.put((from % (1 << 8)).toByte)
+      case config.BytesSize.Short => buf.putShort((from % (1 << 16)).toShort)
+      case config.BytesSize.Int => buf.putInt(from)
+      case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
+    buf.array().toSeq
 
+given ConcreteConvertBytesInt: ConvertBytesInt[Seq[Byte], Int] with
+  override def apply(from: Seq[Byte], conf: (config.BytesSize, ByteOrder, config.Bits)): Int =
+    val buf = ByteBuffer.wrap(from.toArray)
+    buf.order(conf._2)
+    (conf._1, conf._3) match
+      case (config.BytesSize.Byte, config.Bits.Signed) => buf.get.toInt
+      case (config.BytesSize.Byte, config.Bits.Unsigned) => buf.get & 0xFF
+      case (config.BytesSize.Short, config.Bits.Signed) => buf.getShort.toInt
+      case (config.BytesSize.Short, config.Bits.Unsigned) => buf.getShort & 0xFFFF
+      case (config.BytesSize.Int, _) => buf.getInt
+      case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)

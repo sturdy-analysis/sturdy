@@ -12,6 +12,8 @@ import sturdy.values.relational.EqOps
 import scala.util.Random
 import java.lang.Float as JFloat
 import java.lang.Double as JDouble
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 given ConcreteFloatOps: FloatOps[Float] with
   def floatLit(f: Float): Float = f
@@ -156,3 +158,16 @@ given ConcreteConvertFloatDouble: ConvertFloatDouble[Float, Double] with
       val nan64bits = 0X7FF8000000000000L | fields
       JDouble.longBitsToDouble(nan64bits)
     }
+
+given ConcreteConvertFloatBytes: ConvertFloatBytes[Float, Seq[Byte]] with
+  override def apply(from: Float, conf: ByteOrder): Seq[Byte] =
+    val buf = ByteBuffer.allocate(4)
+    buf.order(conf)
+    buf.putFloat(from)
+    buf.array().toSeq
+
+given ConcreteConvertBytesFloat: ConvertBytesFloat[Seq[Byte], Float] with
+  override def apply(from: Seq[Byte], conf: ByteOrder): Float =
+    val buf = ByteBuffer.wrap(from.toArray)
+    buf.order(conf)
+    buf.getFloat

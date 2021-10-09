@@ -11,7 +11,7 @@ import swam.ValType
 import swam.syntax.*
 
 class GenericInterpreterNumerics[V]
-  (stack: OperandStack[V], wasmOps: WasmOps[V, _]):
+  (stack: OperandStack[V], wasmOps: WasmOps[V, _, _]):
 
   import wasmOps.*
   import eqOps.*

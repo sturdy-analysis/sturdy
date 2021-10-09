@@ -4,6 +4,8 @@ import sturdy.effect.failure.FailureKind
 import sturdy.values.config
 import sturdy.values.convert.Convert
 
+import java.nio.ByteOrder
+
 case object LongDivisionByZero extends FailureKind
 case object LongOverflow extends FailureKind
 
@@ -35,3 +37,5 @@ trait LongOps[V]:
 type ConvertLongInt[VFrom, VTo] = Convert[Long, Int, VFrom, VTo, Unit]
 type ConvertLongFloat[VFrom, VTo] = Convert[Long, Float, VFrom, VTo, config.Bits]
 type ConvertLongDouble[VFrom, VTo] = Convert[Long, Double, VFrom, VTo, config.Bits]
+type ConvertLongBytes[VFrom, VTo] = Convert[Long, Seq[Byte], VFrom, VTo, (config.BytesSize, ByteOrder)]
+type ConvertBytesLong[VFrom, VTo] = Convert[Seq[Byte], Long, VFrom, VTo, (config.BytesSize, ByteOrder, config.Bits)]

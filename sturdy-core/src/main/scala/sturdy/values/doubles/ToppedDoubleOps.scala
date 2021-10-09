@@ -3,6 +3,8 @@ package sturdy.values.doubles
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
 
+import java.nio.ByteOrder
+
 given ToppedDoubleOps[T](using ops: DoubleOps[T]): DoubleOps[Topped[T]] with
   def doubleLit(d: Double): Topped[T] = Topped.Actual(ops.doubleLit(d))
   def randomDouble(): Topped[T] = Topped.Top
@@ -24,3 +26,8 @@ given ToppedDoubleOps[T](using ops: DoubleOps[T]): DoubleOps[Topped[T]] with
   def copysign(v: Topped[T], sign: Topped[T]): Topped[T] = v.binary(ops.copysign, sign)
 
   def logNatural(v: Topped[T]): Topped[T] = v.unary(ops.logNatural)
+
+given ToppedConvertDoubleBytes[T, B](using c: ConvertDoubleBytes[T, Seq[B]]): ConvertDoubleBytes[Topped[T], Seq[Topped[B]]] with
+  override def apply(from: Topped[T], conf: ByteOrder): Seq[Topped[B]] = from match
+    case Topped.Top => Seq.fill(8)(Topped.Top)
+    case Topped.Actual(v) => c(v, conf).map(Topped.Actual.apply)

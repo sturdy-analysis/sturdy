@@ -4,6 +4,7 @@ import sturdy.effect.failure.Failure
 import sturdy.values.config
 import sturdy.values.convert.*
 
+import java.nio.ByteOrder
 import scala.util.Random
 
 trait DoubleOps[V]:
@@ -32,3 +33,5 @@ trait DoubleOps[V]:
 type ConvertDoubleInt[VFrom, VTo] = Convert[Double, Float, VFrom, VTo, (config.Overflow, config.Bits)]
 type ConvertDoubleLong[VFrom, VTo] = Convert[Double, Long, VFrom, VTo, (config.Overflow, config.Bits)]
 type ConvertDoubleFloat[VFrom, VTo] = Convert[Double, Float, VFrom, VTo, Unit]
+type ConvertDoubleBytes[VFrom, VTo] = Convert[Double, Seq[Byte], VFrom, VTo, ByteOrder]
+type ConvertBytesDouble[VFrom, VTo] = Convert[Seq[Byte], Double, VFrom, VTo, ByteOrder]

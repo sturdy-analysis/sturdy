@@ -12,7 +12,7 @@ import scala.reflect.ClassTag
 
 /** A memory that tracks byte properties `B` for memory accesses via possibly constant addresses `Topped[Int]`.
  */
-trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: Join[B]) extends Memory[Key, Topped[Int], IndexedSeqView[B], Topped[Int]], Effectful:
+trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: Join[B]) extends Memory[Key, Topped[Int], Seq[B], Topped[Int]], Effectful:
   import ConstantAddressMemory.{*, given}
 
   override type MemoryJoin[A] = WithJoin[A]
@@ -23,12 +23,12 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
   protected def setMemories(s: Memories[Key, B]): Unit =
     memories = mutable.Map() ++ s
 
-  override def memRead(key: Key, addr: Topped[Int], length: Int): OptionA[IndexedSeqView[B]] =
+  override def memRead(key: Key, addr: Topped[Int], length: Int): OptionA[Seq[B]] =
     (memories(key), addr) match
-      case (Topped.Top, _) | (_, Topped.Top) => OptionA.noneSome(Array.fill[B](length)(Top.top).view)
+      case (Topped.Top, _) | (_, Topped.Top) => OptionA.noneSome(Seq.fill[B](length)(Top.top))
       case (Topped.Actual(mem), Topped.Actual(a)) =>
         if (a + length < mem.size) {
-          val readBytes = mem.bytes.view.slice(a, a + length)
+          val readBytes = mem.bytes.slice(a, a + length).toSeq
           if (mem.definite)
             OptionA.some(readBytes)
           else
@@ -37,7 +37,7 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
         else
           OptionA.none
 
-  override def memStore(key: Key, addr: Topped[Int], bytes: IndexedSeqView[B]): OptionA[Unit] =
+  override def memStore(key: Key, addr: Topped[Int], bytes: Seq[B]): OptionA[Unit] =
     memories(key) match
       case Topped.Top => OptionA.noneSome(())
       case Topped.Actual(mem) => addr match

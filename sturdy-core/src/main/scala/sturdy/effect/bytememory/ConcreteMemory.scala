@@ -7,24 +7,25 @@ import java.nio.ByteOrder
 import scala.collection.mutable
 
 
-trait ConcreteMemory[Key] extends Memory[Key, Int, ByteBuffer, Int]:
+trait ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int]:
   import ConcreteMemory.*
   
   override type MemoryJoin[A] = NoJoin[A]
 
   protected val memories: mutable.Map[Key, Mem] = mutable.Map()
 
-  override def memRead(key: Key, addr: Int, length: Int): OptionC[ByteBuffer] =
+  override def memRead(key: Key, addr: Int, length: Int): OptionC[Seq[Byte]] =
     val mem = memories(key)
     // since collections are indexed by signed integers, we have to check here for addr >= 0
     // this means our maximum memory size is half of the allowed size in wasm
     if (addr >= 0 && addr + length <= mem.size)
       val buf = ByteBuffer.wrap(mem.bytes, addr, length)
-      OptionC.Some(buf)
+      OptionC.Some(buf.array().toSeq)
     else
       OptionC.none
 
-  override def memStore(key: Key, addr: Int, buf: ByteBuffer): OptionC[Unit] =
+  override def memStore(key: Key, addr: Int, bytes: Seq[Byte]): OptionC[Unit] =
+    val buf = ByteBuffer.wrap(bytes.toArray)
     val mem = memories(key)
     val length = buf.capacity()
     if (addr >= 0 && addr + length <= mem.size) {

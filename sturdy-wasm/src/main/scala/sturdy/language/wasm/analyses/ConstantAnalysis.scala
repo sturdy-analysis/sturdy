@@ -3,7 +3,6 @@ package sturdy.language.wasm.analyses
 import sturdy.data.{*, given}
 import sturdy.effect.{AnalysisState, Effectful}
 import sturdy.effect.bytememory.ConstantAddressMemory
-import sturdy.effect.bytememory.Serialize
 import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.callframe.CCallFrameInt
 import sturdy.effect.callframe.CMutableCallFrameInt
@@ -21,7 +20,7 @@ import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
 import swam.FuncType
-import sturdy.values.convert.ToppedConvert
+import sturdy.values.convert.{*, given}
 import sturdy.values.doubles.{*, given}
 import sturdy.values.exceptions.{*, given}
 import sturdy.values.functions.{*, given}
@@ -38,7 +37,7 @@ import scala.collection.IndexedSeqView
 object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue, Fix:
 
   type Addr = Topped[Int]
-  type Bytes = IndexedSeqView[Topped[Byte]]
+  type Bytes = Seq[Topped[Byte]]
   type Size = Topped[Int]
   type ExcV = Powerset[WasmException[Value]]
   type FuncIx = Topped[Int]
@@ -104,39 +103,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] =
       runtime(hostFunc)(args)
 
-  trait ASerialize extends Serialize[Value, Bytes, MemoryInst, MemoryInst], Failure:
-    val cSerialize = new ConcreteInterpreter.CSerialize with Failure {
-      override def fail(kind: FailureKind, msg: String): Nothing = ASerialize.this.fail(kind, msg)
-    }
-    override def decode(dat: IndexedSeqView[Topped[Byte]], decInfo: MemoryInst): Value =
-      val bytes = dat.map {
-        case Topped.Top => return decInfo match
-          case _: (i32.Load | i32.Load8S | i32.Load8U | i32.Load16S | i32.Load16U) => Value.Int32(Topped.Top)
-          case _: (i64.Load | i64.Load8S | i64.Load8U | i64.Load16S | i64.Load16U | i64.Load32S | i64.Load32U ) => Value.Int64(Topped.Top)
-          case _: f32.Load => Value.Float32(Topped.Top)
-          case _: f64.Load => Value.Float64(Topped.Top)
-          case _ => throw new IllegalArgumentException(s"Expected load instruction, but got $decInfo.")
-        case Topped.Actual(b) => b
-      }.toArray
-      liftConcreteValue(cSerialize.decode(ByteBuffer.wrap(bytes), decInfo))
-
-    override def encode(v: Value, encInfo: MemoryInst): IndexedSeqView[Topped[Byte]] = v match
-      case Value.TopValue | Value.Int32(Topped.Top) | Value.Int64(Topped.Top) | Value.Float32(Topped.Top) | Value.Float64(Topped.Top) => encInfo match
-        case _: i32.Store => Array.fill(4)(Topped.Top).view
-        case _: i32.Store8 => Array.fill(1)(Topped.Top).view
-        case _: i32.Store16 => Array.fill(2)(Topped.Top).view
-        case _: i64.Store => Array.fill(8)(Topped.Top).view
-        case _: i64.Store8 => Array.fill(1)(Topped.Top).view
-        case _: i64.Store16 => Array.fill(2)(Topped.Top).view
-        case _: i64.Store32 => Array.fill(4)(Topped.Top).view
-        case _: f32.Store => Array.fill(4)(Topped.Top).view
-        case _: f64.Store => Array.fill(8)(Topped.Top).view
-        case _ => throw new IllegalArgumentException(s"Expected store instruction, but got $encInfo.")
-      case Value.Int32(Topped.Actual(i)) => cSerialize.encode(ConcreteInterpreter.Value.Int32(i), encInfo).array().view.map(Topped.Actual.apply)
-      case Value.Int64(Topped.Actual(l)) => cSerialize.encode(ConcreteInterpreter.Value.Int64(l), encInfo).array().view.map(Topped.Actual.apply)
-      case Value.Float32(Topped.Actual(f)) => cSerialize.encode(ConcreteInterpreter.Value.Float32(f), encInfo).array().view.map(Topped.Actual.apply)
-      case Value.Float64(Topped.Actual(d)) => cSerialize.encode(ConcreteInterpreter.Value.Float64(d), encInfo).array().view.map(Topped.Actual.apply)
-
   type InState =
     (CCallFrameInt.Vars[Value],
       ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
@@ -149,7 +115,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends JoinedOperandStack[Value]
       with ConstantAddressMemory[MemoryAddr, Topped[Byte]](Topped.Actual(0))
-      with ASerialize
       with ToppedSymbolTable[TableAddr, SymbolUntopped, Entry]
       with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
       with ABoolBranching[Value](using _.asBoolean)
@@ -179,7 +144,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
 
     private given Effects = effects
     private given Instance = this
-    val wasmOps: WasmOps[Value, FunV] = implicitly
+    val wasmOps: WasmOps[Value, FunV, Bytes] = implicitly
 
     val cfg = control[FrameData[Value]](sensitive = false, cfgOnlyCalls)
 

@@ -4,6 +4,9 @@ import sturdy.effect.failure.FailureKind
 import sturdy.values.config
 import sturdy.values.convert.Convert
 
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
+
 case object IntDivisionByZero extends FailureKind
 case object IntOverflow extends FailureKind
 
@@ -44,3 +47,5 @@ trait IntOps[V]:
 type ConvertIntLong[VFrom, VTo] = Convert[Int, Long, VFrom, VTo, config.Bits]
 type ConvertIntFloat[VFrom, VTo] = Convert[Int, Float, VFrom, VTo, config.Bits]
 type ConvertIntDouble[VFrom, VTo] = Convert[Int, Double, VFrom, VTo, config.Bits]
+type ConvertIntBytes[VFrom, VTo] = Convert[Int, Seq[Byte], VFrom, VTo, (config.BytesSize, ByteOrder)]
+type ConvertBytesInt[VFrom, VTo] = Convert[Seq[Byte], Int, VFrom, VTo, (config.BytesSize, ByteOrder, config.Bits)]
