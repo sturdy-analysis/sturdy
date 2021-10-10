@@ -5,9 +5,7 @@ import sturdy.data.Option
 /*
  * The store interface.
  */
-trait Store[Addr, V]:
-  type StoreJoin[A]
-
-  def read(x: Addr): Option[StoreJoin, V]
+trait Store[Addr, V, MayJoin[_]]:
+  def read(x: Addr): Option[MayJoin, V]
   def write(x: Addr, v: V): Unit
   def free(x: Addr): Unit

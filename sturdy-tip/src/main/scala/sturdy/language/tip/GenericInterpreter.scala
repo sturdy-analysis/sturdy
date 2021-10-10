@@ -21,9 +21,9 @@ import sturdy.values.references.ReferenceOps
 import scala.collection.mutable.ListBuffer
 
 object GenericInterpreter:
-  type GenericEffects[V, Addr] =
+  type GenericEffects[V, Addr, MayJoin[_]] =
     CCallFrame[Unit, String, Addr] with
-    Store[Addr, V] with
+    Store[Addr, V, MayJoin] with
     Allocation[Addr, AllocationSite] with
     Print[V] with
     UserInput[V] with
@@ -68,19 +68,19 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, Addr, BranchJoin[_], Effects <: GenericEffects[V, Addr]]
+trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr, MayJoin]]
   (val effects: Effects)
-  (using effects.StoreJoin[V], effects.StoreJoin[Unit], BranchJoin[Unit]):
+  (using MayJoin[Unit], MayJoin[V]):
 
   import effects.*
-  
+
   val intOps: IntOps[V]; import intOps.*
   val compareOps: CompareOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
   val functionOps: FunctionOps[Function, V, V, V]; import functionOps.*
   val refOps: ReferenceOps[Addr, V]; import refOps.*
   val recOps: RecordOps[String, V, V]; import recOps.*
-  val branchOps: BooleanBranching[V, BranchJoin]; import branchOps.*
+  val branchOps: BooleanBranching[V, MayJoin]; import branchOps.*
 
   val phi: GenericPhi[V]
 

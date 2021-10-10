@@ -2,7 +2,6 @@ package sturdy.language.tip
 
 import sturdy.data.{unit, NoJoin}
 import sturdy.effect.allocation.CAllocationIntIncrement
-import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.CCallFrame
 import sturdy.effect.failure.{Failure, CFailure}
 import sturdy.effect.print.CPrint
@@ -21,7 +20,7 @@ import sturdy.values.relational.{_, given}
 import sturdy.values.{_, given}
 
 object ConcreteInterpreter extends Interpreter:
-  override type BranchJoin[A] = NoJoin[A]
+  override type MayJoin[A] = NoJoin[A]
   
   override type VBool = Boolean
   override type VInt = Int
@@ -64,7 +63,7 @@ object ConcreteInterpreter extends Interpreter:
     final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
-    final def vbranchOps: BooleanBranching[Boolean, BranchJoin] = implicitly
+    final def vbranchOps: BooleanBranching[Boolean, MayJoin] = implicitly
 
     override val phi: GenericPhi[Value] = fix.identity[FixIn, FixOut[Value]]
 

@@ -3,7 +3,6 @@ package sturdy.language.wasm.analyses
 import sturdy.data.{*, given}
 import sturdy.effect.{AnalysisState, Effectful}
 import sturdy.effect.bytememory.ConstantAddressMemory
-import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.callframe.CCallFrameNumbered
 import sturdy.effect.callframe.CMutableCallFrameNumbered
 import sturdy.effect.except.JoinedExcept
@@ -64,7 +63,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
   given EntryTopped: Top[Entry] with
     override def top: Entry = Entry.Top
 
-  given ConstantWasmOperations(using f: Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
@@ -116,7 +115,6 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
       with ConstantAddressMemory[MemoryAddr, Topped[Byte]](Topped.Actual(0))
       with ToppedSymbolTable[TableAddr, SymbolUntopped, Entry]
       with CMutableCallFrameNumbered[FrameData[Value], Value] with CCallFrameNumbered(rootFrameData, rootFrameValues)
-      with ABoolBranching[Value](using _.asBoolean)
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
       with AnalysisState[InState, OutState, AllState] {
@@ -144,9 +142,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     private given Effects = effects
     private given Instance = this
 
-    override val wasmOps: WasmOps[Value, FunV, Bytes] = implicitly
-    override val wasmOperations = implicitly
-    override def vbranchOps: BooleanBranching[Topped[Boolean], WithJoin] = implicitly
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, WithJoin] = implicitly
 
     val cfg = control[FrameData[Value]](sensitive = false, cfgOnlyCalls)
 

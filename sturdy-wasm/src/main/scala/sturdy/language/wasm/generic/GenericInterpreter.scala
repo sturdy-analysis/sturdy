@@ -7,7 +7,6 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.fix
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
-import sturdy.effect.branching.BoolBranching
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.SymbolTable
 import sturdy.values.booleans.BooleanBranching
@@ -41,13 +40,13 @@ enum WasmException[V]:
 
 
 
-type GenericEffects[V, Addr, Bytes, Size, ExcV, Symbol, Entry] =
+type GenericEffects[V, Addr, Bytes, Size, ExcV, Symbol, Entry, MayJoin[_]] =
   OperandStack[V]
-    with Memory[MemoryAddr, Addr,Bytes,Size]
-    with SymbolTable[TableAddr, Symbol, Entry]
+    with Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]
+    with SymbolTable[TableAddr, Symbol, Entry, MayJoin]
     //with SymbolTable[TableAddr, GlobalIdx, GlobalInstance[V]]
     with CMutableCallFrameNumbered[FrameData[V], V]
-    with Except[WasmException[V], ExcV]
+    with Except[WasmException[V], ExcV, MayJoin]
     with Failure
 
 type Imports[V] = mutable.Map[String, ModuleInstance[V]]
@@ -91,37 +90,34 @@ enum FixOut[V]:
   case Eval()
   case ExitWasmFunction(vals: List[V])
 
-trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, MayJoin[_], Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, Symbol, Entry]]
+trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin[_], Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, Symbol, Entry, MayJoin]]
   (val effects: Effects)
-  (using exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin])
-  (using MayJoin[Unit], effects.ExceptJoin[Unit],
-   effects.MemoryJoin[Unit], effects.MemoryJoin[V],
-   effects.TableJoin[Unit]):
+  (using MayJoin[Unit], MayJoin[V]):
 
   import effects.*
   val stack: OperandStack[V] = effects
 
-  val wasmOps: WasmOps[V, FunV, Bytes]; import wasmOps.*
-  val wasmOperations: WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin]; import wasmOperations.*
-  val branchOps: BooleanBranching[V, MayJoin]; import branchOps.*
-
-  val phi: fix.Combinator[FixIn[V], FixOut[V]]
+  val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin]
+  import wasmOps.*
+  import branchOps.*
+  import specialOps.*
+  import exceptOps.*
 
   lazy val num = new GenericInterpreterNumerics[V](effects, wasmOps)
 
+  val labelStack = new LabelStack
   private var memCount = 0
   private var tabCount = 0
   private var globCount = 0
+
+  val phi: fix.Combinator[FixIn[V], FixOut[V]]
+
 
   // add empty table at addr 0 for global variables
   assert(TableAddr(tabCount) == globalTableIndex)
   addEmptyTable(globalTableIndex)
   tabCount += 1
 
-  import wasmOperations.*
-  import exceptOps.*
-
-  val labelStack = new LabelStack
 
   inline private def fail(k: FailureKind, what: String) = effects.fail(k, s"$what in $module")
 

@@ -3,7 +3,6 @@ package sturdy.language.tip.analysis
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.{AnalysisState, Effectful, given}
 import sturdy.effect.allocation.AAllocationFromContext
-import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.callframe.CCallFrame
 import sturdy.effect.failure.{AFailureCollect, Failure}
 import sturdy.effect.print.{APrintPrefix, given}
@@ -28,7 +27,7 @@ import sturdy.language.tip.abstractions.*
 object SignAnalysis extends Interpreter,
   Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
-  override type BranchJoin[A] = WithJoin[A]
+  override type MayJoin[A] = WithJoin[A]
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
@@ -37,8 +36,7 @@ object SignAnalysis extends Interpreter,
   type AllState = OutState
 
   class Effects(initEnvironment: Environment, initStore: Store)
-    extends ABoolBranching[Value](using _.asBoolean)
-      with CCallFrame[Unit, String, Addr]((), initEnvironment)
+    extends CCallFrame[Unit, String, Addr]((), initEnvironment)
       with AStoreMultiAddrThreadded[AllocationSiteAddr, Value](initStore)
       with AAllocationFromContext[AllocationSite, Addr](fromAllocationSite)
       with APrintPrefix[Value]
@@ -71,7 +69,7 @@ object SignAnalysis extends Interpreter,
     final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
-    final def vbranchOps: BooleanBranching[Topped[Boolean], BranchJoin] = implicitly
+    final def vbranchOps: BooleanBranching[Topped[Boolean], MayJoin] = implicitly
 
     given Lazy[Widen[Value]] = lazily(CombineValue)
 

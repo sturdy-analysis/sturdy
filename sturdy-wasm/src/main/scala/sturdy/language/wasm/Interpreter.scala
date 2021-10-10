@@ -84,7 +84,7 @@ trait Interpreter:
   type FunV
   type Symbol
   type Entry
-  type Effects <: GenericEffects[Value, Addr, Bytes, Size, ExcV, Symbol, Entry]
+  type Effects <: GenericEffects[Value, Addr, Bytes, Size, ExcV, Symbol, Entry, MayJoin]
 
   given ValueWasmOps
     (using failure: Failure
@@ -114,7 +114,6 @@ trait Interpreter:
          , convertF64I32: ConvertDoubleInt[F64, I32]
          , convertF64I64: ConvertDoubleLong[F64, I64]
          , convertF64F32: ConvertDoubleFloat[F64, F32]
-         , funOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV]
          , encodeI32: ConvertIntBytes[I32, Bytes]
          , encodeI64: ConvertLongBytes[I64, Bytes]
          , encodeF32: ConvertFloatBytes[F32, Bytes]
@@ -123,9 +122,16 @@ trait Interpreter:
          , decodeI64: ConvertBytesLong[Bytes, I64]
          , decodeF32: ConvertBytesFloat[Bytes, F32]
          , decodeF64: ConvertBytesDouble[Bytes, F64]
-         ): WasmOps[Value, FunV, Bytes] with
+         , boolBranchOps: BooleanBranching[Bool, MayJoin]
+         , funOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV]
+         , excOps: Exceptional[WasmException[Value], ExcV, MayJoin]
+         , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin]
+         ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin] with
 
     final val functionOps: FunctionOps[FunctionInstance[Value], Nothing, Unit, FunV] = funOps
+    final val exceptOps: Exceptional[WasmException[Value], ExcV, MayJoin] = excOps
+    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin] = specOps
+    val branchOps: BooleanBranching[Value, MayJoin] = new LiftedBooleanBranching[Value, Bool, MayJoin](v => v.asBoolean)(using boolBranchOps)
 
     final val intOps: IntOps[Value] = new LiftedIntOps(_.asInt32, Value.Int32.apply)
     final val longOps: LongOps[Value] = new LiftedLongOps(_.asInt64, Value.Int64.apply)
@@ -240,12 +246,5 @@ trait Interpreter:
 
   abstract class GenericInstance
     (_effects: Effects)
-    (using wasmOperations: WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin],
-     exceptOps: Exceptional[WasmException[Value], ExcV, _effects.ExceptJoin])
-    (using MayJoin[Unit], _effects.ExceptJoin[Unit],
-     _effects.MemoryJoin[Unit], _effects.MemoryJoin[Value],
-     _effects.TableJoin[Unit])
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin, Effects](_effects):
-
-    def vbranchOps: BooleanBranching[Bool, MayJoin]
-    val branchOps = new LiftedBooleanBranching[Value, Bool, MayJoin](v => v.asBoolean(using _effects))(using vbranchOps)
+    (using MayJoin[Unit], MayJoin[Value])
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin, Effects](_effects)

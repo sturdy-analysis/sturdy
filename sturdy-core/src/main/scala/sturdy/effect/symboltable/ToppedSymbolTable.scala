@@ -7,9 +7,7 @@ import sturdy.values.{*, given}
 import scala.collection.mutable
 import ToppedSymbolTable.*
 
-trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry], Effectful:
-
-  override type TableJoin[A] = WithJoin[A]
+trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effectful:
 
   protected var tables: Map[Key, Topped[Table[Symbol, Entry]]] = Map()
   private var dirtyTables = Set[Key]()

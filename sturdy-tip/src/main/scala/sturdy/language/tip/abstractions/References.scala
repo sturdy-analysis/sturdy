@@ -15,7 +15,7 @@ object References:
     final type Environment = Map[String, Addr]
     final type Store = Map[AllocationSiteAddr, Value]
 
-    type Effects <: GenericEffects[Value, Addr] & AStoreMultiAddrThreadded[AllocationSiteAddr, Value]
+    type Effects <: GenericEffects[Value, Addr, MayJoin] & AStoreMultiAddrThreadded[AllocationSiteAddr, Value]
 
     def fromAllocationSite(asite: AllocationSite): Addr = Powerset(asite match
       case AllocationSite.Alloc(e) => AllocationSiteAddr.Alloc(e.label)(true)

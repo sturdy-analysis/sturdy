@@ -17,7 +17,7 @@ trait Fix extends Interpreter:
     case FixIn.Eval(_: Loop, _) => true
     case _ => false
 
-  final def frameSensitive(using frame: CallFrame[FrameData[Value], _, _]): Sensitivity[FixIn[Value], FrameData[Value]] = new Sensitivity {
+  final def frameSensitive(using frame: CallFrame[FrameData[Value], _, _, _]): Sensitivity[FixIn[Value], FrameData[Value]] = new Sensitivity {
     override def emptyContext: FrameData[Value] = FrameData.empty
 
     override def switchCall(dom: FixIn[Value]): Boolean = dom match

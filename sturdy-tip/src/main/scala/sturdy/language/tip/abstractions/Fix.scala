@@ -19,7 +19,7 @@ trait Fix:
     case _ => None
   }
 
-  final def parameters[V, A](using effects: GenericEffects[V, A])(using effects.StoreJoin[V]): fix.context.Sensitivity[FixIn, Map[A, V]] =
+  final def parameters[V, A, MayJoin[_]](using effects: GenericEffects[V, A, MayJoin])(using MayJoin[V]): fix.context.Sensitivity[FixIn, Map[A, V]] =
     fix.context.parametersFromStore {
       case FixIn.EnterFunction(f) => Some(f.params.map(p => effects.getLocal(p).get))
       case _ => None

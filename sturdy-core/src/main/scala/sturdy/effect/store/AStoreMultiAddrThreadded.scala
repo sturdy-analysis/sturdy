@@ -16,11 +16,9 @@ import reflect.Selectable.reflectiveSelectable
  * optimize the join computation, since only values of dirty addresses need joining.
  */
 trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V])
-  extends Store[Powerset[Addr], V], AStoreGenericThreadded[Addr, V]:
+  extends Store[Powerset[Addr], V, WithJoin], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
-
-  override type StoreJoin[A] = WithJoin[A]
 
   override def read(xs: Powerset[Addr]): OptionA[V] = {
     var needsNotFound = false

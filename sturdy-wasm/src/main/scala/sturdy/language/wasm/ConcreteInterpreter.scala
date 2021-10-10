@@ -3,7 +3,6 @@ package sturdy.language.wasm
 
 import sturdy.data.{*, given}
 import sturdy.effect.bytememory.ConcreteMemory
-import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.{CCallFrameNumbered, CMutableCallFrameNumbered}
 import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.{CFailure, Failure}
@@ -64,7 +63,7 @@ object ConcreteInterpreter extends Interpreter:
     case Function(fun: FunV)
     case Global(glob: GlobalInstance[Value])
 
-  given ConcreteWasmOperations(using f: Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, NoJoin] with
+  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, NoJoin] with
     override def valueToAddr(v: Value): Int = v.asInt32
     override def valueToFuncIx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
@@ -105,16 +104,13 @@ object ConcreteInterpreter extends Interpreter:
       with ConcreteMemory[MemoryAddr]
       with ConcreteSymbolTable[TableAddr, Symbol, Entry]
       with CMutableCallFrameNumbered[FrameData[Value], Value] with CCallFrameNumbered(rootFrameData, rootFrameValues)
-      with CBoolBranching[Value](using _.asBoolean)
       with ConcreteExcept[WasmException[Value]]
       with CFailure
 
   class Instance(_effects: Effects)(using Failure)
     extends GenericInstance(_effects):
 
-    val wasmOps: WasmOps[Value, FunV, Bytes] = implicitly
-    val wasmOperations: WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin] = implicitly
-    def vbranchOps: BooleanBranching[Bool, MayJoin] = implicitly
+    val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, NoJoin] = implicitly
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] = fix.identity
 

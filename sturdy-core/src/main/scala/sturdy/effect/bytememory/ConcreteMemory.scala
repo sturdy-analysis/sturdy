@@ -5,11 +5,9 @@ import sturdy.data.*
 import scala.collection.mutable
 
 
-trait ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int]:
+trait ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin]:
   import ConcreteMemory.*
   
-  override type MemoryJoin[A] = NoJoin[A]
-
   protected val memories: mutable.Map[Key, Mem] = mutable.Map()
 
   override def memRead(key: Key, addr: Int, length: Int): OptionC[Seq[Byte]] =

@@ -14,8 +14,7 @@ case object AbstractException extends ExceptException:
   override def toString: String = s"Exception (abstract)"
 
 
-trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin], eJoin: Join[E]) extends Except[Exc, E], Effectful:
-  override type ExceptJoin[A] = WithJoin[A]
+trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin], eJoin: Join[E]) extends Except[Exc, E, WithJoin], Effectful:
 
   protected var exception: OptionA[E] = OptionA.none
 

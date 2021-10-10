@@ -5,21 +5,20 @@ import sturdy.values.exceptions.Exceptional
 
 trait ExceptException extends Throwable
 
-trait Except[Exc, E]:
-  type ExceptJoin[A]
-  val exceptional: Exceptional[Exc, E, ExceptJoin]
+trait Except[Exc, E, MayJoin[_]]:
+  val exceptional: Exceptional[Exc, E, MayJoin]
 
   @throws[ExceptException]
   def throws(ex: Exc): Nothing
 
-  protected def tries[A](f: => A): Either[ExceptJoin, A, E]
+  protected def tries[A](f: => A): Either[MayJoin, A, E]
 
-  final def tryCatch[A](f: => A)(handle: Exc => A): ExceptJoin[A] ?=> A =
+  final def tryCatch[A](f: => A)(handle: Exc => A): MayJoin[A] ?=> A =
     tries(f).either(identity)(e => exceptional.handle(e)(handle))
 
-  final def tryFinally[A](f: => A)(g: => Unit): ExceptJoin[A] ?=> A =
+  final def tryFinally[A](f: => A)(g: => Unit): MayJoin[A] ?=> A =
     tries(f).either(a => {g; a})(e => {g; exceptional.handle(e)(throws)})
 
-  final def tryCatchFinally[A](f: => A)(handle: Exc => A)(g: => Unit): ExceptJoin[A] ?=> A =
+  final def tryCatchFinally[A](f: => A)(handle: Exc => A)(g: => Unit): MayJoin[A] ?=> A =
     val tried = tries(f)
     tried.either(a => {g; a})(e => try exceptional.handle(e)(handle) finally g)

@@ -5,13 +5,13 @@ import sturdy.effect.store.Store
 
 
 
-def parametersFromEnv[Dom, Var, V](getParams: Dom => Option[Iterable[Var]])(using env: Environment[Var, V])(using env.EnvJoin[V]) =
+def parametersFromEnv[Dom, Var, V, MayJoin[_]](getParams: Dom => Option[Iterable[Var]])(using env: Environment[Var, V, MayJoin])(using MayJoin[V]) =
   new ParametersFromLookup[Dom, Var, V](
     getParams,
     p => env.lookup(p).get
   )
 
-def parametersFromStore[Dom, Addr, V](getAddrs: Dom => Option[Iterable[Addr]])(using store: Store[Addr, V])(using store.StoreJoin[V]) =
+def parametersFromStore[Dom, Addr, V, MayJoin[_]](getAddrs: Dom => Option[Iterable[Addr]])(using store: Store[Addr, V, MayJoin])(using MayJoin[V]) =
   new ParametersFromLookup[Dom, Addr, V](
     getAddrs,
     addr => store.read(addr).get

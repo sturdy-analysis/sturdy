@@ -17,9 +17,7 @@ import sturdy.values.MayMust
  * variables need joining.
  */
 trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, MayMust[V]])(using j: Join[V])
-  extends Environment[Var, V], Effectful:
-
-  override type EnvJoin[A] = WithJoin[A]
+  extends Environment[Var, V, WithJoin], Effectful:
 
   protected var env: Map[Var, MayMust[V]] = _init
   protected var dirtyVars: Set[Var] = Set()

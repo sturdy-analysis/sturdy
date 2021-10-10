@@ -8,8 +8,7 @@ import scala.util.Success
 case class ConcreteException[E](e: E) extends ExceptException:
   override def toString: String = s"Exception ${e.toString}"
 
-trait ConcreteExcept[E] extends Except[E, E]:
-  override type ExceptJoin[A] = NoJoin[A]
+trait ConcreteExcept[E] extends Except[E, E, NoJoin]:
   override val exceptional = ConcreteExceptional[E]
 
   override def throws(ex: E): Nothing = throw ConcreteException(ex)

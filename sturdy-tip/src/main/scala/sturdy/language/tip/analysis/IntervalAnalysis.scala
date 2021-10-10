@@ -27,7 +27,7 @@ import sturdy.language.tip.abstractions.*
 object IntervalAnalysis extends Interpreter,
   Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
-  override type BranchJoin[A] = WithJoin[A]
+  override type MayJoin[A] = WithJoin[A]
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
@@ -69,7 +69,7 @@ object IntervalAnalysis extends Interpreter,
     final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
-    final def vbranchOps: BooleanBranching[Topped[Boolean], BranchJoin] = implicitly
+    final def vbranchOps: BooleanBranching[Topped[Boolean], MayJoin] = implicitly
 
     var bounds: Set[Int] = Set.empty
     given Widen[IntInterval] = new IntIntervalWiden(bounds)

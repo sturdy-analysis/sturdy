@@ -15,12 +15,10 @@ import scala.collection.mutable.ListBuffer
  * optimize the join computation, since only values of dirty addresses need joining.
  */
 trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])
-  extends Store[Addr, V], AStoreGenericThreadded[Addr, V]:
+  extends Store[Addr, V, WithJoin], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
   
-  override type StoreJoin[A] = WithJoin[A]
-
   override def read(x: Addr): OptionA[V] =
     store.get(x) match
       case scala.None => OptionA.none

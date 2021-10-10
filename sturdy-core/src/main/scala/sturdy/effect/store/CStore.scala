@@ -7,9 +7,7 @@ import scala.collection.mutable.ListBuffer
 /*
  * A concrete store.
  */
-trait CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V]:
-  override type StoreJoin[A] = NoJoin[A]
-
+trait CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V, NoJoin]:
   protected var store: Map[Addr, V] = _init
   def getStore: Map[Addr, V] = store
 

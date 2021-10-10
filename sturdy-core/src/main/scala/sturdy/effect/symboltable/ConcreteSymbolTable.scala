@@ -4,9 +4,7 @@ import sturdy.data.*
 
 import scala.collection.mutable
 
-trait ConcreteSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry]:
-
-  override type TableJoin[A] = NoJoin[A]
+trait ConcreteSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
 
   protected val tables: mutable.Map[Key, mutable.Map[Symbol, Entry]] = mutable.Map()
 
