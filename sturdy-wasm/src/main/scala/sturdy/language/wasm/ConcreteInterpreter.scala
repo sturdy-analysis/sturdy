@@ -4,7 +4,7 @@ package sturdy.language.wasm
 import sturdy.data.{*, given}
 import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.branching.CBoolBranching
-import sturdy.effect.callframe.{CCallFrameInt, CMutableCallFrameInt}
+import sturdy.effect.callframe.{CCallFrameNumbered, CMutableCallFrameNumbered}
 import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.{CFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
@@ -12,9 +12,11 @@ import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.*
+import sturdy.values.booleans.BooleanBranching
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
+import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.*
 import sturdy.values.doubles.{*, given}
 import sturdy.values.exceptions.{*, given}
@@ -27,7 +29,8 @@ import sturdy.values.relational.{*, given}
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-object ConcreteInterpreter extends Interpreter :
+object ConcreteInterpreter extends Interpreter:
+  override type MayJoin[A] = NoJoin[A]
   override type I32 = Int
   override type I64 = Long
   override type F32 = Float
@@ -61,9 +64,7 @@ object ConcreteInterpreter extends Interpreter :
     case Function(fun: FunV)
     case Global(glob: GlobalInstance[Value])
 
-  given ConcreteWasmOperations(using f: Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry] with
-    override type WasmOpsJoin[A] = NoJoin[A]
-
+  given ConcreteWasmOperations(using f: Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, NoJoin] with
     override def valueToAddr(v: Value): Int = v.asInt32
     override def valueToFuncIx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
@@ -103,15 +104,17 @@ object ConcreteInterpreter extends Interpreter :
     extends ConcreteOperandStack[Value]
       with ConcreteMemory[MemoryAddr]
       with ConcreteSymbolTable[TableAddr, Symbol, Entry]
-      with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
+      with CMutableCallFrameNumbered[FrameData[Value], Value] with CCallFrameNumbered(rootFrameData, rootFrameValues)
       with CBoolBranching[Value](using _.asBoolean)
       with ConcreteExcept[WasmException[Value]]
       with CFailure
 
-  class Instance(effects: Effects)(using Failure)
-    extends GenericInstance with GenericInterpreter(effects) :
+  class Instance(_effects: Effects)(using Failure)
+    extends GenericInstance(_effects):
 
     val wasmOps: WasmOps[Value, FunV, Bytes] = implicitly
+    val wasmOperations: WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin] = implicitly
+    def vbranchOps: BooleanBranching[Bool, MayJoin] = implicitly
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] = fix.identity
 

@@ -1,9 +1,8 @@
 package sturdy.language.tip.analysis
 
-import sturdy.data.given
+import sturdy.data.{WithJoin, given}
 import sturdy.effect.{Effectful, AnalysisState, given}
 import sturdy.effect.allocation.AAllocationFromContext
-import sturdy.effect.branching.ABoolBranching
 import sturdy.effect.callframe.CCallFrame
 import sturdy.effect.failure.{AFailureCollect, Failure}
 import sturdy.effect.print.{APrintPrefix, given}
@@ -28,6 +27,8 @@ import sturdy.language.tip.abstractions.*
 object IntervalAnalysis extends Interpreter,
   Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
+  override type BranchJoin[A] = WithJoin[A]
+
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
   type InState = Store
@@ -35,8 +36,7 @@ object IntervalAnalysis extends Interpreter,
   type AllState = OutState
 
   class Effects(initEnvironment: Environment, initStore: Store)
-    extends ABoolBranching[Value](using _.asBoolean)
-      with CCallFrame[Unit, String, Addr]((), initEnvironment)
+    extends CCallFrame[Unit, String, Addr]((), initEnvironment)
       with AStoreMultiAddrThreadded[AllocationSiteAddr, Value](initStore)
       with AAllocationFromContext[AllocationSite, Addr](fromAllocationSite)
       with APrintPrefix[Value]
@@ -56,7 +56,7 @@ object IntervalAnalysis extends Interpreter,
     new Instance(effects, steps, cfgOnlyCalls)
 
   class Instance(effects: Effects, steps: Int, cfgOnlyCalls: Boolean)(using Failure, Effectful)
-    extends GenericInstance with GenericInterpreter[Value, Addr, Effects](effects):
+    extends GenericInstance(effects):
 
     given Effects = effects
 
@@ -69,6 +69,7 @@ object IntervalAnalysis extends Interpreter,
     final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
+    final def vbranchOps: BooleanBranching[Topped[Boolean], BranchJoin] = implicitly
 
     var bounds: Set[Int] = Set.empty
     given Widen[IntInterval] = new IntIntervalWiden(bounds)

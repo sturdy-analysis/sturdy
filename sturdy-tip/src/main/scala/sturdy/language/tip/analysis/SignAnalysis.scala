@@ -1,6 +1,6 @@
 package sturdy.language.tip.analysis
 
-import sturdy.data.given
+import sturdy.data.{WithJoin, given}
 import sturdy.effect.{AnalysisState, Effectful, given}
 import sturdy.effect.allocation.AAllocationFromContext
 import sturdy.effect.branching.ABoolBranching
@@ -27,6 +27,8 @@ import sturdy.language.tip.abstractions.*
 
 object SignAnalysis extends Interpreter,
   Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
+
+  override type BranchJoin[A] = WithJoin[A]
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
@@ -56,7 +58,7 @@ object SignAnalysis extends Interpreter,
     new Instance(effects, steps, cfgOnlyCalls)
 
   class Instance(effects: Effects, steps: Int, cfgOnlyCalls: Boolean)(using Failure, Effectful)
-    extends GenericInstance with GenericInterpreter[Value, Addr, Effects](effects):
+    extends GenericInstance(effects):
 
     given Effects = effects
 
@@ -69,6 +71,7 @@ object SignAnalysis extends Interpreter,
     final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
+    final def vbranchOps: BooleanBranching[Topped[Boolean], BranchJoin] = implicitly
 
     given Lazy[Widen[Value]] = lazily(CombineValue)
 

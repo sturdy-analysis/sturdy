@@ -1,15 +1,17 @@
 package sturdy.language.tip
 
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.tip.GenericInterpreter.{AllocationSite, FixIn, FixOut, GenericEffects, GenericPhi, TypeError}
-import sturdy.values.{Top, Widening, Combine}
-import sturdy.values.functions.{FunctionOps, LiftedFunctionOps}
+import sturdy.language.tip.GenericInterpreter.{FixOut, GenericPhi, TypeError, AllocationSite, GenericEffects, FixIn}
+import sturdy.values.booleans.*
+import sturdy.values.{Top, Combine, Widening}
+import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
 import sturdy.values.ints.{IntOps, LiftedIntOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
-import sturdy.values.references.{LiftedReferenceOps, ReferenceOps}
-import sturdy.values.relational.{CompareOps, EqOps, LiftedCompareOps}
+import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
+import sturdy.values.relational.{EqOps, CompareOps, LiftedCompareOps}
 
 trait Interpreter:
+  type BranchJoin[A]
   type VBool
   type VInt
   type VRef
@@ -65,11 +67,13 @@ trait Interpreter:
       case _ => TopValue
 
   type Instance <: GenericInstance
-  trait GenericInstance
-    extends GenericInterpreter[Value, Addr, Effects]:
+  abstract class GenericInstance
+    (_effects: Effects)
+    (using _effects.StoreJoin[Value], _effects.StoreJoin[Unit], BranchJoin[Unit])
+    extends GenericInterpreter[Value, Addr, BranchJoin, Effects](_effects):
 
     given Instance = this.asInstanceOf[Instance]
-    given Failure = effects
+    given Failure = this.effects
 
     def vintOps: IntOps[VInt]
     def vcompareOps: CompareOps[VInt, VBool]
@@ -80,6 +84,7 @@ trait Interpreter:
     def vfunOps: FunctionOps[Function, Value, Value, VFun]
     def vrefOps: ReferenceOps[Addr, VRef]
     def vrecOps: RecordOps[String, Value, VRecord]
+    def vbranchOps: BooleanBranching[VBool, BranchJoin]
 
     import Value.*
     final val intOps = new LiftedIntOps[Value, VInt](_.asInt, IntValue.apply)(using vintOps)
@@ -100,3 +105,4 @@ trait Interpreter:
     final val functionOps = new LiftedFunctionOps[Function, Value, Value, Value, VFun](_.asFunction, FunValue.apply)(using vfunOps)
     final val refOps = new LiftedReferenceOps[Value, Addr, VRef](_.asReference, RefValue.apply)(using vrefOps)
     final val recOps = new LiftedRecordOps[String, Value, Value, Value, VRecord](_.asRecord, identity, RecValue.apply, identity)(using vrecOps)
+    final val branchOps = new LiftedBooleanBranching[Value, VBool, BranchJoin](v => v.asBoolean(using effects))(using vbranchOps)

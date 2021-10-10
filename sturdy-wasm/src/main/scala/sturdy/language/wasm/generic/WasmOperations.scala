@@ -43,9 +43,7 @@ trait WasmOps[V, FunV, Bytes]:
 
 
 /** Operations specific to Wasm */
-trait WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry]:
-  type WasmOpsJoin[A]
-
+trait WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin[_]]:
   def valueToAddr(v: V): Addr
   def valueToFuncIx(v: V): FuncIx
   
@@ -60,6 +58,6 @@ trait WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry]:
   def entryToFuncV(entry: Entry): FunV
   def entryToGlobI(entry: Entry): GlobalInstance[V]
   
-  def indexLookup[A](ix: V, vec: Vector[A]): Option[WasmOpsJoin, A]
+  def indexLookup[A](ix: V, vec: Vector[A]): Option[MayJoin, A]
 
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]

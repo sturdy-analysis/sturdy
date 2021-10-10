@@ -3,9 +3,12 @@ package sturdy.language.wasm
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.language.wasm.generic.*
 import sturdy.values.*
+import sturdy.values.booleans.BooleanBranching
+import sturdy.values.booleans.LiftedBooleanBranching
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
 import sturdy.values.doubles.*
+import sturdy.values.exceptions.Exceptional
 import sturdy.values.floats.*
 import sturdy.values.functions.FunctionOps
 import sturdy.values.ints.*
@@ -21,6 +24,7 @@ import swam.syntax.{f32, f64, i64, i32}
 import java.nio.ByteOrder
 
 trait Interpreter:
+  type MayJoin[A]
   type I32
   type I64
   type F32
@@ -232,6 +236,16 @@ trait Interpreter:
         case _: f32.Load => Value.Float32(decodeF32(from, ByteOrder.LITTLE_ENDIAN))
         case _: f64.Load => Value.Float64(decodeF64(from, ByteOrder.LITTLE_ENDIAN))
 
-  type Instance <: GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, Effects]
+  type Instance <: GenericInstance
 
-  trait GenericInstance extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, Effects]
+  abstract class GenericInstance
+    (_effects: Effects)
+    (using wasmOperations: WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin],
+     exceptOps: Exceptional[WasmException[Value], ExcV, _effects.ExceptJoin])
+    (using MayJoin[Unit], _effects.ExceptJoin[Unit],
+     _effects.MemoryJoin[Unit], _effects.MemoryJoin[Value],
+     _effects.TableJoin[Unit])
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin, Effects](_effects):
+
+    def vbranchOps: BooleanBranching[Bool, MayJoin]
+    val branchOps = new LiftedBooleanBranching[Value, Bool, MayJoin](v => v.asBoolean(using _effects))(using vbranchOps)

@@ -1,6 +1,6 @@
 package sturdy.language.tip
 
-import sturdy.data.unit
+import sturdy.data.{unit, NoJoin}
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.branching.CBoolBranching
 import sturdy.effect.callframe.CCallFrame
@@ -21,6 +21,8 @@ import sturdy.values.relational.{_, given}
 import sturdy.values.{_, given}
 
 object ConcreteInterpreter extends Interpreter:
+  override type BranchJoin[A] = NoJoin[A]
+  
   override type VBool = Boolean
   override type VInt = Int
   override type VRef = Option[Addr]
@@ -44,16 +46,14 @@ object ConcreteInterpreter extends Interpreter:
   type Store = Map[Int, Value]
 
   class Effects(initEnvironment: Environment, initStore: Store, nextInput: () => Value)
-    extends CBoolBranching[Value](using _.asBoolean)
-      with CCallFrame[Unit, String, Int]((), initEnvironment)
+    extends CCallFrame[Unit, String, Int]((), initEnvironment)
       with CStore[Int, Value](initStore)
       with CAllocationIntIncrement[AllocationSite]
       with CPrint[Value]
       with CUserInput[Value](nextInput)
       with CFailure
 
-  class Instance(effects: Effects)
-    extends GenericInstance with GenericInterpreter(effects):
+  class Instance(effects: Effects) extends GenericInstance(effects):
 
     final def vintOps: IntOps[VInt] = implicitly
     final def vcompareOps: CompareOps[VInt, VBool] = implicitly
@@ -64,6 +64,7 @@ object ConcreteInterpreter extends Interpreter:
     final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
+    final def vbranchOps: BooleanBranching[Boolean, BranchJoin] = implicitly
 
     override val phi: GenericPhi[Value] = fix.identity[FixIn, FixOut[Value]]
 

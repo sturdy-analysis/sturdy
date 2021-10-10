@@ -4,22 +4,23 @@ import sturdy.data.{*, given}
 import sturdy.effect.{AnalysisState, Effectful}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.branching.ABoolBranching
-import sturdy.effect.callframe.CCallFrameInt
-import sturdy.effect.callframe.CMutableCallFrameInt
+import sturdy.effect.callframe.CCallFrameNumbered
+import sturdy.effect.callframe.CMutableCallFrameNumbered
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinedOperandStack
 import sturdy.effect.operandstack.JoinedOperandStack.OperandState
-import sturdy.effect.symboltable.{SymbolTable, ToppedSymbolTable}
+import sturdy.effect.symboltable.{ToppedSymbolTable, SymbolTable}
 import sturdy.fix
 import sturdy.fix
-import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import swam.syntax.*
 import swam.FuncType
+import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
 import sturdy.values.doubles.{*, given}
 import sturdy.values.exceptions.{*, given}
@@ -35,7 +36,7 @@ import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
 object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue, Fix:
-
+  type MayJoin[A] = WithJoin[A]
   type Addr = Topped[Int]
   type Bytes = Seq[Topped[Byte]]
   type Size = Topped[Int]
@@ -63,9 +64,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
   given EntryTopped: Top[Entry] with
     override def top: Entry = Entry.Top
 
-  given ConstantWasmOperations(using f: Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry] with
-    override type WasmOpsJoin[A] = WithJoin[A]
-
+  given ConstantWasmOperations(using f: Failure): WasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
@@ -104,7 +103,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
       runtime(hostFunc)(args)
 
   type InState =
-    (CCallFrameInt.Vars[Value],
+    (CCallFrameNumbered.Vars[Value],
       ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
       ToppedSymbolTable.Tables[TableAddr, SymbolUntopped, Entry])
   type OutState =
@@ -116,7 +115,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     extends JoinedOperandStack[Value]
       with ConstantAddressMemory[MemoryAddr, Topped[Byte]](Topped.Actual(0))
       with ToppedSymbolTable[TableAddr, SymbolUntopped, Entry]
-      with CMutableCallFrameInt[FrameData[Value], Value] with CCallFrameInt(rootFrameData, rootFrameValues)
+      with CMutableCallFrameNumbered[FrameData[Value], Value] with CCallFrameNumbered(rootFrameData, rootFrameValues)
       with ABoolBranching[Value](using _.asBoolean)
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
@@ -140,11 +139,14 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     new Instance(effects, cfgOnlyCalls)
 
   class Instance(effects: Effects, cfgOnlyCalls: Boolean)(using Failure, Effectful)
-    extends GenericInstance with GenericInterpreter(effects) :
+    extends GenericInstance(effects) :
 
     private given Effects = effects
     private given Instance = this
-    val wasmOps: WasmOps[Value, FunV, Bytes] = implicitly
+
+    override val wasmOps: WasmOps[Value, FunV, Bytes] = implicitly
+    override val wasmOperations = implicitly
+    override def vbranchOps: BooleanBranching[Topped[Boolean], WithJoin] = implicitly
 
     val cfg = control[FrameData[Value]](sensitive = false, cfgOnlyCalls)
 

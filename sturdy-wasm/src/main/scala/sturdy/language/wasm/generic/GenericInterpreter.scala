@@ -1,7 +1,7 @@
 package sturdy.language.wasm.generic
 
 import sturdy.data.unit
-import sturdy.effect.callframe.CMutableCallFrameInt
+import sturdy.effect.callframe.CMutableCallFrameNumbered
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.fix
@@ -10,6 +10,7 @@ import sturdy.effect.bytememory.Memory
 import sturdy.effect.branching.BoolBranching
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.SymbolTable
+import sturdy.values.booleans.BooleanBranching
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.convert.*
 import sturdy.values.doubles.*
@@ -18,7 +19,7 @@ import sturdy.values.functions.FunctionOps
 import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
-import swam.{BlockType, FuncIdx, FuncType, GlobalIdx, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
+import swam.{ValType, GlobalType, LabelIdx, MemType, FuncType, TableType, GlobalIdx, FuncIdx, OpCode, BlockType, Limits}
 import swam.syntax.*
 
 import scala.collection.immutable.VectorBuilder
@@ -45,8 +46,7 @@ type GenericEffects[V, Addr, Bytes, Size, ExcV, Symbol, Entry] =
     with Memory[MemoryAddr, Addr,Bytes,Size]
     with SymbolTable[TableAddr, Symbol, Entry]
     //with SymbolTable[TableAddr, GlobalIdx, GlobalInstance[V]]
-    with CMutableCallFrameInt[FrameData[V], V]
-    with BoolBranching[V]
+    with CMutableCallFrameNumbered[FrameData[V], V]
     with Except[WasmException[V], ExcV]
     with Failure
 
@@ -91,19 +91,19 @@ enum FixOut[V]:
   case Eval()
   case ExitWasmFunction(vals: List[V])
 
-trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, Symbol, Entry]]
+trait GenericInterpreter[V,Addr,Bytes,Size,ExcV, FuncIx, FunV, Symbol, Entry, MayJoin[_], Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, Symbol, Entry]]
   (val effects: Effects)
-  (using wasmOperations: WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry],
-   exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin])
-  (using effects.BoolBranchJoin[Unit], effects.ExceptJoin[Unit],
+  (using exceptOps: Exceptional[WasmException[V], ExcV, effects.ExceptJoin])
+  (using MayJoin[Unit], effects.ExceptJoin[Unit],
    effects.MemoryJoin[Unit], effects.MemoryJoin[V],
-   effects.TableJoin[Unit], wasmOperations.WasmOpsJoin[Unit]):
+   effects.TableJoin[Unit]):
 
   import effects.*
   val stack: OperandStack[V] = effects
 
-  val wasmOps: WasmOps[V, FunV, Bytes]
-  import wasmOps.*
+  val wasmOps: WasmOps[V, FunV, Bytes]; import wasmOps.*
+  val wasmOperations: WasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin]; import wasmOperations.*
+  val branchOps: BooleanBranching[V, MayJoin]; import branchOps.*
 
   val phi: fix.Combinator[FixIn[V], FixOut[V]]
 

@@ -1,7 +1,6 @@
 package sturdy.language.tip
 
 import sturdy.effect.allocation.Allocation
-import sturdy.effect.branching.BoolBranching
 import sturdy.effect.callframe.CCallFrame
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind}
@@ -9,13 +8,13 @@ import sturdy.effect.print.Print
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.UserInput
 import sturdy.util.Label
-import sturdy.values.booleans.BooleanOps
+import sturdy.values.*
+import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.ints.IntOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.records.RecordOps
 import sturdy.values.relational.{EqOps, CompareOps}
 import sturdy.fix
-import sturdy.values.*
 import sturdy.data.unit
 import sturdy.values.references.ReferenceOps
 
@@ -23,7 +22,6 @@ import scala.collection.mutable.ListBuffer
 
 object GenericInterpreter:
   type GenericEffects[V, Addr] =
-    BoolBranching[V] with
     CCallFrame[Unit, String, Addr] with
     Store[Addr, V] with
     Allocation[Addr, AllocationSite] with
@@ -70,19 +68,20 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, Addr, Effects <: GenericEffects[V, Addr]]
+trait GenericInterpreter[V, Addr, BranchJoin[_], Effects <: GenericEffects[V, Addr]]
   (val effects: Effects)
-  (using effects.StoreJoin[V], effects.StoreJoin[Unit], effects.BoolBranchJoin[Unit]):
+  (using effects.StoreJoin[V], effects.StoreJoin[Unit], BranchJoin[Unit]):
 
-  import effects._
+  import effects.*
   
-  val intOps: IntOps[V]; import intOps._
-  val compareOps: CompareOps[V, V]; import compareOps._
-  val eqOps: EqOps[V, V]; import eqOps._
-  val functionOps: FunctionOps[Function, V, V, V]; import functionOps._
-  val refOps: ReferenceOps[Addr, V]; import refOps._
-  val recOps: RecordOps[String, V, V]; import recOps._
-  
+  val intOps: IntOps[V]; import intOps.*
+  val compareOps: CompareOps[V, V]; import compareOps.*
+  val eqOps: EqOps[V, V]; import eqOps.*
+  val functionOps: FunctionOps[Function, V, V, V]; import functionOps.*
+  val refOps: ReferenceOps[Addr, V]; import refOps.*
+  val recOps: RecordOps[String, V, V]; import recOps.*
+  val branchOps: BooleanBranching[V, BranchJoin]; import branchOps.*
+
   val phi: GenericPhi[V]
 
   protected var functions: Map[String, Function] = Map()
