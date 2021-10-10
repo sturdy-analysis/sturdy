@@ -54,10 +54,7 @@ object ConcreteInterpreter extends Interpreter:
   override type ExcV = WasmException[Value]
   override type FuncIx = Int
   override type FunV = FunctionInstance[Value]
-
-  enum Symbol:
-    case Function(ix: FuncIx)
-    case Global(ix: GlobalAddr)
+  override type Symbol = FuncIx | GlobalAddr
 
   enum Entry:
     case Function(fun: FunV)
@@ -69,8 +66,8 @@ object ConcreteInterpreter extends Interpreter:
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Int32(sz)
 
-    override def funcIxToSymbol(funcIx: FuncIx): Symbol = Symbol.Function(funcIx)
-    override def globIxToSymbol(globalIdx: GlobalAddr): Symbol = Symbol.Global(globalIdx)
+    override def funcIxToSymbol(funcIx: FuncIx): Symbol = funcIx
+    override def globIxToSymbol(globalIdx: GlobalAddr): Symbol = globalIdx
 
     override def funVToEntry(funV: FunctionInstance[Value]): Entry = Entry.Function(funV)
     override def globIToEntry(globI: GlobalInstance[Value]): Entry = Entry.Global(globI)
