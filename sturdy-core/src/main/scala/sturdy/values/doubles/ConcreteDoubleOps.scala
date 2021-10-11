@@ -14,6 +14,8 @@ import java.lang.Double as JDouble
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+given Structural[Double] with {}
+
 given ConcreteDoubleOps: DoubleOps[Double] with
   def doubleLit(d: Double): Double = d
   def randomDouble(): Double = Random.nextDouble()

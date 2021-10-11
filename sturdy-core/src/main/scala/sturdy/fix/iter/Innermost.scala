@@ -2,6 +2,7 @@ package sturdy.fix.iter
 
 import sturdy.effect.AnalysisState
 import sturdy.effect.Effectful
+import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
 import sturdy.fix.RecurrentCall
@@ -40,11 +41,11 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
    *  
    *  @return the result of running `f` and a flag that indicates if `f` is looping and needs iterating.
    */
-  private def step(f: Dom => Codom, dom: Dom): (Try[Codom], Boolean) =
+  private def step(f: Dom => Codom, dom: Dom): (TrySturdy[Codom], Boolean) =
     val inState = state.getInState()
     stack.push(dom, inState) match
       case Some(result) =>
         (result, false)
       case None =>
-        val result = Try(f(dom))
+        val result = TrySturdy(f(dom))
         stack.pop(dom, inState, result)

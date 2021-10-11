@@ -13,6 +13,8 @@ import java.lang.Float as JFloat
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+given Structural[Int] with {}
+
 given ConcreteIntOps(using f: Failure): IntOps[Int] with
   def intLit(i: Int): Int = i
   def randomInt(): Int = Random.nextInt()
@@ -70,8 +72,6 @@ given ConcreteIntOps(using f: Failure): IntOps[Int] with
   def countLeadingZeros(v: Int): Int = Integer.numberOfLeadingZeros(v)
   def countTrailinZeros(v: Int): Int = Integer.numberOfTrailingZeros(v)
   def nonzeroBitCount(v: Int): Int = Integer.bitCount(v)
-
-given Structural[Int] with {}
 
 given EqOps[Int, Boolean] with
   override def equ(v1: Int, v2: Int): Boolean = v1 == v2

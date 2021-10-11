@@ -52,16 +52,15 @@ given toppedPartialOrder[A](using po: PartialOrder[A]): PartialOrder[Topped[A]] 
 given TopTopped[V]: Top[Topped[V]] with
   override def top: Topped[V] = Topped.Top
 
-object Topped:
-  given CombineToppedFlat[V, W <: Widening]: Combine[Topped[V], W] with
-    def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
-      case (Top, _) => Unchanged(Top)
-      case (_, Top) => Changed(Top)
-      case (Actual(x1), Actual(x2)) => if (x1 == x2) Unchanged(v1) else Changed(Topped.Top)
+given JoinToppedFlat[V, W <: Widening](using Structural[V]): Combine[Topped[V], W] with
+  def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
+    case (Topped.Top, _) => Unchanged(Topped.Top)
+    case (_, Topped.Top) => Changed(Topped.Top)
+    case (Topped.Actual(x1), Topped.Actual(x2)) => if (x1 == x2) Unchanged(v1) else Changed(Topped.Top)
 
-  given CombineToppedDeep[V, W <: Widening](using j: Combine[V, W]): Combine[Topped[V], W] with
-    def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
-      case (Top, _) => Unchanged(Top)
-      case (_, Top) => Changed(Top)
-      case (Actual(x1), Actual(x2)) => j(x1, x2).map(Actual.apply)
+given CombineToppedDeep[V, W <: Widening](using j: Combine[V, W]): Combine[Topped[V], W] with
+  def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
+    case (Topped.Top, _) => Unchanged(Topped.Top)
+    case (_, Topped.Top) => Changed(Topped.Top)
+    case (Topped.Actual(x1), Topped.Actual(x2)) => j(x1, x2).map(Topped.Actual.apply)
 

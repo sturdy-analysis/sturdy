@@ -8,6 +8,7 @@ trait Structural[T]
 given Structural[Unit] with {}
 given Structural[String] with {}
 given Structural[Label] with {}
+given Structural[Byte] with {}
 
 given StructuralOption[A](using Structural[A]): Structural[Option[A]] with {}
 given StructuralMap[K, V](using Structural[K], Structural[V]): Structural[Map[K, V]] with {}

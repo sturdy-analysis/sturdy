@@ -17,6 +17,8 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 
+given Structural[Long] with {}
+
 given ConcreteLongOps(using f: Failure): LongOps[Long] with
   def longLit(l: Long): Long = l
   def randomLong(): Long = Random.nextLong()
@@ -57,8 +59,6 @@ given ConcreteLongOps(using f: Failure): LongOps[Long] with
   def countLeadingZeros(v: Long): Long = JLong.numberOfLeadingZeros(v)
   def countTrailinZeros(v: Long): Long = JLong.numberOfTrailingZeros(v)
   def nonzeroBitCount(v: Long): Long = JLong.bitCount(v)
-
-given Structural[Int] with {}
 
 given EqOps[Long, Boolean] with
   override def equ(v1: Long, v2: Long): Boolean = v1 == v2

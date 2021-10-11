@@ -2,6 +2,7 @@ package sturdy.fix.iter
 
 import sturdy.effect.AnalysisState
 import sturdy.effect.Effectful
+import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
 import sturdy.fix.RecurrentCall
@@ -43,13 +44,13 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
     apply_
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
-  private def step(f: Dom => Codom, dom: Dom): Try[Codom] =
+  private def step(f: Dom => Codom, dom: Dom): TrySturdy[Codom] =
     val inState = state.getInState()
     stack.push(dom, inState) match
       case Some(result) => 
         result
       case None =>
-        val result = Try(f(dom))
+        val result = TrySturdy(f(dom))
         val (widenedResult, looping) = stack.pop(dom, inState, result)
         hasLoop = hasLoop || looping
         widenedResult

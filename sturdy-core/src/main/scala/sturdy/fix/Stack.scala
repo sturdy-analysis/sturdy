@@ -2,14 +2,16 @@ package sturdy.fix
 
 import sturdy.effect.AnalysisState
 import sturdy.effect.Effectful
-import sturdy.values.{MaybeChanged, Widen, Changed, Unchanged}
+import sturdy.effect.SturdyException
+import sturdy.effect.TrySturdy
+import sturdy.values.{Widen, MaybeChanged, Changed, Unchanged}
 
 import scala.collection.mutable
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-case class RecurrentCall[Dom, Ctx](frame: Frame[Dom, Ctx]) extends Exception:
+case class RecurrentCall[Dom, Ctx](frame: Frame[Dom, Ctx]) extends SturdyException:
   override def toString: String = s"RecurrentCall $frame"
 
 case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
@@ -41,7 +43,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
   private var inCacheDirty: Boolean = false
 
   /** Cache of the outputs of previously executed co-recurrent stack frames. */
-  private var outCache: Map[Frame[Dom, Ctx], (Try[Codom], Out)] = Map()
+  private var outCache: Map[Frame[Dom, Ctx], (TrySturdy[Codom], Out)] = Map()
   private var outCacheDirty: Boolean = false
 
   /** Set of _active_ stack frames that have recurred.
@@ -109,7 +111,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
    *  If the frame is recurrent and has not been previously executed, throws a `RecurrentCall` exception.
    *  If the frame is recurrent and has been previously executed, yields the previous result.
    */
-  def push(dom: Dom, in: In): Option[Try[Codom]] =
+  def push(dom: Dom, in: In): Option[TrySturdy[Codom]] =
     val ctx = contextual.getCurrentContext
     val frame = Frame(dom, ctx)
     stack.get(frame) match
@@ -137,7 +139,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
    *
    * If the frame recurred, updates the cache to store the result of this frame.
    */
-  def pop(dom: Dom, in: In, result: Try[Codom]): (Try[Codom], Boolean) =
+  def pop(dom: Dom, in: In, result: TrySturdy[Codom]): (TrySturdy[Codom], Boolean) =
     val ctx = contextual.getCurrentContext
     val frame = Frame(dom, ctx)
     val entry = stack(frame)
@@ -180,7 +182,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
       }
       state.setInState(newIn.get)
 
-  @inline private def loadRecurrentOutput(frame: Frame[Dom, Ctx], ix: Int): Option[Try[Codom]] = outCache.get(frame) match
+  @inline private def loadRecurrentOutput(frame: Frame[Dom, Ctx], ix: Int): Option[TrySturdy[Codom]] = outCache.get(frame) match
     case None =>
       throw RecurrentCall(frame)
     case Some((res, previousOut)) =>
@@ -189,7 +191,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
         println(s"${stackHeightIndent}## RECURRENT $frame <- $res, $previousOut")
       Some(res)
 
-  @inline private def storeCorecurrentOutput(frame: Frame[Dom, Ctx], result: Try[Codom]): Try[Codom] = outCache.get(frame) match
+  @inline private def storeCorecurrentOutput(frame: Frame[Dom, Ctx], result: TrySturdy[Codom]): TrySturdy[Codom] = outCache.get(frame) match
     case None =>
       val out = state.getOutState()
       outCache += frame -> (result, out)
@@ -198,12 +200,13 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
         println(s"${stackHeightIndent}POP  $frame <- $result, $out")
       result
     case Some((previousResult, previousOut)) =>
-      val newResult: MaybeChanged[Try[Codom]] = (previousResult, result) match
-        case (Failure(ex1), Failure(ex2)) => MaybeChanged(Failure(j.joinThrowables(ex1, ex2)), previousResult)
-        case (Failure(_), Success(v)) => Changed(Success(v))
-        case (Success(v), Failure(_)) => Changed(Success(v))
-        case (Success(v1), Success(v2)) => widenCodom(v1, v2).map(Success.apply)
-      val newOut = widenOut(previousOut, state.getOutState())
+      val newResult: MaybeChanged[TrySturdy[Codom]] = (previousResult, result) match
+        case (TrySturdy.Failure(ex1), TrySturdy.Failure(ex2)) => MaybeChanged(TrySturdy.Failure(j.joinThrowables(ex1, ex2)), previousResult)
+        case (TrySturdy.Failure(_), TrySturdy.Success(v)) => Changed(TrySturdy.Success(v))
+        case (TrySturdy.Success(v), TrySturdy.Failure(_)) => Changed(TrySturdy.Success(v))
+        case (TrySturdy.Success(v1), TrySturdy.Success(v2)) => widenCodom(v1, v2).map(TrySturdy.Success.apply)
+      val currentOut = state.getOutState()
+      val newOut = widenOut(previousOut, currentOut)
 
       if (newResult.hasChanged || newOut.hasChanged) {
         outCache += frame -> (newResult.get, newOut.get)

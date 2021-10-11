@@ -8,7 +8,6 @@
 //import sturdy.effect.except.JoinedExcept
 //import sturdy.effect.failure.*
 //import sturdy.effect.operandstack.{JoinedOperandStack, OperandStack}
-//import sturdy.effect.operandstack.JoinedOperandStack.OperandState
 //import sturdy.effect.symboltable.{SymbolTable, ToppedSymbolTable}
 //import sturdy.effect.{AnalysisState, Effectful}
 //import sturdy.fix

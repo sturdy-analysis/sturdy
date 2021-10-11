@@ -1,9 +1,10 @@
 package sturdy.effect.except
 
 import sturdy.data.Either
+import sturdy.effect.SturdyException
 import sturdy.values.exceptions.Exceptional
 
-trait ExceptException extends Throwable
+trait ExceptException extends SturdyException
 
 trait Except[Exc, E, MayJoin[_]]:
   val exceptional: Exceptional[Exc, E, MayJoin]

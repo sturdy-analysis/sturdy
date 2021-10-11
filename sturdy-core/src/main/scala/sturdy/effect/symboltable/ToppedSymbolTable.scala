@@ -31,7 +31,8 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
     tables(key) match
       case Topped.Top => // nothing
       case Topped.Actual(tab) => symbol match
-        case Topped.Top => tables += key -> Topped.Top
+        case Topped.Top =>
+          tables += key -> Topped.Top
         case Topped.Actual(sym) =>
           val newTab = Topped.Actual(tab.updated(sym, newEntry))
           tables += key -> newTab
@@ -53,7 +54,8 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
 
       try g finally {
         for (fkey <- fDirty) fTables(fkey) match
-          case Topped.Top => tables += fkey -> Topped.Top
+          case Topped.Top =>
+            tables += fkey -> Topped.Top
           case Topped.Actual(fTab) => tables.get(fkey) match
             case None => tables += fkey -> Topped.Actual(fTab.allMay)
             case Some(Topped.Top) => // leave at top

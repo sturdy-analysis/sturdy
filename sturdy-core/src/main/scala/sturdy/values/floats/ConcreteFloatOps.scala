@@ -15,6 +15,8 @@ import java.lang.Double as JDouble
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
+given Structural[Float] with {}
+
 given ConcreteFloatOps: FloatOps[Float] with
   def floatLit(f: Float): Float = f
   def randomFloat(): Float = Random.nextFloat()

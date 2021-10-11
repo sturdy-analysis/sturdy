@@ -3,13 +3,14 @@ package sturdy.language.wasm.analyses
 import sturdy.data.{*, given}
 import sturdy.effect.{AnalysisState, Effectful}
 import sturdy.effect.bytememory.ConstantAddressMemory
+import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.CCallFrameNumbered
 import sturdy.effect.callframe.CMutableCallFrameNumbered
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinedOperandStack
-import sturdy.effect.operandstack.JoinedOperandStack.OperandState
-import sturdy.effect.symboltable.{ToppedSymbolTable, SymbolTable}
+import sturdy.effect.symboltable.ToppedSymbolTable
+import sturdy.effect.symboltable.ToppedSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix
 import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
@@ -51,7 +52,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     case Global(glob: GlobalInstance[Value])
     case Top
 
-  given JoinAnEntry(using jF: Join[FunV], jG: Join[GlobalInstance[Value]]): Join[Entry] with
+  given CombineEntry[W <: Widening](using jF: Join[FunV], jG: Join[GlobalInstance[Value]]): Combine[Entry, W] with
     override def apply(v1: Entry, v2: Entry): MaybeChanged[Entry] = (v1, v2) match
       case (Entry.Function(f1), Entry.Function(f2)) => jF(f1, f2).map(Entry.Function.apply)
       case (Entry.Global(g1), Entry.Global(g2)) => jG(g1, g2).map(Entry.Global.apply)
@@ -151,7 +152,3 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
           )
         )
       )
-
-    def initializeModule(module: Module): ModuleInstance[Value] =
-      val modInst = super.initializeModule(module)
-      modInst
