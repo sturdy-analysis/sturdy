@@ -150,7 +150,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
       (widenedResult, true)
     } else {
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}POP  $frame <- $result, ${state.getOutState()}")
+        println(s"${stackHeightIndent}POP  $frame NOT RECURRENT <- $result, ${state.getOutState()}")
       (result, false)
     }
     stack -= frame
@@ -197,7 +197,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
       outCache += frame -> (result, out)
       outCacheDirty = true
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}POP  $frame <- $result, $out")
+        println(s"${stackHeightIndent}POP  $frame <- ${Changed(result)}, ${Changed(out)}")
       result
     case Some((previousResult, previousOut)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = (previousResult, result) match
