@@ -133,7 +133,7 @@ object ConstantAddressMemory:
     inline def size = bytes.length
     inline def pageNum: Int = (size / pageSize).toInt
 
-    override def toString: String = s"Mem(bytesHash=${bytes.toSeq.hashCode()}, dirtyHash=${dirty.hashCode()}, $definite)"
+    override def toString: String = s"Mem(${bytes.size} bytes, ${dirty.size} dirty addresses, definite=$definite)"
 
     override def equals(obj: Any): Boolean = obj match
       case that: Mem[_] =>

@@ -15,6 +15,9 @@ trait SturdyException extends Exception
 enum TrySturdy[A]:
   case Success(a: A)
   case Failure(ex: SturdyException)
+  def isSuccess: Boolean = this match
+    case Success(_) => true
+    case Failure(_) => false
   def get: A = this match
     case Success(a) => a
     case Failure(ex) => throw ex
