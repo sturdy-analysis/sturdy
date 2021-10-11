@@ -61,11 +61,11 @@ enum OptionA[A] extends Option[WithJoin, A]:
     case (None(), NoneSome(e2::Nil)) => NoneSome(e2::Nil)
     case (None(), Some(e2::Nil)) => NoneSome(e2::Nil)
     case (NoneSome(e1::Nil), None()) => NoneSome(e1::Nil)
-    case (NoneSome(e1::Nil), NoneSome(e2::Nil)) => NoneSome(Join(e1,e2)::Nil)
-    case (NoneSome(e1::Nil), Some(e2::Nil)) => NoneSome(Join(e1,e2)::Nil)
+    case (NoneSome(e1::Nil), NoneSome(e2::Nil)) => NoneSome(Join(e1,e2).get::Nil)
+    case (NoneSome(e1::Nil), Some(e2::Nil)) => NoneSome(Join(e1,e2).get::Nil)
     case (Some(e1::Nil), None()) => NoneSome(e1::Nil)
-    case (Some(e1::Nil), NoneSome(e2::Nil)) => NoneSome(Join(e1,e2)::Nil)
-    case (Some(e1::Nil), Some(e2::Nil)) => Some(Join(e1,e2)::Nil)
+    case (Some(e1::Nil), NoneSome(e2::Nil)) => NoneSome(Join(e1,e2).get::Nil)
+    case (Some(e1::Nil), Some(e2::Nil)) => Some(Join(e1,e2).get::Nil)
     case _ => throw new IllegalStateException()
 
 object OptionA:

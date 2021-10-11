@@ -2,7 +2,7 @@ package sturdy.fix
 
 import sturdy.effect.AnalysisState
 import sturdy.effect.Effectful
-import sturdy.values.Widen
+import sturdy.values.{MaybeChanged, Widen, Changed, Unchanged}
 
 import scala.collection.mutable
 import scala.util.Failure
@@ -38,9 +38,11 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
   /** Cache of the inputs of previously executed stack frames.
    */
   private var inCache: Map[Frame[Dom, Ctx], In] = Map()
+  private var inCacheDirty: Boolean = false
 
   /** Cache of the outputs of previously executed co-recurrent stack frames. */
   private var outCache: Map[Frame[Dom, Ctx], (Try[Codom], Out)] = Map()
+  private var outCacheDirty: Boolean = false
 
   /** Set of _active_ stack frames that have recurred.
    *  When a stack frame becomes inactive, it is also removed from this set.
@@ -63,14 +65,36 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
     var previousInCache = inCache
     var previousOutCache = outCache
 
+    var outerInCacheDirty = inCacheDirty
+    var outerOutCacheDirty = outCacheDirty
+    inCacheDirty = false
+    outCacheDirty = false
+
     while (true) {
       val result = f()
-      if (previousInCache == inCache && previousOutCache == outCache)
+
+      if (!inCacheDirty && !outCacheDirty) {
+        if (Fixpoint.DEBUG_CACHE_CHANGES) {
+          if (inCache != previousInCache) throw new IllegalStateException(s"inChacheDirty was wrong")
+          if (outCache != previousOutCache) throw new IllegalStateException(s"outChacheDirty was wrong")
+        }
+        inCacheDirty = outerInCacheDirty
+        outCacheDirty = outerOutCacheDirty
         return result
-      else {
+      } else {
+        if (Fixpoint.DEBUG_CACHE_CHANGES) {
+          if (inCacheDirty && inCache == previousInCache) throw new IllegalStateException(s"inChacheDirty was wrong")
+          if (outCacheDirty && outCache == previousOutCache) throw new IllegalStateException(s"outChacheDirty was wrong")
+        }
+        outerInCacheDirty |= inCacheDirty
+        outerInCacheDirty |= outCacheDirty
+        inCacheDirty = false
+        outCacheDirty = false
+
         iterationCount += 1
         if (Fixpoint.DEBUG)
           println(s"## REPEAT (Iteration $iterationCount)")
+
         previousInCache = inCache
         previousOutCache = outCache
         state.setAllState(originalState)
@@ -136,18 +160,25 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}## RECURRENT $frame -> $in")
       inCache += frame -> in
+      inCacheDirty = true
     case Some(previousIn) =>
-      val joinedIn = widenIn(previousIn, in)
+      val newIn = widenIn(previousIn, in)
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}## RECURRENT $frame -> $joinedIn")
-      inCache += frame -> joinedIn
+        println(s"${stackHeightIndent}## RECURRENT $frame -> $newIn")
+      newIn.ifChanged { changedIn =>
+        inCache += frame -> changedIn
+        inCacheDirty = true
+      }
 
   @inline private def loadCorecurrentInput(frame: Frame[Dom, Ctx], in: In): Unit = inCache.get(frame) match
     case None => inCache += frame -> in
     case Some(recurrentIn) =>
-      val joinedIn = widenIn(in, recurrentIn)
-      inCache += frame -> joinedIn
-      state.setInState(joinedIn)
+      val newIn = widenIn(recurrentIn, in)
+      newIn.ifChanged { changedIn =>
+        inCache += frame -> changedIn
+        inCacheDirty = true
+      }
+      state.setInState(newIn.get)
 
   @inline private def loadRecurrentOutput(frame: Frame[Dom, Ctx], ix: Int): Option[Try[Codom]] = outCache.get(frame) match
     case None =>
@@ -162,18 +193,24 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
     case None =>
       val out = state.getOutState()
       outCache += frame -> (result, out)
+      outCacheDirty = true
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}POP  $frame <- $result, $out")
       result
     case Some((previousResult, previousOut)) =>
-      val joinedResult = (previousResult, result) match
-        case (Failure(ex1), Failure(ex2)) => Failure(j.joinThrowables(ex1, ex2))
-        case (Failure(_), Success(v)) => Success(v)
-        case (Success(v), Failure(_)) => Success(v)
-        case (Success(v1), Success(v2)) => Success(widenCodom(v1, v2))
-      val joinedOut = widenOut(previousOut, state.getOutState())
-      state.setOutState(joinedOut)
-      outCache += frame -> (joinedResult, joinedOut)
+      val newResult: MaybeChanged[Try[Codom]] = (previousResult, result) match
+        case (Failure(ex1), Failure(ex2)) => MaybeChanged(Failure(j.joinThrowables(ex1, ex2)), previousResult)
+        case (Failure(_), Success(v)) => Changed(Success(v))
+        case (Success(v), Failure(_)) => Changed(Success(v))
+        case (Success(v1), Success(v2)) => widenCodom(v1, v2).map(Success.apply)
+      val newOut = widenOut(previousOut, state.getOutState())
+
+      if (newResult.hasChanged || newOut.hasChanged) {
+        outCache += frame -> (newResult.get, newOut.get)
+        outCacheDirty = true
+      }
+      state.setOutState(newOut.get)
+
       if (Fixpoint.DEBUG)
-        println(s"${stackHeightIndent}POP  $frame <- $joinedResult, $joinedOut")
-      joinedResult
+        println(s"${stackHeightIndent}POP  $frame <- $newResult, $newOut")
+      newResult.get

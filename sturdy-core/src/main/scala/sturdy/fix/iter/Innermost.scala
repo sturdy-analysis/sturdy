@@ -29,7 +29,7 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
   override def apply(f: Dom => Codom): Dom => Codom =
     def apply_(dom: Dom): Codom =
       stack.repeatUntilStable { () =>
-        val (result, hasLoop) = step(f, dom, state.getInState())
+        val (result, hasLoop) = step(f, dom)
         if (!hasLoop)
           return result.get
         result
@@ -40,7 +40,8 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
    *  
    *  @return the result of running `f` and a flag that indicates if `f` is looping and needs iterating.
    */
-  private def step(f: Dom => Codom, dom: Dom, inState: In): (Try[Codom], Boolean) =
+  private def step(f: Dom => Codom, dom: Dom): (Try[Codom], Boolean) =
+    val inState = state.getInState()
     stack.push(dom, inState) match
       case Some(result) =>
         (result, false)

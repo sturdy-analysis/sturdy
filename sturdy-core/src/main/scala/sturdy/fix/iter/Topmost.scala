@@ -29,12 +29,12 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
   override def apply(f: Dom => Codom): Dom => Codom =
     def apply_(dom: Dom): Codom =
       if (stack.height > 0) {
-        step(f, dom, state.getInState()).get
+        step(f, dom).get
       } else {
         // this is the topmost call
         stack.repeatUntilStable { () =>
           hasLoop = false
-          val result = step(f, dom, state.getInState())
+          val result = step(f, dom)
           if (!hasLoop)
             return result.get
           result
@@ -43,7 +43,8 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
     apply_
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior. */
-  private def step(f: Dom => Codom, dom: Dom, inState: In): Try[Codom] =
+  private def step(f: Dom => Codom, dom: Dom): Try[Codom] =
+    val inState = state.getInState()
     stack.push(dom, inState) match
       case Some(result) => 
         result

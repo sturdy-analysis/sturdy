@@ -29,15 +29,20 @@ given mayMustRecordOps[F, V](using Failure, Join[V])(using j: Effectful): Record
     case Some(MayMust.May(v)) => j.joinComputations(MayMustRecord(rec.m + (field -> MayMust.Must(newval))))(UnboundRecordField(field).failedUpdate(rec))
 
 given CombineMayMustRecord[F, V, W <: Widening](using j: Combine[V, W]): Combine[MayMustRecord[F, V], W] with
-  override def apply(rec1: MayMustRecord[F, V], rec2: MayMustRecord[F, V]): MayMustRecord[F, V] =
+  override def apply(rec1: MayMustRecord[F, V], rec2: MayMustRecord[F, V]): MaybeChanged[MayMustRecord[F, V]] =
     var joined =  rec1.m
+    var changed = false
     for ((f, v2) <- rec2.m)
       joined.get(f) match
-        case None => joined += f -> MayMust.May(v2.get)
+        case None =>
+          joined += f -> MayMust.May(v2.get)
+          changed = true
         case Some(v1) =>
-          val joinedV = Combine[MayMust[V], W](v1, v2)
-          joined += f -> joinedV
-    MayMustRecord(joined)
+          Combine[MayMust[V], W](v1, v2).ifChanged { changedV =>
+            joined += f -> changedV
+            changed = true
+          }
+    MaybeChanged(MayMustRecord(joined), changed)
 
 given MayMustRecordPO[F, V](using PartialOrder[V]): PartialOrder[MayMustRecord[F, V]] with
   override def lteq(rec1: MayMustRecord[F, V], rec2: MayMustRecord[F, V]): Boolean =

@@ -14,7 +14,7 @@ trait JoinedOperandStack[V](using Join[V]) extends GenericOperandStack[V]:
         stack = fStack.zipAll(stack, null.asInstanceOf[V], null.asInstanceOf[V]).map {
           case (null, v) => v
           case (v, null) => v
-          case (v1, v2) => Join(v1, v2)
+          case (v1, v2) => Join(v1, v2).get
         }
       }
     }

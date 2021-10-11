@@ -1,12 +1,13 @@
 package sturdy.values.taint
 
 import sturdy.effect.failure.Failure
+import sturdy.values.MaybeChanged
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import sturdy.values.ints.IntOps
 import sturdy.values.longs.LongOps
-import sturdy.values.relational.{CompareOps, EqOps, UnsignedCompareOps}
-import sturdy.values.{Combine, Top, Topped, Widening, taint}
+import sturdy.values.relational.{UnsignedCompareOps, EqOps, CompareOps}
+import sturdy.values.*
 import sturdy.values.convert.*
 
 enum Taint:
@@ -22,15 +23,16 @@ given TaintTop: Top[Taint] with
   override def top: Taint = TopTaint
 
 given CombineTaint[W <: Widening]: Combine[Taint, W] with
-  override def apply(v1: Taint, v2: Taint): Taint = (v1,v2) match
-    case (Tainted, Tainted) => Tainted
-    case (Untainted, Untainted) => Untainted
-    case (_, _) => TopTaint
+  override def apply(v1: Taint, v2: Taint): MaybeChanged[Taint] = (v1,v2) match
+    case (Tainted, Tainted) => Unchanged(Tainted)
+    case (Untainted, Untainted) => Unchanged(Untainted)
+    case (TopTaint, _) => Unchanged(TopTaint)
+    case (_, _) => Changed(TopTaint)
 
 case class TaintProduct[V](taint: Taint, value: V):
 
   inline def binary[B, A >: V](f: (V, A) => B, other: TaintProduct[A]): TaintProduct[B] =
-    TaintProduct(Combine(this.taint,other.taint), f(this.value,other.value))
+    TaintProduct(Combine(this.taint,other.taint).get, f(this.value,other.value))
 
   inline def unary[B](f: V => B): TaintProduct[B] = TaintProduct(this.taint, f(this.value))
 
@@ -43,8 +45,11 @@ given TaintProductTop[V, W <: Widening](using vTop: Top[V]): Top[TaintProduct[V]
   override def top: TaintProduct[V] = TaintProduct(Top.top, Top.top)
 
 given CombineTaintProduct[V, W <: Widening](using comb: Combine[V, W]): Combine[TaintProduct[V], W] with
-  override def apply(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] =
-    TaintProduct(Combine(v1.taint, v2.taint), comb.apply(v1.value, v2.value))
+  override def apply(v1: TaintProduct[V], v2: TaintProduct[V]): MaybeChanged[TaintProduct[V]] =
+    val joinedTaint = Join(v1.taint, v2.taint)
+    val joinedVal = comb(v1.value, v2.value)
+    MaybeChanged(TaintProduct(joinedTaint.get, joinedVal.get), joinedTaint.hasChanged || joinedVal.hasChanged)
+
 
 given TaintIntOps[V](using ops: IntOps[V]): IntOps[TaintProduct[V]] with
   def intLit(i: Int): TaintProduct[V] = untainted(ops.intLit(i))

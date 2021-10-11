@@ -57,7 +57,7 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
           case Topped.Actual(fTab) => tables.get(fkey) match
             case None => tables += fkey -> Topped.Actual(fTab.allMay)
             case Some(Topped.Top) => // leave at top
-            case Some(Topped.Actual(gTab)) => tables += fkey -> Topped.Actual(Join(fTab, gTab))
+            case Some(Topped.Actual(gTab)) => Join(gTab, fTab).ifChanged(tables += fkey -> Topped.Actual(_))
 
         dirtyTables ++= fDirty
         dirtyTables ++= snapDirtyTables
@@ -68,25 +68,32 @@ object ToppedSymbolTable:
   type Tables[Key, Symbol, Entry] = Map[Key, Topped[Table[Symbol, Entry]]]
 
   given CombineTable[Symbol, Entry, W <: Widening](using Combine[Entry, W]): Combine[Table[Symbol, Entry], W] with
-    override def apply(old: Table[Symbol, Entry], now: Table[Symbol, Entry]): Table[Symbol, Entry] =
+    override def apply(old: Table[Symbol, Entry], now: Table[Symbol, Entry]): MaybeChanged[Table[Symbol, Entry]] =
       if (old.dirtySymbols.size >= now.dirtySymbols.size)
         combineFrom(old, now)
       else
         combineFrom(now, old)
 
-    private def combineFrom(tab1: Table[Symbol, Entry], tab2: Table[Symbol, Entry]): Table[Symbol, Entry] =
+    private def combineFrom(tab1: Table[Symbol, Entry], tab2: Table[Symbol, Entry]): MaybeChanged[Table[Symbol, Entry]] =
       var tab = tab1.underlying
       var dirty = tab1.dirtySymbols
+      var changed = false
       for (s <- tab2.dirtySymbols) {
         val now = tab2.underlying(s)
-        val e = tab.get(s) match {
-          case None => now
-          case Some(old) => Combine[MayMust[Entry], W](old, now)
+        tab.get(s) match {
+          case None =>
+            tab += s -> now
+            dirty += s
+            changed = true
+          case Some(old) =>
+            Combine[MayMust[Entry], W](old, now).ifChanged { joined =>
+              tab += s -> joined
+              dirty += s
+              changed = true
+            }
         }
-        tab += s -> e
-        dirty += s
       }
-      Table(tab, dirty)
+      MaybeChanged(Table(tab, dirty), changed)
 
   case class Table[Symbol, Entry](val underlying: Map[Symbol, MayMust[Entry]], val dirtySymbols: Set[Symbol]):
     inline def updated(symbol: Symbol, entry: Entry): Table[Symbol, Entry] =

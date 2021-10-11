@@ -4,6 +4,7 @@ import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.values.Abstractly
 import sturdy.values.Join
+import sturdy.values.MaybeChanged
 import sturdy.values.Widen
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
@@ -40,11 +41,11 @@ given PartialOrder[FloatInterval] with
   override def lteq(x: FloatInterval, y: FloatInterval): Boolean = y.l <= x.l && x.h <= y.h
 
 given JoinFfloatInterval: Join[FloatInterval] with
-  override def apply(v1: FloatInterval, v2: FloatInterval): FloatInterval =
-    FloatInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
+  override def apply(v1: FloatInterval, v2: FloatInterval): MaybeChanged[FloatInterval] =
+    MaybeChanged(FloatInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h)), v1)
 
 given WidenFloatInterval: Widen[FloatInterval] with
-  override def apply(v1: FloatInterval, v2: FloatInterval): FloatInterval =
+  override def apply(v1: FloatInterval, v2: FloatInterval): MaybeChanged[FloatInterval] =
     val low =
       if (v1.l <= v2.l)
         v1.l
@@ -55,7 +56,7 @@ given WidenFloatInterval: Widen[FloatInterval] with
         v1.h
       else
         Float.PositiveInfinity
-    FloatInterval(low, high)
+    MaybeChanged(FloatInterval(low, high), v1)
 
 given IntervalFloatOps: FloatOps[FloatInterval] with
   def floatLit(f: Float): FloatInterval = FloatInterval(f, f)

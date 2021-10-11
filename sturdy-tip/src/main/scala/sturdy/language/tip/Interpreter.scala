@@ -2,6 +2,7 @@ package sturdy.language.tip
 
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.language.tip.GenericInterpreter.{FixOut, GenericPhi, TypeError, AllocationSite, GenericEffects, FixIn}
+import sturdy.values.MaybeChanged
 import sturdy.values.booleans.*
 import sturdy.values.{Top, Combine, Widening}
 import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
@@ -59,12 +60,12 @@ trait Interpreter:
 
   given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VFun, W], Combine[VRef, W], Combine[VRecord, W]): Combine[Value, W] with
     import Value.*
-    override def apply(v1: Value, v2: Value): Value = (v1, v2) match
-      case (IntValue(i1), IntValue(i2)) => IntValue(Combine[VInt, W](i1, i2))
-      case (FunValue(funs1), FunValue(funs2)) => FunValue(Combine[VFun, W](funs1, funs2))
-      case (RefValue(addrs1), RefValue(addrs2)) => RefValue(Combine[VRef, W](addrs1, addrs2))
-      case (RecValue(rec1), RecValue(rec2)) => RecValue(Combine[VRecord, W](rec1, rec2))
-      case _ => TopValue
+    override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
+      case (IntValue(i1), IntValue(i2)) => Combine[VInt, W](i1, i2).map(IntValue.apply)
+      case (FunValue(funs1), FunValue(funs2)) => Combine[VFun, W](funs1, funs2).map(FunValue.apply)
+      case (RefValue(addrs1), RefValue(addrs2)) => Combine[VRef, W](addrs1, addrs2).map(RefValue.apply)
+      case (RecValue(rec1), RecValue(rec2)) => Combine[VRecord, W](rec1, rec2).map(RecValue.apply)
+      case _ => MaybeChanged(TopValue, v1)
 
   type Instance <: GenericInstance
   abstract class GenericInstance

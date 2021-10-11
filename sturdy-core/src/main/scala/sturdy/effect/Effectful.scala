@@ -35,7 +35,7 @@ trait Effectful extends ObservableJoin:
       case (Failure(failA: RuntimeException), _) => throw failA
       case (_, Failure(failB: RuntimeException)) => throw failB
       case (Failure(failA), Failure(failB)) => throw joinThrowables(failA, failB)
-      case (Success(aF), Success(aG)) => Join(aF, aG)
+      case (Success(aF), Success(aG)) => Join(aF, aG).get
       case (Success(aF), _) => aF
       case (_, Success(aG)) => aG
   }

@@ -6,10 +6,10 @@ import sturdy.effect.callframe.CallFrame
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, FuncId, InstLoc}
-import sturdy.values.{Combine, Widening}
+import sturdy.language.wasm.generic.{FuncId, FixIn, FixOut, FrameData, InstLoc}
+import sturdy.values.{Combine, Widening, Unchanged, MaybeChanged}
 import swam.FuncIdx
-import swam.syntax.{Block, Call, CallIndirect, Inst, Loop, If}
+import swam.syntax.{Loop, CallIndirect, If, Inst, Block, Call}
 
 trait Fix extends Interpreter:
   final def isFunOrWhile(dom: FixIn[Value]): Boolean = dom match
@@ -39,9 +39,9 @@ trait Fix extends Interpreter:
   }
 
   given CombineFixOut[W <: Widening] (using w: Combine[Value, W]): Combine[FixOut[Value], W] with
-    override def apply(out1: FixOut[Value], out2: FixOut[Value]): FixOut[Value] = (out1, out2) match
-      case (FixOut.Eval(), FixOut.Eval()) => FixOut.Eval()
-      case (FixOut.ExitWasmFunction(vs1), FixOut.ExitWasmFunction(vs2)) => FixOut.ExitWasmFunction(Combine[List[Value], W](vs1, vs2))
+    override def apply(out1: FixOut[Value], out2: FixOut[Value]): MaybeChanged[FixOut[Value]] = (out1, out2) match
+      case (FixOut.Eval(), FixOut.Eval()) => Unchanged(FixOut.Eval())
+      case (FixOut.ExitWasmFunction(vs1), FixOut.ExitWasmFunction(vs2)) => Combine[List[Value], W](vs1, vs2).map(FixOut.ExitWasmFunction.apply)
       case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
 
   enum CfgNode:

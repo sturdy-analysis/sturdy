@@ -2,7 +2,6 @@ package sturdy.effect.store
 
 import sturdy.effect.AnalysisState
 import sturdy.effect.Effectful
-import sturdy.effect.store.AStoreGenericThreadded.StoreState
 import sturdy.values.Join
 
 import scala.collection.mutable.ListBuffer
@@ -26,7 +25,7 @@ trait AStoreGenericThreadded[Addr, V](using j: Join[V])
     dirtyAddrs += x
     store.get(x) match
       case None => store += x -> v
-      case Some(old) => store += x -> j(old, v)
+      case Some(old) => j(old, v).ifChanged(store += x -> _)
 
   override def joinComputations[A](f: => A)(g: => A): Joined[A] =
     val snapshot = store
@@ -47,27 +46,3 @@ trait AStoreGenericThreadded[Addr, V](using j: Join[V])
         dirtyAddrs ++= fDirtyAddrs
       }
     }
-
-  def getStoreJoinWith(other: Map[Addr, V]): Map[Addr, V] =
-    var joined = other
-    for (x <- this.dirtyAddrs)
-      joined.get(x) match
-        case None => joined += x -> store(x)
-        case Some(otherV) =>
-          val thisV = store(x)
-          val joinedV = j(otherV, thisV)
-          joined += x -> joinedV
-    joined
-
-object AStoreGenericThreadded:
-  case class StoreState[Addr, V](store: Map[Addr, V])(using j: Join[V]) {
-    def join(other: StoreState[Addr, V]): StoreState[Addr, V] =
-      var joined = this.store
-      for ((x, v) <- other.store)
-        joined.get(x) match
-          case None => joined += x -> v
-          case Some(thisV) =>
-            val joinedV = j(v, thisV)
-            joined += x -> joinedV
-      StoreState(joined)
-  }

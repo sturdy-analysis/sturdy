@@ -83,8 +83,12 @@ enum FixIn[V]:
   case EnterWasmFunction(id: FuncId[V], func: Func, ft: FuncType)
 
   override def toString: String = this match
-    case Eval(i, loc) => s"eval $i $loc"
-    case EnterWasmFunction(id, _, _) => id.toString
+    case Eval(i, loc) => i match
+      case Block(_, _) => s"Block @$loc"
+      case Loop(_, _) => s"Loop @$loc"
+      case If(_, _, _) => s"If @$loc"
+      case _ => s"$i @$loc"
+    case EnterWasmFunction(id, _, _) => s"Enter $id"
 
 enum FixOut[V]:
   case Eval()

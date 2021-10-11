@@ -40,18 +40,18 @@ given PartialOrder[DoubleSign] with
   override def lteq(x: DoubleSign, y: DoubleSign): Boolean = x == y || x < y
 
 given CombineDoubleSign[W <: Widening]: Combine[DoubleSign, W] with
-  override def apply(v1: DoubleSign, v2: DoubleSign): DoubleSign =
-    if v1 == v2 then v1
-    else if v1 < v2 then v2
-    else if v2 < v1 then v1
+  override def apply(v1: DoubleSign, v2: DoubleSign): MaybeChanged[DoubleSign] =
+    if v1 == v2 then Unchanged(v1)
+    else if v1 < v2 then Changed(v2)
+    else if v2 < v1 then Changed(v1)
     else (v1, v2) match
-      case (TopSign, _) => TopSign
-      case (_, TopSign) => TopSign
-      case (Neg, Zero) => NegOrZero
-      case (Zero, Neg) => NegOrZero
-      case (Zero, Pos) => ZeroOrPos
-      case (Pos, Zero) => ZeroOrPos
-      case _ => TopSign
+      case (TopSign, _) => Unchanged(TopSign)
+      case (_, TopSign) => Changed(TopSign)
+      case (Neg, Zero) => Changed(NegOrZero)
+      case (Zero, Neg) => Changed(NegOrZero)
+      case (Zero, Pos) => Changed(ZeroOrPos)
+      case (Pos, Zero) => Changed(ZeroOrPos)
+      case _ => Changed(TopSign)
 
 
 given SignDoubleOps: DoubleOps[DoubleSign] with

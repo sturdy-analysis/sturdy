@@ -39,18 +39,18 @@ given PartialOrder[FloatSign] with
   override def lteq(x: FloatSign, y: FloatSign): Boolean = x == y || x < y
 
 given CombineFloatSign[W <: Widening]: Combine[FloatSign, W] with
-  override def apply(v1: FloatSign, v2: FloatSign): FloatSign =
-    if v1 == v2 then v1
-    else if v1 < v2 then v2
-    else if v2 < v1 then v1
+  override def apply(v1: FloatSign, v2: FloatSign): MaybeChanged[FloatSign] =
+    if v1 == v2 then Unchanged(v1)
+    else if v1 < v2 then Changed(v2)
+    else if v2 < v1 then Changed(v1)
     else (v1, v2) match
-      case (TopSign, _) => TopSign
-      case (_, TopSign) => TopSign
-      case (Neg, Zero) => NegOrZero
-      case (Zero, Neg) => NegOrZero
-      case (Zero, Pos) => ZeroOrPos
-      case (Pos, Zero) => ZeroOrPos
-      case _ => TopSign
+      case (TopSign, _) => Unchanged(TopSign)
+      case (_, TopSign) => Changed(TopSign)
+      case (Neg, Zero) => Changed(NegOrZero)
+      case (Zero, Neg) => Changed(NegOrZero)
+      case (Zero, Pos) => Changed(ZeroOrPos)
+      case (Pos, Zero) => Changed(ZeroOrPos)
+      case _ => Changed(TopSign)
 
 
 given SignFloatOps: FloatOps[FloatSign] with

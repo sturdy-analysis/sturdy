@@ -69,12 +69,12 @@ trait Interpreter:
 
   given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W], Combine[F32, W], Combine[F64, W]): Combine[Value, W] with
     import Value.*
-    override def apply(v1: Value, v2: Value): Value = (v1, v2) match
-      case (Int32(i1), Int32(i2)) => Int32(Combine[I32, W](i1, i2))
-      case (Int64(l1), Int64(l2)) => Int64(Combine[I64, W](l1, l2))
-      case (Float32(f1), Float32(f2)) => Float32(Combine[F32, W](f1, f2))
-      case (Float64(d1), Float64(d2)) => Float64(Combine[F64, W](d1, d2))
-      case _ => TopValue
+    override def apply(v1: Value, v2: Value): MaybeChanged[Value] = (v1, v2) match
+      case (Int32(i1), Int32(i2)) => Combine[I32, W](i1, i2).map(Int32.apply)
+      case (Int64(l1), Int64(l2)) => Combine[I64, W](l1, l2).map(Int64.apply)
+      case (Float32(f1), Float32(f2)) => Combine[F32, W](f1, f2).map(Float32.apply)
+      case (Float64(d1), Float64(d2)) => Combine[F64, W](d1, d2).map(Float64.apply)
+      case _ => MaybeChanged(TopValue, v1)
 
   type Addr
   type Bytes

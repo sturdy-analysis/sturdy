@@ -25,7 +25,9 @@ given powersetPO[T]: PartialOrder[Powerset[T]] with
   override def lteq(x: Powerset[T], y: Powerset[T]): Boolean = x.set.subsetOf(y.set)
 
 given JoinPowerset[A]: Join[Powerset[A]] with
-  override def apply(v1: Powerset[A], v2: Powerset[A]): Powerset[A] = new Powerset(v1.set ++ v2.set)
+  override def apply(v1: Powerset[A], v2: Powerset[A]): MaybeChanged[Powerset[A]] =
+    val joinedSet = v1.set ++ v2.set
+    MaybeChanged(new Powerset(joinedSet), joinedSet.size > v1.set.size)
 
 given powersetCertainEqualOps[A](using ops: EqOps[A, Boolean]): EqOps[Powerset[A], Topped[Boolean]] with
   override def equ(v1: Powerset[A], v2: Powerset[A]): Topped[Boolean] =

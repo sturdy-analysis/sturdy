@@ -58,10 +58,10 @@ object GenericInterpreter:
   given finiteFixOut[V](using f: Finite[V]): Finite[FixOut[V]] with {}
 
   given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V], W] with
-    override def apply(out1: FixOut[V], out2: FixOut[V]): FixOut[V] = (out1, out2) match
-      case (FixOut.Eval(v1), FixOut.Eval(v2)) => FixOut.Eval(Combine[V, W](v1, v2))
-      case (FixOut.Run(), FixOut.Run()) => FixOut.Run()
-      case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => FixOut.ExitFunction(Combine[V, W](v1, v2))
+    override def apply(out1: FixOut[V], out2: FixOut[V]): MaybeChanged[FixOut[V]] = (out1, out2) match
+      case (FixOut.Eval(v1), FixOut.Eval(v2)) => Combine[V, W](v1, v2).map(FixOut.Eval.apply)
+      case (FixOut.Run(), FixOut.Run()) => Unchanged(FixOut.Run())
+      case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => Combine[V, W](v1, v2).map(FixOut.ExitFunction.apply)
       case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
 
   type GenericPhi[V] = fix.Combinator[FixIn, FixOut[V]]

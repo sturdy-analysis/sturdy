@@ -7,7 +7,6 @@ import sturdy.effect.callframe.CCallFrame
 import sturdy.effect.failure.{AFailureCollect, Failure}
 import sturdy.effect.print.{APrintPrefix, given}
 import sturdy.effect.store.AStoreMultiAddrThreadded
-import sturdy.effect.store.AStoreGenericThreadded.StoreState
 import sturdy.effect.store.Store
 import sturdy.effect.userinput.AUserInput
 import sturdy.fix

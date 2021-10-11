@@ -46,12 +46,12 @@ given PartialOrder[LongInterval] with
   override def lteq(x: LongInterval, y: LongInterval): Boolean = y.l <= x.l && x.h <= y.h
 
 given JoinLongInterval: Join[LongInterval] with
-  override def apply(v1: LongInterval, v2: LongInterval): LongInterval =
-    LongInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
+  override def apply(v1: LongInterval, v2: LongInterval): MaybeChanged[LongInterval] =
+    MaybeChanged(LongInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h)), v1)
 
 given WidenLongInterval(using bounds: => Set[Long]): Widen[LongInterval] with
   private lazy val treeSet: TreeSet[Long] = TreeSet.from(bounds)
-  override def apply(v1: LongInterval, v2: LongInterval): LongInterval =
+  override def apply(v1: LongInterval, v2: LongInterval): MaybeChanged[LongInterval] =
     val low =
       if (v1.l <= v2.l)
         v1.l
@@ -62,7 +62,7 @@ given WidenLongInterval(using bounds: => Set[Long]): Widen[LongInterval] with
         v1.h
       else
         treeSet.minAfter(v2.h).getOrElse(Long.MaxValue)
-    LongInterval(low, high)
+    MaybeChanged(LongInterval(low, high), v1)
 
 given IntervalLongOps(using f: Failure, j: Effectful): LongOps[LongInterval] with
   def longLit(l: Long): LongInterval = LongInterval(l, l)

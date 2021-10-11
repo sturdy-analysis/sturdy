@@ -5,6 +5,7 @@ import swam.*
 import swam.syntax.Func
 import sturdy.values.Finite
 import sturdy.values.Join
+import sturdy.values.MaybeChanged
 
 case class TableAddr(addr: Int) extends AnyVal
 case class MemoryAddr(addr: Int) extends AnyVal
@@ -43,11 +44,12 @@ def mapGlobalInstance[A,B](f: A => B)(x: GlobalInstance[A]): GlobalInstance[B] =
 //  case Wasm(mod, fun, ft) => Wasm(mod.mapModuleInstance(f), fun, ft)
 
 given JoinGlobalInstance[V](using j: Join[V]): Join[GlobalInstance[V]] with
-  override def apply(g1: GlobalInstance[V], g2: GlobalInstance[V]): GlobalInstance[V] = (g1, g2) match
+  override def apply(g1: GlobalInstance[V], g2: GlobalInstance[V]): MaybeChanged[GlobalInstance[V]] = (g1, g2) match
     case (GlobalInstance(t1,v1), GlobalInstance(t2,v2)) =>
       if (t1 == t2)
-        GlobalInstance(t1, j(v1,v2))
-      else throw new Error("Joining of global instances with different types is not allowed.")
+        j(v1,v2).map(v => GlobalInstance(t1, v))
+      else
+        throw new Error("Joining of global instances with different types is not allowed.")
 
 enum ExternalValue:
   case Function(addr: Int)

@@ -5,25 +5,53 @@ object Widening:
   final class Yes extends Widening
   final class No extends Widening
 
+enum MaybeChanged[A]:
+  case Changed(a: A)
+  case Unchanged(a: A)
+
+  inline def hasChanged: Boolean = this match
+    case Changed(_) => true
+    case Unchanged(_) => false
+
+  inline def get: A = this match
+    case Changed(a) => a
+    case Unchanged(a) => a
+
+  inline def map[B](f: A => B): MaybeChanged[B] = this match
+    case Changed(a) => MaybeChanged.Changed(f(a))
+    case Unchanged(a) => MaybeChanged.Unchanged(f(a))
+
+  inline def ifChanged(f: A => Unit): Unit = this match
+    case Changed(a) => f(a)
+    case Unchanged(_) => // nothing
+
+object MaybeChanged:
+  inline def apply[A](a: A, hasChanged: Boolean): MaybeChanged[A] =
+    if (hasChanged) MaybeChanged.Changed(a) else MaybeChanged.Unchanged(a)
+  inline def apply[A](a: A, previous: A): MaybeChanged[A] =
+    if (a == previous) MaybeChanged.Unchanged(a) else MaybeChanged.Changed(a)
+def Changed[A](a: A) = MaybeChanged.Changed(a)
+def Unchanged[A](a: A) = MaybeChanged.Unchanged(a)
+
 trait Combine[V, W <: Widening]:
-  def apply(v1: V, v2: V): V
+  def apply(v1: V, v2: V): MaybeChanged[V]
 
 type Join[V] = Combine[V, Widening.No]
 type Widen[V] = Combine[V, Widening.Yes]
 
 object Combine:
-  inline def apply[V, W <: Widening](v1: V, v2: V)(using j: Combine[V, W]): V = (v1, v2) match {
-    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => r1
+  inline def apply[V, W <: Widening](v1: V, v2: V)(using j: Combine[V, W]): MaybeChanged[V] = (v1, v2) match {
+    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
     case _ => j(v1, v2)
   }
 object Join:
-  inline def apply[V](v1: V, v2: V)(using j: Join[V]): V = (v1, v2) match {
-    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => r1
+  inline def apply[V](v1: V, v2: V)(using j: Join[V]): MaybeChanged[V] = (v1, v2) match {
+    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
     case _ => j(v1, v2)
   }
 object Widen:
-  inline def apply[V](v1: V, v2: V)(using j: Widen[V]): V = (v1, v2) match {
-    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => r1
+  inline def apply[V](v1: V, v2: V)(using j: Widen[V]): MaybeChanged[V] = (v1, v2) match {
+    case (r1: AnyRef, r2: AnyRef) if r1 eq r2 => Unchanged(r1)
     case _ => j(v1, v2)
   }
 

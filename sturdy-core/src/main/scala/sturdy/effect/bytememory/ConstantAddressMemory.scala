@@ -4,7 +4,6 @@ import sturdy.data.*
 import sturdy.effect.Effectful
 import sturdy.fix.*
 import sturdy.values.*
-import sturdy.values.Widening
 
 import scala.collection.mutable
 import scala.collection.IndexedSeqView
@@ -90,7 +89,7 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
       memories = gmemories
       try g finally {
         for ((key, fmem) <- fmemories) gmemories.get(key) match
-          case Some(gmem) => memories += key -> Join(fmem, gmem)
+          case Some(gmem) => memories += key -> Join(fmem, gmem).get
           case None => memories += key -> fmem.map(_.copy(definite = false))
 
         val fkeys = fmemories.keySet
@@ -105,22 +104,28 @@ object ConstantAddressMemory:
   type Memories[Key, B] = Map[Key, Topped[Mem[B]]]
 
   given CombineMem[B, W <: Widening](using j: Combine[B, W]): Combine[Topped[Mem[B]], W] with
-    def apply(old: Topped[Mem[B]], now: Topped[Mem[B]]): Topped[Mem[B]] = (old, now) match
-      case (Topped.Top, _) | (_, Topped.Top) => Topped.Top
+    def apply(old: Topped[Mem[B]], now: Topped[Mem[B]]): MaybeChanged[Topped[Mem[B]]] = (old, now) match
+      case (Topped.Top, _) | (_, Topped.Top) => Unchanged(Topped.Top)
       case (Topped.Actual(oldMem), Topped.Actual(nowMem)) =>
         if (oldMem.bytes.length != nowMem.bytes.length)
-          Topped.Top
+          Changed(Topped.Top)
         else if (oldMem.dirty.size >= nowMem.dirty.size)
-          Topped.Actual(joinSameSized(oldMem, nowMem))
+          joinSameSized(oldMem, nowMem).map(Topped.Actual.apply)
         else
-          Topped.Actual(joinSameSized(nowMem, oldMem))
+          joinSameSized(nowMem, oldMem).map(Topped.Actual.apply)
 
-    private def joinSameSized(mem1: Mem[B], mem2: Mem[B]): Mem[B] =
+    private def joinSameSized(mem1: Mem[B], mem2: Mem[B]): MaybeChanged[Mem[B]] =
       val result = mem1.clone()
-      for (ix <- mem2.dirty)
-        result.bytes(ix) = Combine[B, W](result.bytes(ix), mem2.bytes(ix))
+      var changed = false
+      for (ix <- mem2.dirty) {
+        val b = Combine[B, W](result.bytes(ix), mem2.bytes(ix))
+        if (b.hasChanged) {
+          result.bytes(ix) = b.get
+          changed = true
+        }
+      }
       result.dirty |= mem2.dirty
-      result
+      MaybeChanged(result, changed)
 
   case class Mem[B](bytes: Array[B], dirty: mutable.BitSet, sizeLimit: scala.Option[Int], definite: Boolean = true):
 

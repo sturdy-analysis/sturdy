@@ -54,15 +54,14 @@ given TopTopped[V]: Top[Topped[V]] with
 
 object Topped:
   given CombineToppedFlat[V, W <: Widening]: Combine[Topped[V], W] with
-    def apply(v1: Topped[V], v2: Topped[V]): Topped[V] =
-      if v1 == v2 then
-        v1
-      else
-        Topped.Top
+    def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
+      case (Top, _) => Unchanged(Top)
+      case (_, Top) => Changed(Top)
+      case (Actual(x1), Actual(x2)) => if (x1 == x2) Unchanged(v1) else Changed(Topped.Top)
 
   given CombineToppedDeep[V, W <: Widening](using j: Combine[V, W]): Combine[Topped[V], W] with
-    def apply(v1: Topped[V], v2: Topped[V]): Topped[V] = (v1, v2) match
-      case (Top, _) => Top
-      case (_, Top) => Top
-      case (Actual(x1), Actual(x2)) => Actual(j(x1, x2))
+    def apply(v1: Topped[V], v2: Topped[V]): MaybeChanged[Topped[V]] = (v1, v2) match
+      case (Top, _) => Unchanged(Top)
+      case (_, Top) => Changed(Top)
+      case (Actual(x1), Actual(x2)) => j(x1, x2).map(Actual.apply)
 

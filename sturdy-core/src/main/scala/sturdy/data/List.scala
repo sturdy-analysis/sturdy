@@ -1,24 +1,46 @@
 package sturdy.data
 
-import sturdy.values.{Finite, Widening, Combine}
+import sturdy.values.*
 
 given FiniteSeq[V](using Finite[V]): Finite[Seq[V]] with {}
 
 given CombineEquiSeq[V, W <: Widening](using j: Combine[V, W]): Combine[Seq[V], W] with
-  override def apply(v1: Seq[V], v2: Seq[V]): Seq[V] =
-    if (v1.size != v2.size)
+  override def apply(vs1: Seq[V], vs2: Seq[V]): MaybeChanged[Seq[V]] =
+    if (vs1.size != vs2.size)
       throw new IllegalStateException()
-    v1.zip(v2).map(j.apply.tupled)
+    var changed = false
+    val vs = vs1.zip(vs2).map {
+      case (v1, v2) =>
+        val v = j(v1, v2)
+        changed |= v.hasChanged
+        v.get
+    }
+    MaybeChanged(vs, changed)
+
 
 given CombineEquiList[V, W <: Widening](using j: Combine[V, W]): Combine[List[V], W] with
-  override def apply(v1: List[V], v2: List[V]): List[V] =
-    if (v1.size != v2.size)
+  override def apply(vs1: List[V], vs2: List[V]): MaybeChanged[List[V]] =
+    if (vs1.size != vs2.size)
       throw new IllegalStateException()
-    v1.zip(v2).map(j.apply.tupled)
+    var changed = false
+    val vs = vs1.zip(vs2).map {
+      case (v1, v2) =>
+        val v = j(v1, v2)
+        changed |= v.hasChanged
+        v.get
+    }
+    MaybeChanged(vs, changed)
 
 given CombineEquiVector[V, W <: Widening](using j: Combine[V, W]): Combine[Vector[V], W] with
-  override def apply(v1: Vector[V], v2: Vector[V]): Vector[V] =
-    if (v1.size != v2.size)
+  override def apply(vs1: Vector[V], vs2: Vector[V]): MaybeChanged[Vector[V]] =
+    if (vs1.size != vs2.size)
       throw new IllegalStateException()
-    v1.zip(v2).map(j.apply.tupled)
+    var changed = false
+    val vs = vs1.zip(vs2).map {
+      case (v1, v2) =>
+        val v = j(v1, v2)
+        changed |= v.hasChanged
+        v.get
+    }
+    MaybeChanged(vs, changed)
 

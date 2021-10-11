@@ -52,10 +52,10 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     case Top
 
   given JoinAnEntry(using jF: Join[FunV], jG: Join[GlobalInstance[Value]]): Join[Entry] with
-    override def apply(v1: Entry, v2: Entry): Entry = (v1, v2) match
-      case (Entry.Function(f1), Entry.Function(f2)) => Entry.Function(jF(f1, f2))
-      case (Entry.Global(g1), Entry.Global(g2)) => Entry.Global(jG(g1, g2))
-      case _ => Entry.Top
+    override def apply(v1: Entry, v2: Entry): MaybeChanged[Entry] = (v1, v2) match
+      case (Entry.Function(f1), Entry.Function(f2)) => jF(f1, f2).map(Entry.Function.apply)
+      case (Entry.Global(g1), Entry.Global(g2)) => jG(g1, g2).map(Entry.Global.apply)
+      case _ => MaybeChanged(Entry.Top, v1)
 
   given EntryTopped: Top[Entry] with
     override def top: Entry = Entry.Top

@@ -35,11 +35,11 @@ given PartialOrder[DoubleInterval] with
   override def lteq(x: DoubleInterval, y: DoubleInterval): Boolean = y.l <= x.l && x.h <= y.h
 
 given JoinDoubleInterval: Join[DoubleInterval] with
-  override def apply(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =
-    DoubleInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h))
+  override def apply(v1: DoubleInterval, v2: DoubleInterval): MaybeChanged[DoubleInterval] =
+    MaybeChanged(DoubleInterval(Math.min(v1.l, v2.l), Math.max(v1.h, v2.h)), v1)
 
 given WidenDoubleInterval: Widen[DoubleInterval] with
-  override def apply(v1: DoubleInterval, v2: DoubleInterval): DoubleInterval =
+  override def apply(v1: DoubleInterval, v2: DoubleInterval): MaybeChanged[DoubleInterval] =
     val low =
       if (v1.l <= v2.l)
         v1.l
@@ -50,7 +50,7 @@ given WidenDoubleInterval: Widen[DoubleInterval] with
         v1.h
       else
         Double.PositiveInfinity
-    DoubleInterval(low, high)
+    MaybeChanged(DoubleInterval(low, high), v1)
 
 given IntervalDoubleOps: DoubleOps[DoubleInterval] with
   def doubleLit(d: Double): DoubleInterval = DoubleInterval(d, d)

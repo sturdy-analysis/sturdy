@@ -29,19 +29,23 @@ given ARecordOps[F, V](using Failure, Join[V], Top[V])(using j: Effectful): Reco
       case Some(_) => ARecord.Map(m + (field -> newval))
 
 given CombineARecord[F, V, W <: Widening](using Lazy[Combine[V, W]]): Combine[ARecord[F, V], W] with
-  override def apply(rec1: ARecord[F, V], rec2: ARecord[F, V]): ARecord[F, V] = (rec1, rec2) match
-    case (ARecord.Top(), _ ) | (_, ARecord.Top()) => ARecord.Top()
+  override def apply(rec1: ARecord[F, V], rec2: ARecord[F, V]): MaybeChanged[ARecord[F, V]] = (rec1, rec2) match
+    case (ARecord.Top(), _ ) => Unchanged(rec1)
+    case (_, ARecord.Top()) => Changed(rec2)
     case (ARecord.Map(m1), ARecord.Map(m2)) =>
       if (m1.size != m2.size)
-        return ARecord.Top()
+        return Changed(ARecord.Top())
       var joined =  m1
+      var changed = false
       for ((f, v2) <- m2)
         joined.get(f) match
-          case None => return ARecord.Top()
+          case None => return Changed(ARecord.Top())
           case Some(v1) =>
-            val joinedV = Combine[V, W](v1, v2)(using force)
-            joined += f -> joinedV
-      ARecord.Map(joined)
+            Combine[V, W](v1, v2)(using force).ifChanged { changedV =>
+              joined += f -> changedV
+              changed = true
+            }
+      MaybeChanged(ARecord.Map(joined), changed)
 
 given ARecordPartialOrder[F, V](using Lazy[PartialOrder[V]]): PartialOrder[ARecord[F, V]] with
   override def lteq(rec1: ARecord[F, V], rec2: ARecord[F, V]): Boolean = (rec1, rec2) match
