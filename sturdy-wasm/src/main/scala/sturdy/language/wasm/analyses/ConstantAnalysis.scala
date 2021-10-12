@@ -82,7 +82,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     override def indexLookup[A](ix: Value, vec: Vector[A]): OptionA[A] =
       ix.asInt32 match
         case Topped.Actual(i) =>
-          if (i < vec.size)
+          if (i >= 0 && i < vec.size)
             OptionA.Some(Iterable.single(vec(i)))
           else
             OptionA.None()

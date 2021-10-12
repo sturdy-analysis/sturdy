@@ -45,7 +45,7 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
           mem.dirty.addAll(0 until mem.size)
           OptionA.noneSome(())
         case Topped.Actual(a) =>
-          if (a + bytes.size < mem.size) {
+          if (a >= 0 && a + bytes.size <= mem.size) {
             Array.copy(bytes.toArray, 0, mem.bytes, a, bytes.size)
             mem.dirty.addAll(a until (a + bytes.size))
             OptionA.some(())
