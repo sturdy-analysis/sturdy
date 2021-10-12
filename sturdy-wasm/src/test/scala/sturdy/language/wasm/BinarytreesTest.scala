@@ -24,46 +24,57 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
   val funcName = "_start"
 
   // run constant analysis and print CFG
-//  it must s"execute $funcName in binarytrees_wasail with constant analysis without joining global table to top" in {
-//    val uri = classOf[BinarytreesTest].getResource(base ++ "binarytrees.wast").toURI();
-//    val path = Paths.get(uri)
-//    val module = wasm.parse(path)
-//    val onlyCalls = false
-//    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
-//    val modInst = interp.initializeModule(module)
-//    val result = interp.effects.fallible(
-//      interp.invokeExported(modInst, funcName, List.empty)
-//    )
-//    println(result)
-//    println(interp.cfg.toGraphViz)
-//  }
-//
-//
-//  it must s"execute $funcName in binarytrees_repo with concrete interpreter" in {
-//    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees.wasm").toURI();
-//    val path = Paths.get(uri)
-//    val res = runWasmFunction(path, funcName, List.empty)
-//    println(res)
-//  }
+  it must s"execute $funcName in binarytrees_wasail with constant analysis without joining global table to top" in {
+    val uri = classOf[BinarytreesTest].getResource(base ++ "binarytrees.wast").toURI();
+    val path = Paths.get(uri)
+    val module = wasm.parse(path)
+    val onlyCalls = false
+    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
+    val modInst = interp.initializeModule(module)
+    val result = interp.effects.fallible(
+      interp.invokeExported(modInst, funcName, List.empty)
+    )
+    println(result)
+    println(interp.cfg.toGraphViz)
+  }
 
-//  // run constant analysis and print CFG
-//  it must s"execute $funcName in binarytrees_repo with constant analysis without throwing a recurrent call exception" in {
-//    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees.wasm").toURI();
-//    val path = Paths.get(uri)
-//    val module = readBinaryModule(path)
-//    val onlyCalls = false
-//    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
-//    val modInst = interp.initializeModule(module)
-//    val result = interp.effects.fallible(
-//      interp.invokeExported(modInst, funcName, List.empty)
-//    )
-//    println(result)
-//    println(interp.cfg.toGraphViz)
-//  }
+
+  it must s"execute $funcName in binarytrees_repo with concrete interpreter" in {
+    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees.wasm").toURI();
+    val path = Paths.get(uri)
+    val res = runWasmFunction(path, funcName, List.empty)
+    println(res)
+  }
 
   // run constant analysis and print CFG
   it must s"execute $funcName in binarytrees_repo with constant analysis without throwing a recurrent call exception" in {
-    Thread.sleep(3000)
+    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees.wasm").toURI();
+    val path = Paths.get(uri)
+    val module = readBinaryModule(path)
+    val onlyCalls = false
+    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
+    val modInst = interp.initializeModule(module)
+    val result = interp.effects.fallible(
+      interp.invokeExported(modInst, funcName, List.empty)
+    )
+    println(result)
+    println(interp.cfg.toGraphViz)
+  }
+
+  it must s"execute shortened $funcName in binarytrees_repo with concrete interpreter" in {
+    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees_shortened.wast").toURI();
+    val path = Paths.get(uri)
+    val module = wasm.parse(path)
+    val interp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
+    val modInst = interp.initializeModule(module)
+    val res = interp.effects.fallible(
+      interp.invokeExported(modInst, funcName, List())
+    )
+    println(res)
+  }
+
+  // run constant analysis and print CFG
+  it must s"execute shortened $funcName in binarytrees_repo with constant analysis without throwing a recurrent call exception" in {
     val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees_shortened.wast").toURI();
     val path = Paths.get(uri)
     val module = wasm.parse(path)

@@ -339,12 +339,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
         }
       }
 
-    // stack before invoke: A p0 ... pn (n = params arity)
-    // finish without excepction: A r0 ... rm (m = return arity)
-    // catch Return(op0, ..., opm)
-    //    - stack A g0 ... gk needs to become A op0 ... opm
-    //    - we don't know k, so we need to remember size of stack A
-    // catch Jump(...) => error
     def invoke(fun: FunctionInstance[V], funcIx: FuncId[V]): Unit =
       fun match
         case FunctionInstance.Wasm(mod, func, funcType) =>
@@ -390,7 +384,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
 
     phi {
       case FixIn.Eval(inst, loc) =>
-        eval_open(inst, loc); FixOut.Eval()
+        eval_open(inst, loc)
+        FixOut.Eval()
       case FixIn.EnterWasmFunction(id, func, funcType) =>
         FixOut.ExitWasmFunction(enterFunction_open(id, func, funcType))
     }

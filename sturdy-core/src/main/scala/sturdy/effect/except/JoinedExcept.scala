@@ -42,7 +42,11 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
           case OptionA.None() => throw new IllegalStateException(s"exception cannot be None here")
           case OptionA.NoneSome(exs) => EitherA.Right(exs)
           case OptionA.Some(exs) => EitherA.Right(exs)
-      case ex => throw ex
+      case ex =>
+        exception match
+          case OptionA.None() => throw ex
+          case OptionA.NoneSome(exs) => EitherA.Right(exs)
+          case OptionA.Some(exs) => EitherA.Right(exs)
     }
     // all exceptions are passed to the catch block, which must re-throw them if desired
     this.exception = OptionA.None()
