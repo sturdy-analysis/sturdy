@@ -4,6 +4,7 @@ import sturdy.effect.AnalysisState
 import sturdy.effect.Effectful
 import sturdy.effect.SturdyException
 import sturdy.effect.TrySturdy
+import sturdy.values.Finite
 import sturdy.values.{Widen, MaybeChanged, Changed, Unchanged}
 
 import scala.collection.mutable
@@ -29,7 +30,8 @@ case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
  *  finitely many calls. This property holds in particular if the set of contexts is finite.
  */
 final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, All], contextual: Contextual[Ctx, Dom, Codom])
-  (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], j: Effectful):
+  (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], j: Effectful)
+  (using Finite[Dom], Finite[Ctx]):
 
   /** Set of active calls identified by their context and their stack position.
    * Each call can only be active once since a second invocation triggers a recurrent call.

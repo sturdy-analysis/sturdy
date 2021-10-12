@@ -7,6 +7,7 @@ import sturdy.fix.Combinator
 import sturdy.fix.Contextual
 import sturdy.fix.RecurrentCall
 import sturdy.fix.Stack
+import sturdy.values.Finite
 import sturdy.values.Widen
 
 import scala.collection.mutable
@@ -16,11 +17,13 @@ def topmost[Dom, Codom, In, Out, All, Ctx]
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: AnalysisState[In, Out, All])
   (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], j: Effectful)
+  (using Finite[Dom], Finite[Ctx])
   : Topmost[Dom, Codom, In, Out, All, Ctx] = new Topmost(state, context)
 
 final class Topmost[Dom, Codom, In, Out, All, Ctx]
   (state: AnalysisState[In, Out, All], context: Contextual[Ctx, Dom, Codom])
   (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], j: Effectful)
+  (using Finite[Dom], Finite[Ctx])
   extends Combinator[Dom, Codom]:
 
   private val stack: Stack[Dom, Codom, In, Out, All, Ctx] = new Stack(state, context)

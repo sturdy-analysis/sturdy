@@ -34,7 +34,10 @@ object GenericInterpreter:
     case ParamBinding(fun: Function, name: String)
     case LocalBinding(fun: Function, name: String)
     case Record(r: Exp.Record)
-
+  
+  case class Field(name: String)
+  given Finite[Field] with {}
+  
   case object UnboundVariable extends FailureKind
   case object UnboundAddr extends FailureKind
   case object UserError extends FailureKind
@@ -55,6 +58,7 @@ object GenericInterpreter:
     case Run()
     case ExitFunction(ret: V)
 
+  given finiteFixIn: Finite[FixIn] with {}
   given finiteFixOut[V](using f: Finite[V]): Finite[FixOut[V]] with {}
 
   given CombineFixOut[V, W <: Widening](using w: Combine[V, W]): Combine[FixOut[V], W] with
@@ -79,7 +83,7 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
   val eqOps: EqOps[V, V]; import eqOps.*
   val functionOps: FunctionOps[Function, V, V, V]; import functionOps.*
   val refOps: ReferenceOps[Addr, V]; import refOps.*
-  val recOps: RecordOps[String, V, V]; import recOps.*
+  val recOps: RecordOps[Field, V, V]; import recOps.*
   val branchOps: BooleanBranching[V, MayJoin]; import branchOps.*
 
   val phi: GenericPhi[V]
@@ -125,14 +129,14 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
         nullValue
       case r@Exp.Record(fields) =>
         // represents record as a reference to a record value
-        val fieldVals = fields.map(fe => fe._1 -> eval(fe._2))
+        val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
         val rec = makeRecord(fieldVals)
         val addr = alloc(AllocationSite.Record(r))
         write(addr, rec)
         refValue(addr)
       case Exp.FieldAccess(rec, field) =>
         val recVal = eval(Exp.Deref(rec))
-        lookupRecordField(recVal, field)
+        lookupRecordField(recVal, Field(field))
     }
 
     def run_open(s: Stm): Unit = s match
@@ -161,13 +165,13 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
         val recRef = eval(Exp.Var(recVar))
         val recAddr = refAddr(recRef)
         val recVal = read(recAddr).getOrElse(fail(UnboundAddr, recAddr.toString))
-        val updated = updateRecordField(recVal, field, v)
+        val updated = updateRecordField(recVal, Field(field), v)
         write(recAddr, updated)
       case Assignable.ADerefField(rec, field) =>
         val recRef = eval(rec)
         val recAddr = refAddr(recRef)
         val recVal = read(recAddr).getOrElse(fail(UnboundAddr, recAddr.toString))
-        val updated = updateRecordField(recVal, field, v)
+        val updated = updateRecordField(recVal, Field(field), v)
         write(recAddr, updated)
 
     def call(fun: Function, args: Seq[V]): V =

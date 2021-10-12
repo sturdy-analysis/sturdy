@@ -26,7 +26,7 @@ object ConcreteInterpreter extends Interpreter:
   override type VInt = Int
   override type VRef = Option[Addr]
   override type VFun = Function
-  override type VRecord = Map[String, Value]
+  override type VRecord = Map[Field, Value]
 
   override def topInt(using Instance): VInt = throw new UnsupportedOperationException
   override def topReference(using Instance): VRef = throw new UnsupportedOperationException
@@ -62,7 +62,7 @@ object ConcreteInterpreter extends Interpreter:
     final def vrecEqOps: EqOps[VRecord, VBool] = implicitly
     final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
-    final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
+    final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
     final def vbranchOps: BooleanBranching[Boolean, MayJoin] = implicitly
 
     override val phi: GenericPhi[Value] = fix.identity[FixIn, FixOut[Value]]

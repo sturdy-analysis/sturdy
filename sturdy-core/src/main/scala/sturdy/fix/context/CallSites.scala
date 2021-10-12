@@ -1,6 +1,7 @@
 package sturdy.fix.context
 
 import sturdy.fix.Logger
+import sturdy.values.Finite
 
 import scala.util.Try
 
@@ -16,8 +17,11 @@ class CallSiteLogger[Dom, Call](getCall: Dom => Option[Call]) extends Logger[Dom
     case Some(c) => calls = calls.tail
     case _ => // nothing
 
-  def callString[In](k: Int) = new Sensitivity[Dom, List[Call]] {
-    override def emptyContext: List[Call] = List()
+  def callString[In](k: Int) = new Sensitivity[Dom, CallString[Call]] {
+    override def emptyContext: CallString[Call] = CallString(List())
     override def switchCall(dom: Dom): Boolean = getCall(dom).isDefined
-    override def apply(dom: Dom) = calls.take(k)
+    override def apply(dom: Dom) = CallString(calls.take(k))
   }
+
+case class CallString[Call](calls: List[Call])
+given FiniteCallString[Call]: Finite[CallString[Call]] with {}

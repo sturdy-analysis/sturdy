@@ -9,6 +9,7 @@ import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.SymbolTable
+import sturdy.values.Finite
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.convert.*
@@ -30,6 +31,7 @@ case class FrameData[V](returnArity: Int, module: ModuleInstance[V]):
       s"null:$returnArity"
     else
       s"$module:$returnArity"
+given FiniteFrameData[V]: Finite[FrameData[V]] with {}
 
 object FrameData:
   def empty[V]: FrameData[V] = FrameData[V](0, null)
@@ -93,6 +95,8 @@ enum FixIn[V]:
 enum FixOut[V]:
   case Eval()
   case ExitWasmFunction(vals: List[V])
+
+given finiteFixIn[V]: Finite[FixIn[V]] with {}
 
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin[_], Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, Symbol, Entry, MayJoin]]
   (val effects: Effects)

@@ -7,7 +7,7 @@ import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.{FuncId, FixIn, FixOut, FrameData, InstLoc}
-import sturdy.values.{Combine, Widening, Unchanged, MaybeChanged}
+import sturdy.values.{Combine, MaybeChanged, Widening, Unchanged}
 import swam.FuncIdx
 import swam.syntax.{Loop, CallIndirect, If, Inst, Block, Call}
 

@@ -20,7 +20,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.GenericInterpreter.{FixIn, GenericPhi, AllocationSite, FixOut}
+import sturdy.language.tip.GenericInterpreter.{FixIn, GenericPhi, AllocationSite, FixOut, Field}
 import sturdy.language.tip.abstractions.*
 
 object IntervalAnalysis extends Interpreter,
@@ -67,7 +67,7 @@ object IntervalAnalysis extends Interpreter,
     final def vrecEqOps: EqOps[VRecord, VBool] = ??? //new ARecordEqOps(using lazily(eqOps))
     final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
-    final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
+    final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
     final def vbranchOps: BooleanBranching[Topped[Boolean], MayJoin] = implicitly
 
     var bounds: Set[Int] = Set.empty
@@ -79,8 +79,8 @@ object IntervalAnalysis extends Interpreter,
       super.execute(p)
 
     val callSites = callSitesLogger()
-    val cfg = control[List[Exp.Call], Value](sensitive = true, cfgOnlyCalls)
-
+    val cfg = control[CallString, Value](sensitive = true, cfgOnlyCalls)
+    
     val phi =
       fix.log(callSites,
         fix.contextSensitive(callSites.callString(2),

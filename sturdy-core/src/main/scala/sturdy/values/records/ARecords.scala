@@ -47,6 +47,8 @@ given CombineARecord[F, V, W <: Widening](using Lazy[Combine[V, W]]): Combine[AR
             }
       MaybeChanged(ARecord.Map(joined), changed)
 
+given FiniteARecord[F, V](using Finite[F], Lazy[Finite[V]]): Finite[ARecord[F, V]] with {}
+
 given ARecordPartialOrder[F, V](using Lazy[PartialOrder[V]]): PartialOrder[ARecord[F, V]] with
   override def lteq(rec1: ARecord[F, V], rec2: ARecord[F, V]): Boolean = (rec1, rec2) match
     case (_, ARecord.Top()) => true

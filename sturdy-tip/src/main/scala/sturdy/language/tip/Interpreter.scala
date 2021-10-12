@@ -1,10 +1,10 @@
 package sturdy.language.tip
 
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.tip.GenericInterpreter.{FixOut, GenericPhi, TypeError, AllocationSite, GenericEffects, FixIn}
+import sturdy.language.tip.GenericInterpreter.{FixOut, GenericPhi, TypeError, AllocationSite, GenericEffects, FixIn, Field}
 import sturdy.values.MaybeChanged
 import sturdy.values.booleans.*
-import sturdy.values.{Top, Combine, Widening}
+import sturdy.values.{Top, Combine, Widening, Finite}
 import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
 import sturdy.values.ints.{IntOps, LiftedIntOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
@@ -67,6 +67,8 @@ trait Interpreter:
       case (RecValue(rec1), RecValue(rec2)) => Combine[VRecord, W](rec1, rec2).map(RecValue.apply)
       case _ => MaybeChanged(TopValue, v1)
 
+  class FiniteValue(using Finite[VInt], Finite[VFun], Finite[VRef], Finite[VRecord]) extends Finite[Value]
+
   type Instance <: GenericInstance
   abstract class GenericInstance
     (_effects: Effects)
@@ -84,7 +86,7 @@ trait Interpreter:
     def vrecEqOps: EqOps[VRecord, VBool]
     def vfunOps: FunctionOps[Function, Value, Value, VFun]
     def vrefOps: ReferenceOps[Addr, VRef]
-    def vrecOps: RecordOps[String, Value, VRecord]
+    def vrecOps: RecordOps[Field, Value, VRecord]
     def vbranchOps: BooleanBranching[VBool, MayJoin]
 
     import Value.*
@@ -105,5 +107,5 @@ trait Interpreter:
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
     final val functionOps = new LiftedFunctionOps[Function, Value, Value, Value, VFun](_.asFunction, FunValue.apply)(using vfunOps)
     final val refOps = new LiftedReferenceOps[Value, Addr, VRef](_.asReference, RefValue.apply)(using vrefOps)
-    final val recOps = new LiftedRecordOps[String, Value, Value, Value, VRecord](_.asRecord, identity, RecValue.apply, identity)(using vrecOps)
+    final val recOps = new LiftedRecordOps[Field, Value, Value, Value, VRecord](_.asRecord, identity, RecValue.apply, identity)(using vrecOps)
     final val branchOps = new LiftedBooleanBranching[Value, VBool, MayJoin](v => v.asBoolean(using effects))(using vbranchOps)

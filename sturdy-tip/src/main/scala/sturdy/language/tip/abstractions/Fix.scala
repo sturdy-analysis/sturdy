@@ -1,14 +1,17 @@
 package sturdy.language.tip.abstractions
 
-import sturdy.language.tip.{Stm, Program}
+import sturdy.language.tip.{Program, Stm}
 import sturdy.language.tip.GenericInterpreter.{FixIn, FixOut, GenericEffects}
 import sturdy.fix
 import sturdy.language.tip.Exp
 import sturdy.data.unit
 import sturdy.effect.ObservableJoin
+import sturdy.fix.context.FiniteCallString
 import sturdy.language.tip.Function
+import sturdy.language.tip.Interpreter
+import sturdy.values.Finite
 
-trait Fix:
+trait Fix extends Interpreter:
   final def isFunOrWhile(dom: FixIn): Int = dom match
     case FixIn.EnterFunction(_) => 0
     case FixIn.Run(Stm.While(_, _)) => 1
@@ -18,12 +21,15 @@ trait Fix:
     case FixIn.Eval(c: Exp.Call) => Some(c)
     case _ => None
   }
+  type CallString = fix.context.CallString[Exp.Call]
+  given Finite[CallString] = fix.context.FiniteCallString
 
-  final def parameters[V, A, MayJoin[_]](using effects: GenericEffects[V, A, MayJoin])(using MayJoin[V]): fix.context.Sensitivity[FixIn, Map[A, V]] =
+  final def parameters[MayJoin[_]](using effects: GenericEffects[Value, Addr, MayJoin])(using MayJoin[Value]): fix.context.Sensitivity[FixIn, Parameters] =
     fix.context.parametersFromStore {
       case FixIn.EnterFunction(f) => Some(f.params.map(p => effects.getLocal(p).get))
       case _ => None
     }
+  type Parameters = Map[Addr, Value]
 
   enum CfgNode:
     case Statement(s: Stm)

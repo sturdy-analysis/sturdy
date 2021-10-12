@@ -20,7 +20,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.GenericInterpreter.{AllocationSite, GenericPhi, FixIn, FixOut, given}
+import sturdy.language.tip.GenericInterpreter.{AllocationSite, GenericPhi, FixIn, FixOut, Field, given}
 import sturdy.language.tip.abstractions.*
 
 object SignAnalysis extends Interpreter,
@@ -67,12 +67,13 @@ object SignAnalysis extends Interpreter,
     final def vrecEqOps: EqOps[VRecord, VBool] = ??? // new ARecordEqOps(using lazily(eqOps))
     final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
-    final def vrecOps: RecordOps[String, Value, VRecord] = implicitly
+    final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
     final def vbranchOps: BooleanBranching[Topped[Boolean], MayJoin] = implicitly
 
     given Lazy[Widen[Value]] = lazily(CombineValue)
 
-    val cfg = control[Map[Addr, Value], Value](sensitive = true, cfgOnlyCalls)
+    val cfg = control[Parameters, Value](sensitive = true, cfgOnlyCalls)
+    given Finite[Parameters] with {}
 
     val phi =
       fix.contextSensitive(parameters,

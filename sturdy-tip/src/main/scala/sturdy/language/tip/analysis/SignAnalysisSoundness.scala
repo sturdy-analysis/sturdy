@@ -3,7 +3,7 @@ package sturdy.language.tip.analysis
 import sturdy.effect.allocation.{AllocationContextAbstractly, CAllocationIntIncrement}
 import sturdy.values.Abstractly
 import sturdy.language.tip.{ConcreteInterpreter, Function, given}
-import sturdy.language.tip.GenericInterpreter.AllocationSite
+import sturdy.language.tip.GenericInterpreter.{AllocationSite, Field}
 import sturdy.values.PartialOrder
 import sturdy.{*, given}
 import sturdy.util.{*, given}
@@ -37,7 +37,7 @@ object SignAnalysisSoundness:
       case (Value.IntValue(i1), Value.IntValue(i2)) => PartialOrder[IntSign].lteq(i1, i2)
       case (Value.RefValue(r1), Value.RefValue(r2)) => PartialOrder[VRef].lteq(r1, r2)
       case (Value.FunValue(f1), Value.FunValue(f2)) => PartialOrder[Powerset[Function]].lteq(f1, f2)
-      case (Value.RecValue(r1), Value.RecValue(r2)) => PartialOrder[ARecord[String, Value]].lteq(r1, r2)
+      case (Value.RecValue(r1), Value.RecValue(r2)) => PartialOrder[ARecord[Field, Value]].lteq(r1, r2)
       case _ => false
   given Lazy[PartialOrder[Value]] = lazily(po)
 
