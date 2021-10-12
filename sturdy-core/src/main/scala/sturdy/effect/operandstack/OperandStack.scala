@@ -15,6 +15,8 @@ trait OperandStack[V] extends Effectful:
   /** Computes `f` in a new operand frame, but all remaining operands are moved to the surrounding frame upon exit of `f`. */
   def withFreshOperandFrame[A](f: => A): A
 
+  def getOperandFrame: List[V]
+
   def clearCurrentOperandFrame(): Unit
   
   final def pop2(): (V, V) =

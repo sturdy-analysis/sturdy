@@ -1,6 +1,5 @@
 package sturdy.effect.operandstack
 
-import GenericOperandStack.*
 import sturdy.data.CombineEquiList
 import sturdy.values.*
 
@@ -8,8 +7,8 @@ trait GenericOperandStack[V] extends OperandStack[V]:
   protected var stack: List[V] = Nil
   protected var framePointer: Int = 0
 
-  def getOperandFrame: OperandState[V] = stack.take(stack.size - framePointer)
-  protected def setOperandFrame(s: OperandState[V]): Unit =
+  def getOperandFrame: List[V] = stack.take(stack.size - framePointer)
+  protected def setOperandFrame(s: List[V]): Unit =
     this.stack = s ++ stack.drop(stack.size - framePointer)
 
   def push(v: V): Unit =
@@ -47,8 +46,3 @@ trait GenericOperandStack[V] extends OperandStack[V]:
   override def clearCurrentOperandFrame(): Unit =
     stack = stack.drop(stack.size - framePointer)
 
-object GenericOperandStack:
-  type OperandState[V] = List[V]
-//  case class OperandState[V](vals: List[V]) extends Combinable[OperandState[V]]:
-//    type CombineCtx[W] = Combine[V, W]
-//    def combine[W <: Widening](that: OperandState[V]) = OperandState(Combine[List[V], W](this.vals, that.vals))

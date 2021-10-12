@@ -18,6 +18,3 @@ trait JoinedOperandStack[V](using Join[V]) extends GenericOperandStack[V]:
         }
       }
     }
-
-object JoinedOperandStack:
-  type OperandState[V] = GenericOperandStack.OperandState[V]
