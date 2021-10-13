@@ -85,7 +85,7 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
           OptionA.noneSome(Topped.Top)
         case Topped.Actual(d) =>
           val newPageNum = mem.pageNum + d
-          if (newPageNum < maxPageNum && mem.sizeLimit.forall(newPageNum < _)) {
+          if (newPageNum <= maxPageNum && mem.sizeLimit.forall(newPageNum <= _)) {
             memories += key -> Topped.Actual(SizeMem(mem.size + d * pageSize, mem.sizeLimit, mem.definite))
             OptionA.some(Topped.Actual(mem.pageNum))
           } else {

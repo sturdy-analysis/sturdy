@@ -122,7 +122,10 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
       case AssertModuleTrap(mod,_) =>
         val res = instantiate(mod)
         assert(res.isFailing, c.toString)
-        // TODO
+        val aRes = aInstantiate(mod)
+        assert(res.isFailing, c.toString)
+        //assertResult(IsSound.Sound, s"result after instantiating module $mod")(Soundness.isSound(res, aRes))
+        assertResult(IsSound.Sound, s"interpreter states after instantiating module $mod")(Soundness.isSound(cInterp, aInterp))
       case _: AssertUnlinkable => // skip
       case _: AssertInvalid => // skip
       case _: AssertMalformed => // skip
@@ -152,6 +155,16 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
         val mod = readModule(m)
         cInterp.effects.fallible {
           cInterp.initializeModule(mod, cImports)
+        }
+      case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
+      case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")
+
+  def aInstantiate(t: TestModule): AFallible[ModuleInstance[AValue]] =
+    t match
+      case ValidModule(m) =>
+        val mod = readModule(m)
+        aInterp.effects.fallible {
+          aInterp.initializeModule(mod, aImports)
         }
       case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
       case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")
