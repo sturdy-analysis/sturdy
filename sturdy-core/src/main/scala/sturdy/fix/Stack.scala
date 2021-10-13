@@ -139,22 +139,24 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH $frame")
         None
-      case Some((stackIn, ix, c)) => widenIn(stackIn, in) match {
-        case MaybeChanged.Changed(newIn) =>
-          // call is semi-recurrent: the frame occurs on the stack but with a different state
-          stack += frame -> ((newIn, stackHeight, c + 1))
-          stackHeight += 1
-          state.setInState(newIn)
-          if (Fixpoint.DEBUG)
-            println(s"${stackHeightIndent}PUSH SEMI-RECURRENT $frame")
-          None
-        case MaybeChanged.Unchanged(_) =>
-          // call is recurrent
-          recurrentCalls += ix
-          // store the input state so the co-recurrent call considers it
-          storeRecurrentInput(frame, in)
-          // load any previous output or throw RecurrentCall exception
-          loadRecurrentOutput(frame, ix)
+      case Some((stackIn, ix, c)) =>
+        val widenedIn = widenIn(stackIn, in)
+        widenedIn match {
+          case MaybeChanged.Changed(newIn) =>
+            // call is semi-recurrent: the frame occurs on the stack but with a different state
+            stack += frame -> ((newIn, stackHeight, c + 1))
+            stackHeight += 1
+            state.setInState(newIn)
+            if (Fixpoint.DEBUG)
+              println(s"${stackHeightIndent}PUSH SEMI-RECURRENT $frame")
+            None
+          case MaybeChanged.Unchanged(_) =>
+            // call is recurrent
+            recurrentCalls += ix
+            // store the input state so the co-recurrent call considers it
+            storeRecurrentInput(frame, in)
+            // load any previous output or throw RecurrentCall exception
+            loadRecurrentOutput(frame, ix)
       }
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.

@@ -102,10 +102,12 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
   type InState =
     (CCallFrameNumbered.Vars[Value],
       ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
-      ToppedSymbolTable.Tables[TableAddr, SymbolUntopped, Entry])
+      ToppedSymbolTable.Tables[TableAddr, SymbolUntopped, Entry],
+      JoinedOperandStack.Operands[Value])
   type OutState =
     (ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
-      ToppedSymbolTable.Tables[TableAddr, SymbolUntopped, Entry])
+      ToppedSymbolTable.Tables[TableAddr, SymbolUntopped, Entry],
+      JoinedOperandStack.Operands[Value])
   type AllState = InState
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
@@ -116,16 +118,18 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
       with AnalysisState[InState, OutState, AllState] {
-    override def getInState() = (getFrameVars, getMemories, getSymbolTables)
-    override def getOutState() = (getMemories, getSymbolTables)
+    override def getInState() = (getFrameVars, getMemories, getSymbolTables, getOperandFrame)
+    override def getOutState() = (getMemories, getSymbolTables, getOperandFrame)
     override def getAllState() = getInState()
     def setInState(in: InState) =
       setFrameVars(in._1)
       setMemories(in._2)
       setSymbolTables(in._3)
+      setOperandFrame(in._4)
     def setOutState(out: OutState) =
       setMemories(out._1)
       setSymbolTables(out._2)
+      setOperandFrame(out._3)
     def setAllState(all: AllState) = setInState(all)
   }
 

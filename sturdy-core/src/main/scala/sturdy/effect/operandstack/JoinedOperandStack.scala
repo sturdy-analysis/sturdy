@@ -18,3 +18,6 @@ trait JoinedOperandStack[V](using Join[V]) extends GenericOperandStack[V]:
         }
       }
     }
+
+object JoinedOperandStack:
+  type Operands[V] = List[V]
