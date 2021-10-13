@@ -24,7 +24,7 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
     (memories(key), addr) match
       case (Topped.Top, _) | (_, Topped.Top) => OptionA.noneSome(Seq.fill[B](length)(Top.top))
       case (Topped.Actual(mem), Topped.Actual(a)) =>
-        if (a + length < mem.size) {
+        if (a >=0 && a + length <= mem.size) {
           val readBytes = mem.bytes.slice(a, a + length).toSeq
           if (mem.definite)
             OptionA.some(readBytes)
