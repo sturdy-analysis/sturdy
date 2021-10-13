@@ -1,5 +1,6 @@
 package sturdy.effect.bytememory
 
+import sturdy.IsSound
 import sturdy.data.*
 import sturdy.effect.Effectful
 import sturdy.fix.*
@@ -66,7 +67,7 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
           OptionA.noneSome(Topped.Top)
         case Topped.Actual(d) =>
           val newPageNum = mem.pageNum + d
-          if (newPageNum < maxPageNum && mem.sizeLimit.forall(newPageNum < _)) {
+          if (newPageNum <= maxPageNum && mem.sizeLimit.forall(newPageNum <= _)) {
             val newBytes = mem.bytes.appendedAll(Iterable.fill(d * pageSize)(emptyB))
             memories += key -> Topped.Actual(Mem(newBytes, mem.dirty, mem.sizeLimit))
             OptionA.some(Topped.Actual(mem.pageNum))
@@ -98,6 +99,14 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
             memories += key -> gmemOpt.map(_.copy(definite = false))
       }
     }
+    
+  def memoryIsSound(c: ConcreteMemory[Key]): IsSound =
+    // soundess for memory:
+    //  - keyset is the same
+    //  - for each key: mems(key) is sound
+    //    - abstract size >= concrete size
+    //    - all locations in concrete memory are approximated by locations in abstract memory
+    ??? // TODO
 
 
 object ConstantAddressMemory:

@@ -1,0 +1,59 @@
+package sturdy.language.wasm.analyses
+
+import sturdy.{*,given}
+import sturdy.language.wasm.ConcreteInterpreter
+import ConstantAnalysis.*
+import sturdy.values.Abstractly
+import sturdy.values.PartialOrder
+import sturdy.values.Topped
+import sturdy.values.toppedPartialOrder
+import sturdy.values.concretePO
+import sturdy.values.ints.{*, given}
+import sturdy.values.longs.{*, given}
+import sturdy.values.floats.{*,given}
+import sturdy.values.doubles.{*,given}
+
+object ConstantAnalysisSoundness {
+
+  given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
+    override def abstractly(c: ConcreteInterpreter.Value): Value = c match
+      case ConcreteInterpreter.Value.TopValue => Value.TopValue
+      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(Topped.Actual(i))
+      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(Topped.Actual(l))
+      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
+      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
+
+  given poFloat: PartialOrder[Float] with
+    override def lteq(f1: Float, f2: Float): Boolean =
+      f1.isNaN && f2.isNaN || f1 == f2
+      
+  given poDouble: PartialOrder[Double] with
+    override def lteq(d1: Double, d2: Double): Boolean =
+      d1.isNaN && d2.isNaN || d1 == d2
+  
+  given po: PartialOrder[Value] with
+    override def lteq(x: Value, y: Value): Boolean = (x,y) match
+      case (_, Value.TopValue) => true
+      case (Value.Int32(i1), Value.Int32(i2)) => PartialOrder[Topped[Int]].lteq(i1,i2)
+      case (Value.Int64(l1), Value.Int64(l2)) => PartialOrder[Topped[Long]].lteq(l1,l2)
+      case (Value.Float32(f1), Value.Float32(f2)) => PartialOrder[Topped[Float]].lteq(f1,f2)
+      case (Value.Float64(d1), Value.Float64(d2)) => PartialOrder[Topped[Double]].lteq(d1,d2)
+      case _ => false
+    
+  given [C,A](using aValue: Abstractly[C,A]): Abstractly[List[C], List[A]] with
+    override def abstractly(c: List[C]): List[A] =
+      c.map(aValue.abstractly(_))
+
+  given [A](using poValue: PartialOrder[A]): PartialOrder[List[A]] with
+    override def lteq(x: List[A], y: List[A]): Boolean =
+      if (x.length != y.length)
+        false
+      else
+        x.zip(y).forall((a,b) => poValue.lteq(a,b))
+
+  given Soundness[ConcreteInterpreter.Instance, ConstantAnalysis.Instance] with
+    def isSound(c: ConcreteInterpreter.Instance, a: ConstantAnalysis.Instance): IsSound =
+      // soundness for stack, memory, symbol table, call frame
+      a.effects.operandStackIsSound(c.effects) //&&
+        //a.effects.memoryIsSound(c.effects)
+}

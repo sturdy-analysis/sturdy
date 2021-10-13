@@ -4,13 +4,19 @@ import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.{AFallible, CFailureException, CFallible}
+import sturdy.effect.failure.{AFallible, CFailureException, CFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
+import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
 import sturdy.values.Topped
 import sturdy.values.relational.EqOps
+import sturdy.values.Abstractly
+import sturdy.values.PartialOrder
+import sturdy.{IsSound, Soundness}
+import sturdy.{*,given}
+import sturdy.effect.failure.fallibleAbstractly
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
@@ -93,22 +99,26 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
         val expected = constExprToVals(expectedRes)
         assert(eqVals(expected, res.get), c.toString + s" but $expected != ${res.get}")
         val aRes = runAAction(action)
-        // TODO check for soundness
+        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+        assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertReturnCanonicalNaN(action) =>
         val res = runCAction(action)
         checkNaN(res, c.toString)
         val aRes = runAAction(action)
-        // TODO check for soundness
+        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+        assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertReturnArithmeticNaN(action) =>
         val res = runCAction(action)
         checkNaN(res, c.toString)
         val aRes = runAAction(action)
-        // TODO check for soundness
+        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+        assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertTrap(action: Action, message: String) =>
         val res = runCAction(action)
         assert(res.isFailing, c.toString)
         val aRes = runAAction(action)
-        // TODO check for soundness
+        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+        assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertModuleTrap(mod,_) =>
         val res = instantiate(mod)
         assert(res.isFailing, c.toString)
@@ -133,7 +143,8 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
       case None => // nothing
       case Some(name) => aModules += name -> aModInst
     aCurrent = aModInst
-    // TODO check for soundness of interpreter states
+    // check for soundness of the interpreter states after initialization
+    assertResult(IsSound.Sound, s"after initializing module $mod")(Soundness.isSound(cInterp, aInterp))
 
   def instantiate(t: TestModule): CFallible[ModuleInstance[CValue]] =
     t match

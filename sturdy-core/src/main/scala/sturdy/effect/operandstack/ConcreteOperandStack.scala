@@ -10,3 +10,5 @@ trait ConcreteOperandStack[V] extends GenericOperandStack[V]:
     if (!(oldStack eq this.stack))
       throw new IllegalStateException(s"Concrete operand stack has changed at join point, which is illegal. Old stack was $oldStack, new stack is ${this.stack}.")
     result
+    
+  def getStack: List[V] = stack
