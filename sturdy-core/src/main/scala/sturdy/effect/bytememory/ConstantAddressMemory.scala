@@ -133,9 +133,9 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
     
   def memoryIsSound(c: ConcreteMemory[Key]): IsSound =
     // soundess for memory:
-    //  - keyset is the same
+    //  - keyset is the same; (SE: no, definite abstract memories must exist, non-definite abstract memories may exist)
     //  - for each key: mems(key) is sound
-    //    - abstract size >= concrete size
+    //    - abstract size >= concrete size; (SE: no, the size must be exact otherwise reads appear unfailing when they might fail concretely)
     //    - all locations in concrete memory are approximated by locations in abstract memory
     ??? // TODO
 
@@ -154,11 +154,11 @@ object ConstantAddressMemory:
         Unchanged(Topped.Actual(oldMem))
       case (Topped.Actual(oldMem: ByteMem[_]), Topped.Actual(nowMem: SizeMem)) =>
         Changed(Topped.Actual(nowMem))
-      case (Topped.Actual(oldMem: ByteMem[B]), Topped.Actual(nowMem: ByteMem[B])) =>
+      case (Topped.Actual(oldMem: ByteMem[_]), Topped.Actual(nowMem: ByteMem[_])) =>
         if (oldMem.dirty.size >= nowMem.dirty.size)
-          joinSameSized(oldMem, nowMem).map(Topped.Actual.apply)
+          joinSameSized(oldMem.asInstanceOf[ByteMem[B]], nowMem.asInstanceOf[ByteMem[B]]).map(Topped.Actual.apply)
         else
-          joinSameSized(nowMem, oldMem).map(Topped.Actual.apply)
+          joinSameSized(nowMem.asInstanceOf[ByteMem[B]], oldMem.asInstanceOf[ByteMem[B]]).map(Topped.Actual.apply)
 
     private def joinSameSized(mem1: ByteMem[B], mem2: ByteMem[B]): MaybeChanged[ByteMem[B]] =
       val result = mem1.cloned
