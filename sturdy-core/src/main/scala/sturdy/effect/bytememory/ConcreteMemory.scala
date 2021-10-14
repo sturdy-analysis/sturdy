@@ -52,6 +52,7 @@ trait ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin]:
   override def addEmptyMemory(key: Key, initSize: Int, sizeLimit: scala.Option[Int]): Unit =
     memories(key) = Mem(Array.ofDim[Byte](initSize*pageSize), sizeLimit)
 
+  def getMemories: mutable.Map[Key, Mem] = memories
 
 object ConcreteMemory:
   case class Mem(bytes: Array[Byte], sizeLimit: scala.Option[Int]):

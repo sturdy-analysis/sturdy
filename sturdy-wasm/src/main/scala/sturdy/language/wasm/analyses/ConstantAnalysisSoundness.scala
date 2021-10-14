@@ -3,6 +3,7 @@ package sturdy.language.wasm.analyses
 import sturdy.{*,given}
 import sturdy.language.wasm.ConcreteInterpreter
 import ConstantAnalysis.*
+import sturdy.values.given
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
 import sturdy.values.Topped
@@ -51,9 +52,14 @@ object ConstantAnalysisSoundness {
       else
         x.zip(y).forall((a,b) => poValue.lteq(a,b))
 
+  given (using bs: Soundness[Byte,Byte]): Soundness[Byte, Topped[Byte]] with
+    def isSound(cByte: Byte, aByte: Topped[Byte]): IsSound = aByte match
+      case Topped.Top => IsSound.Sound
+      case Topped.Actual(b) => bs.isSound(cByte,b)
+
   given Soundness[ConcreteInterpreter.Instance, ConstantAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: ConstantAnalysis.Instance): IsSound =
       // soundness for stack, memory, symbol table, call frame
-      a.effects.operandStackIsSound(c.effects) //&&
-        //a.effects.memoryIsSound(c.effects)
+      a.effects.operandStackIsSound(c.effects) &&
+        a.effects.memoryIsSound(c.effects)
 }

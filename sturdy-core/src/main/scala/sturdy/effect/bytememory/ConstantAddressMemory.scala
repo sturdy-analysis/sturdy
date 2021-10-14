@@ -1,6 +1,7 @@
 package sturdy.effect.bytememory
 
 import sturdy.IsSound
+import sturdy.Soundness
 import sturdy.data.*
 import sturdy.effect.Effectful
 import sturdy.fix.*
@@ -131,13 +132,46 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
       }
     }
 
-  def memoryIsSound(c: ConcreteMemory[Key]): IsSound =
+  def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound =
     // soundess for memory:
-    //  - keyset is the same; (SE: no, definite abstract memories must exist, non-definite abstract memories may exist)
-    //  - for each key: mems(key) is sound
-    //    - abstract size >= concrete size; (SE: no, the size must be exact otherwise reads appear unfailing when they might fail concretely)
-    //    - all locations in concrete memory are approximated by locations in abstract memory
-    ??? // TODO
+    //  - all concrete memories are present in abstract memories
+    //  - all definite abstract memores have a concrete counterpart
+    //  - for each key in concrete memories: mems(key) is sound
+    val cMemories = c.getMemories
+    memories.filterNot{ (key, _) => cMemories.isDefinedAt(key)}.foreachEntry { (k, aMem) => aMem match
+      case Topped.Actual(mem) =>
+        if (!mem.isIndefinite)
+          return IsSound.NotSound(s"Definite memory with key $k not present in concrete memory.")
+      case _ =>
+    }
+    c.getMemories.foreachEntry { (key, cMem) =>
+      val aMem = memories.getOrElse(key, { return IsSound.NotSound(s"Key $key not present in constant address memory.") })
+      val memSound = memInstanceIsSound(cMem, aMem)
+      if (memSound.isNotSound)
+        return memSound
+    }
+    IsSound.Sound
+
+
+  def memInstanceIsSound(c: ConcreteMemory.Mem, a: Topped[Mem[B]])(using bytesSound: Soundness[Byte, B]): IsSound =
+    // - sizes are equal
+    // - all locations in concrete memory are approximated by locations in abstract memory
+    a match
+      case Topped.Top => IsSound.Sound
+      case Topped.Actual(SizeMem(size, sizeLimit, _)) =>
+        if (c.size == size && c.sizeLimit == sizeLimit)
+          IsSound.Sound
+        else
+          IsSound.NotSound(s"Sizes of concrete and abstract memory do not coincide.")
+      case Topped.Actual(aMem@ByteMem(bytes, dirty, sizeLimit, _)) =>
+        if (c.size != aMem.size || c.sizeLimit != sizeLimit)
+          return IsSound.NotSound(s"Sizes of concrete and abstract memory do not coincide.")
+        c.bytes.zip(bytes).foreach { (cByte, aByte) =>
+          val bSound = bytesSound.isSound(cByte, aByte)
+          if (bSound.isNotSound)
+            return IsSound.NotSound(s"Byte $cByte is not approximated by $aByte.")
+        }
+        IsSound.Sound
 
 
 object ConstantAddressMemory:
@@ -177,11 +211,13 @@ object ConstantAddressMemory:
     def cloned: Mem[B]
     def size: Int
     def toIndefinite: Mem[B]
+    def isIndefinite: Boolean
 
   case class SizeMem(size: Int, sizeLimit: scala.Option[Int], definite: Boolean = true) extends Mem[Nothing]:
     override def cloned = this
     inline def pageNum: Int = (size / pageSize).toInt
     override def toIndefinite: SizeMem = SizeMem(size, sizeLimit, false)
+    override def isIndefinite: Boolean = definite
 
   case class ByteMem[B](bytes: Array[B], dirty: mutable.BitSet, sizeLimit: scala.Option[Int], definite: Boolean = true) extends Mem[B]:
 
@@ -189,6 +225,7 @@ object ConstantAddressMemory:
     inline def size = bytes.length
     inline def pageNum: Int = (size / pageSize).toInt
     override def toIndefinite: ByteMem[B] = ByteMem(bytes, dirty, sizeLimit, false)
+    override def isIndefinite: Boolean = definite
 
     override def toString: String = s"Mem(${bytes.size} bytes, ${dirty.size} dirty addresses, definite=$definite)"
 
