@@ -94,35 +94,34 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
       case QuotedModule(id, text) =>
         ???
       case AssertReturn(action, expectedRes) =>
+        val aRes = runAAction(action)
         val res = runCAction(action)
         assert(!res.isFailing)
         val expected = constExprToVals(expectedRes)
         assert(eqVals(expected, res.get), c.toString + s" but $expected != ${res.get}")
-        val aRes = runAAction(action)
         assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertReturnCanonicalNaN(action) =>
+        val aRes = runAAction(action)
         val res = runCAction(action)
         checkNaN(res, c.toString)
-        val aRes = runAAction(action)
         assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertReturnArithmeticNaN(action) =>
+        val aRes = runAAction(action)
         val res = runCAction(action)
         checkNaN(res, c.toString)
-        val aRes = runAAction(action)
         assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertTrap(action: Action, message: String) =>
+        val aRes = runAAction(action)
         val res = runCAction(action)
         assert(res.isFailing, c.toString)
-        val aRes = runAAction(action)
         assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertModuleTrap(mod,_) =>
-        val res = instantiate(mod)
-        assert(res.isFailing, c.toString)
         val aRes = aInstantiate(mod)
+        val res = instantiate(mod)
         assert(res.isFailing, c.toString)
         //assertResult(IsSound.Sound, s"result after instantiating module $mod")(Soundness.isSound(res, aRes))
         assertResult(IsSound.Sound, s"interpreter states after instantiating module $mod")(Soundness.isSound(cInterp, aInterp))
@@ -130,9 +129,9 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
       case _: AssertInvalid => // skip
       case _: AssertMalformed => // skip
       case _: AssertExhaustion => // skip
-      case action: Action => 
-        runCAction(action)
+      case action: Action =>
         runAAction(action)
+        runCAction(action)
       case _: Meta => // skip
 
   def loadModule(id: Option[String], mod: Module): Unit =

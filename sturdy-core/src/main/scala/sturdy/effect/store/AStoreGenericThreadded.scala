@@ -2,6 +2,7 @@ package sturdy.effect.store
 
 import sturdy.effect.AnalysisState
 import sturdy.effect.Effectful
+import sturdy.effect.TrySturdy
 import sturdy.values.Join
 
 import scala.collection.mutable.ListBuffer

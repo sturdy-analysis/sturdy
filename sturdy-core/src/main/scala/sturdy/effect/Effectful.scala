@@ -25,7 +25,7 @@ enum TrySturdy[A]:
     case Success(_) => throw new MatchError(this)
     case Failure(ex) => ex
 object TrySturdy:
-  def apply[A](f: => A) =
+  inline def apply[A](f: => A) =
     try Success(f) catch {
       case ex: SturdyException => Failure(ex)
       case ex => throw ex
@@ -40,21 +40,30 @@ trait Effectful extends ObservableJoin:
     case (_, _: RecurrentCall[_, _]) => failA
     case _ => if (failA == failB) failA else StarvedJoin(failA, failB)
 
+  private var _fSuccess: Boolean = false
+  protected def fSuccess: Boolean = _fSuccess
+
   /* This is the default join for pure computations f and g.
    * Subclasses must override join to join effects and call super.join
    */
   def joinComputations[A](f: => A)(g: => A): Joined[A] = {
-    this.joinStart()
-    val triedF = TrySturdy(f)
-    this.joinSwitch()
-    val triedG = TrySturdy(g)
-    this.joinEnd()
+    val originalFSuccess = this._fSuccess
+    try {
+      this.joinStart()
+      val triedF = TrySturdy(f)
+      this._fSuccess = triedF.isSuccess
+      this.joinSwitch()
+      val triedG = TrySturdy(g)
+      this.joinEnd()
 
-    (triedF, triedG) match
-      case (TrySturdy.Failure(failA), TrySturdy.Failure(failB)) => throw joinThrowables(failA, failB)
-      case (TrySturdy.Success(aF), TrySturdy.Success(aG)) => Join(aF, aG).get
-      case (TrySturdy.Success(aF), _) => aF
-      case (_, TrySturdy.Success(aG)) => aG
+      (triedF, triedG) match
+        case (TrySturdy.Failure(failA), TrySturdy.Failure(failB)) => throw joinThrowables(failA, failB)
+        case (TrySturdy.Success(aF), TrySturdy.Success(aG)) => Join(aF, aG).get
+        case (TrySturdy.Success(aF), _) => aF
+        case (_, TrySturdy.Success(aG)) => aG
+    } finally {
+      this._fSuccess = originalFSuccess
+    }
   }
 
   def joinWithFailure[A](f: => A)(g: => Nothing): A = {

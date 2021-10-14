@@ -12,16 +12,6 @@ import sturdy.effect.Effectful
  *     case If(e, thn, els) => boolBranch(eval(e), scoped(thn), scoped(els))
  */
 trait AEnvironmentStaticScope[Var, V] extends CEnvironment[Var, V], Effectful:
-  override def joinComputations[A](f: => A)(g: => A): Joined[A] =
-    val snapshot = env
-    super.joinComputations(ensureUnchangedEnv(f, snapshot))(ensureUnchangedEnv(g, snapshot))
-
-  def ensureUnchangedEnv[A](f: => A, oldEnv: Map[Var, V]): A =
-    val result = f
-    if (!(oldEnv eq this.env))
-      throw new IllegalStateException(s"Statically scoped environment has changed at join point, which is illegal. Old environment was $oldEnv, new environment is ${this.env}.")
-    result
-
   def environmentIsSound[VC](c: CEnvironment[Var, VC])(using vSoundness: Soundness[VC, V]): IsSound =
     if (c.getEnv.keySet != env.keySet) {
       val different = (c.getEnv.keySet -- env.keySet) ++ (env.keySet -- c.getEnv.keySet)

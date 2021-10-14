@@ -46,7 +46,7 @@ trait AEnvironmentDynamicScope[Var, V](_init: Map[Var, MayMust[V]])(using j: Joi
   override def clear(): Unit =
     dirtyVars ++= env.keys
     env = Map()
-  
+
   override def joinComputations[A](f: => A)(g: => A): Joined[A] =
     val snapshot = env
     var joinedEnv = env

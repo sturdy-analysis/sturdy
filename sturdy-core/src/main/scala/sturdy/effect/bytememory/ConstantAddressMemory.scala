@@ -130,7 +130,7 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
             memories += key -> gmemOpt.map(_.toIndefinite)
       }
     }
-    
+
   def memoryIsSound(c: ConcreteMemory[Key]): IsSound =
     // soundess for memory:
     //  - keyset is the same; (SE: no, definite abstract memories must exist, non-definite abstract memories may exist)

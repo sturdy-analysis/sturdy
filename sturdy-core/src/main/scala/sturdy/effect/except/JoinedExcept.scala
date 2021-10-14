@@ -7,7 +7,6 @@ import sturdy.values.exceptions.Exceptional
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Success
-
 import JoinedExcept.*
 
 case object AbstractException extends ExceptException:

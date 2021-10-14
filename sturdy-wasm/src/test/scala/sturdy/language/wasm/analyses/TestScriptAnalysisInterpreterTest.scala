@@ -10,7 +10,7 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 
 class TestScriptAnalysisInterpreterTest extends AnyFlatSpec, Matchers:
-  behavior of "TestScript interpreter"
+  behavior of "TestScript constant analysis"
 
   val pathSpectest = Paths.get(classOf[TestScriptParserTest].getResource("/sturdy/language/wasm/spectest.wast").toURI())
   val uri = classOf[TestScriptParserTest].getResource("/sturdy/language/wasm/scripts").toURI();

@@ -119,11 +119,11 @@ trait APrintPrefix[P] extends Print[P], Effectful:
     val snapshot = printed
     var printedF: PrintResult[P] = null
     var printedG: PrintResult[P] = null
-    try 
+    try
       super.joinComputations(
         try f finally printedF = printed)(
         try {printed = snapshot; g} finally printedG = printed)
-    finally 
+    finally
       printed = printedF.join(printedG)
   }
 

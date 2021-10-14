@@ -96,6 +96,8 @@ enum FixOut[V]:
   case Eval()
   case ExitWasmFunction(vals: List[V])
 
+type Fixed[V] = FixIn[V] => FixOut[V]
+
 given finiteFixIn[V]: Finite[FixIn[V]] with {}
 
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin[_], Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, Symbol, Entry, MayJoin]]
@@ -224,182 +226,180 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
     }
     stack.pop()
 
-
-
-  private lazy val fixed = fix.Fixpoint { (rec: FixIn[V] => FixOut[V]) =>
-    def eval(inst: Inst, loc: InstLoc[V]): FixOut[V] =
-      rec(FixIn.Eval(inst, loc))
-    inline def enterFunction(id: FuncId[V], func: Func, ft: FuncType): FixOut[V] =
-      rec(FixIn.EnterWasmFunction(id, func, ft))
-
-    def eval_open(inst: Inst, loc: InstLoc[V]): Unit =
-      val opcode = inst.opcode
-      if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)
-        stack.push(num.evalNumeric(inst))
-      else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
-        evalMemoryInst(inst)
-      else if (opcode >= OpCode.Unreachable && opcode <= OpCode.CallIndirect)
-        evalControlInst(inst, loc)
-      else inst match
-        case i: VarInst => evalVarInst(i)
-        case op: Miscop =>
-          val v = stack.pop()
-          stack.push(num.evalMiscop(op, v))
-        case Drop => stack.pop()
-        case Select =>
-          val isZero = num.evalNumeric(i32.Eqz)
-          boolBranch[Unit](isZero) {
-            // v == 0: else branch
-            val (_, v2) = stack.pop2()
-            stack.push(v2)
-          } {
-            stack.pop()
-          }
-        case _ => throw new IllegalArgumentException(s"Unexpected instruction $inst")
-
-    def evalControlInst(inst: Inst, loc: InstLoc[V]): Unit = inst match
-      case Nop => // nothing
-      case Unreachable => fail(UnreachableInstruction, inst.toString)
-      case Block(bt, insts) =>
-        label(paramsArity(bt), returnArity(bt), loc.withLoc(insts), None)
-      case l@Loop(bt, insts) =>
-        val pt = paramsArity(bt)
-        label(pt, pt, loc.withLoc(insts), Some((l, loc)))
-      case If(bt, thnInsts, elsInsts) =>
-        val isZero = num.evalNumeric(i32.Eqz)
-        val rt = returnArity(bt)
-        boolBranch[Unit](isZero) {
-          // v == 0: else branch
-          label(paramsArity(bt), rt, loc.withLoc(elsInsts, offset = thnInsts.length), None)
-        } {
-          label(paramsArity(bt), rt, loc.withLoc(thnInsts), None)
-        }
-      case Br(labelIndex) =>
-        branch(labelIndex)
-      case BrIf(labelIndex) =>
+  def eval_open(inst: Inst, loc: InstLoc[V])(using Fixed[V]): Unit =
+    val opcode = inst.opcode
+    if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)
+      stack.push(num.evalNumeric(inst))
+    else if (opcode >= OpCode.I32Load && opcode <= OpCode.MemoryGrow)
+      evalMemoryInst(inst)
+    else if (opcode >= OpCode.Unreachable && opcode <= OpCode.CallIndirect)
+      evalControlInst(inst, loc)
+    else inst match
+      case i: VarInst => evalVarInst(i)
+      case op: Miscop =>
+        val v = stack.pop()
+        stack.push(num.evalMiscop(op, v))
+      case Drop => stack.pop()
+      case Select =>
         val isZero = num.evalNumeric(i32.Eqz)
         boolBranch[Unit](isZero) {
           // v == 0: else branch
-          // do nothing
+          val (_, v2) = stack.pop2()
+          stack.push(v2)
         } {
-          branch(labelIndex)
+          stack.pop()
         }
-      case BrTable(labels, defaultLabel) =>
-        val ix = stack.pop()
-        indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
-      case Return =>
-        val operands = stack.popN(getFrameData.returnArity)
-        throws(WasmException.Return(operands))
-      case Call(funcIx) =>
-        val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-        invoke(func, FuncId.Direct(funcIx))
-      case CallIndirect(typeIx) =>
-        val ftExpected = module.functionTypes(typeIx)
-        val funcIx = stack.pop()
-        tableGet(tableIndex, funcIxToSymbol(valueToFuncIx(funcIx))).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { entry =>
-          val func = entryToFuncV(entry)
-          if (func == null)
-            fail(UninitializedFunction, funcIx.toString)
-          invokeIndirect(func, ftExpected, funcIx)
-        }
-      case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
+      case _ => throw new IllegalArgumentException(s"Unexpected instruction $inst")
 
-
-    def branch(labelIndex: LabelIdx): Unit =
-      val returnArity: Int = labelStack.lookupLabel(labelIndex)
-      val operands = stack.popN(returnArity)
-      throws(WasmException.Jump(labelIndex, operands))
-
-    /* stack before label-call:  A p0 ... pn (n = params arity)
-   * finish without exception: A r0 ... rm (m = return arity) => nothing to do
-   * catch Jump(l0, op0, ..., opm)
-   *   - this block is the jump target
-   *   - stack: A g0 ... gk needs to become A op0 ... opm
-   *   - we don't know k, so we need to remember size of stack A
-   * catch Jump(li, op0, ..., opl) i != 0 and Return(op0, ..., opl)
-   *   - jump target is further out
-   *   - stack: A g0 ... gok needs to become A
-   *   - we don't know k, so we need to remember size of stack A
-   */
-    def label(paramsArity: Int, returnArity: Int, insts: Iterable[(Inst, InstLoc[V])], branchTarget: Option[(Inst, InstLoc[V])]): Unit =
-      stack.withFreshOperandFrame {
-        tryCatch {
-          labelStack.pushLabel(returnArity)
-          try insts.foreach(eval)
-          finally labelStack.popLabel()
-        } { ex =>
-          stack.clearCurrentOperandFrame()
-          ex match {
-            case WasmException.Jump(labelIndex, operands) =>
-              if (labelIndex == 0) {
-                stack.pushN(operands)
-                branchTarget.foreach(eval)
-              } else {
-                throws(WasmException.Jump(labelIndex - 1, operands))
-              }
-            case _: WasmException.Return[V] =>
-              throws(ex)
-          }
-        }
+  def evalControlInst(inst: Inst, loc: InstLoc[V])(using Fixed[V]): Unit = inst match
+    case Nop => // nothing
+    case Unreachable => fail(UnreachableInstruction, inst.toString)
+    case Block(bt, insts) =>
+      label(paramsArity(bt), returnArity(bt), loc.withLoc(insts), None)
+    case l@Loop(bt, insts) =>
+      val pt = paramsArity(bt)
+      label(pt, pt, loc.withLoc(insts), Some((l, loc)))
+    case If(bt, thnInsts, elsInsts) =>
+      val isZero = num.evalNumeric(i32.Eqz)
+      val rt = returnArity(bt)
+      boolBranch[Unit](isZero) {
+        // v == 0: else branch
+        label(paramsArity(bt), rt, loc.withLoc(elsInsts, offset = thnInsts.length), None)
+      } {
+        label(paramsArity(bt), rt, loc.withLoc(thnInsts), None)
       }
+    case Br(labelIndex) =>
+      branch(labelIndex)
+    case BrIf(labelIndex) =>
+      val isZero = num.evalNumeric(i32.Eqz)
+      boolBranch[Unit](isZero) {
+        // v == 0: else branch
+        // do nothing
+      } {
+        branch(labelIndex)
+      }
+    case BrTable(labels, defaultLabel) =>
+      val ix = stack.pop()
+      indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
+    case Return =>
+      val operands = stack.popN(getFrameData.returnArity)
+      throws(WasmException.Return(operands))
+    case Call(funcIx) =>
+      val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+      invoke(func, FuncId.Direct(funcIx))
+    case CallIndirect(typeIx) =>
+      val ftExpected = module.functionTypes(typeIx)
+      val funcIx = stack.pop()
+      tableGet(tableIndex, funcIxToSymbol(valueToFuncIx(funcIx))).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { entry =>
+        val func = entryToFuncV(entry)
+        if (func == null)
+          fail(UninitializedFunction, funcIx.toString)
+        invokeIndirect(func, ftExpected, funcIx)
+      }
+    case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
-    def invoke(fun: FunctionInstance[V], funcIx: FuncId[V]): Unit =
-      fun match
-        case FunctionInstance.Wasm(mod, func, funcType) =>
-          val args = stack.popN(funcType.params.size)
-          val frameData = FrameData(funcType.t.size, mod)
-          val vars = args.view ++ func.locals.map(num.defaultValue)
-          labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
-            enterFunction(funcIx, func, funcType)
-          }))
-        case FunctionInstance.Host(hostFunc) =>
-          val args = stack.popN(hostFunc.funcType.params.size)
-          val res = invokeHostFunction(hostFunc, args)
-          val expectedSize = hostFunc.funcType.t.size
-          if (res.length != expectedSize) {
-            throw new Error(s"Host function returned the wrong number of results: expected $expectedSize, but got ${res.length}.")
-          }
-          stack.pushN(res)
+  def branch(labelIndex: LabelIdx): Unit =
+    val returnArity: Int = labelStack.lookupLabel(labelIndex)
+    val operands = stack.popN(returnArity)
+    throws(WasmException.Jump(labelIndex, operands))
 
-    def enterFunction_open(id: FuncId[V], func: Func, funcType: FuncType): List[V] =
-      val returnN = funcType.t.size
+  /* stack before label-call:  A p0 ... pn (n = params arity)
+ * finish without exception: A r0 ... rm (m = return arity) => nothing to do
+ * catch Jump(l0, op0, ..., opm)
+ *   - this block is the jump target
+ *   - stack: A g0 ... gk needs to become A op0 ... opm
+ *   - we don't know k, so we need to remember size of stack A
+ * catch Jump(li, op0, ..., opl) i != 0 and Return(op0, ..., opl)
+ *   - jump target is further out
+ *   - stack: A g0 ... gok needs to become A
+ *   - we don't know k, so we need to remember size of stack A
+ */
+  def label(paramsArity: Int, returnArity: Int, insts: Iterable[(Inst, InstLoc[V])], branchTarget: Option[(Inst, InstLoc[V])])(using Fixed[V]): Unit =
+    stack.withFreshOperandFrame {
       tryCatch {
-        val loc = InstLoc.InFunction(module, id, 0)
-        label(0, returnN, loc.withLoc(func.body), None)
+        labelStack.pushLabel(returnArity)
+        try
+          for ((i,loc) <- insts)
+            eval(i, loc)
+        finally labelStack.popLabel()
       } { ex =>
         stack.clearCurrentOperandFrame()
         ex match {
-          case WasmException.Return(operands) =>
-            stack.pushN(operands)
-          case WasmException.Jump(_, _) =>
-            fail(InvalidModule, s"Tried to jump through a function boundary.")
+          case WasmException.Jump(labelIndex, operands) =>
+            if (labelIndex == 0) {
+              stack.pushN(operands)
+              for ((i,loc) <- branchTarget)
+                eval(i, loc)
+            } else {
+              throws(WasmException.Jump(labelIndex - 1, operands))
+            }
+          case _: WasmException.Return[V] =>
+            throws(ex)
         }
       }
-      stack.peekN(returnN)
+    }
 
-    def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V): Unit =
-      functionOps.invokeFun(funV, Seq()) {
-        case (func, _) =>
-          val ftActual = func.funcType
-          if (ftExpected != ftActual)
-            fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
-          invoke(func, FuncId.Indirect(funcIx))
+  def invoke(fun: FunctionInstance[V], funcIx: FuncId[V])(using Fixed[V]): Unit =
+    fun match
+      case FunctionInstance.Wasm(mod, func, funcType) =>
+        val args = stack.popN(funcType.params.size)
+        val frameData = FrameData(funcType.t.size, mod)
+        val vars = args.view ++ func.locals.map(num.defaultValue)
+        labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
+          enterFunction(funcIx, func, funcType)
+        }))
+      case FunctionInstance.Host(hostFunc) =>
+        val args = stack.popN(hostFunc.funcType.params.size)
+        val res = invokeHostFunction(hostFunc, args)
+        val expectedSize = hostFunc.funcType.t.size
+        if (res.length != expectedSize) {
+          throw new Error(s"Host function returned the wrong number of results: expected $expectedSize, but got ${res.length}.")
+        }
+        stack.pushN(res)
+
+  def enterFunction_open(id: FuncId[V], func: Func, funcType: FuncType)(using Fixed[V]): List[V] =
+    val returnN = funcType.t.size
+    tryCatch {
+      val loc = InstLoc.InFunction(module, id, 0)
+      label(0, returnN, loc.withLoc(func.body), None)
+    } { ex =>
+      stack.clearCurrentOperandFrame()
+      ex match {
+        case WasmException.Return(operands) =>
+          stack.pushN(operands)
+        case WasmException.Jump(_, _) =>
+          fail(InvalidModule, s"Tried to jump through a function boundary.")
       }
+    }
+    stack.peekN(returnN)
 
+  def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V)(using Fixed[V]): Unit =
+    functionOps.invokeFun(funV, Seq()) {
+      case (func, _) =>
+        val ftActual = func.funcType
+        if (ftExpected != ftActual)
+          fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
+        invoke(func, FuncId.Indirect(funcIx))
+    }
+
+
+  inline def eval(inst: Inst, loc: InstLoc[V])(using rec: FixIn[V] => FixOut[V]): FixOut[V] =
+    rec(FixIn.Eval(inst, loc))
+  inline def enterFunction(id: FuncId[V], func: Func, ft: FuncType)(using rec: FixIn[V] => FixOut[V]): FixOut[V] =
+    rec(FixIn.EnterWasmFunction(id, func, ft))
+
+  private lazy val fixed: Fixed[V] = fix.Fixpoint { (rec: Fixed[V]) =>
     phi {
       case FixIn.Eval(inst, loc) =>
-        eval_open(inst, loc)
+        eval_open(inst, loc)(using rec)
         FixOut.Eval()
       case FixIn.EnterWasmFunction(id, func, funcType) =>
-        FixOut.ExitWasmFunction(enterFunction_open(id, func, funcType))
+        FixOut.ExitWasmFunction(enterFunction_open(id, func, funcType)(using rec))
     }
   }
+  inline def external[A](f: Fixed[V] ?=> A): A = f(using fixed)
 
-  def eval(inst: Inst, loc: InstLoc[V]): FixOut[V] = fixed(FixIn.Eval(inst, loc))
-  def enterFunction(id: FuncId[V], func: Func, ft: FuncType): FixOut[V] = fixed(FixIn.EnterWasmFunction(id, func, ft))
-
-
-  def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] =
+  def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] = external {
     modInst.exports.find((name, _) => name == funcName) match
       case Some((_, ExternalValue.Function(funcIx))) =>
         val fun = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
@@ -413,19 +413,20 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
           eval(Call(funcIx), InstLoc.InvokeExported(modInst, funcName))
         }
         stack.popN(rtLength)
-        // TODO host functions
-          //case FunctionInstance.Host(hostFunc) =>
-          //  try {
-          //    val res = invokeHostFunction(hostFunc, args)
-          //    val expectedSize = hostFunc.funcType.t.size
-          //    if (res.length != expectedSize)
-          //      throw new Error(s"Host function returned the wrong number of results: expected $expectedSize, but got ${res.length}.")
-          //    res
-          //  } catch {
-          //    case HostFunction.ExitException(exitCode) => fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
-          //  }
+      // TODO host functions
+      //case FunctionInstance.Host(hostFunc) =>
+      //  try {
+      //    val res = invokeHostFunction(hostFunc, args)
+      //    val expectedSize = hostFunc.funcType.t.size
+      //    if (res.length != expectedSize)
+      //      throw new Error(s"Host function returned the wrong number of results: expected $expectedSize, but got ${res.length}.")
+      //    res
+      //  } catch {
+      //    case HostFunction.ExitException(exitCode) => fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
+      //  }
 
       case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
+  }
 
 
   private def returnArity(bt: BlockType): Int =
@@ -454,7 +455,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
 //    // TODO WIP
 //    ???
 
-  def evalInstructionSequence(insts: Vector[(Inst, InstLoc[V])], mod: ModuleInstance[V]): V =
+  def evalInstructionSequence(insts: Vector[(Inst, InstLoc[V])], mod: ModuleInstance[V])(using Fixed[V]): V =
     val frameData = FrameData(1,mod)
     labelStack.withFresh(withFreshOperandStack(inNewFrameNoIndex(frameData, Vector.empty[V]){
       insts.foreach(eval(_, _))
@@ -534,7 +535,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
     (funcs.result(), globs.result(), tabs.result(), mems.result())
 
   // we assume a valid module here
-  def initializeModule(module: Module, imports: Imports[V] = mutable.Map.empty): ModuleInstance[V] =
+  def initializeModule(module: Module, imports: Imports[V] = mutable.Map.empty): ModuleInstance[V] = external {
     val modInst = new ModuleInstance[V] {}
     var loc = InstLoc.InInit(modInst, 0)
     // compute the initilization values for globals
@@ -553,19 +554,19 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
     modInst.functionTypes = module.types
     // functions
     modInst.functions = funcImports ++
-      module.funcs.map(func => FunctionInstance.Wasm(modInst,func,module.types(func.tpe)))
+      module.funcs.map(func => FunctionInstance.Wasm(modInst, func, module.types(func.tpe)))
     // globals
     modInst.globalAddrs = modInst.globalAddrs :++ module.globals.zip(globValues).map {
-      case (Global(GlobalType(tpe,_),_),value) =>
+      case (Global(GlobalType(tpe, _), _), value) =>
         val globalAddr = GlobalAddr(globCount)
         globCount += 1
-        val newGlobal = GlobalInstance(tpe,value)
+        val newGlobal = GlobalInstance(tpe, value)
         tableSet(globalTableIndex, globIxToSymbol(globalAddr), globIToEntry(newGlobal))
         globalAddr
     }
     // tables
     modInst.tableAddrs = tabImports ++ module.tables.map {
-      case TableType(_, Limits(min,max)) =>
+      case TableType(_, Limits(min, max)) =>
         val tabAddr = TableAddr(tabCount)
         addEmptyTable(tabAddr)
         tabCount += 1
@@ -583,52 +584,54 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
     }
     // data
     modInst.data = module.data.map {
-      case Data(_,_,init) => DataInstance(init.toByteVector)
+      case Data(_, _, init) => DataInstance(init.toByteVector)
     }
     // we don't need elems currently
     // exports
     modInst.exports = module.exports.map {
       case Export(fieldName, kind, index) =>
         kind match {
-          case ExternalKind.Function => (fieldName,ExternalValue.Function(index))
-          case ExternalKind.Global => (fieldName,ExternalValue.Global(index))
-          case ExternalKind.Memory => (fieldName,ExternalValue.Memory(index))
-          case ExternalKind.Table => (fieldName,ExternalValue.Table(index))
+          case ExternalKind.Function => (fieldName, ExternalValue.Function(index))
+          case ExternalKind.Global => (fieldName, ExternalValue.Global(index))
+          case ExternalKind.Memory => (fieldName, ExternalValue.Memory(index))
+          case ExternalKind.Table => (fieldName, ExternalValue.Table(index))
         }
     }
 
     // initialize tables and memories
-    val frameData = FrameData(1,modInst)
+    val frameData = FrameData(1, modInst)
     // TODO: do we need a fresh stack and label stack here?
-    inNewFrameNoIndex(frameData, Vector.empty[V]){
+    inNewFrameNoIndex(frameData, Vector.empty[V]) {
       // memory
       module.data.zipWithIndex.foreach {
-        case (Data(memIdx, off, init),i) =>
+        case (Data(memIdx, off, init), i) =>
           assert(memIdx == 0)
           val insts = loc.withLoc(off)
           loc = loc + off.length
-          insts.foreach(eval)
+          for ((i, loc) <- insts)
+            eval(i, loc)
           val base = stack.pop()
           val bytes = init.toByteVector.toIterable
-          bytes.zipWithIndex.foreach { (byte,byteIdx) =>
+          bytes.zipWithIndex.foreach { (byte, byteIdx) =>
             stack.push(base)
             stack.push(num.evalNumeric(i32.Const(byte.toInt)))
             evalMemoryInst(i32.Store8(0, byteIdx))
           }
-          // in case we want to use memory.init here:
-          //stack.push(num.evalNumeric(i32.Const(0)))
-          //stack.push(num.evalNumeric(i32.Const((init.size / 8).toInt))) //is it ok to convert long to int here?
-          //memoryInit(i)
-          // memoryDrop(i) for the current wasm version
+        // in case we want to use memory.init here:
+        //stack.push(num.evalNumeric(i32.Const(0)))
+        //stack.push(num.evalNumeric(i32.Const((init.size / 8).toInt))) //is it ok to convert long to int here?
+        //memoryInit(i)
+        // memoryDrop(i) for the current wasm version
       }
       // tables
       module.elem.zipWithIndex.foreach {
         case (Elem(tableIdx, off, init), i) =>
           val insts = loc.withLoc(off)
           loc = loc + off.length
-          insts.foreach(eval)
+          for ((i, loc) <- insts)
+            eval(i, loc)
           val base = stack.pop()
-          init.zipWithIndex.foreach { (funcIx,i) =>
+          init.zipWithIndex.foreach { (funcIx, i) =>
             stack.push(base)
             stack.push(num.evalNumeric(i32.Const(i)))
             stack.push(num.evalNumeric(i32.Add)) // adds index to base
@@ -637,7 +640,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
             tableSet(TableAddr(modInst.tableAddrs(tableIdx).addr), funcIxToSymbol(valueToFuncIx(idx)), funVToEntry(funV))
             // TODO add failure conditions for table writing
           }
-     }
+      }
     }
 
     // invoke the start function
@@ -650,11 +653,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
             val vars = func.locals.map(num.defaultValue)
             labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
               val res = enterFunction(FuncId.Direct(funcIdx), func, funcType)
-//              println(s"invoke exported $funcName = $res should have $rtLength values")
-//              println(func)
+              //              println(s"invoke exported $funcName = $res should have $rtLength values")
+              //              println(func)
             }))
           case _: FunctionInstance.Host[V] => ??? // TODO: is it allowed to use host functions as start function?
     }
 
     modInst
+  }
 
