@@ -56,6 +56,9 @@ object ConstantAnalysisSoundness {
     def isSound(cByte: Byte, aByte: Topped[Byte]): IsSound = aByte match
       case Topped.Top => IsSound.Sound
       case Topped.Actual(b) => bs.isSound(cByte,b)
+      
+  given Soundness[ConcreteInterpreter.Entry, ConstantAnalysis.Entry] with
+    override def isSound(c: ConcreteInterpreter.Entry, a: Entry): IsSound = ??? // TODO
 
   given Soundness[ConcreteInterpreter.Instance, ConstantAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: ConstantAnalysis.Instance): IsSound =

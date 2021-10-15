@@ -30,7 +30,7 @@ import scala.io.Source
 import scala.jdk.StreamConverters.*
 
 
-class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
+class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
   type AValue = ConstantAnalysis.Value
 
@@ -43,6 +43,11 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
   var aCurrent: ModuleInstance[AValue] = null
   val cImports: mutable.Map[String, ModuleInstance[CValue]] = mutable.Map()
   val aImports: mutable.Map[String, ModuleInstance[AValue]] = mutable.Map()
+  val convertVals: unresolved.Expr => List[ConstantAnalysis.Value] = 
+    if (useTop)
+      constExprToTops
+    else 
+      constExprToAVals
 
   spectest.foreach{ mod =>
     val modInst = cInterp.initializeModule(mod)
@@ -94,7 +99,7 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
       case QuotedModule(id, text) =>
         ???
       case AssertReturn(action, expectedRes) =>
-        val aRes = runAAction(action)
+        val aRes = runAAction(action, convertVals)
         val res = runCAction(action)
         assert(!res.isFailing)
         val expected = constExprToVals(expectedRes)
@@ -102,19 +107,19 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
         assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertReturnCanonicalNaN(action) =>
-        val aRes = runAAction(action)
+        val aRes = runAAction(action, convertVals)
         val res = runCAction(action)
         checkNaN(res, c.toString)
         assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertReturnArithmeticNaN(action) =>
-        val aRes = runAAction(action)
+        val aRes = runAAction(action, convertVals)
         val res = runCAction(action)
         checkNaN(res, c.toString)
         assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertTrap(action: Action, message: String) =>
-        val aRes = runAAction(action)
+        val aRes = runAAction(action, convertVals)
         val res = runCAction(action)
         assert(res.isFailing, c.toString)
         assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
@@ -130,7 +135,7 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
       case _: AssertMalformed => // skip
       case _: AssertExhaustion => // skip
       case action: Action =>
-        runAAction(action)
+        runAAction(action, convertVals)
         runCAction(action)
       case _: Meta => // skip
 
@@ -173,8 +178,8 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None):
     case Get(modName, name) => evalCGet(modName, name)
   }
 
-  def runAAction(a: Action): AResult = a match {
-    case Invoke(modName, fun, expr) => evalAInvoke(modName, fun, constExprToAVals(expr))
+  def runAAction(a: Action, convertVals: unresolved.Expr => List[ConstantAnalysis.Value]): AResult = a match {
+    case Invoke(modName, fun, expr) => evalAInvoke(modName, fun, convertVals(expr))
     case Get(modName, name) => evalAGet(modName, name)
   }
 
@@ -244,6 +249,16 @@ def constExprToAVal(inst: unresolved.Inst): ConstantAnalysis.Value =
     case unresolved.f64.Const(d) => ConstantAnalysis.Value.Float64(Topped.Actual(d))
     case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
+def constExprToTops(e: unresolved.Expr): List[ConstantAnalysis.Value] =
+  e.map(constExprToTop).toList
+
+def constExprToTop(inst: unresolved.Inst): ConstantAnalysis.Value =
+  inst match
+    case unresolved.i32.Const(_) => ConstantAnalysis.Value.Int32(Topped.Top)
+    case unresolved.i64.Const(_) => ConstantAnalysis.Value.Int64(Topped.Top)
+    case unresolved.f32.Const(_) => ConstantAnalysis.Value.Float32(Topped.Top)
+    case unresolved.f64.Const(_) => ConstantAnalysis.Value.Float64(Topped.Top)
+    case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
 def readModule(mod: unresolved.Module): Module =
   implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)

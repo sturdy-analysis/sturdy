@@ -25,6 +25,8 @@ class TestScriptAnalysisInterpreterTest extends AnyFlatSpec, Matchers:
       val script = parseScript(sourceCode)
       val interp = TestScriptAnalysisInterpreter(Some(spectest))
       interp.run(script)
+      val interpTop = TestScriptAnalysisInterpreter(Some(spectest), true)
+      interpTop.run(script)
     }
   }
 

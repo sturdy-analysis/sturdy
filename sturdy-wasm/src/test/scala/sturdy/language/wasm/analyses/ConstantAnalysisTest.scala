@@ -13,6 +13,7 @@ import sturdy.language.wasm.analyses.ConstantAnalysis.Value
 import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.generic.UnreachableInstruction
 import sturdy.values.Topped
+import sturdy.values.ints.IntDivisionByZero
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -67,6 +68,8 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(simple, "test-global", List(Value.Int32(0)), List(Value.Int32(1)))
     testFunctionConstantArgs(simple, "test-global", List(Value.Int32(1)), List(Value.Int32(2)))
     testFunctionConstantArgs(simple, "test-call-indirect-parametric", List(Value.Int32(0)), List(Value.Int32(0)))
+    testFailingFunction(simple, "division", List(ConstantAnalysis.Value.Int32(Topped.Actual(1)),
+      ConstantAnalysis.Value.Int32(Topped.Actual(0))), IntDivisionByZero)
 
     testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(0)), List(Value.Int64(1)))
   }
@@ -88,6 +91,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "test-unreachable5", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
   testFunction(simple, "test-global", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
   testFunction(simple, "test-call-indirect-parametric", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(0))))
+  testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntDivisionByZero)
 
   (1 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
@@ -112,9 +116,9 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
         case AFallible.Failing(fails) => assert(false, s"Expected $expected but execution failed: $fails")
     }
 
-  def testFailingFunction(path: Path, funcName: String, args: List[ConcreteInterpreter.Value], failureKind: FailureKind) =
+  def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind) =
     it must s"execute $funcName with args $args throwing exception $failureKind" in {
-      val res = runConstantAnalysis(path, funcName, args.map(ConstantAnalysis.liftConcreteValue))
+      val res = runConstantAnalysis(path, funcName, args)//args.map(ConstantAnalysis.liftConcreteValue))
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $failureKind but execution succeeded: $vals")
         case AFallible.MaybeFailing(_, fails) => assert(fails.set.exists(_._1 == failureKind))
