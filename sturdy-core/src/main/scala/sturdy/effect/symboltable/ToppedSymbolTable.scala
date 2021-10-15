@@ -6,6 +6,9 @@ import sturdy.values.{*, given}
 
 import scala.collection.mutable
 import ToppedSymbolTable.*
+import sturdy.effect.ComputationJoiner
+import sturdy.effect.ComputationJoinerWithSuper
+import sturdy.effect.TrySturdy
 
 trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effectful:
 
@@ -41,30 +44,38 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
     tables += key -> Topped.Actual(Table(Map(), Set()))
     dirtyTables += key
 
-  override def joinComputations[A](f: => A)(g: => A): Joined[A] =
+  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     val snapshot = tables
     val snapDirtyTables = dirtyTables
     dirtyTables = Set()
+    var fTables: Map[Key, Topped[Table[Symbol, Entry]]] = null
+    var fDirty: Set[Key] = null
 
-    super.joinComputations(f){
-      val fTables = tables
+    override def inbetween_(): Unit =
+      fTables = tables
+      fDirty = dirtyTables
       tables = snapshot
-      val fDirty = dirtyTables
       dirtyTables = Set()
 
-      try g finally {
-        for (fkey <- fDirty) fTables(fkey) match
-          case Topped.Top =>
-            tables += fkey -> Topped.Top
-          case Topped.Actual(fTab) => tables.get(fkey) match
-            case None => tables += fkey -> Topped.Actual(fTab.allMay)
-            case Some(Topped.Top) => // leave at top
-            case Some(Topped.Actual(gTab)) => Join(gTab, fTab).ifChanged(tables += fkey -> Topped.Actual(_))
+    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+      tables = fTables
+      dirtyTables = snapDirtyTables ++ fDirty
 
-        dirtyTables ++= fDirty
-        dirtyTables ++= snapDirtyTables
-      }
-    }
+    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit =
+      dirtyTables ++= snapDirtyTables
+
+    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      for (fkey <- fDirty) fTables(fkey) match
+        case Topped.Top =>
+          tables += fkey -> Topped.Top
+        case Topped.Actual(fTab) => tables.get(fkey) match
+          case None => tables += fkey -> Topped.Actual(fTab.allMay)
+          case Some(Topped.Top) => // leave at top
+          case Some(Topped.Actual(gTab)) => Join(gTab, fTab).ifChanged(tables += fkey -> Topped.Actual(_))
+
+      dirtyTables ++= fDirty
+      dirtyTables ++= snapDirtyTables
+  }
 
 object ToppedSymbolTable:
   type Tables[Key, Symbol, Entry] = Map[Key, Topped[Table[Symbol, Entry]]]

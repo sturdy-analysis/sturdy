@@ -4,7 +4,8 @@ import sturdy.data.Either
 import sturdy.effect.SturdyException
 import sturdy.values.exceptions.Exceptional
 
-trait ExceptException extends SturdyException
+trait ExceptException extends SturdyException:
+  override def isBottom: Boolean = false
 
 trait Except[Exc, E, MayJoin[_]]:
   val exceptional: Exceptional[Exc, E, MayJoin]

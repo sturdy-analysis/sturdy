@@ -13,6 +13,7 @@ import scala.util.Success
 import scala.util.Try
 
 case class RecurrentCall[Dom, Ctx](frame: Frame[Dom, Ctx]) extends SturdyException:
+  override def isBottom: Boolean = true
   override def toString: String = s"RecurrentCall $frame"
 
 case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
@@ -236,7 +237,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
       val newResult: MaybeChanged[TrySturdy[Codom]] = (previousResult, result) match
         case (TrySturdy.Failure(ex1), TrySturdy.Failure(ex2)) => MaybeChanged(TrySturdy.Failure(j.joinThrowables(ex1, ex2)), previousResult)
         case (TrySturdy.Failure(_), TrySturdy.Success(v)) => Changed(TrySturdy.Success(v))
-        case (TrySturdy.Success(v), TrySturdy.Failure(_)) => Changed(TrySturdy.Success(v))
+        case (TrySturdy.Success(v), TrySturdy.Failure(_)) => Unchanged(TrySturdy.Success(v))
         case (TrySturdy.Success(v1), TrySturdy.Success(v2)) => widenCodom(v1, v2).map(TrySturdy.Success.apply)
       val currentOut = state.getOutState()
       val newOut = widenOut(previousOut, currentOut)

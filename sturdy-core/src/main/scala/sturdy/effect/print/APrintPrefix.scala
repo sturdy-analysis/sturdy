@@ -2,7 +2,10 @@ package sturdy.effect.print
 
 import sturdy.IsSound
 import sturdy.Soundness
+import sturdy.effect.ComputationJoiner
+import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.Effectful
+import sturdy.effect.TrySturdy
 import sturdy.values.Finite
 import sturdy.values.Join
 import sturdy.values.MaybeChanged
@@ -15,13 +18,32 @@ object APrintPrefix:
     case OneOf(rs: Set[PrintResult[A]])
     case Concat(p1: PrintResult[A], p2: PrintResult[A])
 
+    def findCommonPrefix(as: Vector[A], bs: Vector[A]): (Vector[A], Vector[A], Vector[A]) =
+      var it1 = as
+      var it2 = bs
+      var prefix: List[A] = Nil
+      while (it1.nonEmpty && it2.nonEmpty && it1.head == it2.head) {
+        prefix = it1.head :: prefix
+        it1 = it1.tail
+        it2 = it2.tail
+      }
+      (prefix.view.reverse.toVector, it1, it2)
+
     def join(that: PrintResult[A]): PrintResult[A] = (this, that) match
       case _ if this.isEmpty => this
       case _ if that.isEmpty => that
       case (PrintResult.OneOf(rs1), PrintResult.OneOf(rs2)) => PrintResult.OneOf(rs1 ++ rs2)
       case (PrintResult.OneOf(rs1), _) => PrintResult.OneOf(rs1 + that)
       case (_, PrintResult.OneOf(rs2)) => PrintResult.OneOf(rs2 + this)
-      case (r1: PrintResult.Definite[A], r2: PrintResult.Definite[A]) if r1.as == r2.as => r1
+      case (r1: PrintResult.Definite[A], r2: PrintResult.Definite[A]) =>
+        val (prefix, thisRest, thatRest) = findCommonPrefix(r1.as, r2.as)
+        val thisRestResult = PrintResult.Definite(thisRest)
+        val thatRestResult = PrintResult.Definite(thatRest)
+        val rest = PrintResult.OneOf(Set(thisRestResult, thatRestResult))
+        if (prefix.nonEmpty)
+          PrintResult.Definite(prefix)
+        else
+          rest
       case _ => PrintResult.OneOf(Set(this, that))
 
     def :+(a: A): PrintResult[A] = this match
@@ -115,16 +137,21 @@ trait APrintPrefix[P] extends Print[P], Effectful:
   override def print(a: P): Unit =
     printed = printed :+ a
 
-  override def joinComputations[A](f: => A)(g: => A): Joined[A] = {
+  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     val snapshot = printed
     var printedF: PrintResult[P] = null
-    var printedG: PrintResult[P] = null
-    try
-      super.joinComputations(
-        try f finally printedF = printed)(
-        try {printed = snapshot; g} finally printedG = printed)
-    finally
-      printed = printedF.join(printedG)
+
+    override def inbetween_(): Unit =
+      printedF = printed
+      printed = snapshot
+
+    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+      printed = printedF
+
+    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit = {}
+
+    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      printed = printedF.join(printed)
   }
 
   def printIsSound[C](c: CPrint[C])(using Soundness[C, P]): IsSound =

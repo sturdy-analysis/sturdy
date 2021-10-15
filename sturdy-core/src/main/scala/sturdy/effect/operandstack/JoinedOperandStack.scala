@@ -1,5 +1,7 @@
 package sturdy.effect.operandstack
 
+import sturdy.effect.ComputationJoiner
+import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.TrySturdy
 import sturdy.{Soundness, IsSound}
 import sturdy.values.Join
@@ -7,20 +9,35 @@ import sturdy.values.Join
 /** Stacks of different execution branches are joined. */
 trait JoinedOperandStack[V](using Join[V]) extends GenericOperandStack[V]:
 
-  override def joinComputations[A](f: => A)(g: => A): Joined[A] =
+  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     val snapshot = stack
     var fStack: List[V] = null
-    super.joinComputations(f) {
+
+    override def inbetween_(): Unit =
       fStack = stack
       stack = snapshot
-      val res = TrySturdy(g)
-      // only retain stacks from successful computations
-      if (res.isSuccess && fSuccess)
-        stack = joinWith(fStack)
-      else if (fSuccess)
+
+    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+      if (fRes.isSuccess)
         stack = fStack
-      res.get
-    }
+      else
+        stack = snapshot
+
+    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit =
+      if (!gRes.isSuccess)
+        stack = snapshot
+
+    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      if (gRes.isSuccess) {
+        if (fRes.isSuccess)
+          stack = joinWith(fStack)
+        // else nothing
+      } else if (fRes.isSuccess) {
+        stack = fStack
+      } else {
+        stack = snapshot
+      }
+  }
 
   private def joinWith(other: List[V]): List[V] =
     if (stack.size != other.size)

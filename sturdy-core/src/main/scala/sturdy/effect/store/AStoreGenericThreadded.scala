@@ -1,6 +1,8 @@
 package sturdy.effect.store
 
 import sturdy.effect.AnalysisState
+import sturdy.effect.ComputationJoiner
+import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.Effectful
 import sturdy.effect.TrySturdy
 import sturdy.values.Join
@@ -28,22 +30,29 @@ trait AStoreGenericThreadded[Addr, V](using j: Join[V])
       case None => store += x -> v
       case Some(old) => j(old, v).ifChanged(store += x -> _)
 
-  override def joinComputations[A](f: => A)(g: => A): Joined[A] =
+  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     val snapshot = store
-    var snapshotDirtyAddrs = dirtyAddrs
+    val snapshotDirtyAddrs = dirtyAddrs
     dirtyAddrs = Set()
+    var fStore: Map[Addr, V] = null
+    var fDirtyAddrs: Set[Addr] = null
 
-    super.joinComputations(f) {
-      val fStore = store
-      val fDirtyAddrs = dirtyAddrs
+    override def inbetween_(): Unit =
+      fStore = store
+      fDirtyAddrs = dirtyAddrs
       store = snapshot
       dirtyAddrs = Set()
 
-      try g finally {
-        for (x <- fDirtyAddrs)
-          weakUpdate(x, fStore(x))
+    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+      store = fStore
+      dirtyAddrs = snapshotDirtyAddrs ++ fDirtyAddrs
 
-        dirtyAddrs ++= snapshotDirtyAddrs
-        dirtyAddrs ++= fDirtyAddrs
-      }
-    }
+    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit =
+      dirtyAddrs ++= snapshotDirtyAddrs
+
+    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      for (x <- fDirtyAddrs)
+        weakUpdate(x, fStore(x))
+      dirtyAddrs ++= snapshotDirtyAddrs
+      dirtyAddrs ++= fDirtyAddrs
+  }
