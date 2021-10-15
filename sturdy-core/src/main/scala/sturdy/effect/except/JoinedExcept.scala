@@ -32,7 +32,9 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
     throw AbstractException
 
   override protected def tries[A](f: => A): EitherA[A, E] =
-    val res = try {
+    val originalException = this.exception
+    this.exception = OptionA.None()
+    try {
       val a = f
       exception match
         case OptionA.None() => EitherA.Left(Iterable.single(a))
@@ -49,10 +51,9 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
           case OptionA.None() => throw ex
           case OptionA.NoneSome(exs) => EitherA.Right(exs)
           case OptionA.Some(exs) => EitherA.Right(exs)
+    } finally {
+      this.exception = originalException
     }
-    // all exceptions are passed to the catch block, which must re-throw them if desired
-    this.exception = OptionA.None()
-    res
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     val snapshot = exception
