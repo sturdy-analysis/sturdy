@@ -6,6 +6,8 @@ import sturdy.values.{*, given}
 
 import scala.collection.mutable
 import ToppedSymbolTable.*
+import sturdy.IsSound
+import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.TrySturdy
@@ -72,10 +74,53 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
           case None => tables += fkey -> Topped.Actual(fTab.allMay)
           case Some(Topped.Top) => // leave at top
           case Some(Topped.Actual(gTab)) => Join(gTab, fTab).ifChanged(tables += fkey -> Topped.Actual(_))
+      for (tkey <- dirtyTables if !fTables.isDefinedAt(tkey)) {
+        tables(tkey)  match
+          case Topped.Actual(tab) => tables += tkey -> Topped.Actual(tab.allMay)
+          case _ =>
+      }
 
       dirtyTables ++= fDirty
       dirtyTables ++= snapDirtyTables
   }
+
+  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound =
+    // - all tables in c are present in the abstract
+    // - all abstract tables with at least one 'must' entry have a concrete counterpart
+    // - for each key in c, tabs(key) is sound
+    val cTables = c.getTables
+    tables.filterNot { (key,_) => cTables.isDefinedAt(key) }.foreachEntry { (k, aTab) => aTab match
+      case Topped.Actual(tab) =>
+        if (!tab.isAllMay)
+          return IsSound.NotSound(s"Definite table with key $k not present in concrete tables.")
+      case _ =>
+    }
+    cTables.foreachEntry { (key, cTab) =>
+      val aTab = tables.getOrElse(key, { return IsSound.NotSound(s"Key $key not present in topped symbol table.") })
+      val tabSound = tabInstanceIsSound(cTab, aTab)
+      if (tabSound.isNotSound)
+        return tabSound
+    }
+    IsSound.Sound
+
+  def tabInstanceIsSound[cEntry](c: mutable.Map[Symbol, cEntry], a: Topped[Table[Symbol,Entry]])(using entrySound: Soundness[cEntry, Entry]): IsSound =
+    // all entries in c are approximated by corresponding entry in a
+    // all abstract symbols not defined in c point to a 'may' entry
+    a match
+      case Topped.Top => return IsSound.Sound
+      case Topped.Actual(aTab) =>
+        aTab.underlying.filterNot { (symbol,_) => c.isDefinedAt(symbol) }.foreachEntry { (s, aEntry) =>
+          if (aEntry.isMust)
+            return IsSound.NotSound(s"Definite entry $aEntry with symbol $s not present in concrete table.")
+        }
+        c.foreachEntry { (key, cEntry) =>
+          val aEntry = aTab.underlying.getOrElse(key,
+            { return IsSound.NotSound(s"Concrete entry $cEntry with symbol $key not present in abstract table.") })
+          val eSound = entrySound.isSound(cEntry, aEntry.get)
+          if (!eSound.isSound)
+            return IsSound.NotSound(s"Concrete entry $cEntry with symbol $key not approximated by abstract entry ${aEntry.get}.")
+        }
+        IsSound.Sound
 
 object ToppedSymbolTable:
   type Tables[Key, Symbol, Entry] = Map[Key, Topped[Table[Symbol, Entry]]]
@@ -121,5 +166,7 @@ object ToppedSymbolTable:
         newUnderlying += s -> mentry.asMay
       }
       Table(newUnderlying, newDirtySymbols)
+
+    def isAllMay: Boolean = underlying.forall((_,e) => !e.isMust)
 
 

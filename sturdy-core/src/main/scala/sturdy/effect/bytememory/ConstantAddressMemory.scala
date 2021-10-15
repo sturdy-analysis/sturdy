@@ -156,7 +156,7 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
           return IsSound.NotSound(s"Definite memory with key $k not present in concrete memory.")
       case _ =>
     }
-    c.getMemories.foreachEntry { (key, cMem) =>
+    cMemories.foreachEntry { (key, cMem) =>
       val aMem = memories.getOrElse(key, { return IsSound.NotSound(s"Key $key not present in constant address memory.") })
       val memSound = memInstanceIsSound(cMem, aMem)
       if (memSound.isNotSound)

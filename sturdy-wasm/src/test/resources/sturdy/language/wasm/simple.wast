@@ -289,6 +289,10 @@
     (call_indirect (type $out-i32) (i32.const 0))
   )
 
+  (func (export "test-call-indirect-parametric") (param i32) (result i32)
+    (call_indirect (type $out-i32) (local.get 0))
+  )
+
   (func (export "params-break") (result i32)
     (local $x i32)
     (i32.const 1)

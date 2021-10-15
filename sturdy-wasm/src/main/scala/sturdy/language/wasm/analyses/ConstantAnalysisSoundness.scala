@@ -61,5 +61,6 @@ object ConstantAnalysisSoundness {
     def isSound(c: ConcreteInterpreter.Instance, a: ConstantAnalysis.Instance): IsSound =
       // soundness for stack, memory, symbol table, call frame
       a.effects.operandStackIsSound(c.effects) &&
-        a.effects.memoryIsSound(c.effects)
+        a.effects.memoryIsSound(c.effects) //&&
+        //a.effects.tableIsSound(c.effects)
 }

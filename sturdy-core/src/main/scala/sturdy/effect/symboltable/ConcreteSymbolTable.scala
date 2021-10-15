@@ -16,3 +16,5 @@ trait ConcreteSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, E
 
   override def addEmptyTable(key: Key): Unit =
     tables(key) = mutable.Map()
+    
+  def getTables: mutable.Map[Key, mutable.Map[Symbol, Entry]] = tables
