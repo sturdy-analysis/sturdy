@@ -3,7 +3,10 @@ package sturdy.effect.bytememory
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.data.*
+import sturdy.effect.ComputationJoiner
+import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.Effectful
+import sturdy.effect.TrySturdy
 import sturdy.fix.*
 import sturdy.values.*
 
@@ -114,23 +117,32 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
       case Topped.Actual(size) =>
         memories += key -> Topped.Actual(ByteMem(Array.fill[B](size*pageSize)(emptyB), mutable.BitSet(), sizeLimit.flatMap(_.toOption)))
 
-  override def joinComputations[A](f: => A)(g: => A): Joined[A] =
-    // clones all mutable Mem
-    val gmemories = mutable.Map() ++ memories.view.mapValues(_.map(_.cloned))
-    super.joinComputations(f) {
-      val fmemories = memories
-      memories = gmemories
-      try g finally {
-        for ((key, fmem) <- fmemories) gmemories.get(key) match
-          case Some(gmem) => memories += key -> Join(fmem, gmem).get
-          case None => memories += key -> fmem.map(_.toIndefinite)
+  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+    var gmemories = mutable.Map() ++ memories.view.mapValues(_.map(_.cloned))
+    var fmemories: mutable.Map[Key, Topped[Mem[B]]] = null
 
-        val fkeys = fmemories.keySet
-        for ((key, gmemOpt) <- gmemories)
-          if (!fkeys.contains(key))
-            memories += key -> gmemOpt.map(_.toIndefinite)
-      }
-    }
+    override def inbetween_(): Unit =
+      fmemories = memories
+      memories = gmemories
+
+    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+      memories = fmemories
+      gmemories = null
+
+    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit =
+      fmemories = null
+
+    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      for ((key, fmem) <- fmemories) gmemories.get(key) match
+        case Some(gmem) => memories += key -> Join(fmem, gmem).get
+        case None => memories += key -> fmem.map(_.toIndefinite)
+
+      val fkeys = fmemories.keySet
+      for ((key, gmemOpt) <- gmemories)
+        if (!fkeys.contains(key))
+          memories += key -> gmemOpt.map(_.toIndefinite)
+      fmemories = null
+  }
 
   def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound =
     // soundess for memory:

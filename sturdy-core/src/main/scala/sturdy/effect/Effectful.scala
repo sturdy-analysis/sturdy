@@ -103,7 +103,7 @@ trait Effectful extends ObservableJoin:
     if (as.isEmpty)
       next()
     else {
-      joinComputations(joinComputationsIt(as))(next())
+      joinComputations(next())(joinComputationsIt(as))
     }
 
 object Effectful:

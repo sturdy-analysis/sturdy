@@ -8,6 +8,9 @@ import sturdy.values.exceptions.Exceptional
 import scala.collection.mutable.ListBuffer
 import scala.util.Success
 import JoinedExcept.*
+import sturdy.effect.ComputationJoiner
+import sturdy.effect.ComputationJoinerWithSuper
+import sturdy.effect.TrySturdy
 
 case object AbstractException extends ExceptException:
   override def toString: String = s"Exception (abstract)"
@@ -51,15 +54,22 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
     this.exception = OptionA.None()
     res
 
-  override def joinComputations[A](f: => A)(g: => A): Joined[A] =
-    val snapshot = this.exception
-    super.joinComputations(f) {
-      val fExcept = this.exception
-      this.exception = snapshot
-      try g finally {
-        this.exception = fExcept.joinDeep(this.exception)
-      }
-    }
+  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+    val snapshot = exception
+    var fExcept: OptionA[E] = null
+    
+    override def inbetween_(): Unit =
+      fExcept = exception
+      exception = snapshot
 
+    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+      exception = fExcept
+
+    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit = {}
+
+    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+      exception = fExcept.joinDeep(exception)
+  }
+  
 object JoinedExcept:
   type State[Exc, E] = OptionA[E]
