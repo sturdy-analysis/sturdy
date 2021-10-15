@@ -45,7 +45,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
   type FunV = Topped[Powerset[FunctionInstance[Value]]]
 
   type Symbol = Topped[SymbolUntopped]
-  type SymbolUntopped = FuncIx | GlobalAddr
+  type SymbolUntopped = Int | GlobalAddr
 
   enum Entry:
     case Function(fun: FunV)
@@ -67,7 +67,9 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Int32(sz)
 
-    override def funcIxToSymbol(funcIx: FuncIx): Symbol = Topped.Actual(funcIx)
+    override def funcIxToSymbol(funcIx: FuncIx): Symbol = funcIx match
+      case Topped.Top => Topped.Top
+      case Topped.Actual(i) => Topped.Actual(i)
     override def globIxToSymbol(globalIdx: GlobalAddr): Symbol = Topped.Actual(globalIdx)
 
     override def funVToEntry(funV: FunV): Entry = Entry.Function(funV)
