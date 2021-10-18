@@ -365,4 +365,26 @@
     i32.div_s
   )
 
+  (func (export "effects") (param i32) (result i32)
+      (local i32)
+      (if
+        (block (result i32) (local.set 1 (i32.const 1)) (local.get 0))
+        (then
+          (local.set 1 (i32.mul (local.get 1) (i32.const 3)))
+          (local.set 1 (i32.sub (local.get 1) (i32.const 5)))
+          (local.set 1 (i32.mul (local.get 1) (i32.const 7)))
+          (br 0)
+          (local.set 1 (i32.mul (local.get 1) (i32.const 100)))
+        )
+        (else
+          (local.set 1 (i32.mul (local.get 1) (i32.const 5)))
+          (local.set 1 (i32.sub (local.get 1) (i32.const 7)))
+          (local.set 1 (i32.mul (local.get 1) (i32.const 3)))
+          (br 0)
+          (local.set 1 (i32.mul (local.get 1) (i32.const 1000)))
+        )
+      )
+      (local.get 1)
+    )
+
 )

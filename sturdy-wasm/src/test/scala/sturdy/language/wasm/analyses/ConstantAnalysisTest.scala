@@ -34,8 +34,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   val uriFact = classOf[ConstantAnalysisTest].getResource("/sturdy/language/wasm/fact.wast").toURI();
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
-
-
+  
   {
     import sturdy.language.wasm.ConcreteInterpreter.Value
     testFunctionConstantArgs(simple, "noop", List.empty, List(Value.Int32(0)))
@@ -70,6 +69,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(simple, "test-call-indirect-parametric", List(Value.Int32(0)), List(Value.Int32(0)))
     testFailingFunction(simple, "division", List(ConstantAnalysis.Value.Int32(Topped.Actual(1)),
       ConstantAnalysis.Value.Int32(Topped.Actual(0))), IntDivisionByZero)
+    testFunctionConstantArgs(simple, "effects", List(Value.Int32(1)), List(Value.Int32(-14)))
 
     testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(0)), List(Value.Int64(1)))
   }
@@ -92,6 +92,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "test-global", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
   testFunction(simple, "test-call-indirect-parametric", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(0))))
   testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntDivisionByZero)
+  testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
 
   (1 to 8).foreach { arg =>
     testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
