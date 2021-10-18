@@ -1,12 +1,13 @@
 package sturdy.values.longs
 
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
 import sturdy.values.config
 
 import java.nio.ByteOrder
 
-given ToppedLongOps[T](using ops: LongOps[T], f: Failure): LongOps[Topped[T]] with
+given ToppedLongOps[T](using ops: LongOps[T], f: Failure, eff: Effectful): LongOps[Topped[T]] with
   def longLit(l: Long): Topped[T] = Topped.Actual(ops.longLit(l))
   def randomLong(): Topped[T] = Topped.Top
 
@@ -15,10 +16,15 @@ given ToppedLongOps[T](using ops: LongOps[T], f: Failure): LongOps[Topped[T]] wi
   def mul(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.mul, v2)
 
 
-  def div(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.div, v2)
-  def divUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.divUnsigned, v2)
-  def remainder(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.remainder, v2)
-  def remainderUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.remainderUnsigned, v2)
+  private inline def safeDiv[TT >: T](op: (T, TT) => T, v1: Topped[T], v2: Topped[T]): Topped[T] =
+    if (v2 == Topped.Top)
+      eff.joinWithFailure(v1.binary(op, v2))(f.fail(LongDivisionByZero, s"$v1 / $v2"))
+    else
+      v1.binary(op, v2)
+  def div(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.div, v1, v2)
+  def divUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.divUnsigned, v1, v2)
+  def remainder(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.remainder, v1, v2)
+  def remainderUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.remainderUnsigned, v1, v2)
 
   def bitAnd(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.bitAnd, v2)
   def bitOr(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.bitOr, v2)

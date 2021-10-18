@@ -155,7 +155,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
       fix.log(callSites,
-        fix.contextSensitive(frameSensitive && callSites.callString(1),
+        fix.contextSensitive(frameSensitive && callSites.callString(0),
           fix.log(cfg.logger,
             fix.filter(isFunOrWhile,
               fix.iter.topmost

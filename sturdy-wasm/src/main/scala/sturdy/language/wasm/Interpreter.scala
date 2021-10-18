@@ -212,35 +212,36 @@ trait Interpreter:
     final val convertDoubleLong: ConvertDoubleLong[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int64.apply)
     final val convertDoubleFloat: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, Value.Float32.apply)
 
-    override final val encode: Convert[Value, Seq[Byte], Value, Bytes, StoreInst | StoreNInst] = new Convert:
-      override def apply(from: Value, conf: StoreInst | StoreNInst): Bytes = (from, conf) match
-        case (Value.Int32(i), _: i32.Store8) => encodeI32(i, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN))
-        case (Value.Int32(i), _: i32.Store16) => encodeI32(i, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN))
-        case (Value.Int32(i), _: i32.Store) => encodeI32(i, (config.BytesSize.Int, ByteOrder.LITTLE_ENDIAN))
-        case (Value.Int64(l), _: i64.Store8) => encodeI64(l, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN))
-        case (Value.Int64(l), _: i64.Store16) => encodeI64(l, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN))
-        case (Value.Int64(l), _: i64.Store32) => encodeI64(l, (config.BytesSize.Int, ByteOrder.LITTLE_ENDIAN))
-        case (Value.Int64(l), _: i64.Store) => encodeI64(l, (config.BytesSize.Long, ByteOrder.LITTLE_ENDIAN))
-        case (Value.Float32(f), _: f32.Store) => encodeF32(f, ByteOrder.LITTLE_ENDIAN)
-        case (Value.Float64(d), _: f64.Store) => encodeF64(d, ByteOrder.LITTLE_ENDIAN)
+    val LITTLE_ENDIAN = SomeCC(ByteOrder.LITTLE_ENDIAN, false)
+    override final val encode = new Convert[Value, Seq[Byte], Value, Bytes, SomeCC[StoreInst | StoreNInst]]:
+      override def apply(from: Value, conf: SomeCC[StoreInst | StoreNInst]): Bytes = (from, conf.t) match
+        case (Value.Int32(i), _: i32.Store8) => encodeI32(i, config.BytesSize.Byte && LITTLE_ENDIAN)
+        case (Value.Int32(i), _: i32.Store16) => encodeI32(i, config.BytesSize.Short && LITTLE_ENDIAN)
+        case (Value.Int32(i), _: i32.Store) => encodeI32(i, config.BytesSize.Int && LITTLE_ENDIAN)
+        case (Value.Int64(l), _: i64.Store8) => encodeI64(l, config.BytesSize.Byte && LITTLE_ENDIAN)
+        case (Value.Int64(l), _: i64.Store16) => encodeI64(l, config.BytesSize.Short && LITTLE_ENDIAN)
+        case (Value.Int64(l), _: i64.Store32) => encodeI64(l, config.BytesSize.Int && LITTLE_ENDIAN)
+        case (Value.Int64(l), _: i64.Store) => encodeI64(l, config.BytesSize.Long && LITTLE_ENDIAN)
+        case (Value.Float32(f), _: f32.Store) => encodeF32(f, LITTLE_ENDIAN)
+        case (Value.Float64(d), _: f64.Store) => encodeF64(d, LITTLE_ENDIAN)
         case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
-    override final val decode: Convert[Seq[Byte], Value, Bytes, Value, LoadInst | LoadNInst] = new Convert:
-      override def apply(from: Bytes, conf: LoadInst | LoadNInst): Value = conf match
-        case _: i32.Load8S => Value.Int32(decodeI32(from, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
-        case _: i32.Load8U => Value.Int32(decodeI32(from, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN, config.Bits.Unsigned)))
-        case _: i32.Load16S => Value.Int32(decodeI32(from, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
-        case _: i32.Load16U => Value.Int32(decodeI32(from, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN, config.Bits.Unsigned)))
-        case _: i32.Load => Value.Int32(decodeI32(from, (config.BytesSize.Int, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
-        case _: i64.Load8S => Value.Int64(decodeI64(from, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
-        case _: i64.Load8U => Value.Int64(decodeI64(from, (config.BytesSize.Byte, ByteOrder.LITTLE_ENDIAN, config.Bits.Unsigned)))
-        case _: i64.Load16S => Value.Int64(decodeI64(from, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
-        case _: i64.Load16U => Value.Int64(decodeI64(from, (config.BytesSize.Short, ByteOrder.LITTLE_ENDIAN, config.Bits.Unsigned)))
-        case _: i64.Load32S => Value.Int64(decodeI64(from, (config.BytesSize.Int, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
-        case _: i64.Load32U => Value.Int64(decodeI64(from, (config.BytesSize.Int, ByteOrder.LITTLE_ENDIAN, config.Bits.Unsigned)))
-        case _: i64.Load => Value.Int64(decodeI64(from, (config.BytesSize.Long, ByteOrder.LITTLE_ENDIAN, config.Bits.Signed)))
-        case _: f32.Load => Value.Float32(decodeF32(from, ByteOrder.LITTLE_ENDIAN))
-        case _: f64.Load => Value.Float64(decodeF64(from, ByteOrder.LITTLE_ENDIAN))
+    override final val decode = new Convert[Seq[Byte], Value, Bytes, Value, SomeCC[LoadInst | LoadNInst]]:
+      override def apply(from: Bytes, conf: SomeCC[LoadInst | LoadNInst]): Value = conf.t match
+        case _: i32.Load8S => Value.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Signed))
+        case _: i32.Load8U => Value.Int32(decodeI32(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Unsigned))
+        case _: i32.Load16S => Value.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Signed))
+        case _: i32.Load16U => Value.Int32(decodeI32(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Unsigned))
+        case _: i32.Load => Value.Int32(decodeI32(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed))
+        case _: i64.Load8S => Value.Int64(decodeI64(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Signed))
+        case _: i64.Load8U => Value.Int64(decodeI64(from, config.BytesSize.Byte && LITTLE_ENDIAN && config.Bits.Unsigned))
+        case _: i64.Load16S => Value.Int64(decodeI64(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Signed))
+        case _: i64.Load16U => Value.Int64(decodeI64(from, config.BytesSize.Short && LITTLE_ENDIAN && config.Bits.Unsigned))
+        case _: i64.Load32S => Value.Int64(decodeI64(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Signed))
+        case _: i64.Load32U => Value.Int64(decodeI64(from, config.BytesSize.Int && LITTLE_ENDIAN && config.Bits.Unsigned))
+        case _: i64.Load => Value.Int64(decodeI64(from, config.BytesSize.Long && LITTLE_ENDIAN && config.Bits.Signed))
+        case _: f32.Load => Value.Float32(decodeF32(from, LITTLE_ENDIAN))
+        case _: f64.Load => Value.Float64(decodeF64(from, LITTLE_ENDIAN))
 
   type Instance <: GenericInstance
 

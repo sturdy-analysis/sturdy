@@ -6,7 +6,7 @@ import sturdy.values.Structural
 import sturdy.values.config
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
-import sturdy.values.convert.Convert
+import sturdy.values.convert.*
 import sturdy.values.relational.CompareOps
 import sturdy.values.relational.EqOps
 
@@ -28,8 +28,6 @@ given ConcreteLongOps(using f: Failure): LongOps[Long] with
   def div(v1: Long, v2: Long): Long =
     if (v2 == 0)
       f.fail(LongDivisionByZero, s"$v1 / $v2")
-    else if (v1 == Long.MinValue && v2 == -1)
-      f.fail(LongOverflow, s"$v1 / $v2")
     else
       v1 / v2
   def divUnsigned(v1: Long, v2: Long): Long =
@@ -75,7 +73,7 @@ given ConcreteConvertLongInt: ConvertLongInt[Long, Int] with
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(l: Long, conf: Unit): Int = (l % (1L << 32)).toInt
+  def apply(l: Long, conf: NilCC.type): Int = (l % (1L << 32)).toInt
 
 given ConcreteConvertLongFloat: ConvertLongFloat[Long, Float] with
   private val convC = JFloat.parseFloat("0x1p12")
@@ -107,9 +105,9 @@ given ConcreteConvertLongDouble: ConvertLongDouble[Long, Double] with
     case config.Bits.Raw => JDouble.longBitsToDouble(l)
 
 given ConcreteConvertLongBytes: ConvertLongBytes[Long, Seq[Byte]] with
-  override def apply(from: Long, conf: (config.BytesSize, ByteOrder)): Seq[Byte] =
-    val buf = ByteBuffer.allocate(conf._1.bytes)
-    buf.order(conf._2)
+  override def apply(from: Long, conf: config.BytesSize && SomeCC[ByteOrder]): Seq[Byte] =
+    val buf = ByteBuffer.allocate(conf.c1.bytes)
+    buf.order(conf.c2.t)
     conf._1 match
       case config.BytesSize.Byte => buf.put(0, (from % (1L << 8)).toByte)
       case config.BytesSize.Short => buf.putShort(0, (from % (1L << 16)).toShort)
@@ -118,10 +116,10 @@ given ConcreteConvertLongBytes: ConvertLongBytes[Long, Seq[Byte]] with
     buf.array().toSeq
 
 given ConcreteConvertBytesLong: ConvertBytesLong[Seq[Byte], Long] with
-  override def apply(from: Seq[Byte], conf: (config.BytesSize, ByteOrder, config.Bits)): Long =
+  override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Long =
     val buf = ByteBuffer.wrap(from.toArray)
-    buf.order(conf._2)
-    (conf._1, conf._3) match
+    buf.order(conf.c1.c2.t)
+    (conf.c1.c1, conf.c2) match
       case (config.BytesSize.Byte, config.Bits.Signed) => buf.get.toLong
       case (config.BytesSize.Byte, config.Bits.Unsigned) => buf.get & 0xFFL
       case (config.BytesSize.Short, config.Bits.Signed) => buf.getShort.toLong

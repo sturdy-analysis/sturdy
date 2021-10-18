@@ -30,8 +30,8 @@ trait DoubleOps[V]:
   
   def logNatural(v: V): V
 
-type ConvertDoubleInt[VFrom, VTo] = Convert[Double, Float, VFrom, VTo, (config.Overflow, config.Bits)]
-type ConvertDoubleLong[VFrom, VTo] = Convert[Double, Long, VFrom, VTo, (config.Overflow, config.Bits)]
-type ConvertDoubleFloat[VFrom, VTo] = Convert[Double, Float, VFrom, VTo, Unit]
-type ConvertDoubleBytes[VFrom, VTo] = Convert[Double, Seq[Byte], VFrom, VTo, ByteOrder]
-type ConvertBytesDouble[VFrom, VTo] = Convert[Seq[Byte], Double, VFrom, VTo, ByteOrder]
+type ConvertDoubleInt[VFrom, VTo] = Convert[Double, Float, VFrom, VTo, config.Overflow && config.Bits]
+type ConvertDoubleLong[VFrom, VTo] = Convert[Double, Long, VFrom, VTo, config.Overflow && config.Bits]
+type ConvertDoubleFloat[VFrom, VTo] = Convert[Double, Float, VFrom, VTo, NilCC.type]
+type ConvertDoubleBytes[VFrom, VTo] = Convert[Double, Seq[Byte], VFrom, VTo, SomeCC[ByteOrder]]
+type ConvertBytesDouble[VFrom, VTo] = Convert[Seq[Byte], Double, VFrom, VTo, SomeCC[ByteOrder]]

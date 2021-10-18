@@ -165,7 +165,7 @@ given TaintUnsignedCompareOps[A,B](using ops: UnsignedCompareOps[A,B]): Unsigned
   override def geUnsigned(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.geUnsigned, v2)
   override def gtUnsigned(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.gtUnsigned, v2)
 
-given TaintConvert[From, To, VFrom, VTo, Config](using conv: Convert[From, To, VFrom, VTo, Config]):
+given TaintConvert[From, To, VFrom, VTo, Config <: ConvertConfig[_]](using conv: Convert[From, To, VFrom, VTo, Config]):
   Convert[From, To, TaintProduct[VFrom], TaintProduct[VTo], Config] with
   override def apply(from: TaintProduct[VFrom], conf: Config): TaintProduct[VTo] =
     from.unary(x => conv.apply(x, conf))

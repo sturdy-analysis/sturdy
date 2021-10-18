@@ -3,6 +3,7 @@ package sturdy.language.wasm.generic
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.OperandStack
 import sturdy.values.config
+import sturdy.values.convert.*
 import sturdy.values.doubles.*
 import sturdy.values.floats.*
 import sturdy.values.ints.*
@@ -94,7 +95,6 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
     case i32.Sub => intOps.sub(v1, v2)
     case i32.Mul => intOps.mul(v1, v2)
     case i32.DivS =>
-      stack.push(intOps.intLit(Int.MinValue))
       val v1IsMinValue = eqOps.equ(v1, intOps.intLit(Int.MinValue))
       val v2IsMinusOne = eqOps.equ(v2, intOps.intLit(-1))
       val isOverflow = intOps.bitAnd(v1IsMinValue, v2IsMinusOne)
@@ -119,7 +119,15 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
     case i64.Add => longOps.add(v1, v2)
     case i64.Sub => longOps.sub(v1, v2)
     case i64.Mul => longOps.mul(v1, v2)
-    case i64.DivS => longOps.div(v1, v2)
+    case i64.DivS =>
+      val v1IsMinValue = eqOps.equ(v1, longOps.longLit(Long.MinValue))
+      val v2IsMinusOne = eqOps.equ(v2, longOps.longLit(-1))
+      val isOverflow = intOps.bitAnd(v1IsMinValue, v2IsMinusOne)
+      wasmOps.branchOps.boolBranch(isOverflow) {
+        fail(LongOverflow, s"$v1 / $v2")
+      } {
+        longOps.div(v1, v2)
+      }
     case i64.DivU => longOps.divUnsigned(v1, v2)
     case i64.RemS => longOps.remainder(v1, v2)
     case i64.RemU => longOps.remainderUnsigned(v1, v2)
@@ -206,27 +214,27 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
     case f64.Ge => ge(v1, v2)
 
   inline def evalConvertop(op: Convertop, v: V): V = op match
-    case i32.WrapI64 => convertLongInt(v, ())
-    case i32.TruncSF32 => convertFloatInt(v  , (config.Overflow.Fail, config.Bits.Signed))
-    case i32.TruncUF32 => convertFloatInt(v, (config.Overflow.Fail, config.Bits.Unsigned))
-    case i32.TruncSF64 => convertDoubleInt(v, (config.Overflow.Fail, config.Bits.Signed))
-    case i32.TruncUF64 => convertDoubleInt(v, (config.Overflow.Fail, config.Bits.Unsigned))
-    case i32.ReinterpretF32 => convertFloatInt(v, (config.Overflow.Allow, config.Bits.Raw))
+    case i32.WrapI64 => convertLongInt(v, NilCC)
+    case i32.TruncSF32 => convertFloatInt(v, (config.Overflow.Fail && config.Bits.Signed))
+    case i32.TruncUF32 => convertFloatInt(v, (config.Overflow.Fail && config.Bits.Unsigned))
+    case i32.TruncSF64 => convertDoubleInt(v, (config.Overflow.Fail && config.Bits.Signed))
+    case i32.TruncUF64 => convertDoubleInt(v, (config.Overflow.Fail && config.Bits.Unsigned))
+    case i32.ReinterpretF32 => convertFloatInt(v, (config.Overflow.Allow && config.Bits.Raw))
     case i64.ExtendSI32 => convertIntLong(v, config.Bits.Signed)
     case i64.ExtendUI32 => convertIntLong(v, config.Bits.Unsigned)
-    case i64.TruncSF32 => convertFloatLong(v, (config.Overflow.Fail, config.Bits.Signed))
-    case i64.TruncUF32 => convertFloatLong(v, (config.Overflow.Fail, config.Bits.Unsigned))
-    case i64.TruncSF64 => convertDoubleLong(v, (config.Overflow.Fail, config.Bits.Signed))
-    case i64.TruncUF64 => convertDoubleLong(v, (config.Overflow.Fail, config.Bits.Unsigned))
-    case i64.ReinterpretF64 => convertDoubleLong(v, (config.Overflow.Allow, config.Bits.Raw))
+    case i64.TruncSF32 => convertFloatLong(v, (config.Overflow.Fail && config.Bits.Signed))
+    case i64.TruncUF32 => convertFloatLong(v, (config.Overflow.Fail && config.Bits.Unsigned))
+    case i64.TruncSF64 => convertDoubleLong(v, (config.Overflow.Fail && config.Bits.Signed))
+    case i64.TruncUF64 => convertDoubleLong(v, (config.Overflow.Fail && config.Bits.Unsigned))
+    case i64.ReinterpretF64 => convertDoubleLong(v, (config.Overflow.Allow && config.Bits.Raw))
 
-    case f32.DemoteF64 => convertDoubleFloat(v, ())
+    case f32.DemoteF64 => convertDoubleFloat(v, NilCC)
     case f32.ConvertSI32 => convertIntFloat(v, config.Bits.Signed)
     case f32.ConvertUI32 => convertIntFloat(v, config.Bits.Unsigned)
     case f32.ConvertSI64 => convertLongFloat(v, config.Bits.Signed)
     case f32.ConvertUI64 => convertLongFloat(v, config.Bits.Unsigned)
     case f32.ReinterpretI32 => convertIntFloat(v, config.Bits.Raw)
-    case f64.PromoteF32 => convertFloatDouble(v, ())
+    case f64.PromoteF32 => convertFloatDouble(v, NilCC)
     case f64.ConvertSI32 => convertIntDouble(v, config.Bits.Signed)
     case f64.ConvertUI32 => convertIntDouble(v, config.Bits.Unsigned)
     case f64.ConvertSI64 => convertLongDouble(v, config.Bits.Signed)
@@ -234,14 +242,14 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
     case f64.ReinterpretI64 => convertLongDouble(v, config.Bits.Raw)
 
   inline def evalMiscop(op: Miscop, v: V): V = op match
-    case i32.TruncSatSF32 => convertFloatInt(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
-    case i32.TruncSatUF32 => convertFloatInt(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
-    case i32.TruncSatSF64 => convertDoubleInt(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
-    case i32.TruncSatUF64 => convertDoubleInt(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
-    case i64.TruncSatSF32 => convertFloatLong(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
-    case i64.TruncSatUF32 => convertFloatLong(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
-    case i64.TruncSatSF64 => convertDoubleLong(v, (config.Overflow.JumpToBounds, config.Bits.Signed))
-    case i64.TruncSatUF64 => convertDoubleLong(v, (config.Overflow.JumpToBounds, config.Bits.Unsigned))
+    case i32.TruncSatSF32 => convertFloatInt(v, (config.Overflow.JumpToBounds && config.Bits.Signed))
+    case i32.TruncSatUF32 => convertFloatInt(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
+    case i32.TruncSatSF64 => convertDoubleInt(v, (config.Overflow.JumpToBounds && config.Bits.Signed))
+    case i32.TruncSatUF64 => convertDoubleInt(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
+    case i64.TruncSatSF32 => convertFloatLong(v, (config.Overflow.JumpToBounds && config.Bits.Signed))
+    case i64.TruncSatUF32 => convertFloatLong(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
+    case i64.TruncSatSF64 => convertDoubleLong(v, (config.Overflow.JumpToBounds && config.Bits.Signed))
+    case i64.TruncSatUF64 => convertDoubleLong(v, (config.Overflow.JumpToBounds && config.Bits.Unsigned))
 
   def defaultValue(ty: ValType): V = ty match
     case ValType.I32 => evalNumeric(i32.Const(0))

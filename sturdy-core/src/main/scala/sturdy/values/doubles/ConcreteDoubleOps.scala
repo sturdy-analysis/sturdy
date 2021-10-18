@@ -1,7 +1,6 @@
 package sturdy.values.doubles
 
-import sturdy.values.convert.ConversionFailure
-import sturdy.values.convert.Convert
+import sturdy.values.convert.*
 import sturdy.values.config
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
@@ -58,24 +57,24 @@ given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] 
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(d: Double, conf: (config.Overflow, config.Bits)) = conf match
-    case (config.Overflow.Allow, config.Bits.Signed) => d.toInt
-    case (config.Overflow.Allow, config.Bits.Unsigned) => d.toLong.toInt
-    case (config.Overflow.Fail, config.Bits.Signed) =>
+  def apply(d: Double, conf: config.Overflow && config.Bits) = conf match
+    case (config.Overflow.Allow && config.Bits.Signed) => d.toInt
+    case (config.Overflow.Allow && config.Bits.Unsigned) => d.toLong.toInt
+    case (config.Overflow.Fail && config.Bits.Signed) =>
       if (d.isNaN)
         f.fail(ConversionFailure, s"double $d cannot be converted")
       else if (d >= -Int.MinValue.toDouble || d <= Int.MinValue.toDouble - 1)
         f.fail(ConversionFailure, s"double $d out of integer range")
       else
         d.toInt
-    case (config.Overflow.Fail, config.Bits.Unsigned) =>
+    case (config.Overflow.Fail && config.Bits.Unsigned) =>
       if (d.isNaN)
         f.fail(ConversionFailure, s"double $d cannot be converted")
       else if (d >= -Int.MinValue.toDouble * 2.0d || d <= -1.0)
         f.fail(ConversionFailure, s"double $d out of integer range")
       else
         d.toLong.toInt
-    case (config.Overflow.JumpToBounds, config.Bits.Signed) =>
+    case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
       if (d.isNaN)
         0
       else if (d >= -Int.MinValue.toDouble)
@@ -84,7 +83,7 @@ given ConcreteConvertDoubleInt(using f: Failure): ConvertDoubleInt[Double, Int] 
         Int.MinValue
       else
         d.toInt
-    case (config.Overflow.JumpToBounds, config.Bits.Unsigned) =>
+    case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
       if (d.isNaN)
         0
       else if (d >= -Int.MinValue.toDouble * 2.0d)
@@ -101,18 +100,18 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  def apply(d: Double, conf: (config.Overflow, config.Bits)) = conf match
-    case (_, config.Bits.Raw) => JDouble.doubleToRawLongBits(d)
-    case (config.Overflow.Allow, config.Bits.Signed) => d.toLong
+  def apply(d: Double, conf: config.Overflow && config.Bits) = conf match
+    case (_ && config.Bits.Raw) => JDouble.doubleToRawLongBits(d)
+    case (config.Overflow.Allow && config.Bits.Signed) => d.toLong
 //    case (config.Overflow.Allow, config.Bits.Unsigned) => ???
-    case (config.Overflow.Fail, config.Bits.Signed) =>
+    case (config.Overflow.Fail && config.Bits.Signed) =>
       if (d.isNaN)
         f.fail(ConversionFailure, s"double $d cannot be converted")
       else if (d >= -Long.MinValue.toDouble || d < Long.MinValue.toDouble)
         f.fail(ConversionFailure, s"double $d out of long range")
       else
         d.toLong
-    case (config.Overflow.Fail, config.Bits.Unsigned) =>
+    case (config.Overflow.Fail && config.Bits.Unsigned) =>
       if (d.isNaN)
         f.fail(ConversionFailure, s"double $d cannot be converted")
       else if (d >= -Long.MinValue.toDouble * 2.0d || d <= -1.0d)
@@ -121,7 +120,7 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
         (d - 9223372036854775808.0d).toLong | Long.MinValue
       else
         d.toLong
-    case (config.Overflow.JumpToBounds, config.Bits.Signed) =>
+    case (config.Overflow.JumpToBounds && config.Bits.Signed) =>
       if (d.isNaN)
         0
       else if (d >= -Long.MinValue.toDouble)
@@ -130,7 +129,7 @@ given ConcreteConvertDoubleLong(using f: Failure): ConvertDoubleLong[Double, Lon
         Long.MinValue
       else
         d.toLong
-    case (config.Overflow.JumpToBounds, config.Bits.Unsigned) =>
+    case (config.Overflow.JumpToBounds && config.Bits.Unsigned) =>
       if (d.isNaN)
         0
       else if (d >= -Long.MinValue.toDouble * 2.0d)
@@ -148,7 +147,7 @@ given ConcreteConvertDoubleFloat: ConvertDoubleFloat[Double, Float] with
    * Most conversion rules have been copied from:
    *   https://github.com/satabin/swam/tree/fd76cb96759fb7bbd84e476d0b2a9fd1e47b9c08/runtime/src/swam/runtime
    */
-  override def apply(d: Double, conf: Unit): Float =
+  override def apply(d: Double, conf: NilCC.type): Float =
     if (!d.isNaN) {
       d.toFloat
     } else {
@@ -161,14 +160,14 @@ given ConcreteConvertDoubleFloat: ConvertDoubleFloat[Double, Float] with
     }
 
 given ConcreteConvertDoubleBytes: ConvertDoubleBytes[Double, Seq[Byte]] with
-  override def apply(from: Double, conf: ByteOrder): Seq[Byte] =
+  override def apply(from: Double, conf: SomeCC[ByteOrder]): Seq[Byte] =
     val buf = ByteBuffer.allocate(8)
-    buf.order(conf)
+    buf.order(conf.t)
     buf.putDouble(0, from)
     buf.array().toSeq
 
 given ConcreteConvertBytesDouble: ConvertBytesDouble[Seq[Byte], Double] with
-  override def apply(from: Seq[Byte], conf: ByteOrder): Double =
+  override def apply(from: Seq[Byte], conf: SomeCC[ByteOrder]): Double =
     val buf = ByteBuffer.wrap(from.toArray)
-    buf.order(conf)
+    buf.order(conf.t)
     buf.getDouble

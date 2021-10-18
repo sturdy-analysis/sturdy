@@ -87,12 +87,29 @@ trait Effectful extends ObservableJoin:
   }
 
   def joinWithFailure[A](f: => A)(g: => Nothing): A = {
-    val triedF = TrySturdy(f)
-    val failB = TrySturdy(g).exception
+    val joiner = makeComputationJoiner[A]
 
-    triedF match
-      case TrySturdy.Success(aF) => aF
-      case TrySturdy.Failure(failA) => throw joinThrowables(failA, failB)
+    val triedF = TrySturdy(f)
+    joiner.inbetween()
+    val triedG = TrySturdy(g).asInstanceOf[TrySturdy[A]]
+
+    if (triedF.isBottom) {
+      if (!triedG.isBottom) {
+        joiner.retainOnlySecond(triedG)
+        triedG.get
+      } else {
+        triedF.get
+      }
+    } else if (triedG.isBottom) {
+      joiner.retainOnlyFirst(triedF)
+      triedF.get
+    } else {
+      joiner.retainBoth(triedF, triedG)
+      val failB = triedG.exception
+      triedF match
+        case TrySturdy.Failure(failA) => throw joinThrowables(failA, failB)
+        case TrySturdy.Success(aF) => aF
+    }
   }
 
   final def joinComputationsIterable[A](as: IterableOnce[() => A]): Joined[A] =

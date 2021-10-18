@@ -2,7 +2,8 @@ package sturdy.values.longs
 
 import sturdy.effect.failure.FailureKind
 import sturdy.values.config
-import sturdy.values.convert.Convert
+import sturdy.values.convert.SomeCC
+import sturdy.values.convert.{&&, Convert, NilCC}
 
 import java.nio.ByteOrder
 
@@ -34,8 +35,8 @@ trait LongOps[V]:
   def countTrailinZeros(v: V): V
   def nonzeroBitCount(v: V): V
 
-type ConvertLongInt[VFrom, VTo] = Convert[Long, Int, VFrom, VTo, Unit]
+type ConvertLongInt[VFrom, VTo] = Convert[Long, Int, VFrom, VTo, NilCC.type]
 type ConvertLongFloat[VFrom, VTo] = Convert[Long, Float, VFrom, VTo, config.Bits]
 type ConvertLongDouble[VFrom, VTo] = Convert[Long, Double, VFrom, VTo, config.Bits]
-type ConvertLongBytes[VFrom, VTo] = Convert[Long, Seq[Byte], VFrom, VTo, (config.BytesSize, ByteOrder)]
-type ConvertBytesLong[VFrom, VTo] = Convert[Seq[Byte], Long, VFrom, VTo, (config.BytesSize, ByteOrder, config.Bits)]
+type ConvertLongBytes[VFrom, VTo] = Convert[Long, Seq[Byte], VFrom, VTo, config.BytesSize && SomeCC[ByteOrder]]
+type ConvertBytesLong[VFrom, VTo] = Convert[Seq[Byte], Long, VFrom, VTo, config.BytesSize && SomeCC[ByteOrder] && config.Bits]

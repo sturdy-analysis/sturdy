@@ -1,7 +1,9 @@
 package sturdy.values.doubles
 
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
+import sturdy.values.convert.*
 
 import java.nio.ByteOrder
 
@@ -27,7 +29,9 @@ given ToppedDoubleOps[T](using ops: DoubleOps[T]): DoubleOps[Topped[T]] with
 
   def logNatural(v: Topped[T]): Topped[T] = v.unary(ops.logNatural)
 
-given ToppedConvertDoubleBytes[T, B](using c: ConvertDoubleBytes[T, Seq[B]]): ConvertDoubleBytes[Topped[T], Seq[Topped[B]]] with
-  override def apply(from: Topped[T], conf: ByteOrder): Seq[Topped[B]] = from match
-    case Topped.Top => Seq.fill(8)(Topped.Top)
+given ToppedConvertDoubleBytes[T, B](using c: ConvertDoubleBytes[T, Seq[B]])(using Effectful, Failure): ConvertDoubleBytes[Topped[T], Seq[Topped[B]]] with
+  override def apply(from: Topped[T], conf: SomeCC[ByteOrder]): Seq[Topped[B]] = from match
+    case Topped.Top =>
+      val bytes = Seq.fill(8)(Topped.Top)
+      safeTopConversion(conf, bytes)
     case Topped.Actual(v) => c(v, conf).map(Topped.Actual.apply)

@@ -189,12 +189,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
     memRead(memIdx,addr,byteSize).option
       (fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
       {(b: Bytes) =>
-        val v = decode(b, inst)
+        val v = decode(b, SomeCC(inst, false))
         stack.push(v)}
 
   def store(inst: StoreInst | StoreNInst): Unit =
     val v = stack.pop()
-    val bytes = encode(v, inst)
+    val bytes = encode(v, SomeCC(inst, false))
 
     // add offset to base address (which is already on the stack)
     stack.push(intOps.intLit(inst.offset))

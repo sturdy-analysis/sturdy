@@ -10,9 +10,18 @@ case object ConversionFailure extends FailureKind
  *  The type parameters `From` and `To` are only used to select instances, whereas
  *  the actual values are represented as `VFrom` and `VTo`.
  */
-trait Convert[From, To, VFrom, VTo, Config]:
+trait Convert[From, To, VFrom, VTo, Config <: ConvertConfig[_]]:
   def apply(from: VFrom, conf: Config): VTo
 
+trait ConvertConfig[C <: ConvertConfig[C]] { this: C =>
+  def canFail: Boolean
+  def &&[C2 <: ConvertConfig[_]](c: C2) = new &&[C, C2](this, c)
+}
+case object NilCC extends ConvertConfig[NilCC.type]:
+  override val canFail: Boolean = false
+case class SomeCC[T](t: T, canFail: Boolean) extends ConvertConfig[SomeCC[T]]
+case class &&[C1 <: ConvertConfig[_], C2 <: ConvertConfig[_]](c1: C1, c2: C2) extends ConvertConfig[&&[C1,C2]]:
+  override val canFail: Boolean = c1.canFail || c2.canFail
 
 object Convert:
-  def apply[From, To, V1, V2, Config](from: V1, conf: Config)(using c: Convert[From, To, V1, V2, Config]) = c(from, conf)
+  def apply[From, To, V1, V2, Config <: ConvertConfig[_]](from: V1, conf: Config)(using c: Convert[From, To, V1, V2, Config]) = c(from, conf)

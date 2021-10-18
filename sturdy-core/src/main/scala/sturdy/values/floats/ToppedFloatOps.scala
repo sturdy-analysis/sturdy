@@ -1,7 +1,9 @@
 package sturdy.values.floats
 
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
+import sturdy.values.convert.*
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -26,7 +28,9 @@ given ToppedFloatOps[T](using ops: FloatOps[T]): FloatOps[Topped[T]] with
   def nearest(v: Topped[T]): Topped[T] = v.unary(ops.nearest)
   def copysign(v: Topped[T], sign: Topped[T]): Topped[T] = v.binary(ops.copysign, sign)
 
-given ToppedConvertFloatBytes[T, B](using c: ConvertFloatBytes[T, Seq[B]]): ConvertFloatBytes[Topped[T], Seq[Topped[B]]] with
-  override def apply(from: Topped[T], conf: ByteOrder): Seq[Topped[B]] = from match
-    case Topped.Top => Seq.fill(4)(Topped.Top)
+given ToppedConvertFloatBytes[T, B](using c: ConvertFloatBytes[T, Seq[B]])(using Effectful, Failure): ConvertFloatBytes[Topped[T], Seq[Topped[B]]] with
+  override def apply(from: Topped[T], conf: SomeCC[ByteOrder]): Seq[Topped[B]] = from match
+    case Topped.Top =>
+      val bytes = Seq.fill(4)(Topped.Top)
+      safeTopConversion(conf, bytes)
     case Topped.Actual(v) => c(v, conf).map(Topped.Actual.apply)

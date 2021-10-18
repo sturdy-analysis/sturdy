@@ -2,7 +2,7 @@ package sturdy.values.ints
 
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
-import sturdy.values.convert.Convert
+import sturdy.values.convert.*
 import sturdy.values.relational.EqOps
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
@@ -116,9 +116,9 @@ given ConcreteConvertIntDouble: ConvertIntDouble[Int, Double] with
     case _ => throw UnsupportedConfiguration(conf, this.getClass.getSimpleName)
 
 given ConcreteConvertIntBytes: ConvertIntBytes[Int, Seq[Byte]] with
-  override def apply(from: Int, conf: (config.BytesSize, ByteOrder)): Seq[Byte] =
-    val buf = ByteBuffer.allocate(conf._1.bytes)
-    buf.order(conf._2)
+  override def apply(from: Int, conf: config.BytesSize && SomeCC[ByteOrder]): Seq[Byte] =
+    val buf = ByteBuffer.allocate(conf.c1.bytes)
+    buf.order(conf.c2.t)
     conf._1 match
       case config.BytesSize.Byte => buf.put(0, (from % (1 << 8)).toByte)
       case config.BytesSize.Short => buf.putShort(0, (from % (1 << 16)).toShort)
@@ -127,10 +127,10 @@ given ConcreteConvertIntBytes: ConvertIntBytes[Int, Seq[Byte]] with
     buf.array().toSeq
 
 given ConcreteConvertBytesInt: ConvertBytesInt[Seq[Byte], Int] with
-  override def apply(from: Seq[Byte], conf: (config.BytesSize, ByteOrder, config.Bits)): Int =
+  override def apply(from: Seq[Byte], conf: config.BytesSize && SomeCC[ByteOrder] && config.Bits): Int =
     val buf = ByteBuffer.wrap(from.toArray)
-    buf.order(conf._2)
-    (conf._1, conf._3) match
+    buf.order(conf.c1.c2.t)
+    (conf.c1.c1, conf.c2) match
       case (config.BytesSize.Byte, config.Bits.Signed) => buf.get.toInt
       case (config.BytesSize.Byte, config.Bits.Unsigned) => buf.get & 0xFF
       case (config.BytesSize.Short, config.Bits.Signed) => buf.getShort.toInt

@@ -12,7 +12,8 @@ import sturdy.values.config.UnsupportedConfiguration
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-given ToppedIntOps[T](using ops: IntOps[T], f: Failure)(using Join[Topped[T]], Effectful): IntOps[Topped[T]] with
+given ToppedIntOps[T](using ops: IntOps[T], f: Failure, eff: Effectful): IntOps[Topped[T]] with
+
   def intLit(i: Int): Topped[T] = Topped.Actual(ops.intLit(i))
   def randomInt(): Topped[T] = Topped.Top
 
@@ -23,15 +24,16 @@ given ToppedIntOps[T](using ops: IntOps[T], f: Failure)(using Join[Topped[T]], E
   def max(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.max, v2)
   def min(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.min, v2)
 
-  def div(v1: Topped[T], v2: Topped[T]): Topped[T] =
+  private inline def safeDiv[TT >: T](op: (T, TT) => T, v1: Topped[T], v2: Topped[T]): Topped[T] =
     if (v2 == Topped.Top)
-      joinComputations(v1.binary(ops.div, v2))(f.fail(IntDivisionByZero, s"$v1 / $v2"))
+      eff.joinWithFailure(v1.binary(op, v2))(f.fail(IntDivisionByZero, s"$v1 / $v2"))
     else
-      v1.binary(ops.div, v2)
-  def divUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.divUnsigned, v2)
-  def remainder(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.remainder, v2)
-  def remainderUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.remainderUnsigned, v2)
-  def modulo(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.modulo, v2)
+      v1.binary(op, v2)
+  def div(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.div, v1, v2)
+  def divUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.divUnsigned, v1, v2)
+  def remainder(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.remainder, v1, v2)
+  def remainderUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.remainderUnsigned, v1, v2)
+  def modulo(v1: Topped[T], v2: Topped[T]): Topped[T] = safeDiv(ops.modulo, v1, v2)
   def gcd(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.gcd, v2)
 
   def absolute(v: Topped[T]): Topped[T] = v.unary(ops.absolute)

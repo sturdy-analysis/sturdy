@@ -72,7 +72,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
         ???
       case AssertReturn(action, expectedRes) =>
         val res = runAction(action)
-        assert(!res.isFailing)
+        assert(!res.isFailing, s"$action failed")
         val expected = constExprToVals(expectedRes)
         assert(eqVals(expected, res.get), c.toString + s" but $expected != ${res.get}")
       case AssertReturnCanonicalNaN(action) =>
