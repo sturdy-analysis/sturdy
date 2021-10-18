@@ -29,8 +29,6 @@ given ConcreteIntOps(using f: Failure): IntOps[Int] with
   def div(v1: Int, v2: Int): Int =
     if (v2 == 0)
       f.fail(IntDivisionByZero, s"$v1 / $v2")
-    else if (v1 == Int.MinValue && v2 == -1)
-      f.fail(IntOverflow, s"$v1 / $v2")
     else
       v1 / v2
   def divUnsigned(v1: Int, v2: Int): Int =

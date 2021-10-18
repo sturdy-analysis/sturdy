@@ -113,7 +113,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
   import specialOps.*
   import exceptOps.*
 
-  lazy val num = new GenericInterpreterNumerics[V](effects, wasmOps)
+  lazy val num = new GenericInterpreterNumerics[V, MayJoin](effects, wasmOps)
 
   val labelStack = new LabelStack
   private var memCount = 0

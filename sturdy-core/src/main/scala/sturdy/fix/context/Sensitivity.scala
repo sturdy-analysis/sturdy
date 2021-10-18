@@ -10,6 +10,9 @@ trait Sensitivity[Dom, Ctx] extends Function[Dom, Ctx]:
 
   /** Returns the context that might be new. */
   override def apply(dom: Dom): Ctx
+  
+  def &&[OtherCtx](s: Sensitivity[Dom, OtherCtx]): Sensitivity[Dom, (Ctx, OtherCtx)] =
+    new Product(this, s)
 
 final class Product[Dom, Ctx1, Ctx2](s1: Sensitivity[Dom, Ctx1], s2: Sensitivity[Dom, Ctx2]) extends Sensitivity[Dom, (Ctx1, Ctx2)]:
   override def emptyContext: (Ctx1, Ctx2) = (s1.emptyContext, s2.emptyContext)

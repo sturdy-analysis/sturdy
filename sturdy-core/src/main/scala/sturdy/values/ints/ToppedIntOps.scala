@@ -1,7 +1,9 @@
 package sturdy.values.ints
 
+import sturdy.data.{*, given}
+import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
-import sturdy.values.Topped
+import sturdy.values.{Join, Topped}
 import sturdy.values.config
 import sturdy.values.config.Bits
 import sturdy.values.config.BytesSize
@@ -10,7 +12,7 @@ import sturdy.values.config.UnsupportedConfiguration
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-given ToppedIntOps[T](using ops: IntOps[T], f: Failure): IntOps[Topped[T]] with
+given ToppedIntOps[T](using ops: IntOps[T], f: Failure)(using Join[Topped[T]], Effectful): IntOps[Topped[T]] with
   def intLit(i: Int): Topped[T] = Topped.Actual(ops.intLit(i))
   def randomInt(): Topped[T] = Topped.Top
 
@@ -21,7 +23,11 @@ given ToppedIntOps[T](using ops: IntOps[T], f: Failure): IntOps[Topped[T]] with
   def max(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.max, v2)
   def min(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.min, v2)
 
-  def div(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.div, v2)
+  def div(v1: Topped[T], v2: Topped[T]): Topped[T] =
+    if (v2 == Topped.Top)
+      joinComputations(v1.binary(ops.div, v2))(f.fail(IntDivisionByZero, s"$v1 / $v2"))
+    else
+      v1.binary(ops.div, v2)
   def divUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.divUnsigned, v2)
   def remainder(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.remainder, v2)
   def remainderUnsigned(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.remainderUnsigned, v2)

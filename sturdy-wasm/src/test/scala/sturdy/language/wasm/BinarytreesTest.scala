@@ -28,7 +28,7 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
     val uri = classOf[BinarytreesTest].getResource(base ++ "binarytrees.wast").toURI();
     val path = Paths.get(uri)
     val module = wasm.parse(path)
-    val onlyCalls = false
+    val onlyCalls = true
     val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
     val modInst = interp.initializeModule(module)
     val result = interp.effects.fallible(
@@ -51,7 +51,7 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
     val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees.wasm").toURI();
     val path = Paths.get(uri)
     val module = readBinaryModule(path)
-    val onlyCalls = false
+    val onlyCalls = true
     val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
     val modInst = interp.initializeModule(module)
     val result = interp.effects.fallible(
@@ -78,7 +78,7 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
     val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees_shortened.wast").toURI();
     val path = Paths.get(uri)
     val module = wasm.parse(path)
-    val onlyCalls = false
+    val onlyCalls = true
     val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
     val modInst = interp.initializeModule(module)
     val result = interp.effects.fallible(

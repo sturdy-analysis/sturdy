@@ -35,7 +35,7 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
   type AValue = ConstantAnalysis.Value
 
   val cInterp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
-  val onlyCalls = false
+  val onlyCalls = true
   val aInterp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
   val cModules: mutable.Map[String, ModuleInstance[CValue]] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance[AValue]] = mutable.Map()
