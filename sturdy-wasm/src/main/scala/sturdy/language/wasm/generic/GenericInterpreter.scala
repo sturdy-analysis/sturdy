@@ -400,32 +400,27 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
   inline def external[A](f: Fixed[V] ?=> A): A = f(using fixed)
 
   def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] = external {
-    modInst.exports.find((name, _) => name == funcName) match
-      case Some((_, ExternalValue.Function(funcIx))) =>
-        val fun = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-        val paramTys = fun.funcType.params
-        if (paramTys.length != args.length)
-          throw new Error(s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}.")
-        // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
-        val rtLength = fun.funcType.t.length
-        stack.pushN(args)
-        inNewFrameNoIndex(FrameData(0, modInst), Iterable.empty) {
-          eval(Call(funcIx), InstLoc.InvokeExported(modInst, funcName))
-        }
-        stack.popN(rtLength)
-      // TODO host functions
-      //case FunctionInstance.Host(hostFunc) =>
-      //  try {
-      //    val res = invokeHostFunction(hostFunc, args)
-      //    val expectedSize = hostFunc.funcType.t.size
-      //    if (res.length != expectedSize)
-      //      throw new Error(s"Host function returned the wrong number of results: expected $expectedSize, but got ${res.length}.")
-      //    res
-      //  } catch {
-      //    case HostFunction.ExitException(exitCode) => fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
-      //  }
-
-      case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
+    stack.ifEmpty({}, {throw IllegalStateException("Stack is not empty before invokeExported.")})
+    stack.withFreshOperandStack {
+      modInst.exports.find((name, _) => name == funcName) match
+        case Some((_, ExternalValue.Function(funcIx))) =>
+          val fun = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+          val paramTys = fun.funcType.params
+          if (paramTys.length != args.length)
+            throw new Error(s"Wrong number of arguments in external invocation. Expected ${paramTys.length} but got ${args.length}.")
+          // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
+          val rtLength = fun.funcType.t.length
+          stack.pushN(args)
+          inNewFrameNoIndex(FrameData(0, modInst), Iterable.empty) {
+            eval(Call(funcIx), InstLoc.InvokeExported(modInst, funcName))
+          }
+          val res = stack.popN(rtLength)
+          //stack.ifEmpty({}, {
+          //  throw IllegalStateException("Stack is not empty after invokeExported.")
+          //})
+          res
+        case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
+    }
   }
 
 
@@ -658,7 +653,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
             }))
           case _: FunctionInstance.Host[V] => ??? // TODO: is it allowed to use host functions as start function?
     }
-
+    stack.ifEmpty({}, {throw IllegalStateException("Stack is not empty after module initialization.")})
     modInst
   }
 

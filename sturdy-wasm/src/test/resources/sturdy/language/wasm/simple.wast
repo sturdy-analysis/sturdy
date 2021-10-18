@@ -3,7 +3,7 @@
 
   (table funcref
     (elem
-      $noop
+      $noop $const
     )
   )
 
@@ -11,7 +11,7 @@
 
   (type $out-i32 (func (result i32)))
 
-  (func (export "const") (param i32) (result i32)
+  (func $const (export "const") (param i32) (result i32)
     (local.get 0)
   )
 
