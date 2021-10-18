@@ -3,7 +3,7 @@ package sturdy.language.wasm
 
 import sturdy.data.{*, given}
 import sturdy.effect.bytememory.ConcreteMemory
-import sturdy.effect.callframe.{CCallFrameNumbered, CMutableCallFrameNumbered}
+import sturdy.effect.callframe.{GenericCallFrameNumbered, GenericMutableCallFrameNumbered}
 import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.{CFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
@@ -100,7 +100,7 @@ object ConcreteInterpreter extends Interpreter:
     extends ConcreteOperandStack[Value]
       with ConcreteMemory[MemoryAddr]
       with ConcreteSymbolTable[TableAddr, Symbol, Entry]
-      with CMutableCallFrameNumbered[FrameData[Value], Value] with CCallFrameNumbered(rootFrameData, rootFrameValues)
+      with GenericMutableCallFrameNumbered[FrameData[Value], Value] with GenericCallFrameNumbered(rootFrameData, rootFrameValues)
       with ConcreteExcept[WasmException[Value]]
       with CFailure
 

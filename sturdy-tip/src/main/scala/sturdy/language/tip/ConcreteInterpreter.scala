@@ -2,7 +2,7 @@ package sturdy.language.tip
 
 import sturdy.data.{unit, NoJoin}
 import sturdy.effect.allocation.CAllocationIntIncrement
-import sturdy.effect.callframe.CCallFrame
+import sturdy.effect.callframe.GenericCallFrame
 import sturdy.effect.failure.{Failure, CFailure}
 import sturdy.effect.print.CPrint
 import sturdy.effect.store.CStore
@@ -45,7 +45,7 @@ object ConcreteInterpreter extends Interpreter:
   type Store = Map[Int, Value]
 
   class Effects(initEnvironment: Environment, initStore: Store, nextInput: () => Value)
-    extends CCallFrame[Unit, String, Int]((), initEnvironment)
+    extends GenericCallFrame[Unit, String, Int]((), initEnvironment)
       with CStore[Int, Value](initStore)
       with CAllocationIntIncrement[AllocationSite]
       with CPrint[Value]

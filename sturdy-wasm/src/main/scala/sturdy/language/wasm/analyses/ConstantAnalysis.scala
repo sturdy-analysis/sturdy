@@ -4,8 +4,9 @@ import sturdy.data.{*, given}
 import sturdy.effect.{AnalysisState, Effectful}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
-import sturdy.effect.callframe.CCallFrameNumbered
-import sturdy.effect.callframe.CMutableCallFrameNumbered
+import sturdy.effect.callframe.GenericCallFrameNumbered
+import sturdy.effect.callframe.GenericMutableCallFrameNumbered
+import sturdy.effect.callframe.JoinedMutableCallFrameNumbered
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinedOperandStack
@@ -102,7 +103,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
       runtime(hostFunc)(args)
 
   type InState =
-    (CCallFrameNumbered.Vars[Value],
+    (GenericCallFrameNumbered.Vars[Value],
       ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
       ToppedSymbolTable.Tables[TableAddr, SymbolUntopped, Entry],
       JoinedOperandStack.Operands[Value])
@@ -116,7 +117,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     extends JoinedOperandStack[Value]
       with ConstantAddressMemory[MemoryAddr, Topped[Byte]](Topped.Actual(0))
       with ToppedSymbolTable[TableAddr, SymbolUntopped, Entry]
-      with CMutableCallFrameNumbered[FrameData[Value], Value] with CCallFrameNumbered(rootFrameData, rootFrameValues)
+      with JoinedMutableCallFrameNumbered[FrameData[Value], Value] with GenericCallFrameNumbered(rootFrameData, rootFrameValues)
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
       with AnalysisState[InState, OutState, AllState] {

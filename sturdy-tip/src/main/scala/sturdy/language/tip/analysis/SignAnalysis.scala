@@ -3,7 +3,7 @@ package sturdy.language.tip.analysis
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.{AnalysisState, Effectful, given}
 import sturdy.effect.allocation.AAllocationFromContext
-import sturdy.effect.callframe.CCallFrame
+import sturdy.effect.callframe.GenericCallFrame
 import sturdy.effect.failure.{AFailureCollect, Failure}
 import sturdy.effect.print.{APrintPrefix, given}
 import sturdy.effect.store.AStoreMultiAddrThreadded
@@ -35,7 +35,7 @@ object SignAnalysis extends Interpreter,
   type AllState = OutState
 
   class Effects(initEnvironment: Environment, initStore: Store)
-    extends CCallFrame[Unit, String, Addr]((), initEnvironment)
+    extends GenericCallFrame[Unit, String, Addr]((), initEnvironment)
       with AStoreMultiAddrThreadded[AllocationSiteAddr, Value](initStore)
       with AAllocationFromContext[AllocationSite, Addr](fromAllocationSite)
       with APrintPrefix[Value]

@@ -6,8 +6,8 @@ import scala.reflect.ClassTag
 import scala.annotation.targetName
 import sturdy.values.Widen
 
-trait CCallFrameNumbered[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V]) extends CallFrame[Data, Int, V, NoJoin]:
-  import CCallFrameNumbered.*
+trait GenericCallFrameNumbered[Data, V](_data: Data, _vars: Iterable[V])(using ClassTag[V]) extends CallFrame[Data, Int, V, NoJoin]:
+  import GenericCallFrameNumbered.*
 
   private var data: Data = _data
   protected var vars: Array[V] = _vars.toArray
@@ -46,10 +46,10 @@ trait CCallFrameNumbered[Data, V](_data: Data, _vars: Iterable[V])(using ClassTa
       this.vars = snapshotVars
     }
 
-object CCallFrameNumbered:
+object GenericCallFrameNumbered:
   type Vars[V] = Seq[V]
 
-trait CMutableCallFrameNumbered[Data, V](using ClassTag[V]) extends CCallFrameNumbered[Data, V] with MutableCallFrame[Data, Int, V, NoJoin]:
+trait GenericMutableCallFrameNumbered[Data, V](using ClassTag[V]) extends GenericCallFrameNumbered[Data, V] with MutableCallFrame[Data, Int, V, NoJoin]:
   override def setLocal(ix: Int, v: V): OptionC[Unit] =
     if (ix >= 0 && ix < vars.size) {
       vars = vars.updated(ix, v)

@@ -1,7 +1,7 @@
 package sturdy.language.tip
 
 import sturdy.effect.allocation.Allocation
-import sturdy.effect.callframe.CCallFrame
+import sturdy.effect.callframe.GenericCallFrame
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.print.Print
@@ -22,7 +22,7 @@ import scala.collection.mutable.ListBuffer
 
 object GenericInterpreter:
   type GenericEffects[V, Addr, MayJoin[_]] =
-    CCallFrame[Unit, String, Addr] with
+    GenericCallFrame[Unit, String, Addr] with
     Store[Addr, V, MayJoin] with
     Allocation[Addr, AllocationSite] with
     Print[V] with

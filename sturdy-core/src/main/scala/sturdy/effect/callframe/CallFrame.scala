@@ -1,8 +1,9 @@
 package sturdy.effect.callframe
 
 import sturdy.data.Option
+import sturdy.effect.Effectful
 
-trait CallFrame[Data, Var, V, MayJoin[_]]:
+trait CallFrame[Data, Var, V, MayJoin[_]] extends Effectful:
   def getFrameData: Data
   def getLocal(x: Var): Option[MayJoin, V]
   def inNewFrame[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A

@@ -1,7 +1,7 @@
 package sturdy.language.wasm.generic
 
 import sturdy.data.unit
-import sturdy.effect.callframe.CMutableCallFrameNumbered
+import sturdy.effect.callframe.GenericMutableCallFrameNumbered
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.fix
@@ -47,7 +47,7 @@ type GenericEffects[V, Addr, Bytes, Size, ExcV, Symbol, Entry, MayJoin[_]] =
     with Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]
     with SymbolTable[TableAddr, Symbol, Entry, MayJoin]
     //with SymbolTable[TableAddr, GlobalIdx, GlobalInstance[V]]
-    with CMutableCallFrameNumbered[FrameData[V], V]
+    with GenericMutableCallFrameNumbered[FrameData[V], V]
     with Except[WasmException[V], ExcV, MayJoin]
     with Failure
 
@@ -400,7 +400,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
   inline def external[A](f: Fixed[V] ?=> A): A = f(using fixed)
 
   def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] = external {
-    stack.ifEmpty({}, {throw IllegalStateException("Stack is not empty before invokeExported.")})
     stack.withFreshOperandStack {
       modInst.exports.find((name, _) => name == funcName) match
         case Some((_, ExternalValue.Function(funcIx))) =>
@@ -414,11 +413,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
           inNewFrameNoIndex(FrameData(0, modInst), Iterable.empty) {
             eval(Call(funcIx), InstLoc.InvokeExported(modInst, funcName))
           }
-          val res = stack.popN(rtLength)
-          //stack.ifEmpty({}, {
-          //  throw IllegalStateException("Stack is not empty after invokeExported.")
-          //})
-          res
+          stack.popN(rtLength)
         case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
     }
   }
