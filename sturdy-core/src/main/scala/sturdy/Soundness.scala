@@ -33,3 +33,13 @@ given AbstractlySound[C, A](using abs: Abstractly[C, A], po: PartialOrder[A]): S
       IsSound.Sound
     else
       IsSound.NotSound(s"Value $c abstracts to ${abs.abstractly(c)} but was not less-than-eq the abstract value $a")
+
+def seqIsSound[v1,v2](using vSoundness: Soundness[v1,v2]): Soundness[Seq[v1], Seq[v2]] = new Soundness[Seq[v1], Seq[v2]] {
+  override def isSound(c: Seq[v1], a: Seq[v2]): IsSound =
+    if (c.length != a.length)
+      IsSound.NotSound(s"Sequence lengths are not equal: $c $a")
+    else
+      c.zip(a).foldLeft(IsSound.Sound){
+        case (s, (cE,aE)) => s && vSoundness.isSound(cE,aE)
+      }
+}

@@ -1,4 +1,6 @@
 package sturdy.effect.callframe
+import sturdy.{IsSound, Soundness, seqIsSound}
+import sturdy.effect.operandstack.GenericOperandStack
 import sturdy.effect.{ComputationJoiner, ComputationJoinerWithSuper, TrySturdy}
 import sturdy.values.Join
 
@@ -39,5 +41,13 @@ trait JoinedCallFrameNumbered[Data,V](using Join[V], ClassTag[V]) extends Generi
     if (vars.length != other.length)
       throw IllegalStateException()
     vars.zip(other).map(Join[V](_,_).get)
+
+  def joinedCallFrameNumberedIsSound[cV, cData](c: GenericCallFrameNumbered[cData,cV])(using vSoundness: Soundness[cV,V], dSoundness: Soundness[cData,Data]): IsSound =
+    val dataIsSound = dSoundness.isSound(c.getFrameData, getFrameData)
+    if (dataIsSound.isNotSound)
+      return dataIsSound
+    val aVals = getFrameVars
+    val cVals = c.getFrameVars
+    seqIsSound.isSound(cVals, aVals)
     
 trait JoinedMutableCallFrameNumbered[Data,V](using ClassTag[V]) extends JoinedCallFrameNumbered[Data,V] with GenericMutableCallFrameNumbered[Data,V] 

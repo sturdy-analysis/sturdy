@@ -1,5 +1,6 @@
 package sturdy.effect.operandstack
 
+import sturdy.seqIsSound
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.TrySturdy
@@ -50,18 +51,7 @@ trait JoinedOperandStack[V](using Join[V]) extends GenericOperandStack[V]:
 
   def operandStackIsSound[cV](c: ConcreteOperandStack[cV])(using vSoundndess: Soundness[cV, V]): IsSound =
     val cStack = c.getStack
-    // stack sizes need to be equal
-    if (cStack.length != stack.length)
-      IsSound.NotSound(s"${classOf[JoinedOperandStack[_]].getName}: expected stack sizes to be equal, but ${cStack.length} != ${stack.length}.")
-    else
-      // all entries need to be sound
-      cStack.zip(stack).foreach {
-        case (cv, av) =>
-          val subSound = vSoundndess.isSound(cv, av)
-          if (subSound.isNotSound)
-            return subSound
-      }
-      IsSound.Sound
+    seqIsSound.isSound(cStack, stack)
 
 object JoinedOperandStack:
   type Operands[V] = List[V]

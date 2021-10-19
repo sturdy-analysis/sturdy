@@ -73,6 +73,6 @@ object ConstantAnalysisSoundness {
       // soundness for stack, memory, symbol table, call frame
       a.effects.operandStackIsSound(c.effects) &&
         a.effects.memoryIsSound(c.effects) &&
-        a.effects.tableIsSound(c.effects)
-        // TODO call frame
+        a.effects.tableIsSound(c.effects) &&
+        a.effects.joinedCallFrameNumberedIsSound(c.effects)
 }

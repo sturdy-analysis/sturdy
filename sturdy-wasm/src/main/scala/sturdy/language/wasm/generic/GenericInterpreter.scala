@@ -4,7 +4,7 @@ import sturdy.data.unit
 import sturdy.effect.callframe.GenericMutableCallFrameNumbered
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.fix
+import sturdy.{IsSound, Soundness, fix}
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.operandstack.ConcreteOperandStack
@@ -19,7 +19,7 @@ import sturdy.values.functions.FunctionOps
 import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
-import swam.{ValType, GlobalType, LabelIdx, MemType, FuncType, TableType, GlobalIdx, FuncIdx, OpCode, BlockType, Limits}
+import swam.{BlockType, FuncIdx, FuncType, GlobalIdx, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
 import swam.syntax.*
 
 import scala.collection.immutable.VectorBuilder
@@ -32,6 +32,16 @@ case class FrameData[V](returnArity: Int, module: ModuleInstance[V]):
     else
       s"$module:$returnArity"
 given FiniteFrameData[V]: Finite[FrameData[V]] with {}
+
+given frameDataIsSound[cV,aV]: Soundness[FrameData[cV], FrameData[aV]] with
+  override def isSound(c: FrameData[cV], a: FrameData[aV]): IsSound =
+    if (c.returnArity != a.returnArity)
+      return IsSound.NotSound(s"Return arities do not match: $c $a.")
+    if (c.module == null && a.module == null)
+      return IsSound.Sound
+    if (c.module != null && a.module != null)
+      return IsSound.NotSound(s"Concrete module ${c.module} not approximated by ${a.module}")
+    summon[Soundness[ModuleInstance[cV], ModuleInstance[aV]]].isSound(c.module, a.module)
 
 object FrameData:
   def empty[V]: FrameData[V] = FrameData[V](0, null)
