@@ -13,7 +13,8 @@ lazy val root = (project in file("."))
     sturdy_core,
     sturdy_scheme,
     sturdy_tip,
-    sturdy_wasm
+    sturdy_wasm,
+    sturdy_wasm_benchmarks
   )
   .settings(skip / publish := true)
 
@@ -76,3 +77,10 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
       "org.scalatest" %% "scalatest" % "3.2.9" % "test",
     )
   )
+
+lazy val sturdy_wasm_benchmarks = (project in file("sturdy-wasm-benchmarks"))
+  .dependsOn(sturdy_wasm % "compile->compile;test->test")
+  .settings(
+    name := "sturdy-wasm-benchmarks"
+  )
+  .enablePlugins(JmhPlugin)
