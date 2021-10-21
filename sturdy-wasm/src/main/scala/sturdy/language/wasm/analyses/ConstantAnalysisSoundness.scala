@@ -58,21 +58,17 @@ object ConstantAnalysisSoundness {
       case Topped.Top => IsSound.Sound
       case Topped.Actual(b) => bs.isSound(cByte,b)
       
-  given Soundness[ConcreteInterpreter.Entry, Entry] with
-    override def isSound(c: ConcreteInterpreter.Entry, a: Entry): IsSound = (a, c) match
-      case (Entry.Top, _) => IsSound.Sound
-      case (Entry.Function(aFun), ConcreteInterpreter.Entry.Function(cFun)) => aFun match
-        case Topped.Top => IsSound.Sound
-        case Topped.Actual(aPow) => powersetContainsOneSound.isSound(cFun, aPow)
-      case (Entry.Global(aGlob), ConcreteInterpreter.Entry.Global(cGlob)) =>
-        globalInstanceIsSound.isSound(cGlob, aGlob)
-      case _ => IsSound.NotSound(s"Concrete symbol table entry $c not approximated by $a.")
+  given Soundness[ConcreteInterpreter.FunV, FunV] with
+    override def isSound(cFun: ConcreteInterpreter.FunV, aFun: FunV): IsSound = aFun match
+      case Topped.Top => IsSound.Sound
+      case Topped.Actual(aPow) => powersetContainsOneSound.isSound(cFun, aPow)
 
   given Soundness[ConcreteInterpreter.Instance, ConstantAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: ConstantAnalysis.Instance): IsSound =
       // soundness for stack, memory, symbol table, call frame
       a.effects.operandStackIsSound(c.effects) &&
         a.effects.memoryIsSound(c.effects) &&
+        a.effects.globalsIsSound(c.effects) &&
         a.effects.tableIsSound(c.effects) &&
         a.effects.joinedCallFrameNumberedIsSound(c.effects)
 }

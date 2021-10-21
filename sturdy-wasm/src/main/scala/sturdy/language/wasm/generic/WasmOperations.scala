@@ -19,7 +19,7 @@ import swam.syntax.MemoryInst
 import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
 
-trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin[_]]:
+trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]]:
   val intOps: IntOps[V]
   val longOps: LongOps[V]
   val floatOps: FloatOps[V]
@@ -43,25 +43,17 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin[_
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, MayJoin]
-  val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin]
+  val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, MayJoin]
   val branchOps: BooleanBranching[V, MayJoin]
 
 /** Operations specific to Wasm */
-trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, Symbol, Entry, MayJoin[_]]:
+trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, MayJoin[_]]:
   def valueToAddr(v: V): Addr
   def valueToFuncIx(v: V): FuncIx
   
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
 
-  def funcIxToSymbol(funcIx: FuncIx): Symbol
-  def globIxToSymbol(globalIdx: GlobalAddr): Symbol
-
-  def funVToEntry(funV: FunV): Entry
-  def globIToEntry(globI: GlobalInstance[V]): Entry
-  def entryToFuncV(entry: Entry): FunV
-  def entryToGlobI(entry: Entry): GlobalInstance[V]
-  
   def indexLookup[A](ix: V, vec: Vector[A]): Option[MayJoin, A]
 
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]

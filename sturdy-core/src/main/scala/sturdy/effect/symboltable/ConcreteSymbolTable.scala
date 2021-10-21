@@ -15,4 +15,5 @@ trait ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, 
   override def addEmptyTable(key: Key): Unit =
     tables += key -> Map()
     
-  def getTables: Map[Key, Map[Symbol, Entry]] = tables
+  override def getTables: Map[Key, Map[Symbol, Entry]] = tables
+  override def setTables(tables: Map[Key, Map[Symbol, Entry]]) = this.tables = tables

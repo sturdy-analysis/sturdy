@@ -1,6 +1,5 @@
 package sturdy.language.wasm
 
-
 import sturdy.data.{*, given}
 import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.callframe.{GenericCallFrameNumbered, GenericMutableCallFrameNumbered}
@@ -54,29 +53,12 @@ object ConcreteInterpreter extends Interpreter:
   override type ExcV = WasmException[Value]
   override type FuncIx = Int
   override type FunV = FunctionInstance[Value]
-  override type Symbol = FuncIx | GlobalAddr
 
-  enum Entry:
-    case Function(fun: FunV)
-    case Global(glob: GlobalInstance[Value])
-
-  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, Symbol, Entry, NoJoin] with
+  given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, NoJoin] with
     override def valueToAddr(v: Value): Int = v.asInt32
     override def valueToFuncIx(v: Value): Int = v.asInt32
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Int32(sz)
-
-    override def funcIxToSymbol(funcIx: FuncIx): Symbol = funcIx
-    override def globIxToSymbol(globalIdx: GlobalAddr): Symbol = globalIdx
-
-    override def funVToEntry(funV: FunctionInstance[Value]): Entry = Entry.Function(funV)
-    override def globIToEntry(globI: GlobalInstance[Value]): Entry = Entry.Global(globI)
-    override def entryToFuncV(entry: Entry): FunctionInstance[Value] = entry match
-      case Entry.Function(funV) => funV
-      case Entry.Global(_) => throw new IllegalArgumentException(s"Expected a function, but got $entry.")
-    override def entryToGlobI(entry: Entry): GlobalInstance[Value] = entry match
-      case Entry.Global(globI) => globI
-      case Entry.Function(_) => throw new IllegalArgumentException(s"Expected a global, but got $entry.")
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): OptionC[A] =
       val i = ix.asInt32
@@ -99,15 +81,18 @@ object ConcreteInterpreter extends Interpreter:
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends ConcreteOperandStack[Value]
       with ConcreteMemory[MemoryAddr]
-      with ConcreteSymbolTable[TableAddr, Symbol, Entry]
+      with Globals[Value]
+      with ConcreteSymbolTable[TableAddr, FuncIx, FunV]
       with GenericMutableCallFrameNumbered[FrameData[Value], Value] with GenericCallFrameNumbered(rootFrameData, rootFrameValues)
       with ConcreteExcept[WasmException[Value]]
-      with CFailure
+      with CFailure:
+
+    override def makeGlobalsTable = new ConcreteSymbolTable[Unit, GlobalAddr, Value] {}
 
   class Instance(_effects: Effects)(using Failure)
     extends GenericInstance(_effects):
 
-    val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, NoJoin] = implicitly
+    val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] = fix.identity
 

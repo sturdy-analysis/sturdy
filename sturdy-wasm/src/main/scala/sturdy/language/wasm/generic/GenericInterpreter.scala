@@ -56,14 +56,6 @@ enum WasmException[V]:
   case Return(operands: List[V])
 
 
-trait Globals[V](using f: Failure) extends Effectful:
-  val globalTable: DecidableSymbolTable[Unit, Int, V]
-  def readGlobal(ix: Int) =
-    globalTable.tableGet((), ix).getOrElse(f.fail(UnboundGlobal, ix.toString))
-  def writeGlobal(ix: Int, v: V): Unit =
-    globalTable.tableSet((), ix, v)
-  override def makeComputationJoiner[A]: ComputationJoiner[A] =
-    new DelegatingComputationJoiner(globalTable)
 
 type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
   OperandStack[V]                                         // operand stack
@@ -123,14 +115,14 @@ type Fixed[V] = FixIn[V] => FixOut[V]
 
 given finiteFixIn[V]: Finite[FixIn[V]] with {}
 
-trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin[_], Effects <: GenericEffects[V,Addr,Bytes,Size,ExcV, Symbol, Entry, MayJoin]]
+trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], Effects <: GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin]]
   (val effects: Effects)
   (using MayJoin[Unit], MayJoin[V]):
 
   import effects.*
   val stack: OperandStack[V] = effects
 
-  val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry, MayJoin]
+  val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin]
   import wasmOps.*
   import branchOps.*
   import specialOps.*
@@ -144,7 +136,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
   private var globCount = 0
 
   val phi: fix.Combinator[FixIn[V], FixOut[V]]
-
 
   // add empty table at addr 0 for global variables
   assert(TableAddr(tabCount) == globalTableIndex)
@@ -168,18 +159,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
       setLocal(ix, v).getOrElse(fail(UnboundLocal, ix.toString))
     case GlobalGet(globalIx) =>
       val globalIdx = module.globalAddrs.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
-      tableGet(globalTableIndex, globIxToSymbol(globalIdx)).orElseAndThen(fail(UnboundGlobal, globalIdx.toString)) { entry =>
-        val global = entryToGlobI(entry)
-        stack.push(global.value)
-      }
+      val global = readGlobal(globalIdx)
+      stack.push(global)
     case GlobalSet(globalIx) =>
       val globalIdx = module.globalAddrs.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
       val v = stack.pop()
-      tableGet(globalTableIndex, globIxToSymbol(globalIdx)).orElseAndThen(fail(UnboundGlobal, globalIdx.toString)) { entry =>
-        val global = entryToGlobI(entry)
-        val newGlobal = GlobalInstance(global.tpe,v)
-        tableSet(globalTableIndex, globIxToSymbol(globalIdx), globIToEntry(newGlobal))
-      }
+      val _ = readGlobal(globalIdx) // fails when global is undefined
+      writeGlobal(globalIdx, v)
 
   def evalMemoryInst(inst: Inst): Unit = inst match
     case i: LoadInst => load(i)
@@ -243,12 +229,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
   val globalTableIndex: TableAddr =
     TableAddr(0)
 
-  def getGlobalValue(index: GlobalAddr): V =
-    tableGet(globalTableIndex, globIxToSymbol(index)).orElseAndThen(fail(UnboundGlobal, index.toString)) { entry =>
-      val global = entryToGlobI(entry)
-      stack.push(global.value)
-    }
-    stack.pop()
+  def getGlobalValue(ga: GlobalAddr): V =
+    readGlobal(ga)
 
   def eval_open(inst: Inst, loc: InstLoc[V])(using Fixed[V]): Unit =
     val opcode = inst.opcode
@@ -314,8 +296,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
     case CallIndirect(typeIx) =>
       val ftExpected = module.functionTypes(typeIx)
       val funcIx = stack.pop()
-      tableGet(tableIndex, funcIxToSymbol(valueToFuncIx(funcIx))).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { entry =>
-        val func = entryToFuncV(entry)
+      tableGet(tableIndex, valueToFuncIx(funcIx)).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
         if (func == null)
           fail(UninitializedFunction, funcIx.toString)
         invokeIndirect(func, ftExpected, funcIx)
@@ -574,8 +555,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
       case (Global(GlobalType(tpe, _), _), value) =>
         val globalAddr = GlobalAddr(globCount)
         globCount += 1
-        val newGlobal = GlobalInstance(tpe, value)
-        tableSet(globalTableIndex, globIxToSymbol(globalAddr), globIToEntry(newGlobal))
+        writeGlobal(globalAddr, value)
         globalAddr
     }
     // tables
@@ -651,7 +631,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
             stack.push(num.evalNumeric(i32.Add)) // adds index to base
             val idx = stack.pop() // stack is empty
             val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
-            tableSet(TableAddr(modInst.tableAddrs(tableIdx).addr), funcIxToSymbol(valueToFuncIx(idx)), funVToEntry(funV))
+            tableSet(TableAddr(modInst.tableAddrs(tableIdx).addr), valueToFuncIx(idx), funV)
             // TODO add failure conditions for table writing
           }
       }

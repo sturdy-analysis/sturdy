@@ -30,9 +30,11 @@ abstract class ComputationJoinerWithSuper[A](sup: ComputationJoiner[A]) extends 
     sup.retainBoth(fRes, gRes)
   }
 
-class DelegatingComputationJoiner[A](other: Effectful) extends ComputationJoiner[A]:
+class DelegatingComputationJoinerWithSuper[A](other: Effectful, sup: ComputationJoiner[A])
+  extends ComputationJoinerWithSuper[A](sup):
+
   val joiner = other.makeComputationJoiner[A]
-  override def inbetween(): Unit = joiner.inbetween()
-  def retainOnlyFirst(fRes: TrySturdy[A]): Unit = joiner.retainOnlyFirst(fRes)
-  def retainOnlySecond(gRes: TrySturdy[A]): Unit = joiner.retainOnlySecond(gRes)
-  def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiner.retainBoth(fRes, gRes)
+  override def inbetween_(): Unit = joiner.inbetween()
+  def retainOnlyFirst_(fRes: TrySturdy[A]): Unit = joiner.retainOnlyFirst(fRes)
+  def retainOnlySecond_(gRes: TrySturdy[A]): Unit = joiner.retainOnlySecond(gRes)
+  def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joiner.retainBoth(fRes, gRes)

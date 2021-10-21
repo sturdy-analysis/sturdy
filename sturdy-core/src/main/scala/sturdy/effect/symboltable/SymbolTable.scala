@@ -9,4 +9,6 @@ trait SymbolTable[Key, Symbol, Entry, MayJoin[_]] extends Effectful:
   def tableSet(key: Key, symbol: Symbol, newEntry: Entry): Unit
   def addEmptyTable(key: Key): Unit
 
-trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]
+trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
+  def getTables: Map[Key, Map[Symbol, Entry]]
+  def setTables(tables: Map[Key, Map[Symbol, Entry]]): Unit

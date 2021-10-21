@@ -17,6 +17,7 @@ case class GlobalAddr(addr: Int) extends AnyVal
 
 given Finite[TableAddr] with {}
 given Finite[MemoryAddr] with {}
+given Finite[GlobalAddr] with {}
 given Structural[TableAddr] with {}
 given Structural[MemoryAddr] with {}
 given Structural[GlobalAddr] with {}
@@ -78,8 +79,8 @@ def functionInstanceIsSoundFlat[cV,aV]: Soundness[FunctionInstance[cV], Function
     case _ => IsSound.NotSound(s"Concrete function instance $c not approximated by $a.")
 }
 
-case class TableInstance[V](tableType: TableType, functions: Vector[FunctionInstance[V]])
-case class GlobalInstance[V](tpe: ValType, var value: V)
+//case class TableInstance[V](tableType: TableType, functions: Vector[FunctionInstance[V]])
+//case class GlobalInstance[V](tpe: ValType, val value: V)
 case class DataInstance(data: ByteVector)
 case class ElemInstance[V](functions: Vector[FunctionInstance[V]])
 
@@ -87,25 +88,8 @@ given elemInstanceIsSound[cV, aV](using fSoundness: Soundness[FunctionInstance[c
   override def isSound(c: ElemInstance[cV], a: ElemInstance[aV]): IsSound =
     seqIsSound.isSound(c.functions, a.functions)
 
-given globalInstanceIsSound[cV,aV](using vSound: Soundness[cV,aV]): Soundness[GlobalInstance[cV], GlobalInstance[aV]] with
-  override def isSound(c: GlobalInstance[cV], a: GlobalInstance[aV]): IsSound = (c,a) match
-    case (GlobalInstance(cTpe, cVal), GlobalInstance(aTpe, aVal)) =>
-      if (cTpe != aTpe)
-        IsSound.NotSound(s"Type mismatch: concrete global $c not approximated by $a.")
-      else
-        vSound.isSound(cVal, aVal)
-
-def mapGlobalInstance[A,B](f: A => B)(x: GlobalInstance[A]): GlobalInstance[B] = GlobalInstance(x.tpe, f(x.value))
 //def mapFunctionInstance[A,B](f: A => B)(x: FunctionInstance[A]): FunctionInstance[B] = x match
 //  case Wasm(mod, fun, ft) => Wasm(mod.mapModuleInstance(f), fun, ft)
-
-given JoinGlobalInstance[V](using j: Join[V]): Join[GlobalInstance[V]] with
-  override def apply(g1: GlobalInstance[V], g2: GlobalInstance[V]): MaybeChanged[GlobalInstance[V]] = (g1, g2) match
-    case (GlobalInstance(t1,v1), GlobalInstance(t2,v2)) =>
-      if (t1 == t2)
-        j(v1,v2).map(v => GlobalInstance(t1, v))
-      else
-        throw new Error("Joining of global instances with different types is not allowed.")
 
 enum ExternalValue:
   case Function(addr: Int)

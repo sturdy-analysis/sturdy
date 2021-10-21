@@ -13,7 +13,7 @@ import swam.ValType
 import swam.syntax.*
 
 class GenericInterpreterNumerics[V, MayJoin[_]]
-  (stack: OperandStack[V] & Failure, wasmOps: WasmOps[V, _, _, _, _, _, _, _, _, MayJoin])
+  (stack: OperandStack[V] & Failure, wasmOps: WasmOps[V, _, _, _, _, _, _, MayJoin])
   (using MayJoin[V]):
 
   import wasmOps.*
