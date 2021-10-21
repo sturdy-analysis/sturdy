@@ -4,7 +4,6 @@ import sturdy.data.*
 import sturdy.effect.Effectful
 import sturdy.values.{*, given}
 
-import scala.collection.mutable
 import ToppedSymbolTable.*
 import sturdy.IsSound
 import sturdy.Soundness
@@ -103,7 +102,7 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
     }
     IsSound.Sound
 
-  def tabInstanceIsSound[cEntry](c: mutable.Map[Symbol, cEntry], a: Topped[Table[Symbol,Entry]])(using entrySound: Soundness[cEntry, Entry]): IsSound =
+  def tabInstanceIsSound[cEntry](c: Map[Symbol, cEntry], a: Topped[Table[Symbol,Entry]])(using entrySound: Soundness[cEntry, Entry]): IsSound =
     // all entries in c are approximated by corresponding entry in a
     // all abstract symbols not defined in c point to a 'may' entry
     a match

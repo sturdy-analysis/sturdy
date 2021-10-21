@@ -10,33 +10,7 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-trait SturdyException extends Exception:
-  def isBottom: Boolean
-
-enum TrySturdy[A]:
-  case Success(a: A)
-  case Failure(ex: SturdyException)
-  def isSuccess: Boolean = this match
-    case Success(_) => true
-    case Failure(_) => false
-  def isBottom: Boolean = this match
-    case Success(_) => false
-    case Failure(ex) => ex.isBottom
-  def get: A = this match
-    case Success(a) => a
-    case Failure(ex) => throw ex
-  def exception: SturdyException = this match
-    case Success(_) => throw new MatchError(this)
-    case Failure(ex) => ex
-object TrySturdy:
-  inline def apply[A](f: => A) =
-    try Success(f) catch {
-      case ex: SturdyException => Failure(ex)
-      case ex => throw ex
-    }
-
 trait Effectful extends ObservableJoin:
-//  type JoinExceptions
   type Joined[A] = Join[A] ?=> A
 
   final def joinThrowables(failA: SturdyException, failB: SturdyException): SturdyException =
@@ -130,31 +104,3 @@ object Effectful:
     override val isBottom: Boolean = ex1.isBottom && ex2.isBottom
 
 
-trait ComputationJoiner[A]:
-  // put before() code as part of the initializer
-  def inbetween(): Unit
-  def retainOnlyFirst(fRes: TrySturdy[A]): Unit
-  def retainOnlySecond(gRes: TrySturdy[A]): Unit
-  def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit
-
-abstract class ComputationJoinerWithSuper[A](sup: ComputationJoiner[A]) extends ComputationJoiner[A]:
-  def inbetween_(): Unit
-  final def inbetween(): Unit = {
-    inbetween_()
-    sup.inbetween()
-  }
-  def retainOnlyFirst_(fRes: TrySturdy[A]): Unit
-  final def retainOnlyFirst(fRes: TrySturdy[A]): Unit = {
-    retainOnlyFirst_(fRes)
-    sup.retainOnlyFirst(fRes)
-  }
-  def retainOnlySecond_(gRes: TrySturdy[A]): Unit
-  final def retainOnlySecond(gRes: TrySturdy[A]): Unit = {
-    retainOnlySecond_(gRes)
-    sup.retainOnlySecond(gRes)
-  }
-  def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit
-  final def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = {
-    retainBoth_(fRes, gRes)
-    sup.retainBoth(fRes, gRes)
-  }

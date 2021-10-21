@@ -2,6 +2,7 @@ package sturdy.language.wasm.generic
 
 import sturdy.data.unit
 import sturdy.effect.ComputationJoiner
+import sturdy.effect.DelegatingComputationJoiner
 import sturdy.effect.Effectful
 import sturdy.effect.callframe.GenericMutableCallFrameNumbered
 import sturdy.effect.except.Except
@@ -10,9 +11,9 @@ import sturdy.{Soundness, fix, IsSound}
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.operandstack.ConcreteOperandStack
-import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.symboltable.SymbolTable
+import sturdy.effect.symboltable.JoinedSymbolTable
 import sturdy.values.Finite
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.exceptions.Exceptional
@@ -55,10 +56,19 @@ enum WasmException[V]:
   case Return(operands: List[V])
 
 
+trait Globals[V](using f: Failure) extends Effectful:
+  val globalTable: DecidableSymbolTable[Unit, Int, V]
+  def readGlobal(ix: Int) =
+    globalTable.tableGet((), ix).getOrElse(f.fail(UnboundGlobal, ix.toString))
+  def writeGlobal(ix: Int, v: V): Unit =
+    globalTable.tableSet((), ix, v)
+  override def makeComputationJoiner[A]: ComputationJoiner[A] =
+    new DelegatingComputationJoiner(globalTable)
+
 type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
   OperandStack[V]                                         // operand stack
     with Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]   // binary memory
-    with DecidableSymbolTable[Unit, Int, V]               // globals
+    with Globals[V]                                       // globals
     with SymbolTable[TableAddr, FuncIx, FunV, MayJoin]    // function pointer
     with GenericMutableCallFrameNumbered[FrameData[V], V] // call frame
     with Except[WasmException[V], ExcV, MayJoin]          // exception
