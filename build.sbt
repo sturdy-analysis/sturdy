@@ -79,7 +79,9 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
   )
 
 lazy val sturdy_wasm_benchmarks = (project in file("sturdy-wasm-benchmarks"))
-  .dependsOn(sturdy_wasm % "compile->compile;test->test")
+  .dependsOn(sturdy_wasm % "compile->compile")
+  .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile")
+  .dependsOn(ProjectRef(swam, "swam_text") % "compile->compile")
   .settings(
     name := "sturdy-wasm-benchmarks"
   )
