@@ -1,13 +1,17 @@
 package sturdy.language.wasm.generic
 
 import sturdy.data.unit
+import sturdy.effect.ComputationJoiner
+import sturdy.effect.Effectful
 import sturdy.effect.callframe.GenericMutableCallFrameNumbered
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.{IsSound, Soundness, fix}
+import sturdy.{Soundness, fix, IsSound}
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.operandstack.ConcreteOperandStack
+import sturdy.effect.symboltable.ConcreteSymbolTable
+import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.symboltable.SymbolTable
 import sturdy.values.Finite
 import sturdy.values.booleans.BooleanBranching
@@ -19,7 +23,7 @@ import sturdy.values.functions.FunctionOps
 import sturdy.values.ints.*
 import sturdy.values.longs.*
 import sturdy.values.relational.*
-import swam.{BlockType, FuncIdx, FuncType, GlobalIdx, GlobalType, LabelIdx, Limits, MemType, OpCode, TableType, ValType}
+import swam.{ValType, GlobalType, LabelIdx, MemType, FuncType, TableType, GlobalIdx, FuncIdx, OpCode, BlockType, Limits}
 import swam.syntax.*
 
 import scala.collection.immutable.VectorBuilder
@@ -51,15 +55,14 @@ enum WasmException[V]:
   case Return(operands: List[V])
 
 
-
-type GenericEffects[V, Addr, Bytes, Size, ExcV, Symbol, Entry, MayJoin[_]] =
-  OperandStack[V]
-    with Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]
-    with SymbolTable[TableAddr, Symbol, Entry, MayJoin]
-    //with SymbolTable[TableAddr, GlobalIdx, GlobalInstance[V]]
-    with GenericMutableCallFrameNumbered[FrameData[V], V]
-    with Except[WasmException[V], ExcV, MayJoin]
-    with Failure
+type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
+  OperandStack[V]                                         // operand stack
+    with Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]   // binary memory
+    with DecidableSymbolTable[Unit, Int, V]               // globals
+    with SymbolTable[TableAddr, FuncIx, FunV, MayJoin]    // function pointer
+    with GenericMutableCallFrameNumbered[FrameData[V], V] // call frame
+    with Except[WasmException[V], ExcV, MayJoin]          // exception
+    with Failure                                          // failure
 
 type Imports[V] = mutable.Map[String, ModuleInstance[V]]
 
@@ -227,7 +230,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, Symbol, Entry
   def tableIndex: TableAddr =
     module.tableAddrs(0)
 
-  val globalTableIndex: TableAddr = TableAddr(0)
+  val globalTableIndex: TableAddr =
+    TableAddr(0)
 
   def getGlobalValue(index: GlobalAddr): V =
     tableGet(globalTableIndex, globIxToSymbol(index)).orElseAndThen(fail(UnboundGlobal, index.toString)) { entry =>
