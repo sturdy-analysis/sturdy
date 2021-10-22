@@ -28,29 +28,31 @@ import sturdy.values.floats.{*, given}
 import sturdy.values.ints.{*, given}
 import sturdy.values.longs.{*, given}
 import sturdy.values.relational.{*, given}
+import sturdy.values.taint.{*, given}
 import sturdy.values.{*, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue, Fix:
+object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFunctionValue, Fix:
   type MayJoin[A] = WithJoin[A]
   type Addr = Topped[Int]
-  type Bytes = Seq[Topped[Byte]]
+  type AByte = TaintProduct[Topped[Byte]]
+  type Bytes = Seq[AByte]
   type Size = Topped[Int]
   type ExcV = Powerset[WasmException[Value]]
   type FuncIx = Topped[Int]
   type FunV = Topped[Powerset[FunctionInstance[Value]]]
 
   given ConstantSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
-    override def valueToAddr(v: Value): Addr = v.asInt32
-    override def valueToFuncIx(v: Value): FuncIx = v.asInt32
-    override def valToSize(v: Value): Size = v.asInt32
-    override def sizeToVal(sz: Size): Value = Value.Int32(sz)
+    override def valueToAddr(v: Value): Addr = v.asInt32.value
+    override def valueToFuncIx(v: Value): FuncIx = v.asInt32.value
+    override def valToSize(v: Value): Size = v.asInt32.value
+    override def sizeToVal(sz: Size): Value = Value.Int32(untainted(sz))
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): OptionA[A] =
-      ix.asInt32 match
+      ix.asInt32.value match
         case Topped.Actual(i) =>
           if (i >= 0 && i < vec.size)
             OptionA.Some(Iterable.single(vec(i)))
@@ -66,23 +68,23 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
       }
     )
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] =
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantTaintAnalysis.Value]): List[ConstantTaintAnalysis.Value] =
       runtime(hostFunc)(args)
 
   type InState =
     (ConcreteCallFrame.Vars[Value],
-      ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
+      ConstantAddressMemory.Memories[MemoryAddr, AByte],
       Globals.Values[Value],
       JoinedOperandStack.Operands[Value])
   type OutState =
-    (ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
+    (ConstantAddressMemory.Memories[MemoryAddr, AByte],
       Globals.Values[Value],
       JoinedOperandStack.Operands[Value])
   type AllState = InState
 
   class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
     extends JoinedOperandStack[Value]
-      with ConstantAddressMemory[MemoryAddr, Topped[Byte]](Topped.Actual(0))
+      with ConstantAddressMemory[MemoryAddr, AByte](untainted(Topped.Actual(0)))
       with Globals[Value]
       with ToppedSymbolTable[TableAddr, Int, FunV]
       with JoinedCallFrame[FrameData[Value], Int, Value]

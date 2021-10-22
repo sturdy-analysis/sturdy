@@ -2,6 +2,7 @@ package sturdy.values.taint
 
 import sturdy.effect.failure.Failure
 import sturdy.values.MaybeChanged
+import sturdy.values.booleans.BooleanBranching
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
 import sturdy.values.ints.IntOps
@@ -30,6 +31,9 @@ given CombineTaint[W <: Widening]: Combine[Taint, W] with
     case (_, _) => Changed(TopTaint)
 
 case class TaintProduct[V](taint: Taint, value: V):
+
+  def map[W](f: V => W): TaintProduct[W] =
+    TaintProduct(taint, f(value))
 
   inline def binary[B, A >: V](f: (V, A) => B, other: TaintProduct[A]): TaintProduct[B] =
     TaintProduct(Combine(this.taint,other.taint).get, f(this.value,other.value))
@@ -168,4 +172,24 @@ given TaintUnsignedCompareOps[A,B](using ops: UnsignedCompareOps[A,B]): Unsigned
 given TaintConvert[From, To, VFrom, VTo, Config <: ConvertConfig[_]](using conv: Convert[From, To, VFrom, VTo, Config]):
   Convert[From, To, TaintProduct[VFrom], TaintProduct[VTo], Config] with
   override def apply(from: TaintProduct[VFrom], conf: Config): TaintProduct[VTo] =
-    from.unary(x => conv.apply(x, conf))
+    from.unary(x => conv(x, conf))
+
+given TaintPointwiseConvert[From, To, VFrom, VToElem, Config <: ConvertConfig[_]](using conv: Convert[From, To, VFrom, Seq[VToElem], Config]):
+  Convert[From, To, TaintProduct[VFrom], Seq[TaintProduct[VToElem]], Config] with
+  override def apply(from: TaintProduct[VFrom], conf: Config): Seq[TaintProduct[VToElem]] =
+    val converted = conv(from.value, conf)
+    converted.map(from.copyTaint(_))
+
+given TaintCoPointwiseConvert[From, To, VFromElem, VTo, Config <: ConvertConfig[_]](using conv: Convert[From, To, Seq[VFromElem], VTo, Config]):
+  Convert[From, To, Seq[TaintProduct[VFromElem]], TaintProduct[VTo], Config] with
+  override def apply(from: Seq[TaintProduct[VFromElem]], conf: Config): TaintProduct[VTo] =
+    var taint = Untainted
+    val fromValue = from.map { tv =>
+      taint = Join(taint, tv.taint).get
+      tv.value
+    }
+    val converted = conv(fromValue, conf)
+    TaintProduct(taint, converted)
+
+given TaintBooleanBranching[V, J[_]](using ops: BooleanBranching[V, J]): BooleanBranching[TaintProduct[V], J] with
+  def boolBranch[A](v: TaintProduct[V], thn: => A, els: => A): J[A] ?=> A = ops.boolBranch(v.value, thn, els)
