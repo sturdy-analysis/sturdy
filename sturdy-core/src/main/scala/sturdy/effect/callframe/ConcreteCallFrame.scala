@@ -24,7 +24,7 @@ trait ConcreteCallFrame[Data, Var, V](using ClassTag[V]) extends DecidableMutabl
       vars(i) = v
       i += 1
     }
-    builder.result()
+    names = builder.result()
   }
   setVars(initialCallFrameVars)
 
