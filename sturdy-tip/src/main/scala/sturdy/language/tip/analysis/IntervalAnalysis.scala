@@ -3,7 +3,7 @@ package sturdy.language.tip.analysis
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.{Effectful, AnalysisState, given}
 import sturdy.effect.allocation.AAllocationFromContext
-import sturdy.effect.callframe.GenericCallFrame
+import sturdy.effect.callframe.JoinedCallFrame
 import sturdy.effect.failure.{AFailureCollect, Failure}
 import sturdy.effect.print.{APrintPrefix, given}
 import sturdy.effect.store.AStoreMultiAddrThreadded
@@ -35,13 +35,15 @@ object IntervalAnalysis extends Interpreter,
   type AllState = OutState
 
   class Effects(initEnvironment: Environment, initStore: Store)
-    extends GenericCallFrame[Unit, String, Addr]((), initEnvironment)
+    extends JoinedCallFrame[Unit, String, Addr]
       with AStoreMultiAddrThreadded[AllocationSiteAddr, Value](initStore)
       with AAllocationFromContext[AllocationSite, Addr](fromAllocationSite)
       with APrintPrefix[Value]
       with AUserInput[Value](Value.IntValue(IntInterval.Top))
       with AFailureCollect
       with AnalysisState[InState, OutState, AllState]:
+    override def initialCallFrameData: Unit = ()
+    override def initialCallFrameVars: Map[String, Addr] = initEnvironment
     override def getInState() = getStore
     override def setInState(in: InState) = setStore(in)
     override def getOutState() = (getStore, getPrinted)

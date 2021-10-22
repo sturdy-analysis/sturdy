@@ -9,7 +9,7 @@ import sturdy.values.Join
 
 import scala.collection.mutable.ListBuffer
 
-/*
+/**
  * An abstract threadded store. The store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */

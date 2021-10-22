@@ -2,7 +2,7 @@ package sturdy.language.wasm
 
 import sturdy.data.{*, given}
 import sturdy.effect.bytememory.ConcreteMemory
-import sturdy.effect.callframe.{GenericCallFrameNumbered, GenericMutableCallFrameNumbered}
+import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.{CFailure, Failure}
 import sturdy.effect.operandstack.ConcreteOperandStack
@@ -83,11 +83,13 @@ object ConcreteInterpreter extends Interpreter:
       with ConcreteMemory[MemoryAddr]
       with Globals[Value]
       with ConcreteSymbolTable[TableAddr, FuncIx, FunV]
-      with GenericMutableCallFrameNumbered[FrameData[Value], Value] with GenericCallFrameNumbered(rootFrameData, rootFrameValues)
+      with ConcreteCallFrame[FrameData[Value], Int, Value]
       with ConcreteExcept[WasmException[Value]]
       with CFailure:
 
-    override def makeGlobalsTable = new ConcreteSymbolTable[Unit, GlobalAddr, Value] {}
+    override def initialCallFrameData = rootFrameData
+    override def initialCallFrameVars = rootFrameValues.view.zipWithIndex.map(_.swap)
+    override protected def makeGlobalsTable = new ConcreteSymbolTable[Unit, GlobalAddr, Value] {}
 
   class Instance(_effects: Effects)(using Failure)
     extends GenericInstance(_effects):

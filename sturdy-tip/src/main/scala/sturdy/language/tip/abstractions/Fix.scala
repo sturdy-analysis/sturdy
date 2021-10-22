@@ -26,7 +26,7 @@ trait Fix extends Interpreter:
 
   final def parameters[MayJoin[_]](using effects: GenericEffects[Value, Addr, MayJoin])(using MayJoin[Value]): fix.context.Sensitivity[FixIn, Parameters] =
     fix.context.parametersFromStore {
-      case FixIn.EnterFunction(f) => Some(f.params.map(p => effects.getLocal(p).get))
+      case FixIn.EnterFunction(f) => Some(f.params.map(p => effects.getLocalByName(p).get))
       case _ => None
     }
   type Parameters = Map[Addr, Value]

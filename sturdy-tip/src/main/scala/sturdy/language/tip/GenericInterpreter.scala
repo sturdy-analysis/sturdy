@@ -1,7 +1,7 @@
 package sturdy.language.tip
 
 import sturdy.effect.allocation.Allocation
-import sturdy.effect.callframe.GenericCallFrame
+import sturdy.effect.callframe.DecidableCallFrame
 import sturdy.effect.environment.Environment
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.effect.print.Print
@@ -22,7 +22,7 @@ import scala.collection.mutable.ListBuffer
 
 object GenericInterpreter:
   type GenericEffects[V, Addr, MayJoin[_]] =
-    GenericCallFrame[Unit, String, Addr] with
+    DecidableCallFrame[Unit, String, Addr] with
     Store[Addr, V, MayJoin] with
     Allocation[Addr, AllocationSite] with
     Print[V] with
@@ -102,7 +102,7 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
       case Exp.Var(x) => functions.get(x) match
         case Some(fun) => funValue(fun)
         case None =>
-          val addr = getLocal(x).getOrElse(fail(UnboundVariable, x))
+          val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
           read(addr).getOrElse(fail(UnboundAddr, s"$addr for variable $x"))
       case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
       case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
@@ -120,7 +120,7 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
         write(addr, eval(e))
         refValue(addr)
       case Exp.VarRef(x) =>
-        val addr = getLocal(x).getOrElse(fail(UnboundVariable, x))
+        val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
         unmanagedRefValue(addr)
       case Exp.Deref(e) =>
         val addr = refAddr(eval(e))
@@ -156,7 +156,7 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
 
     def assign(lhs: Assignable, v: V): Unit = lhs match
       case Assignable.AVar(x) =>
-        val addr = getLocal(x).getOrElse(fail(UnboundVariable, x))
+        val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
         write(addr, v)
       case Assignable.ADeref(e) =>
         val addr = refAddr(eval(e))

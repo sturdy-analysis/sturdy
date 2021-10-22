@@ -36,4 +36,5 @@ trait JoinedSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends ConcreteS
         }
         joined += key -> joinedMap
       }
+      tables = joined
   }

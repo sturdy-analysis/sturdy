@@ -2,9 +2,8 @@ package sturdy.language.wasm.generic
 
 import sturdy.data.unit
 import sturdy.effect.ComputationJoiner
-import sturdy.effect.DelegatingComputationJoiner
 import sturdy.effect.Effectful
-import sturdy.effect.callframe.GenericMutableCallFrameNumbered
+import sturdy.effect.callframe.DecidableMutableCallFrame
 import sturdy.effect.except.Except
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.{Soundness, fix, IsSound}
@@ -58,13 +57,13 @@ enum WasmException[V]:
 
 
 type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
-  OperandStack[V]                                         // operand stack
-    with Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]   // binary memory
-    with Globals[V]                                       // globals
-    with SymbolTable[TableAddr, FuncIx, FunV, MayJoin]    // function pointer
-    with GenericMutableCallFrameNumbered[FrameData[V], V] // call frame
-    with Except[WasmException[V], ExcV, MayJoin]          // exception
-    with Failure                                          // failure
+  OperandStack[V]                                        
+    with Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]  
+    with Globals[V]                                      
+    with SymbolTable[TableAddr, FuncIx, FunV, MayJoin]   
+    with DecidableMutableCallFrame[FrameData[V], Int, V]
+    with Except[WasmException[V], ExcV, MayJoin]         
+    with Failure                                         
 
 type Imports[V] = mutable.Map[String, ModuleInstance[V]]
 
@@ -350,7 +349,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
         val args = stack.popN(funcType.params.size)
         val frameData = FrameData(funcType.t.size, mod)
         val vars = args.view ++ func.locals.map(num.defaultValue)
-        labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
+        labelStack.withFresh(stack.withFreshOperandFrame(inNewFrame(frameData, vars.view.zipWithIndex.map(_.swap)) {
           enterFunction(funcIx, func, funcType)
         }))
       case FunctionInstance.Host(hostFunc) =>
@@ -415,7 +414,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
           // paramTys.zip(args).map(???) // TODO: check for right type -> we need some kind of generic language feature here
           val rtLength = fun.funcType.t.length
           stack.pushN(args)
-          inNewFrameNoIndex(FrameData(0, modInst), Iterable.empty) {
+          inNewFrame(FrameData(0, modInst), Iterable.empty) {
             eval(Call(funcIx), InstLoc.InvokeExported(modInst, funcName))
           }
           stack.popN(rtLength)
@@ -452,7 +451,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 
   def evalInstructionSequence(insts: Vector[(Inst, InstLoc[V])], mod: ModuleInstance[V])(using Fixed[V]): V =
     val frameData = FrameData(1,mod)
-    labelStack.withFresh(withFreshOperandStack(inNewFrameNoIndex(frameData, Vector.empty[V]){
+    labelStack.withFresh(withFreshOperandStack(inNewFrame(frameData, Iterable.empty){
       insts.foreach(eval(_, _))
       stack.pop()
     }))
@@ -595,7 +594,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     // initialize tables and memories
     val frameData = FrameData(1, modInst)
     // TODO: do we need a fresh stack and label stack here?
-    inNewFrameNoIndex(frameData, Vector.empty[V]) {
+    inNewFrame(frameData, Iterable.empty) {
       // memory
       module.data.zipWithIndex.foreach {
         case (Data(memIdx, off, init), i) =>
@@ -645,7 +644,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
           case FunctionInstance.Wasm(mod, func, funcType) =>
             val frameData = FrameData(funcType.t.size, mod)
             val vars = func.locals.map(num.defaultValue)
-            labelStack.withFresh(stack.withFreshOperandFrame(inNewFrameNoIndex(frameData, vars) {
+            labelStack.withFresh(stack.withFreshOperandFrame(inNewFrame(frameData, vars.view.zipWithIndex.map(_.swap)) {
               val res = enterFunction(FuncId.Direct(funcIdx), func, funcType)
               //              println(s"invoke exported $funcName = $res should have $rtLength values")
               //              println(func)

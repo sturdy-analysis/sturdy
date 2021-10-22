@@ -1,14 +1,15 @@
 package sturdy.effect.callframe
+import sturdy.{IsSound, Soundness, seqIsSound}
+import sturdy.effect.operandstack.GenericOperandStack
 import sturdy.effect.{ComputationJoiner, ComputationJoinerWithSuper, TrySturdy}
 import sturdy.values.Join
 
 import scala.reflect.ClassTag
-import scala.collection.mutable.Builder
 
-trait JoinedCallFrame[Data, Var, V](_data: Data, _vars: Map[Var, V])(using Join[V], ClassTag[V]) extends GenericCallFrame[Data, Var, V]:
+trait JoinedCallFrame[Data, Var, V](using Join[V], ClassTag[V]) extends ConcreteCallFrame[Data, Var, V]:
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
-    val snapshot = vars
-    var fVars: Map[Var,V] = null
+    private val snapshot = vars
+    private var fVars: Array[V] = _
 
     override def inbetween_(): Unit =
       fVars = vars
@@ -36,11 +37,17 @@ trait JoinedCallFrame[Data, Var, V](_data: Data, _vars: Map[Var, V])(using Join[
       }
   }
 
-  private def joinWith(other: Map[Var,V]): Map[Var,V] =
-    if (vars.keySet != other.keySet)
+  private def joinWith(other: Array[V]): Array[V] =
+    if (vars.length != other.length)
       throw IllegalStateException()
-    val newVars: Builder[(Var,V), Map[Var,V]] = Map.newBuilder
-    vars.keySet.foreach { key =>
-      newVars += key -> Join[V](vars(key), other(key)).get
-    }
-    newVars.result
+    vars.zip(other).map(Join[V](_,_).get)
+
+  def joinedCallFrameNumberedIsSound[cData, cV](c: ConcreteCallFrame[cData, Var, cV])(using vSoundness: Soundness[cV,V], dSoundness: Soundness[cData,Data]): IsSound =
+    val dataIsSound = dSoundness.isSound(c.getFrameData, getFrameData)
+    if (dataIsSound.isNotSound)
+      return dataIsSound
+    if (getFrameNames != c.getFrameNames)
+      return IsSound.NotSound(s"Variable names in call frame differ: concrete=${c.getFrameNames}, abstract=$getFrameNames")
+    val aVals = getFrameVars
+    val cVals = c.getFrameVars
+    seqIsSound.isSound(cVals, aVals)

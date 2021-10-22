@@ -7,13 +7,17 @@ import sturdy.effect.failure.Failure
 import sturdy.effect.symboltable.DecidableSymbolTable
 
 trait Globals[V] extends Effectful, Failure:
-  def makeGlobalsTable: DecidableSymbolTable[Unit, GlobalAddr, V]
+  protected def makeGlobalsTable: DecidableSymbolTable[Unit, GlobalAddr, V]
+
   val globalsTable = makeGlobalsTable
   globalsTable.addEmptyTable(())
+
   def readGlobal(ga: GlobalAddr): V =
     globalsTable.tableGet((), ga).getOrElse(fail(UnboundGlobal, ga.toString))
+
   def writeGlobal(ga: GlobalAddr, v: V): Unit =
     globalsTable.tableSet((), ga, v)
+
   override def makeComputationJoiner[A]: ComputationJoiner[A] =
     new DelegatingComputationJoinerWithSuper(globalsTable, super.makeComputationJoiner)
 
