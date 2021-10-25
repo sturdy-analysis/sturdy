@@ -68,31 +68,22 @@ type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
 type Imports[V] = mutable.Map[String, ModuleInstance[V]]
 
 enum InstLoc[V]:
-  case InFunction(mod: ModuleInstance[V], func: FuncId[V], pc: Int)
+  case InFunction(func: FuncId[V], pc: Int)
   case InInit(mod: ModuleInstance[V], pc: Int)
   case InvokeExported(mod: ModuleInstance[V], funName: String)
 
   override def toString: String = this match
-    case InFunction(mod, func, pc) => s"$mod.$func:$pc"
+    case InFunction(func, pc) => s"$func:$pc"
     case InInit(mod, pc) => s"$mod.INIT:$pc"
     case InvokeExported(mod, funName) => s"$mod.$funName"
 
   def +(i: Int): InstLoc[V] = this match
-    case InFunction(mod, func, pc) => InFunction(mod, func, pc + i)
+    case InFunction(func, pc) => InFunction(func, pc + i)
     case InInit(mod, pc) => InInit(mod, pc + i)
     case InvokeExported(mod, funName) => throw new IllegalStateException
 
   def withLoc(insts: Vector[Inst], offset: Int = 0): Vector[(Inst, InstLoc[V])] =
     insts.zipWithIndex.map((i, ix) => (i, this + ix + 1 + offset))
-
-
-enum FuncId[V]:
-  case Direct(ix: FuncIdx)
-  case Indirect(v: V)
-
-  override def toString: String = this match
-    case Direct(ix) => ix.toString
-    case Indirect(v) => s"indirect($v)"
 
 enum FixIn[V]:
   case Eval(inst: Inst, loc: InstLoc[V])
@@ -291,7 +282,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       throws(WasmException.Return(operands))
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
-      invoke(func, FuncId.Direct(funcIx))
+      invoke(func)
     case CallIndirect(typeIx) =>
       val ftExpected = module.functionTypes(typeIx)
       val funcIx = stack.pop()
@@ -343,14 +334,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       }
     }
 
-  def invoke(fun: FunctionInstance[V], funcIx: FuncId[V])(using Fixed[V]): Unit =
+  def invoke(fun: FunctionInstance[V])(using Fixed[V]): Unit =
     fun match
-      case FunctionInstance.Wasm(mod, func, funcType) =>
+      case FunctionInstance.Wasm(mod, ix, func, funcType) =>
         val args = stack.popN(funcType.params.size)
         val frameData = FrameData(funcType.t.size, mod)
         val vars = args.view ++ func.locals.map(num.defaultValue)
         labelStack.withFresh(stack.withFreshOperandFrame(inNewFrame(frameData, vars.view.zipWithIndex.map(_.swap)) {
-          enterFunction(funcIx, func, funcType)
+          enterFunction(FuncId(mod, ix), func, funcType)
         }))
       case FunctionInstance.Host(hostFunc) =>
         val args = stack.popN(hostFunc.funcType.params.size)
@@ -364,7 +355,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   def enterFunction_open(id: FuncId[V], func: Func, funcType: FuncType)(using Fixed[V]): List[V] =
     val returnN = funcType.t.size
     tryCatch {
-      val loc = InstLoc.InFunction(module, id, 0)
+      val loc = InstLoc.InFunction(id, 0)
       label(0, returnN, loc.withLoc(func.body), None)
     } { ex =>
       stack.clearCurrentOperandFrame()
@@ -383,7 +374,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
         val ftActual = func.funcType
         if (ftExpected != ftActual)
           fail(IndirectCallTypeMismatch, s"Expected function of type $ftExpected but $funcIx has type $ftActual")
-        invoke(func, FuncId.Indirect(funcIx))
+        invoke(func)
     }
 
 
@@ -547,8 +538,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     // types
     modInst.functionTypes = module.types
     // functions
+    val funcImportsSize = funcImports.size
     modInst.functions = funcImports ++
-      module.funcs.map(func => FunctionInstance.Wasm(modInst, func, module.types(func.tpe)))
+      module.funcs.view.zipWithIndex.map { (func, ix) =>
+        FunctionInstance.Wasm(modInst, funcImportsSize + ix, func, module.types(func.tpe))
+      }
     // globals
     modInst.globalAddrs = modInst.globalAddrs :++ module.globals.zip(globValues).map {
       case (Global(GlobalType(tpe, _), _), value) =>
@@ -641,11 +635,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       funcIdx =>
         val func = modInst.functions(funcIdx)
         func match
-          case FunctionInstance.Wasm(mod, func, funcType) =>
+          case FunctionInstance.Wasm(mod, ix, func, funcType) =>
             val frameData = FrameData(funcType.t.size, mod)
             val vars = func.locals.map(num.defaultValue)
             labelStack.withFresh(stack.withFreshOperandFrame(inNewFrame(frameData, vars.view.zipWithIndex.map(_.swap)) {
-              val res = enterFunction(FuncId.Direct(funcIdx), func, funcType)
+              val res = enterFunction(FuncId(mod, ix), func, funcType)
               //              println(s"invoke exported $funcName = $res should have $rtLength values")
               //              println(func)
             }))

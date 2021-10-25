@@ -22,6 +22,9 @@ given Structural[TableAddr] with {}
 given Structural[MemoryAddr] with {}
 given Structural[GlobalAddr] with {}
 
+case class FuncId[V](mod: ModuleInstance[V], funcIx: Int):
+  override def toString: String = s"$mod.$funcIx"
+
 trait ModuleInstance[V]:
   var functionTypes: Vector[FuncType] = Vector.empty
   var functions: Vector[FunctionInstance[V]] = Vector.empty
@@ -55,23 +58,23 @@ given Structural[FuncType] with {}
 given Structural[DataInstance] with {}
 
 enum FunctionInstance[V]:
-  case Wasm(module: ModuleInstance[V], func: Func, ft: FuncType)
+  case Wasm(module: ModuleInstance[V], funcIx: Int,  func: Func, ft: FuncType)
   case Host(hf: HostFunction)
 
   def funcType: FuncType = this match
-    case Wasm(_, _ , ft) => ft
+    case Wasm(_, _, _, ft) => ft
     case Host(hf) => hf.funcType
 
 given functionInstanceIsSound[cV,aV]: Soundness[FunctionInstance[cV], FunctionInstance[aV]] with
   override def isSound(c: FunctionInstance[cV], a: FunctionInstance[aV]): IsSound = (c,a) match
-    case (FunctionInstance.Wasm(cM,_,_), FunctionInstance.Wasm(aM,_,_)) =>
+    case (FunctionInstance.Wasm(cM,_,_,_), FunctionInstance.Wasm(aM,_,_,_)) =>
       functionInstanceIsSoundFlat.isSound(c,a) &&
         summon[Soundness[ModuleInstance[cV], ModuleInstance[aV]]].isSound(cM,aM)
     case _ => functionInstanceIsSoundFlat.isSound(c,a)
 
 def functionInstanceIsSoundFlat[cV,aV]: Soundness[FunctionInstance[cV], FunctionInstance[aV]] = new Soundness[FunctionInstance[cV], FunctionInstance[aV]] {
   override def isSound(c: FunctionInstance[cV], a: FunctionInstance[aV]): IsSound = (c,a) match
-    case (FunctionInstance.Wasm(_,cFunc,cFt), FunctionInstance.Wasm(_,aFunc,aFt)) =>
+    case (FunctionInstance.Wasm(_,_,cFunc,cFt), FunctionInstance.Wasm(_,_,aFunc,aFt)) =>
       val fIsSound = summon[Soundness[Func,Func]].isSound(cFunc, aFunc)
       val tIsSound = summon[Soundness[FuncType,FuncType]].isSound(cFt, aFt)
       fIsSound && tIsSound
