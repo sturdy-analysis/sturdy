@@ -7,9 +7,8 @@ import collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.util.Failure
 import scala.util.Success
-import scala.util.Try
-
 import ControlFlowGraph.*
+import sturdy.effect.TrySturdy
 
 def control[Ctx, Dom, Codom, Node]
   (contextSensitive: Boolean)
@@ -144,16 +143,16 @@ class ControlLogger[Ctx, Dom, Codom, Node]
           predecessors = Set(cnode)
         case None => // nothing
 
-    override def exit(dom: Dom, codom: Try[Codom]): Unit =
+    override def exit(dom: Dom, codom: TrySturdy[Codom]): Unit =
       codom match
-        case Success(cod) => getCodomNode(dom, cod.asInstanceOf[Codom]) match
+        case TrySturdy.Success(cod) => getCodomNode(dom, cod.asInstanceOf[Codom]) match
           case Some(node) =>
             val cnode = CNode(node, getContext)
             nodes += cnode
             addEdgeFromPredecessors(cnode)
             predecessors = Set(cnode)
           case None => // nothing
-        case Failure(_: RecurrentCall[_, _]) =>
+        case TrySturdy.Failure(_: RecurrentCall[_, _]) =>
           predecessors = Set()
         case _ => // nothing
   }

@@ -3,7 +3,7 @@ package sturdy.effect
 trait SturdyException extends Exception:
   def isBottom: Boolean
 
-enum TrySturdy[A]:
+enum TrySturdy[+A]:
   case Success(a: A)
   case Failure(ex: SturdyException)
   def isSuccess: Boolean = this match

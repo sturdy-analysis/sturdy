@@ -36,6 +36,7 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
     )
     println(result)
     println(interp.cfg.toGraphViz)
+    println(s"Found ${interp.constantInstructions.getConstantNumericInstructions} constant numeric instructions")
   }
 
 
@@ -59,6 +60,7 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
     )
     println(result)
     println(interp.cfg.toGraphViz)
+    println(s"Found ${interp.constantInstructions.getConstantNumericInstructions} constant numeric instructions")
   }
 
   it must s"execute shortened $funcName in binarytrees_repo with concrete interpreter" in {
@@ -86,6 +88,7 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
     )
     println(result)
     println(interp.cfg.toGraphViz)
+    println(s"Found ${interp.constantInstructions.getConstantNumericInstructions} constant numeric instructions")
   }
 
   def readBinaryModule(path: Path): Module =

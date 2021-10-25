@@ -1,5 +1,6 @@
 package sturdy.fix.context
 
+import sturdy.effect.TrySturdy
 import sturdy.fix.Logger
 import sturdy.values.Finite
 
@@ -13,7 +14,7 @@ class CallSiteLogger[Dom, Call](getCall: Dom => Option[Call]) extends Logger[Dom
     case Some(c) => calls = c :: calls
     case _ => // nothing
 
-  def exit(dom: Dom, codom: Try[Any]): Unit = getCall(dom) match
+  def exit(dom: Dom, codom: TrySturdy[Any]): Unit = getCall(dom) match
     case Some(c) => calls = calls.tail
     case _ => // nothing
 
