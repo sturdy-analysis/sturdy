@@ -19,7 +19,7 @@ import sturdy.values.ints.given
 import sturdy.values.longs.given
 import sturdy.values.given
 import swam.OpCode
-import swam.syntax.BrIf
+import swam.syntax
 
 import scala.collection.MapView
 
@@ -53,13 +53,19 @@ trait ConstantValues extends Interpreter:
   def constantInstructionsLogger()(using stack: OperandStack[Value]): ConstantInstructionsLogger = new ConstantInstructionsLogger
 
   class ConstantInstructionsLogger(using stack: OperandStack[Value]) extends fix.Logger[FixIn[Value], FixOut[Value]]:
-    var brifInstructions: Map[InstLoc, Topped[Boolean]] = Map()
-    var numericInstructions: Map[InstLoc, Value] = Map()
+    var instructionValues: Map[InstLoc, Value] = Map()
+    var instructions: Map[InstLoc, syntax.Inst] = Map()
 
-//    def getConstantBrifInstructions: Map[InstLoc, Boolean] =
-//      brifInstructions.flatten
+    private def addInstruction(inst: syntax.Inst, loc: InstLoc, v: Value): Unit =
+      instructions += loc -> inst
+      instructionValues.get(loc) match
+        case None =>
+          instructionValues += loc -> v
+        case Some(previousResult) =>
+          val joined = Join(previousResult, v).get
+          instructionValues += loc -> joined
 
-    def getConstantNumericInstructions: Map[InstLoc, Value] = numericInstructions.filter(_._2 match
+    def get: Map[InstLoc, Value] = instructionValues.filter(_._2 match
       case Value.TopValue => false
       case Value.Int32(Topped.Top) => false
       case Value.Int64(Topped.Top) => false
@@ -68,28 +74,54 @@ trait ConstantValues extends Interpreter:
       case _ => true
     )
 
+    def grouped: Map[String, Map[InstLoc, Value]] =
+      get.groupBy(kv => instructions(kv._1).getClass.getSimpleName)
+
+    def groupedCount: Map[String, Int] =
+      get.groupBy(kv => instructions(kv._1).getClass.getSimpleName).view.mapValues(_.size).toMap
+
     override def enter(dom: FixIn[Value]): Unit = dom match
-      case FixIn.Eval(BrIf(_), loc) =>
-        val doJump = stack.peek() match
-          case Value.Int32(Topped.Actual(i)) => Topped.Actual(i != 0)
-          case _ => Topped.Top
-        brifInstructions.get(loc) match
-          case None =>
-            brifInstructions += loc -> doJump
-          case Some(previousResult) =>
-            val joined = Join(previousResult, doJump).get
-            brifInstructions += loc -> joined
+      case FixIn.Eval(inst, loc) =>
+        if (readsSingleValueFromStack(inst)) {
+          val value = stack.peek()
+          addInstruction(inst, loc, value)
+        } else if (readsSingleBooleanFromStack(inst)) {
+          val boolValue = stack.peek() match
+            case Value.Int32(Topped.Actual(i)) => boolean(Topped.Actual(i != 0))
+            case _ => boolean(Topped.Top)
+          addInstruction(inst, loc, boolValue)
+        }
+      case _ => // nothing
 
     override def exit(dom: FixIn[Value], codom: TrySturdy[FixOut[Value]]): Unit = dom match
       case FixIn.Eval(inst, loc) =>
-        val opcode = inst.opcode
-        if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S) {
+        if (inst == syntax.Nop || inst == syntax.Unreachable) {
+          addInstruction(inst, loc, Value.Int32(Topped.Actual(0)))
+        } else if (writesSingleValueToStack(inst)) {
           val result = if (codom.isSuccess) stack.peek() else Value.TopValue
-          numericInstructions.get(loc) match
-            case None =>
-              numericInstructions += loc -> result
-            case Some(previousResult) =>
-              val joined = Join(previousResult, result).get
-              numericInstructions += loc -> joined
+          addInstruction(inst, loc, result)
         }
       case _ => // nothing
+
+    def writesSingleValueToStack(inst: syntax.Inst): Boolean =
+      val opcode = inst.opcode
+      if (opcode >= OpCode.I32Eqz && opcode <= OpCode.I64Extend32S)
+        return true
+
+      inst match {
+        case _: syntax.LocalGet | _: syntax.GlobalGet => true
+        case _: syntax.MemorySize.type | _: syntax.LoadInst | _: syntax.LoadNInst => true
+        case _ => false
+      }
+
+    def readsSingleValueFromStack(inst: syntax.Inst): Boolean = inst match
+      case _: syntax.LocalSet | _: syntax.GlobalSet | _: syntax.LocalTee => true
+      case _: syntax.StoreInst | _: syntax.StoreNInst => true
+      case _: syntax.Select.type => true
+      case _: swam.syntax.BrTable | _: swam.syntax.CallIndirect => true
+      case _ => false
+
+    def readsSingleBooleanFromStack(inst: syntax.Inst): Boolean = inst match
+      case _: swam.syntax.If | _: swam.syntax.BrIf => true
+      case _ => false
+

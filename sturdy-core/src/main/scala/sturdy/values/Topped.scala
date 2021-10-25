@@ -1,29 +1,30 @@
 package sturdy.values
 
-enum Topped[+V]:
+enum Topped[+V] extends Iterable[V]:
   case Top
   case Actual(v: V)
+
+  override def iterator: Iterator[V] = this match
+    case Top => Iterator.empty
+    case Actual(v) => Iterator.single(v)
 
   inline def get: V = this match
     case Top => throw new MatchError(this)
     case Actual(v) => v
 
-  inline def foreach[A](f: V => A): Unit = this match
+  override def foreach[A](f: V => A): Unit = this match
     case Top => // nothing
     case Actual(v) => f(v)
 
-  inline def filter(f: V => Boolean): Topped[V] = this match
+  override def filter(f: V => Boolean): Topped[V] = this match
     case Top => Top
     case Actual(v) => if (f(v)) this else Top
-
-  inline def withFilter(f: V => Boolean): Topped[V] =
-    filter(f)
 
   final def toString(suffix: String): String = this match
     case Top => s"Top$suffix"
     case Actual(v) => v.toString
 
-  inline final def map[A](f: V => A): Topped[A] = this match
+  override final def map[A](f: V => A): Topped[A] = this match
     case Top => Top
     case Actual(v) => Actual(f(v))
 
