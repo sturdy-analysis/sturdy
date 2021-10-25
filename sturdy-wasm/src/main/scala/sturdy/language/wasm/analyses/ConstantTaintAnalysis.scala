@@ -43,7 +43,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
   type Size = Topped[Int]
   type ExcV = Powerset[WasmException[Value]]
   type FuncIx = Topped[Int]
-  type FunV = Topped[Powerset[FunctionInstance[Value]]]
+  type FunV = Topped[Powerset[FunctionInstance]]
 
   given ConstantSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32.value
@@ -82,12 +82,12 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
       JoinedOperandStack.Operands[Value])
   type AllState = InState
 
-  class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
+  class Effects(rootFrameData: FrameData, rootFrameValues: Iterable[Value])
     extends JoinedOperandStack[Value]
       with ConstantAddressMemory[MemoryAddr, AByte](untainted(Topped.Actual(0)))
       with Globals[Value]
       with ToppedSymbolTable[TableAddr, Int, FunV]
-      with JoinedCallFrame[FrameData[Value], Int, Value]
+      with JoinedCallFrame[FrameData, Int, Value]
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
       with AnalysisState[InState, OutState, AllState] {
@@ -111,7 +111,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
     def setAllState(all: AllState) = setInState(all)
   }
 
-  def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value], cfgOnlyCalls: Boolean): Instance =
+  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value], cfgOnlyCalls: Boolean): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
     given Effects = effects
     new Instance(effects, cfgOnlyCalls)
@@ -125,7 +125,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     val callSites = callSitesLogger()
-    type Context = (FrameData[Value], CallString)
+    type Context = (FrameData, CallString)
 
     val cfg = control[Context](sensitive = true, cfgOnlyCalls)
 

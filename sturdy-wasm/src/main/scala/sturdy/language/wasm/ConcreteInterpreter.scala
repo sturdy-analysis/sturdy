@@ -52,7 +52,7 @@ object ConcreteInterpreter extends Interpreter:
   override type Size = Int
   override type ExcV = WasmException[Value]
   override type FuncIx = Int
-  override type FunV = FunctionInstance[Value]
+  override type FunV = FunctionInstance
 
   given ConcreteSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, NoJoin] with
     override def valueToAddr(v: Value): Int = v.asInt32
@@ -78,12 +78,12 @@ object ConcreteInterpreter extends Interpreter:
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =
       runtime(hostFunc)(args)
 
-  class Effects(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value])
+  class Effects(rootFrameData: FrameData, rootFrameValues: Iterable[Value])
     extends ConcreteOperandStack[Value]
       with ConcreteMemory[MemoryAddr]
       with Globals[Value]
       with ConcreteSymbolTable[TableAddr, FuncIx, FunV]
-      with ConcreteCallFrame[FrameData[Value], Int, Value]
+      with ConcreteCallFrame[FrameData, Int, Value]
       with ConcreteExcept[WasmException[Value]]
       with CFailure:
 
@@ -98,7 +98,7 @@ object ConcreteInterpreter extends Interpreter:
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] = fix.identity
 
-  def apply(rootFrameData: FrameData[Value], rootFrameValues: Iterable[Value]): Instance =
+  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value]): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
     given Failure = effects
     new Instance(effects)

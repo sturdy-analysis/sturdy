@@ -27,9 +27,9 @@ import scala.collection.mutable
 
 class TestScriptInterpreter(spectest: Option[Module] = None):
   val interp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
-  val modules: mutable.Map[String, ModuleInstance[Value]] = mutable.Map()
-  var current: ModuleInstance[Value] = null
-  val imports: mutable.Map[String, ModuleInstance[Value]] = mutable.Map()
+  val modules: mutable.Map[String, ModuleInstance] = mutable.Map()
+  var current: ModuleInstance = null
+  val imports: mutable.Map[String, ModuleInstance] = mutable.Map()
   
   spectest.foreach{ mod => 
     val modInst = interp.initializeModule(mod)
@@ -51,7 +51,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
 
-  def getModule(module: Option[String]): ModuleInstance[Value] = module match
+  def getModule(module: Option[String]): ModuleInstance = module match
     case None => current
     case Some(name) => modules(name)
 
@@ -101,7 +101,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
       case Some(name) => modules += name -> modInst
     current = modInst
 
-  def instantiate(t: TestModule): CFallible[ModuleInstance[Value]] =
+  def instantiate(t: TestModule): CFallible[ModuleInstance] =
     t match
       case ValidModule(m) =>
         val mod = readModule(m)

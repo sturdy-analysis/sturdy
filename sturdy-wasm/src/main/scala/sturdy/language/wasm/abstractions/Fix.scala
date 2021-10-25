@@ -24,14 +24,14 @@ trait Fix extends Interpreter:
     case _ => -1
 
 
-  final def frameSensitive(using frame: CallFrame[FrameData[Value], _, _, _]): Sensitivity[FixIn[Value], FrameData[Value]] = new Sensitivity {
-    override def emptyContext: FrameData[Value] = FrameData.empty
+  final def frameSensitive(using frame: CallFrame[FrameData, _, _, _]): Sensitivity[FixIn[Value], FrameData] = new Sensitivity {
+    override def emptyContext: FrameData = FrameData.empty
 
     override def switchCall(dom: FixIn[Value]): Boolean = dom match
       case _: FixIn.EnterWasmFunction[Value] => true // called by invoke and invokeExported
       case _ => false
 
-    override def apply(dom: FixIn[Value]): FrameData[Value] = frame.getFrameData
+    override def apply(dom: FixIn[Value]): FrameData = frame.getFrameData
   }
 
   final def callSitesLogger() = fix.context.callSites[FixIn[Value], Call | CallIndirect] {
@@ -49,11 +49,11 @@ trait Fix extends Interpreter:
       case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
 
   enum CfgNode:
-    case Instruction(inst: Inst, loc: InstLoc[_])
-    case Call(inst: swam.syntax.Call | CallIndirect, loc: InstLoc[_])
+    case Instruction(inst: Inst, loc: InstLoc)
+    case Call(inst: swam.syntax.Call | CallIndirect, loc: InstLoc)
     case CallReturn(callNode: Call) extends CfgNode, fix.CallReturnNode[Call]
-    case Enter(funId: FuncId[Value]) extends CfgNode, fix.ImportantControlNode
-    case Exit(funId: FuncId[Value]) extends CfgNode, fix.ImportantControlNode
+    case Enter(funId: FuncId) extends CfgNode, fix.ImportantControlNode
+    case Exit(funId: FuncId) extends CfgNode, fix.ImportantControlNode
 
     override def toString: String = this match
       case Instruction(inst, loc) => inst match

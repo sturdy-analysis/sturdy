@@ -16,7 +16,7 @@ class Binarytrees:
   val (interp, modInst) = getInterpAndModule()
   val funcName = "_start"
 
-  def getInterpAndModule(): (ConstantAnalysis.Instance, ModuleInstance[ConstantAnalysis.Value]) =
+  def getInterpAndModule(): (ConstantAnalysis.Instance, ModuleInstance) =
     val base = "/sturdy/language/wasm/benchmarksgame/src"
 
     val resource = classOf[Binarytrees].getResourceAsStream(base ++ "/binarytrees.wasm")

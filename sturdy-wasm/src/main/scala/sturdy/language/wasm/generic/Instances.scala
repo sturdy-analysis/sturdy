@@ -22,24 +22,21 @@ given Structural[TableAddr] with {}
 given Structural[MemoryAddr] with {}
 given Structural[GlobalAddr] with {}
 
-case class FuncId[V](mod: ModuleInstance[V], funcIx: Int):
-  override def toString: String = s"$mod.$funcIx"
-
-trait ModuleInstance[V]:
+class ModuleInstance:
   var functionTypes: Vector[FuncType] = Vector.empty
-  var functions: Vector[FunctionInstance[V]] = Vector.empty
+  var functions: Vector[FunctionInstance] = Vector.empty
   var tableAddrs: Vector[TableAddr] = Vector.empty
   var memoryAddrs: Vector[MemoryAddr] = Vector.empty
   var globalAddrs: Vector[GlobalAddr] = Vector.empty
-  var elems: Vector[ElemInstance[V]] = Vector.empty
+  var elems: Vector[ElemInstance] = Vector.empty
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
   override def toString: Name = Integer.toHexString(this.hashCode)
 
-given moduleInstanceIsSound[cV, aV]: Soundness[ModuleInstance[cV], ModuleInstance[aV]] with
+given moduleInstanceIsSound: Soundness[ModuleInstance, ModuleInstance] with
   // TODO: not optimal, because we don't check soundness of the function instances' modules
-  override def isSound(c: ModuleInstance[cV], a: ModuleInstance[aV]): IsSound =
+  override def isSound(c: ModuleInstance, a: ModuleInstance): IsSound =
     given vecIsSound[V](using Structural[V]): Structural[Vector[V]] with {}
     given Structural[(String, ExternalValue)] with {}
     val ftSound = summon[Soundness[Vector[FuncType], Vector[FuncType]]].isSound(c.functionTypes, a.functionTypes)
@@ -57,23 +54,23 @@ given Structural[Func] with {}
 given Structural[FuncType] with {}
 given Structural[DataInstance] with {}
 
-enum FunctionInstance[V]:
-  case Wasm(module: ModuleInstance[V], funcIx: Int,  func: Func, ft: FuncType)
+enum FunctionInstance:
+  case Wasm(module: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
   case Host(hf: HostFunction)
 
   def funcType: FuncType = this match
     case Wasm(_, _, _, ft) => ft
     case Host(hf) => hf.funcType
 
-given functionInstanceIsSound[cV,aV]: Soundness[FunctionInstance[cV], FunctionInstance[aV]] with
-  override def isSound(c: FunctionInstance[cV], a: FunctionInstance[aV]): IsSound = (c,a) match
+given functionInstanceIsSound: Soundness[FunctionInstance, FunctionInstance] with
+  override def isSound(c: FunctionInstance, a: FunctionInstance): IsSound = (c,a) match
     case (FunctionInstance.Wasm(cM,_,_,_), FunctionInstance.Wasm(aM,_,_,_)) =>
       functionInstanceIsSoundFlat.isSound(c,a) &&
-        summon[Soundness[ModuleInstance[cV], ModuleInstance[aV]]].isSound(cM,aM)
+        summon[Soundness[ModuleInstance, ModuleInstance]].isSound(cM,aM)
     case _ => functionInstanceIsSoundFlat.isSound(c,a)
 
-def functionInstanceIsSoundFlat[cV,aV]: Soundness[FunctionInstance[cV], FunctionInstance[aV]] = new Soundness[FunctionInstance[cV], FunctionInstance[aV]] {
-  override def isSound(c: FunctionInstance[cV], a: FunctionInstance[aV]): IsSound = (c,a) match
+def functionInstanceIsSoundFlat: Soundness[FunctionInstance, FunctionInstance] = new Soundness[FunctionInstance, FunctionInstance] {
+  override def isSound(c: FunctionInstance, a: FunctionInstance): IsSound = (c,a) match
     case (FunctionInstance.Wasm(_,_,cFunc,cFt), FunctionInstance.Wasm(_,_,aFunc,aFt)) =>
       val fIsSound = summon[Soundness[Func,Func]].isSound(cFunc, aFunc)
       val tIsSound = summon[Soundness[FuncType,FuncType]].isSound(cFt, aFt)
@@ -85,10 +82,10 @@ def functionInstanceIsSoundFlat[cV,aV]: Soundness[FunctionInstance[cV], Function
 //case class TableInstance[V](tableType: TableType, functions: Vector[FunctionInstance[V]])
 //case class GlobalInstance[V](tpe: ValType, val value: V)
 case class DataInstance(data: ByteVector)
-case class ElemInstance[V](functions: Vector[FunctionInstance[V]])
+case class ElemInstance(functions: Vector[FunctionInstance])
 
-given elemInstanceIsSound[cV, aV](using fSoundness: Soundness[FunctionInstance[cV], FunctionInstance[aV]]): Soundness[ElemInstance[cV], ElemInstance[aV]] with
-  override def isSound(c: ElemInstance[cV], a: ElemInstance[aV]): IsSound =
+given elemInstanceIsSound(using fSoundness: Soundness[FunctionInstance, FunctionInstance]): Soundness[ElemInstance, ElemInstance] with
+  override def isSound(c: ElemInstance, a: ElemInstance): IsSound =
     seqIsSound.isSound(c.functions, a.functions)
 
 //def mapFunctionInstance[A,B](f: A => B)(x: FunctionInstance[A]): FunctionInstance[B] = x match

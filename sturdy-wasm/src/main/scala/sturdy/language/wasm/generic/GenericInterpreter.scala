@@ -29,65 +29,66 @@ import swam.syntax.*
 import scala.collection.immutable.VectorBuilder
 import scala.collection.mutable
 
-case class FrameData[V](returnArity: Int, module: ModuleInstance[V]):
+case class FrameData(returnArity: Int, module: ModuleInstance):
   override def toString: String =
     if (module == null)
       s"null:$returnArity"
     else
       s"$module:$returnArity"
-given FiniteFrameData[V]: Finite[FrameData[V]] with {}
+given FiniteFrameData: Finite[FrameData] with {}
 
-given frameDataIsSound[cV,aV]: Soundness[FrameData[cV], FrameData[aV]] with
-  override def isSound(c: FrameData[cV], a: FrameData[aV]): IsSound =
+given frameDataIsSound: Soundness[FrameData, FrameData] with
+  override def isSound(c: FrameData, a: FrameData): IsSound =
     if (c.returnArity != a.returnArity)
       return IsSound.NotSound(s"Return arities do not match: $c $a.")
     if (c.module == null && a.module == null)
       return IsSound.Sound
     if (c.module != null && a.module != null)
       return IsSound.NotSound(s"Concrete module ${c.module} not approximated by ${a.module}")
-    summon[Soundness[ModuleInstance[cV], ModuleInstance[aV]]].isSound(c.module, a.module)
+    summon[Soundness[ModuleInstance, ModuleInstance]].isSound(c.module, a.module)
 
 object FrameData:
-  def empty[V]: FrameData[V] = FrameData[V](0, null)
+  val empty: FrameData = FrameData(0, null)
 
 enum WasmException[V]:
   case Jump(labelIndex: LabelIdx, operands: List[V])
   case Return(operands: List[V])
-
-
 
 type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
   OperandStack[V]                                        
     with Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]  
     with Globals[V]                                      
     with SymbolTable[TableAddr, FuncIx, FunV, MayJoin]   
-    with DecidableMutableCallFrame[FrameData[V], Int, V]
+    with DecidableMutableCallFrame[FrameData, Int, V]
     with Except[WasmException[V], ExcV, MayJoin]         
     with Failure                                         
 
-type Imports[V] = mutable.Map[String, ModuleInstance[V]]
+type Imports = mutable.Map[String, ModuleInstance]
 
-enum InstLoc[V]:
-  case InFunction(func: FuncId[V], pc: Int)
-  case InInit(mod: ModuleInstance[V], pc: Int)
-  case InvokeExported(mod: ModuleInstance[V], funName: String)
+case class FuncId(mod: ModuleInstance, funcIx: Int):
+  override def toString: String = s"$mod.$funcIx"
+
+enum InstLoc:
+  case InFunction(func: FuncId, pc: Int)
+  case InInit(mod: ModuleInstance, pc: Int)
+  case InvokeExported(mod: ModuleInstance, funName: String)
 
   override def toString: String = this match
     case InFunction(func, pc) => s"$func:$pc"
     case InInit(mod, pc) => s"$mod.INIT:$pc"
     case InvokeExported(mod, funName) => s"$mod.$funName"
 
-  def +(i: Int): InstLoc[V] = this match
+  def +(i: Int): InstLoc = this match
     case InFunction(func, pc) => InFunction(func, pc + i)
     case InInit(mod, pc) => InInit(mod, pc + i)
     case InvokeExported(mod, funName) => throw new IllegalStateException
 
-  def withLoc(insts: Vector[Inst], offset: Int = 0): Vector[(Inst, InstLoc[V])] =
+  def withLoc(insts: Vector[Inst], offset: Int = 0): Vector[(Inst, InstLoc)] =
     insts.zipWithIndex.map((i, ix) => (i, this + ix + 1 + offset))
 
 enum FixIn[V]:
-  case Eval(inst: Inst, loc: InstLoc[V])
-  case EnterWasmFunction(id: FuncId[V], func: Func, ft: FuncType)
+  case Eval(inst: Inst, loc: InstLoc)
+  case EnterWasmFunction(id: FuncId, func: Func, ft: FuncType)
 
   override def toString: String = this match
     case Eval(i, loc) => i match
@@ -135,7 +136,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 
   inline private def fail(k: FailureKind, what: String) = effects.fail(k, s"$what in $module")
 
-  def module: ModuleInstance[V] = getFrameData.module
+  def module: ModuleInstance = getFrameData.module
 
   def evalVarInst(inst: VarInst): Unit = inst match
     case LocalGet(ix) =>
@@ -222,7 +223,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   def getGlobalValue(ga: GlobalAddr): V =
     readGlobal(ga)
 
-  def eval_open(inst: Inst, loc: InstLoc[V])(using Fixed[V]): Unit =
+  def eval_open(inst: Inst, loc: InstLoc)(using Fixed[V]): Unit =
     val opcode = inst.opcode
     if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)
       stack.push(num.evalNumeric(inst))
@@ -247,7 +248,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
         }
       case _ => throw new IllegalArgumentException(s"Unexpected instruction $inst")
 
-  def evalControlInst(inst: Inst, loc: InstLoc[V])(using Fixed[V]): Unit = inst match
+  def evalControlInst(inst: Inst, loc: InstLoc)(using Fixed[V]): Unit = inst match
     case Nop => // nothing
     case Unreachable => fail(UnreachableInstruction, inst.toString)
     case Block(bt, insts) =>
@@ -309,7 +310,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
  *   - stack: A g0 ... gok needs to become A
  *   - we don't know k, so we need to remember size of stack A
  */
-  def label(paramsArity: Int, returnArity: Int, insts: Iterable[(Inst, InstLoc[V])], branchTarget: Option[(Inst, InstLoc[V])])(using Fixed[V]): Unit =
+  def label(paramsArity: Int, returnArity: Int, insts: Iterable[(Inst, InstLoc)], branchTarget: Option[(Inst, InstLoc)])(using Fixed[V]): Unit =
     stack.withFreshOperandFrame {
       tryCatch {
         labelStack.pushLabel(returnArity)
@@ -334,7 +335,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       }
     }
 
-  def invoke(fun: FunctionInstance[V])(using Fixed[V]): Unit =
+  def invoke(fun: FunctionInstance)(using Fixed[V]): Unit =
     fun match
       case FunctionInstance.Wasm(mod, ix, func, funcType) =>
         val args = stack.popN(funcType.params.size)
@@ -352,7 +353,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
         }
         stack.pushN(res)
 
-  def enterFunction_open(id: FuncId[V], func: Func, funcType: FuncType)(using Fixed[V]): List[V] =
+  def enterFunction_open(id: FuncId, func: Func, funcType: FuncType)(using Fixed[V]): List[V] =
     val returnN = funcType.t.size
     tryCatch {
       val loc = InstLoc.InFunction(id, 0)
@@ -378,9 +379,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     }
 
 
-  inline def eval(inst: Inst, loc: InstLoc[V])(using rec: FixIn[V] => FixOut[V]): FixOut[V] =
+  inline def eval(inst: Inst, loc: InstLoc)(using rec: FixIn[V] => FixOut[V]): FixOut[V] =
     rec(FixIn.Eval(inst, loc))
-  inline def enterFunction(id: FuncId[V], func: Func, ft: FuncType)(using rec: FixIn[V] => FixOut[V]): FixOut[V] =
+  inline def enterFunction(id: FuncId, func: Func, ft: FuncType)(using rec: FixIn[V] => FixOut[V]): FixOut[V] =
     rec(FixIn.EnterWasmFunction(id, func, ft))
 
   private lazy val fixed: Fixed[V] = fix.Fixpoint { (rec: Fixed[V]) =>
@@ -394,7 +395,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   }
   inline def external[A](f: Fixed[V] ?=> A): A = f(using fixed)
 
-  def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance[V], funcName: String, args: List[V]): List[V] = external {
+  def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance, funcName: String, args: List[V]): List[V] = external {
     stack.withFreshOperandStack {
       modInst.exports.find((name, _) => name == funcName) match
         case Some((_, ExternalValue.Function(funcIx))) =>
@@ -440,7 +441,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 //    // TODO WIP
 //    ???
 
-  def evalInstructionSequence(insts: Vector[(Inst, InstLoc[V])], mod: ModuleInstance[V])(using Fixed[V]): V =
+  def evalInstructionSequence(insts: Vector[(Inst, InstLoc)], mod: ModuleInstance)(using Fixed[V]): V =
     val frameData = FrameData(1,mod)
     labelStack.withFresh(withFreshOperandStack(inNewFrame(frameData, Iterable.empty){
       insts.foreach(eval(_, _))
@@ -458,9 +459,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       stack.push(res)
     }
   
-  def resolveImports(module: Module, imports: Imports[V]):
-    (Vector[FunctionInstance[V]], Vector[GlobalAddr], Vector[TableAddr], Vector[MemoryAddr]) =
-    val funcs: VectorBuilder[FunctionInstance[V]] = VectorBuilder()
+  def resolveImports(module: Module, imports: Imports):
+    (Vector[FunctionInstance], Vector[GlobalAddr], Vector[TableAddr], Vector[MemoryAddr]) =
+    val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
     val globs: VectorBuilder[GlobalAddr] = VectorBuilder()
     val tabs: VectorBuilder[TableAddr] = VectorBuilder()
     val mems: VectorBuilder[MemoryAddr] = VectorBuilder()
@@ -520,8 +521,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     (funcs.result(), globs.result(), tabs.result(), mems.result())
 
   // we assume a valid module here
-  def initializeModule(module: Module, imports: Imports[V] = mutable.Map.empty): ModuleInstance[V] = external {
-    val modInst = new ModuleInstance[V] {}
+  def initializeModule(module: Module, imports: Imports = mutable.Map.empty): ModuleInstance = external {
+    val modInst = new ModuleInstance
     var loc = InstLoc.InInit(modInst, 0)
     // compute the initilization values for globals
     val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports)
@@ -643,7 +644,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
               //              println(s"invoke exported $funcName = $res should have $rtLength values")
               //              println(func)
             }))
-          case _: FunctionInstance.Host[V] => ??? // TODO: is it allowed to use host functions as start function?
+          case _: FunctionInstance.Host => ??? // TODO: is it allowed to use host functions as start function?
     }
     stack.ifEmpty({}, {throw IllegalStateException("Stack is not empty after module initialization.")})
     modInst

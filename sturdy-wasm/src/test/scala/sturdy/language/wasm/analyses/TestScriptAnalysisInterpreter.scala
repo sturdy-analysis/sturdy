@@ -37,12 +37,12 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
   val cInterp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
   val onlyCalls = true
   val aInterp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
-  val cModules: mutable.Map[String, ModuleInstance[CValue]] = mutable.Map()
-  val aModules: mutable.Map[String, ModuleInstance[AValue]] = mutable.Map()
-  var cCurrent: ModuleInstance[CValue] = null
-  var aCurrent: ModuleInstance[AValue] = null
-  val cImports: mutable.Map[String, ModuleInstance[CValue]] = mutable.Map()
-  val aImports: mutable.Map[String, ModuleInstance[AValue]] = mutable.Map()
+  val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
+  val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
+  var cCurrent: ModuleInstance = null
+  var aCurrent: ModuleInstance = null
+  val cImports: mutable.Map[String, ModuleInstance] = mutable.Map()
+  val aImports: mutable.Map[String, ModuleInstance] = mutable.Map()
   val convertVals: unresolved.Expr => List[ConstantAnalysis.Value] = 
     if (useTop)
       constExprToTops
@@ -74,11 +74,11 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
 
-  def getCModule(module: Option[String]): ModuleInstance[CValue] = module match
+  def getCModule(module: Option[String]): ModuleInstance = module match
     case None => cCurrent
     case Some(name) => cModules(name)
 
-  def getAModule(module: Option[String]): ModuleInstance[AValue] = module match
+  def getAModule(module: Option[String]): ModuleInstance = module match
     case None => aCurrent
     case Some(name) => aModules(name)
 
@@ -153,7 +153,7 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
     // check for soundness of the interpreter states after initialization
     assertResult(IsSound.Sound, s"after initializing module $mod")(Soundness.isSound(cInterp, aInterp))
 
-  def instantiate(t: TestModule): CFallible[ModuleInstance[CValue]] =
+  def instantiate(t: TestModule): CFallible[ModuleInstance] =
     t match
       case ValidModule(m) =>
         val mod = readModule(m)
@@ -163,7 +163,7 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
       case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
       case QuotedModule(id, s) => throw new Error("instantiation of quoted modules not yet implemented.")
 
-  def aInstantiate(t: TestModule): AFallible[ModuleInstance[AValue]] =
+  def aInstantiate(t: TestModule): AFallible[ModuleInstance] =
     t match
       case ValidModule(m) =>
         val mod = readModule(m)
