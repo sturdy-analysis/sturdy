@@ -6,11 +6,13 @@ import sturdy.effect.callframe.CallFrame
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.generic.{FuncId, FixIn, FixOut, FrameData, InstLoc}
+import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, FuncId, FunctionInstance, InstLoc, ModuleInstance}
 import sturdy.values.Finite
-import sturdy.values.{Combine, MaybeChanged, Widening, Unchanged}
+import sturdy.values.{Combine, MaybeChanged, Unchanged, Widening}
 import swam.FuncIdx
-import swam.syntax.{Loop, CallIndirect, If, Inst, Block, Call}
+import swam.syntax.{Block, Call, CallIndirect, If, Inst, Loop}
+
+import scala.collection.mutable
 
 trait Fix extends Interpreter:
   final def isFunOrWhile(dom: FixIn[Value]): Boolean = dom match
@@ -77,13 +79,39 @@ trait Fix extends Interpreter:
     case _ => None
   }
 
-//  def allCfgNodes(prog: Program, allStatements: Boolean): Set[CfgNode] =
-//    prog.fold(using {
-//      case fun => Set(CfgNode.Enter(fun), CfgNode.Exit(fun))
-//    }, {
-//      case Stm.Block(_) => Set()
-//      case s => if (allStatements) Set(CfgNode.Statement(s)) else Set()
-//    }, {
-//      case c: Exp.Call => Set(CfgNode.Call(c), CfgNode.CallReturn(c))
-//      case _ => Set()
-//    })
+
+  def allCfgNodes(modules: List[ModuleInstance]): Set[CfgNode] =
+    val nodes: mutable.Set[CfgNode] = mutable.Set.empty
+    modules.flatMap(_.functions).foreach {
+      case f@FunctionInstance.Wasm(modInst, funcIx, func, ft) =>
+        println(s"in function $f.")
+        nodes.add(CfgNode.Enter(FuncId(modInst, funcIx)))
+        nodes.add(CfgNode.Exit(FuncId(modInst, funcIx)))
+        val (_,body) = withLocations(func.body, InstLoc.InFunction(FuncId(modInst, funcIx), 0))
+        println(body)
+        nodes.addAll(body.flatMap(instToCfgNode(_)))
+      case FunctionInstance.Host(hostF) => ???
+    }
+    Set.from(nodes)
+
+  def withLocations(instr: Vector[Inst], startLoc: InstLoc): (InstLoc, Vector[(Inst, InstLoc)]) =
+    instr.foldLeft[(InstLoc, Vector[(Inst, InstLoc)])]((startLoc, Vector.empty)) { case ((loc, res), next) =>
+      println(s"visiting $next with loc $loc")
+      next match
+        case Block(_, body) =>
+          val (nestedLoc, nestedRes) = withLocations(body, loc+1)
+          (nestedLoc, res ++: (next, loc + 1) +: nestedRes)
+        case Loop(_, body) =>
+          val (nestedLoc, nestedRes) = withLocations(body, loc+1)
+          (nestedLoc, res ++: (next, loc + 1) +: nestedRes)
+        case If(_, thenInstr, elseInstr) =>
+          val (nestedLocThen, nestedResThen) = withLocations(thenInstr, loc+1)
+          val (nestedLocElse, nestedResElse) = withLocations(elseInstr, nestedLocThen)
+          (nestedLocElse, res ++: (next, loc+1) +: nestedResThen ++: nestedResElse)
+        case _ => (loc+1, res :+ (next, loc+1))
+    }
+
+  def instToCfgNode(inst: (Inst, InstLoc)): Set[CfgNode] = inst match
+    case (inst: swam.syntax.Call, loc) => Set(CfgNode.Call(inst, loc), CfgNode.CallReturn(CfgNode.Call(inst, loc)))
+    case (inst: swam.syntax.CallIndirect, loc) => Set(CfgNode.Call(inst, loc), CfgNode.CallReturn(CfgNode.Call(inst, loc)))
+    case (inst, loc) => Set(CfgNode.Instruction(inst, loc))
