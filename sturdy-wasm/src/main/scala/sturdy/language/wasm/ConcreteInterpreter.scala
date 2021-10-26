@@ -69,7 +69,7 @@ object ConcreteInterpreter extends Interpreter:
 
 
     val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(
-      HostFunction.Exit() -> { args =>
+      HostFunction.proc_exit -> { args =>
         val exitCode = args.head
         f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
       }

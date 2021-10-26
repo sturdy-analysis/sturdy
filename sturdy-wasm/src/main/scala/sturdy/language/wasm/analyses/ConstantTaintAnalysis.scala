@@ -35,7 +35,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFunctionValue, Fix:
+object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFunctionValue, Fix, ControlFlow:
   type MayJoin[A] = WithJoin[A]
   type Addr = Topped[Int]
   type AByte = TaintProduct[Topped[Byte]]
@@ -62,7 +62,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
           OptionA.NoneSome(vec)
 
     val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(
-      HostFunction.Exit() -> { args =>
+      HostFunction.proc_exit -> { args =>
         val exitCode = args.head
         f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
       }

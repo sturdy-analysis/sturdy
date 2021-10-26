@@ -1,4 +1,4 @@
-package sturdy.language.wasm.analyses
+package sturdy.language.wasm.analyses.constant
 
 import cats.effect.{Blocker, IO}
 import org.scalatest.Assertions.*
@@ -35,8 +35,7 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
   type AValue = ConstantAnalysis.Value
 
   val cInterp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
-  val onlyCalls = true
-  val aInterp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
+  val aInterp = ConstantAnalysis(FrameData.empty, Iterable.empty, cfgSensitive = true, cfgOnlyCalls = true)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

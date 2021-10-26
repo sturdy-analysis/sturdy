@@ -21,8 +21,7 @@ class Binarytrees:
 
     val resource = classOf[Binarytrees].getResourceAsStream(base ++ "/binarytrees.wasm")
     val module = readBinaryModule(resource)
-    val onlyCalls = true
-    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
+    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, cfgSensitive = true, cfgOnlyCalls = true)
     val modInst = interp.initializeModule(module)
     (interp,modInst)
 

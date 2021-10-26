@@ -6,13 +6,11 @@ import sturdy.effect.callframe.CallFrame
 import sturdy.fix
 import sturdy.fix.context.Sensitivity
 import sturdy.language.wasm.Interpreter
-import sturdy.language.wasm.generic.{FixIn, FixOut, FrameData, FuncId, FunctionInstance, InstLoc, ModuleInstance}
+import sturdy.language.wasm.generic.{FuncId, FixIn, FixOut, FrameData, InstLoc}
 import sturdy.values.Finite
-import sturdy.values.{Combine, MaybeChanged, Unchanged, Widening}
+import sturdy.values.{Combine, MaybeChanged, Widening, Unchanged}
 import swam.FuncIdx
-import swam.syntax.{Block, Call, CallIndirect, If, Inst, Loop}
-
-import scala.collection.mutable
+import swam.syntax.{Loop, CallIndirect, If, Inst, Block, Call}
 
 trait Fix extends Interpreter:
   final def isFunOrWhile(dom: FixIn[Value]): Boolean = dom match
@@ -49,36 +47,6 @@ trait Fix extends Interpreter:
       case (FixOut.Eval(), FixOut.Eval()) => Unchanged(FixOut.Eval())
       case (FixOut.ExitWasmFunction(vs1), FixOut.ExitWasmFunction(vs2)) => Combine[List[Value], W](vs1, vs2).map(FixOut.ExitWasmFunction.apply)
       case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
-
-  enum CfgNode:
-    case Instruction(inst: Inst, loc: InstLoc)
-    case Call(inst: swam.syntax.Call | CallIndirect, loc: InstLoc)
-    case CallReturn(callNode: Call) extends CfgNode, fix.CallReturnNode[Call]
-    case Enter(funId: FuncId) extends CfgNode, fix.ImportantControlNode
-    case Exit(funId: FuncId) extends CfgNode, fix.ImportantControlNode
-
-    override def toString: String = this match
-      case Instruction(inst, loc) => inst match
-        case Block(_, _) => s"Block @$loc"
-        case Loop(_, _) => s"Loop @$loc"
-        case If(_, _, _) => s"If @$loc"
-        case _ => s"$inst @$loc"
-      case Call(inst, loc) => s"$inst @$loc"
-      case CallReturn(call) => s"CallReturn(${call.inst}) @${call.loc}"
-      case Enter(funId) => s"enter $funId"
-      case Exit(funId) => s"exit $funId"
-
-  def control[Ctx](sensitive: Boolean, onlyCalls: Boolean)(using effect: ObservableJoin) = fix.control[Ctx, FixIn[Value], FixOut[Value], CfgNode](sensitive) {
-    case FixIn.Eval(c: Call, loc) => Some(CfgNode.Call(c, loc))
-    case FixIn.Eval(c: CallIndirect, loc) => Some(CfgNode.Call(c, loc))
-    case FixIn.Eval(inst, loc) => if (onlyCalls) None else Some(CfgNode.Instruction(inst, loc))
-    case FixIn.EnterWasmFunction(id, _, _) => Some(CfgNode.Enter(id))
-  } {
-    case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
-    case (FixIn.Eval(c: (Call | CallIndirect), loc), _) => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
-    case _ => None
-  }
-
 
   def allCfgNodes(modules: List[ModuleInstance]): Set[CfgNode] =
     val nodes: mutable.Set[CfgNode] = mutable.Set.empty

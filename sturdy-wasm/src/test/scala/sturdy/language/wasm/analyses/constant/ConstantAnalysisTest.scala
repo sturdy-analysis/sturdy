@@ -1,4 +1,4 @@
-package sturdy.language.wasm.analyses
+package sturdy.language.wasm.analyses.constant
 
 import cats.effect.Blocker
 import cats.effect.IO
@@ -9,6 +9,7 @@ import sturdy.effect.failure.FailureException
 import sturdy.effect.failure.FailureKind
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
 import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.generic.UnreachableInstruction
@@ -129,8 +130,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 
 def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.parse(path)
-  val onlyCalls = false
-  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
+  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, cfgSensitive = true, cfgOnlyCalls = false)
   val modInst = interp.initializeModule(module)
   val result = interp.effects.fallible(
     interp.invokeExported(modInst, funName, args)

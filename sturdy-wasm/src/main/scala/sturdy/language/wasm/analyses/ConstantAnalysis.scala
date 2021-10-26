@@ -34,7 +34,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue, Fix:
+object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue, Fix, ControlFlow:
   type MayJoin[A] = WithJoin[A]
   type Addr = Topped[Int]
   type Bytes = Seq[Topped[Byte]]
@@ -43,7 +43,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
   type FuncIx = Topped[Int]
   type FunV = Topped[Powerset[FunctionInstance]]
 
-  given ConstantSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
@@ -59,15 +59,15 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
         case Topped.Top =>
           OptionA.NoneSome(vec)
 
-    val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(
-      HostFunction.Exit() -> { args =>
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] = hostFunc match
+      case HostFunction.proc_exit =>
         val exitCode = args.head
         f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
-      }
-    )
-
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] =
-      runtime(hostFunc)(args)
+      case HostFunction.fd_close => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_read => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_seek => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
 
   type InState =
     (ConcreteCallFrame.Vars[Value],
@@ -109,12 +109,12 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     def setAllState(all: AllState) = setInState(all)
   }
 
-  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value], cfgOnlyCalls: Boolean): Instance =
+  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value], cfgSensitive: Boolean, cfgOnlyCalls: Boolean): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
     given Effects = effects
-    new Instance(effects, cfgOnlyCalls)
+    new Instance(effects, cfgSensitive, cfgOnlyCalls)
 
-  class Instance(effects: Effects, cfgOnlyCalls: Boolean)(using Failure, Effectful)
+  class Instance(effects: Effects, cfgSensitive: Boolean, cfgOnlyCalls: Boolean)(using Failure, Effectful)
     extends GenericInstance(effects) :
 
     private given Effects = effects
@@ -125,7 +125,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     val callSites = callSitesLogger()
     type Context = (FrameData, CallString)
 
-    val cfg = control[Context](sensitive = true, cfgOnlyCalls)
+    val cfg = control[Context](cfgSensitive, cfgOnlyCalls)
     val constantInstructions = constantInstructionsLogger()
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
