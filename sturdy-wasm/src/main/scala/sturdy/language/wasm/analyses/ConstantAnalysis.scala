@@ -123,14 +123,14 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     val callSites = callSitesLogger()
-    type Context = (FrameData, CallString)
+    type Context = CallString
 
     val cfg = control[Context](cfgSensitive, cfgOnlyCalls)
     val constantInstructions = constantInstructionsLogger()
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
       fix.log(callSites && constantInstructions,
-        fix.contextSensitive[Context, FixIn[Value], FixOut[Value]](frameSensitive && callSites.callString(0),
+        fix.contextSensitive[Context, FixIn[Value], FixOut[Value]](callSites.callString(0),
           fix.log(cfg.logger,
             fix.filter(isFunOrWhile,
               fix.iter.topmost

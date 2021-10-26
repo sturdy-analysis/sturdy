@@ -24,16 +24,6 @@ trait Fix extends Interpreter:
     case _ => -1
 
 
-  final def frameSensitive(using frame: CallFrame[FrameData, _, _, _]): Sensitivity[FixIn[Value], FrameData] = new Sensitivity {
-    override def emptyContext: FrameData = FrameData.empty
-
-    override def switchCall(dom: FixIn[Value]): Boolean = dom match
-      case _: FixIn.EnterWasmFunction[Value] => true // called by invoke and invokeExported
-      case _ => false
-
-    override def apply(dom: FixIn[Value]): FrameData = frame.getFrameData
-  }
-
   final def callSitesLogger() = fix.context.callSites[FixIn[Value], Call | CallIndirect] {
     case FixIn.Eval(c: Call, _) => Some(c)
     case FixIn.Eval(c: CallIndirect, _) => Some(c)
@@ -47,39 +37,3 @@ trait Fix extends Interpreter:
       case (FixOut.Eval(), FixOut.Eval()) => Unchanged(FixOut.Eval())
       case (FixOut.ExitWasmFunction(vs1), FixOut.ExitWasmFunction(vs2)) => Combine[List[Value], W](vs1, vs2).map(FixOut.ExitWasmFunction.apply)
       case _ => throw new IllegalArgumentException(s"Cannot join outputs of different kind, $out1 and $out2")
-
-  def allCfgNodes(modules: List[ModuleInstance]): Set[CfgNode] =
-    val nodes: mutable.Set[CfgNode] = mutable.Set.empty
-    modules.flatMap(_.functions).foreach {
-      case f@FunctionInstance.Wasm(modInst, funcIx, func, ft) =>
-        println(s"in function $f.")
-        nodes.add(CfgNode.Enter(FuncId(modInst, funcIx)))
-        nodes.add(CfgNode.Exit(FuncId(modInst, funcIx)))
-        val (_,body) = withLocations(func.body, InstLoc.InFunction(FuncId(modInst, funcIx), 0))
-        println(body)
-        nodes.addAll(body.flatMap(instToCfgNode(_)))
-      case FunctionInstance.Host(hostF) => ???
-    }
-    Set.from(nodes)
-
-  def withLocations(instr: Vector[Inst], startLoc: InstLoc): (InstLoc, Vector[(Inst, InstLoc)]) =
-    instr.foldLeft[(InstLoc, Vector[(Inst, InstLoc)])]((startLoc, Vector.empty)) { case ((loc, res), next) =>
-      println(s"visiting $next with loc $loc")
-      next match
-        case Block(_, body) =>
-          val (nestedLoc, nestedRes) = withLocations(body, loc+1)
-          (nestedLoc, res ++: (next, loc + 1) +: nestedRes)
-        case Loop(_, body) =>
-          val (nestedLoc, nestedRes) = withLocations(body, loc+1)
-          (nestedLoc, res ++: (next, loc + 1) +: nestedRes)
-        case If(_, thenInstr, elseInstr) =>
-          val (nestedLocThen, nestedResThen) = withLocations(thenInstr, loc+1)
-          val (nestedLocElse, nestedResElse) = withLocations(elseInstr, nestedLocThen)
-          (nestedLocElse, res ++: (next, loc+1) +: nestedResThen ++: nestedResElse)
-        case _ => (loc+1, res :+ (next, loc+1))
-    }
-
-  def instToCfgNode(inst: (Inst, InstLoc)): Set[CfgNode] = inst match
-    case (inst: swam.syntax.Call, loc) => Set(CfgNode.Call(inst, loc), CfgNode.CallReturn(CfgNode.Call(inst, loc)))
-    case (inst: swam.syntax.CallIndirect, loc) => Set(CfgNode.Call(inst, loc), CfgNode.CallReturn(CfgNode.Call(inst, loc)))
-    case (inst, loc) => Set(CfgNode.Instruction(inst, loc))

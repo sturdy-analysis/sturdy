@@ -19,7 +19,7 @@ class TestScriptAnalysisInterpreterTest extends AnyFlatSpec, Matchers:
 
   val spectest = parse(pathSpectest)
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast") && !p.toString.endsWith("memory_grow.wast")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
       val file = Source.fromURI(p.toUri)
       val sourceCode = file.getLines().mkString("\n")

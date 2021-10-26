@@ -2,8 +2,9 @@ package sturdy.language.wasm
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.language.wasm.analyses.ConstantAnalysis
-import sturdy.language.wasm.generic.{FrameData, FunctionInstance, InstLoc, FuncId}
+import sturdy.language.wasm.generic.{FunctionInstance, FuncId, InstLoc, FrameData}
 import sturdy.values.Topped
 
 import java.nio.file.{Path, Paths}
@@ -19,8 +20,7 @@ class CfgNodesTest extends AnyFlatSpec, Matchers:
 
 def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]) =
   val module = parse(path)
-  val onlyCalls = false
-  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, onlyCalls)
+  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, cfgSensitive = false, cfgOnlyCalls = false)
   val modInst = interp.initializeModule(module)
   val result = interp.effects.fallible(
     interp.invokeExported(modInst, "fac-rec", List(ConstantAnalysis.Value.Int64(Topped.Actual(3))))
@@ -30,7 +30,7 @@ def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]
   )
   println(interp.cfg.toGraphViz)
 
-  val allNodes = ConstantAnalysis.allCfgNodes(List(modInst))
+  val allNodes = ControlFlow.allCfgNodes(List(modInst))
   println("all nodes:")
   allNodes.toList.sortBy(_.toString).foreach(println(_))
 

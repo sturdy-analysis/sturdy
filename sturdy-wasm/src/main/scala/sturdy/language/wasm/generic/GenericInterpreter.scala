@@ -83,8 +83,10 @@ enum InstLoc:
     case InInit(mod, pc) => InInit(mod, pc + i)
     case InvokeExported(mod, funName) => throw new IllegalStateException
 
-  def withLoc(insts: Vector[Inst], offset: Int = 0): Vector[(Inst, InstLoc)] =
-    insts.zipWithIndex.map((i, ix) => (i, this + ix + 1 + offset))
+  def -(that: InstLoc): Int = (this, that) match
+    case (InFunction(func1, pc1), InFunction(func2, pc2)) if func1 == func2 => pc2 - pc1
+    case (InInit(mod1, pc1), InInit(mod2, pc2)) if mod1 == mod2 => pc2 - pc1
+    case _ => throw new MatchError((this, that))
 
 enum FixIn[V]:
   case Eval(inst: Inst, loc: InstLoc)
@@ -251,19 +253,19 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   def evalControlInst(inst: Inst, loc: InstLoc)(using Fixed[V]): Unit = inst match
     case Nop => // nothing
     case Unreachable => fail(UnreachableInstruction, inst.toString)
-    case Block(bt, insts) =>
-      label(paramsArity(bt), returnArity(bt), loc.withLoc(insts), None)
+    case b@Block(bt, insts) =>
+      label(BlockId(b), paramsArity(bt), returnArity(bt), insts, None)
     case l@Loop(bt, insts) =>
       val pt = paramsArity(bt)
-      label(pt, pt, loc.withLoc(insts), Some((l, loc)))
-    case If(bt, thnInsts, elsInsts) =>
+      label(BlockId(l), pt, pt, insts, Some((l, loc)))
+    case ifInst@If(bt, thnInsts, elsInsts) =>
       val isZero = num.evalNumeric(i32.Eqz)
       val rt = returnArity(bt)
       boolBranch[Unit](isZero) {
         // v == 0: else branch
-        label(paramsArity(bt), rt, loc.withLoc(elsInsts, offset = thnInsts.length), None)
+        label(BlockId(ifInst -> false), paramsArity(bt), rt, elsInsts, None)
       } {
-        label(paramsArity(bt), rt, loc.withLoc(thnInsts), None)
+        label(BlockId(ifInst -> true), paramsArity(bt), rt, thnInsts, None)
       }
     case Br(labelIndex) =>
       branch(labelIndex)
@@ -310,13 +312,16 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
  *   - stack: A g0 ... gok needs to become A
  *   - we don't know k, so we need to remember size of stack A
  */
-  def label(paramsArity: Int, returnArity: Int, insts: Iterable[(Inst, InstLoc)], branchTarget: Option[(Inst, InstLoc)])(using Fixed[V]): Unit =
+  def label(block: BlockId, paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[(Inst, InstLoc)])(using Fixed[V]): Unit =
     stack.withFreshOperandFrame {
       tryCatch {
         labelStack.pushLabel(returnArity)
         try
-          for ((i,loc) <- insts)
-            eval(i, loc)
+          val modInst = module
+          for ((inst, ix) <- insts.zipWithIndex) {
+            val loc = modInst.blockInstLocs((block, ix))
+            eval(inst, loc)
+          }
         finally labelStack.popLabel()
       } { ex =>
         stack.clearCurrentOperandFrame()
@@ -356,8 +361,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   def enterFunction_open(id: FuncId, func: Func, funcType: FuncType)(using Fixed[V]): List[V] =
     val returnN = funcType.t.size
     tryCatch {
-      val loc = InstLoc.InFunction(id, 0)
-      label(0, returnN, loc.withLoc(func.body), None)
+      label(BlockId(id), 0, returnN, func.body, None)
     } { ex =>
       stack.clearCurrentOperandFrame()
       ex match {
@@ -441,10 +445,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 //    // TODO WIP
 //    ???
 
-  def evalInstructionSequence(insts: Vector[(Inst, InstLoc)], mod: ModuleInstance)(using Fixed[V]): V =
+  def evalInstructionSequence(block: BlockId, insts: Vector[Inst], mod: ModuleInstance)(using Fixed[V]): V =
     val frameData = FrameData(1,mod)
     labelStack.withFresh(withFreshOperandStack(inNewFrame(frameData, Iterable.empty){
-      insts.foreach(eval(_, _))
+      for ((inst, ix) <- insts.zipWithIndex) {
+        val loc = mod.blockInstLocs((block, ix))
+        eval(inst, loc)
+      }
       stack.pop()
     }))
 
@@ -528,9 +535,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     val (funcImports, globImports, tabImports, memImpors) = resolveImports(module, imports)
     modInst.globalAddrs = globImports
     val globValues = module.globals.map { glob =>
-      val insts = loc.withLoc(glob.init)
-      loc = loc + glob.init.length
-      evalInstructionSequence(insts, modInst)
+      val id = BlockId(glob)
+      loc = modInst.registerBlockSizes(id, loc, glob.init)
+      evalInstructionSequence(id, glob.init, modInst)
     }
     // in the current swam version reference vectors are already provided via the elem fields of the module
     // -> we don't have to compute anything here for now
@@ -538,12 +545,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     // allocate structures for the new module
     // types
     modInst.functionTypes = module.types
+
     // functions
     val funcImportsSize = funcImports.size
-    modInst.functions = funcImports ++
-      module.funcs.view.zipWithIndex.map { (func, ix) =>
-        FunctionInstance.Wasm(modInst, funcImportsSize + ix, func, module.types(func.tpe))
-      }
+    funcImports.foreach(modInst.addFunction)
+    module.funcs.view.zipWithIndex.map { (func, ix) =>
+      FunctionInstance.Wasm(modInst, funcImportsSize + ix, func, module.types(func.tpe))
+    }.foreach(modInst.addFunction)
+
     // globals
     modInst.globalAddrs = modInst.globalAddrs :++ module.globals.zip(globValues).map {
       case (Global(GlobalType(tpe, _), _), value) =>
@@ -587,48 +596,42 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     }
 
     // initialize tables and memories
-    val frameData = FrameData(1, modInst)
-    // TODO: do we need a fresh stack and label stack here?
-    inNewFrame(frameData, Iterable.empty) {
-      // memory
-      module.data.zipWithIndex.foreach {
-        case (Data(memIdx, off, init), i) =>
-          assert(memIdx == 0)
-          val insts = loc.withLoc(off)
-          loc = loc + off.length
-          for ((i, loc) <- insts)
-            eval(i, loc)
-          val base = stack.pop()
-          val bytes = init.toByteVector.toIterable
+    // memory
+    module.data.zipWithIndex.foreach {
+      case (data@Data(memIdx, off, init), i) =>
+        assert(memIdx == 0)
+        val id = BlockId(data)
+        loc = modInst.registerBlockSizes(id, loc, off)
+        val base = evalInstructionSequence(id, off, modInst)
+        val bytes = init.toByteVector.toIterable
+        inNewFrame(FrameData(1, modInst), Iterable.empty) {
           bytes.zipWithIndex.foreach { (byte, byteIdx) =>
             stack.push(base)
             stack.push(num.evalNumeric(i32.Const(byte.toInt)))
-            evalMemoryInst(i32.Store8(0, byteIdx))
+            store(i32.Store8(0, byteIdx))
           }
-        // in case we want to use memory.init here:
-        //stack.push(num.evalNumeric(i32.Const(0)))
-        //stack.push(num.evalNumeric(i32.Const((init.size / 8).toInt))) //is it ok to convert long to int here?
-        //memoryInit(i)
-        // memoryDrop(i) for the current wasm version
-      }
-      // tables
-      module.elem.zipWithIndex.foreach {
-        case (Elem(tableIdx, off, init), i) =>
-          val insts = loc.withLoc(off)
-          loc = loc + off.length
-          for ((i, loc) <- insts)
-            eval(i, loc)
-          val base = stack.pop()
-          init.zipWithIndex.foreach { (funcIx, i) =>
-            stack.push(base)
-            stack.push(num.evalNumeric(i32.Const(i)))
-            stack.push(num.evalNumeric(i32.Add)) // adds index to base
-            val idx = stack.pop() // stack is empty
-            val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
-            tableSet(TableAddr(modInst.tableAddrs(tableIdx).addr), valueToFuncIx(idx), funV)
-            // TODO add failure conditions for table writing
-          }
-      }
+        }
+      // in case we want to use memory.init here:
+      //stack.push(num.evalNumeric(i32.Const(0)))
+      //stack.push(num.evalNumeric(i32.Const((init.size / 8).toInt))) //is it ok to convert long to int here?
+      //memoryInit(i)
+      // memoryDrop(i) for the current wasm version
+    }
+    // tables
+    module.elem.zipWithIndex.foreach {
+      case (elem@Elem(tableIdx, off, init), i) =>
+        val id = BlockId(elem)
+        loc = modInst.registerBlockSizes(id, loc, off)
+        val base = evalInstructionSequence(id, off, modInst)
+        init.zipWithIndex.foreach { (funcIx, i) =>
+          stack.push(base)
+          stack.push(num.evalNumeric(i32.Const(i)))
+          stack.push(num.evalNumeric(i32.Add)) // adds index to base
+          val idx = stack.pop() // stack is empty
+          val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
+          tableSet(TableAddr(modInst.tableAddrs(tableIdx).addr), valueToFuncIx(idx), funV)
+          // TODO add failure conditions for table writing
+        }
     }
 
     // invoke the start function

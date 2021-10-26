@@ -3,7 +3,7 @@ package sturdy.language.wasm.generic
 import scodec.bits.ByteVector
 import sturdy.{IsSound, Soundness, AbstractlySound, seqIsSound}
 import swam.*
-import swam.syntax.Func
+import swam.syntax.*
 import sturdy.values.Finite
 import sturdy.values.Join
 import sturdy.values.MaybeChanged
@@ -22,9 +22,31 @@ given Structural[TableAddr] with {}
 given Structural[MemoryAddr] with {}
 given Structural[GlobalAddr] with {}
 
+class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Elem):
+  override def equals(obj: Any): Boolean = obj match
+    case that: BlockId => this.b match
+      case _: FuncId => this.b == that.b
+      case _: Block | _: Loop | _: Global | _: Data | _: Elem => this.b eq that.b
+      case (ifInst1: If, bool1) => that.b match
+        case (ifInst2, bool2) => (ifInst1 eq ifInst2) && bool1 == bool2
+        case _ => false
+    case _ => false
+  override def hashCode(): Int = b.hashCode
+
 class ModuleInstance:
   var functionTypes: Vector[FuncType] = Vector.empty
-  var functions: Vector[FunctionInstance] = Vector.empty
+
+  private var _functions: Vector[FunctionInstance] = Vector.empty
+  def functions: Vector[FunctionInstance] = _functions
+  def addFunction(fun: FunctionInstance): Unit =
+    _functions :+= fun
+    fun match
+      case FunctionInstance.Wasm(_, ix, func, _) =>
+        val funcId = FuncId(this, ix)
+        val loc = InstLoc.InFunction(funcId, 0)
+        registerBlockSizes(BlockId(funcId), loc, func.body)
+      case _: FunctionInstance.Host => // nothing
+
   var tableAddrs: Vector[TableAddr] = Vector.empty
   var memoryAddrs: Vector[MemoryAddr] = Vector.empty
   var globalAddrs: Vector[GlobalAddr] = Vector.empty
@@ -32,7 +54,54 @@ class ModuleInstance:
   var data: Vector[DataInstance] = Vector.empty
   var exports: Vector[(String, ExternalValue)] = Vector.empty
 
+  /** For each block, where does each contained instruction start. */
+  var blockInstLocs: Map[(BlockId, Int), InstLoc] = Map.empty
+
+  def registerBlockSizes(block: BlockId, loc: InstLoc, insts: Iterable[Inst]): InstLoc =
+    var current = loc
+    for ((inst, ix) <- insts.zipWithIndex)
+      blockInstLocs += (block, ix) -> current
+      inst match
+        case inst@If(_, thn, els) =>
+          val thnLoc = current + 1
+          val elsLoc = registerBlockSizes(BlockId(inst -> true), thnLoc, thn)
+          current = registerBlockSizes(BlockId(inst -> false), elsLoc, els)
+        case inst@Block(_, body) =>
+          val id = BlockId(inst)
+          val bodyLoc = current + 1
+          current = registerBlockSizes(id, bodyLoc, body)
+        case inst@Loop(_, body) =>
+          val id = BlockId(inst)
+          val bodyLoc = current + 1
+          current = registerBlockSizes(id, bodyLoc, body)
+        case _ =>
+          current = current + 1
+    current
+
+
   override def toString: Name = Integer.toHexString(this.hashCode)
+
+given Structural[Func] with {}
+given Structural[FuncType] with {}
+given Structural[DataInstance] with {}
+
+enum FunctionInstance:
+  case Wasm(module: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
+  case Host(hf: HostFunction)
+
+  def funcType: FuncType = this match
+    case Wasm(_, _, _, ft) => ft
+    case Host(hf) => hf.funcType
+
+enum ExternalValue:
+  case Function(addr: Int)
+  case Table(addr: Int)
+  case Memory(addr: Int)
+  case Global(addr: Int)
+
+
+
+
 
 given moduleInstanceIsSound: Soundness[ModuleInstance, ModuleInstance] with
   // TODO: not optimal, because we don't check soundness of the function instances' modules
@@ -49,18 +118,6 @@ given moduleInstanceIsSound: Soundness[ModuleInstance, ModuleInstance] with
     val expSound = summon[Soundness[Vector[(String,ExternalValue)], Vector[(String,ExternalValue)]]].isSound(c.exports, a.exports)
 
     ftSound && fSound && tabSound && memSound && globSound && elemSound && datSound && expSound
-
-given Structural[Func] with {}
-given Structural[FuncType] with {}
-given Structural[DataInstance] with {}
-
-enum FunctionInstance:
-  case Wasm(module: ModuleInstance, funcIx: Int,  func: Func, ft: FuncType)
-  case Host(hf: HostFunction)
-
-  def funcType: FuncType = this match
-    case Wasm(_, _, _, ft) => ft
-    case Host(hf) => hf.funcType
 
 given functionInstanceIsSound: Soundness[FunctionInstance, FunctionInstance] with
   override def isSound(c: FunctionInstance, a: FunctionInstance): IsSound = (c,a) match
@@ -90,9 +147,3 @@ given elemInstanceIsSound(using fSoundness: Soundness[FunctionInstance, Function
 
 //def mapFunctionInstance[A,B](f: A => B)(x: FunctionInstance[A]): FunctionInstance[B] = x match
 //  case Wasm(mod, fun, ft) => Wasm(mod.mapModuleInstance(f), fun, ft)
-
-enum ExternalValue:
-  case Function(addr: Int)
-  case Table(addr: Int)
-  case Memory(addr: Int)
-  case Global(addr: Int)
