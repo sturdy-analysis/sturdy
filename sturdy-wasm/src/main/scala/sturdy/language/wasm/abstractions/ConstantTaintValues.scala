@@ -3,6 +3,7 @@ package sturdy.language.wasm.abstractions
 import sturdy.effect.failure.Failure
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Interpreter
+import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.values.Finite
 import sturdy.values.Topped
 import sturdy.values.taint.*
@@ -29,9 +30,18 @@ trait ConstantTaintValues extends Interpreter:
     case Topped.Actual(false) => Topped.Actual(0)
   })
 
-  def liftConcreteValue(cv: ConcreteInterpreter.Value): Value = cv match
-    case ConcreteInterpreter.Value.TopValue => Value.TopValue
-    case ConcreteInterpreter.Value.Int32(i) => Value.Int32(untainted(Topped.Actual(i)))
-    case ConcreteInterpreter.Value.Int64(l) => Value.Int64(untainted(Topped.Actual(l)))
-    case ConcreteInterpreter.Value.Float32(f) => Value.Float32(untainted(Topped.Actual(f)))
-    case ConcreteInterpreter.Value.Float64(d) => Value.Float64(untainted(Topped.Actual(d)))
+  def liftConcreteValue(cv: ConcreteInterpreter.Value, doTaint: Boolean = false): Value =
+    cv match
+      case ConcreteInterpreter.Value.TopValue => Value.TopValue
+      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(if (doTaint) then tainted(Topped.Actual(i)) else untainted(Topped.Actual(i)))
+      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(if (doTaint) then tainted(Topped.Actual(l)) else untainted(Topped.Actual(l)))
+      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(if (doTaint) then tainted(Topped.Actual(f)) else untainted(Topped.Actual(f)))
+      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(if (doTaint) then tainted(Topped.Actual(d)) else untainted(Topped.Actual(d)))
+
+  def liftConstantValue(cv: ConstantAnalysis.Value, doTaint: Boolean = false): Value =
+    cv match
+      case ConstantAnalysis.Value.TopValue => Value.TopValue
+      case ConstantAnalysis.Value.Int32(i) => Value.Int32(if (doTaint) then tainted(i) else untainted(i))
+      case ConstantAnalysis.Value.Int64(l) => Value.Int64(if (doTaint) then tainted(l) else untainted(l))
+      case ConstantAnalysis.Value.Float32(f) => Value.Float32(if (doTaint) then tainted(f) else untainted(f))
+      case ConstantAnalysis.Value.Float64(d) => Value.Float64(if (doTaint) then tainted(d) else untainted(d))

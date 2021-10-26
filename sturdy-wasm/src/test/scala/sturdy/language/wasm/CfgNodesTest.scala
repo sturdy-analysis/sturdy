@@ -24,11 +24,11 @@ def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]
   val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, CfgConfig.AllNodes(sensitive = false))
   val modInst = interp.initializeModule(module)
   val result = interp.effects.fallible(
-    interp.invokeExported(modInst, "fac-rec", List(ConstantAnalysis.Value.Int64(Topped.Actual(3))))
+    interp.invokeExported(modInst, "test1", List(ConstantAnalysis.Value.Int32(Topped.Actual(1))))
   )
-  val result2 = interp.effects.fallible(
-    interp.invokeExported(modInst, "fac-iter", List(ConstantAnalysis.Value.Int64(Topped.Actual(3))))
-  )
+  //val result2 = interp.effects.fallible(
+  //  interp.invokeExported(modInst, "test1", List(ConstantAnalysis.Value.Int32(Topped.Actual(0))))
+  //)
   println(interp.cfg.toGraphViz)
 
   val allNodes = ControlFlow.allCfgNodes(List(modInst))

@@ -1,4 +1,25 @@
 (module
+
+  (func (export "test1") (param i32)
+    local.get 0
+    i32.const 0
+    i32.eq
+    (if
+      (then
+        i32.const 1
+        drop
+        br 0
+        i32.const 1
+        i32.const 2
+        drop
+        drop)
+      (else
+        br 0)
+    )
+    i32.const 1
+    drop
+  )
+
   (func $fac-rec (export "fac-rec") (param i64) (result i64)
     local.get 0
     i64.const 0
