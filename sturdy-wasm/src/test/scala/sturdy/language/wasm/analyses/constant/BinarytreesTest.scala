@@ -64,7 +64,7 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
 
     val eliminatable = deadNodes + constantInstructions
     val eliminatablePercent = (10000.0 * eliminatable / allNodes.size.toDouble).round / 100.0
-    println(s"This analysis can eliminate $eliminatable, $eliminatablePercent% of the ${allNodes.size} nodes in $name")
+    println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allNodes.size} nodes in $name")
 
 //  // run constant analysis and print CFG
 //  it must s"execute $funcName in binarytrees_repo with constant analysis without throwing a recurrent call exception" in {

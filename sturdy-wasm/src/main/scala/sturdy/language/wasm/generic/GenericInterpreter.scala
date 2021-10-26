@@ -200,8 +200,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 
     // add offset to base address (which is already on the stack)
     stack.push(intOps.intLit(inst.offset))
-    stack.push(num.evalNumeric(i32.Add))
-    val addr = valueToAddr(stack.pop())
+    val addr = valueToAddr(num.evalNumeric(i32.Add))
 
     val memIdx = memoryIndex
     memStore(memIdx, addr, bytes).getOrElse(

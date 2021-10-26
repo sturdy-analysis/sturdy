@@ -104,6 +104,12 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
   testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
   testFunction(fact, "fac-opt", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
+  
+  testFunction(fact, "fac-rec", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-iter", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
+  testFunction(fact, "fac-opt", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
 
 
 

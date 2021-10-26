@@ -7,6 +7,7 @@ import swam.syntax.Block
 import sturdy.language.wasm.generic.FuncId
 import swam.syntax.Inst
 import sturdy.fix
+import sturdy.fix.ControlFlowGraph
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.FixIn
 import sturdy.language.wasm.generic.FixOut
@@ -19,19 +20,22 @@ import collection.mutable
 
 enum CfgNode:
   case Instruction(inst: Inst, loc: InstLoc)
+  case Labeled(inst: Block | Loop | If, loc: InstLoc)
+  case LabeledEnd(startNode: Labeled) extends CfgNode, fix.EndNode[Labeled]
   case Call(inst: swam.syntax.Call | CallIndirect, loc: InstLoc)
-  case CallReturn(callNode: Call) extends CfgNode, fix.CallReturnNode[Call]
+  case CallReturn(startNode: Call) extends CfgNode, fix.EndNode[Call]
   case Enter(funId: FuncId) extends CfgNode, fix.ImportantControlNode
   case Exit(funId: FuncId) extends CfgNode, fix.ImportantControlNode
 
   override def toString: String = this match
-    case Instruction(inst, loc) => inst match
+    case Instruction(inst, loc) => s"$inst @$loc"
+    case Labeled(inst, loc) => inst match
       case Block(_, _) => s"Block @$loc"
       case Loop(_, _) => s"Loop @$loc"
       case If(_, _, _) => s"If @$loc"
-      case _ => s"$inst @$loc"
+    case LabeledEnd(labeled) => s"End $labeled"
     case Call(inst, loc) => s"$inst @$loc"
-    case CallReturn(call) => s"CallReturn(${call.inst}) @${call.loc}"
+    case CallReturn(call) => s"End $call"
     case Enter(funId) => s"enter $funId"
     case Exit(funId) => s"exit $funId"
 
@@ -51,6 +55,7 @@ trait ControlFlow extends Interpreter:
   def control[Ctx](config: CfgConfig)(using effect: ObservableJoin) = fix.control[Ctx, FixIn[Value], FixOut[Value], CfgNode](config.contextSensitive) {
     case FixIn.Eval(c: Call, loc) => Some(CfgNode.Call(c, loc))
     case FixIn.Eval(c: CallIndirect, loc) => Some(CfgNode.Call(c, loc))
+    case FixIn.Eval(c: (Block | Loop | If), loc) => Some(CfgNode.Labeled(c, loc))
     case FixIn.Eval(inst, loc) =>
       val includeNode = config.granularity match
         case CfgGranularity.AllNodes => true
@@ -64,11 +69,15 @@ trait ControlFlow extends Interpreter:
   } {
     case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
     case (FixIn.Eval(c: (Call | CallIndirect), loc), _) => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
+    case (FixIn.Eval(c: (Block | Loop | If), loc), _) => Some(CfgNode.LabeledEnd(CfgNode.Labeled(c, loc)))
     case _ => None
   }
 
 
 object ControlFlow:
+  import ControlFlowGraph.CNode
+
+
   def allCfgNodes(modules: List[ModuleInstance]): Set[CfgNode] =
     val nodes: mutable.Set[CfgNode] = mutable.Set.empty
     for (mod <- modules; fun <- mod.functions) fun match {

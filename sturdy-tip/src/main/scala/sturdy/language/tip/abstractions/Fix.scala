@@ -34,7 +34,7 @@ trait Fix extends Interpreter:
   enum CfgNode:
     case Statement(s: Stm)
     case Call(call: Exp.Call)
-    case CallReturn(callNode: Call) extends CfgNode, fix.CallReturnNode[Call]
+    case CallReturn(startNode: Call) extends CfgNode, fix.EndNode[Call]
     case Enter(fun: Function) extends CfgNode, fix.ImportantControlNode
     case Exit(fun: Function) extends CfgNode, fix.ImportantControlNode
 

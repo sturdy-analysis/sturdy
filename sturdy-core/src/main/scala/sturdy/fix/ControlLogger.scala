@@ -51,8 +51,8 @@ trait ControlFlowGraph[Node, Ctx]:
         sb ++= edge
       }
       from.node match
-        case cr: CallReturnNode[_] =>
-          val callNode = CNode(cr.callNode.asInstanceOf[Node], from.ctx)
+        case cr: EndNode[_] =>
+          val callNode = CNode(cr.startNode.asInstanceOf[Node], from.ctx)
           val edge = s"\t${nodeToGraphViz(callNode)} -> ${nodeToGraphViz(from)} [${callReturnEdgeGraphVizAttributes(callNode, from)}];\n"
           sb ++= edge
         case _ => // nothing
@@ -145,7 +145,7 @@ class ControlLogger[Ctx, Dom, Codom, Node]
 
     override def exit(dom: Dom, codom: TrySturdy[Codom]): Unit =
       codom match
-        case TrySturdy.Success(cod) => getCodomNode(dom, cod.asInstanceOf[Codom]) match
+        case TrySturdy.Success(cod) => getCodomNode(dom, cod) match
           case Some(node) =>
             val cnode = CNode(node, getContext)
             nodes += cnode
@@ -160,5 +160,5 @@ class ControlLogger[Ctx, Dom, Codom, Node]
 
 /** Marker trait for important control nodes, used during GrpahViz generation */
 trait ImportantControlNode
-trait CallReturnNode[Node]:
-  val callNode: Node
+trait EndNode[Node]:
+  val startNode: Node
