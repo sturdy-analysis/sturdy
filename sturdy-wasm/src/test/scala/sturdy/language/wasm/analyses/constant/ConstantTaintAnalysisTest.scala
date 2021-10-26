@@ -9,7 +9,7 @@ import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.analyses.ConstantTaintAnalysis
-import sturdy.language.wasm.analyses.ConstantTaintAnalysis.Value
+import sturdy.language.wasm.analyses.ConstantTaintAnalysis.{Value, untaint}
 import sturdy.language.wasm.generic.{FrameData, UnreachableInstruction}
 import sturdy.values.Topped
 import sturdy.values.taint.Taint
@@ -140,10 +140,3 @@ def runConstantTaintAnalysis(path: Path, funName: String, args: List[Value]): AF
   )
   println(interp.cfg.toGraphViz)
   result
-
-def untaint(v: Value): ConstantAnalysis.Value = v match
-  case Value.TopValue => ConstantAnalysis.Value.TopValue
-  case Value.Int32(TaintProduct(_, v1)) => ConstantAnalysis.Value.Int32(v1)
-  case Value.Int64(TaintProduct(_, v1)) => ConstantAnalysis.Value.Int64(v1)
-  case Value.Float32(TaintProduct(_, v1)) => ConstantAnalysis.Value.Float32(v1)
-  case Value.Float64(TaintProduct(_, v1)) => ConstantAnalysis.Value.Float64(v1)

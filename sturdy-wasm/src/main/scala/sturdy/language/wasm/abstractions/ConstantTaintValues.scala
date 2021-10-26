@@ -45,3 +45,10 @@ trait ConstantTaintValues extends Interpreter:
       case ConstantAnalysis.Value.Int64(l) => Value.Int64(if (doTaint) then tainted(l) else untainted(l))
       case ConstantAnalysis.Value.Float32(f) => Value.Float32(if (doTaint) then tainted(f) else untainted(f))
       case ConstantAnalysis.Value.Float64(d) => Value.Float64(if (doTaint) then tainted(d) else untainted(d))
+
+  def untaint(v: Value): ConstantAnalysis.Value = v match
+    case Value.TopValue => ConstantAnalysis.Value.TopValue
+    case Value.Int32(TaintProduct(_, v1)) => ConstantAnalysis.Value.Int32(v1)
+    case Value.Int64(TaintProduct(_, v1)) => ConstantAnalysis.Value.Int64(v1)
+    case Value.Float32(TaintProduct(_, v1)) => ConstantAnalysis.Value.Float32(v1)
+    case Value.Float64(TaintProduct(_, v1)) => ConstantAnalysis.Value.Float64(v1)
