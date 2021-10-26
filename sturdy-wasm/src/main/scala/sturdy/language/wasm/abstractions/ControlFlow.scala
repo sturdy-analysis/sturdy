@@ -115,4 +115,7 @@ object ControlFlow:
   def instToCfgNode(inst: (Inst, InstLoc)): Set[CfgNode] = inst match
     case (inst: swam.syntax.Call, loc) => Set(CfgNode.Call(inst, loc), CfgNode.CallReturn(CfgNode.Call(inst, loc)))
     case (inst: swam.syntax.CallIndirect, loc) => Set(CfgNode.Call(inst, loc), CfgNode.CallReturn(CfgNode.Call(inst, loc)))
+    case (inst: swam.syntax.Block, loc) => Set(CfgNode.Labeled(inst, loc), CfgNode.LabeledEnd(CfgNode.Labeled(inst, loc)))
+    case (inst: swam.syntax.Loop, loc) => Set(CfgNode.Labeled(inst, loc), CfgNode.LabeledEnd(CfgNode.Labeled(inst, loc)))
+    case (inst: swam.syntax.If, loc) => Set(CfgNode.Labeled(inst, loc), CfgNode.LabeledEnd(CfgNode.Labeled(inst, loc)))
     case (inst, loc) => Set(CfgNode.Instruction(inst, loc))
