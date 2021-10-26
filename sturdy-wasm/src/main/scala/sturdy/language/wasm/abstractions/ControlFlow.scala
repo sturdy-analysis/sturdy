@@ -1,6 +1,7 @@
 package sturdy.language.wasm.abstractions
 
 import sturdy.effect.ObservableJoin
+import sturdy.effect.except.ObservableExcept
 import swam.syntax.Loop
 import sturdy.language.wasm.generic.InstLoc
 import swam.syntax.Block
@@ -52,7 +53,7 @@ enum CfgGranularity:
 trait ControlFlow extends Interpreter:
   import swam.syntax.Call
 
-  def control[Ctx](config: CfgConfig)(using effect: ObservableJoin) = fix.control[Ctx, FixIn[Value], FixOut[Value], CfgNode](config.contextSensitive) {
+  def control[Ctx](config: CfgConfig)(using ObservableJoin, ObservableExcept[WasmException[Value]]) = fix.control[Ctx, FixIn[Value], FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive) {
     case FixIn.Eval(c: Call, loc) => Some(CfgNode.Call(c, loc))
     case FixIn.Eval(c: CallIndirect, loc) => Some(CfgNode.Call(c, loc))
     case FixIn.Eval(c: (Block | Loop | If), loc) => Some(CfgNode.Labeled(c, loc))

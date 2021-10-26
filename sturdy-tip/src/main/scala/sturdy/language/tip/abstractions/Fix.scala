@@ -6,6 +6,7 @@ import sturdy.fix
 import sturdy.language.tip.Exp
 import sturdy.data.unit
 import sturdy.effect.ObservableJoin
+import sturdy.effect.except.ObservableExcept
 import sturdy.fix.context.FiniteCallString
 import sturdy.language.tip.Function
 import sturdy.language.tip.Interpreter
@@ -38,7 +39,7 @@ trait Fix extends Interpreter:
     case Enter(fun: Function) extends CfgNode, fix.ImportantControlNode
     case Exit(fun: Function) extends CfgNode, fix.ImportantControlNode
 
-  def control[Ctx, V](sensitive: Boolean, onlyCalls: Boolean)(using effect: ObservableJoin) = fix.control[Ctx, FixIn, FixOut[V], CfgNode](sensitive) {
+  def control[Ctx, V](sensitive: Boolean, onlyCalls: Boolean)(using obsJoin: ObservableJoin) = fix.control[Ctx, FixIn, FixOut[V], Unit, CfgNode](sensitive) {
     case FixIn.Run(Stm.Block(_)) => None
     case FixIn.Run(s) => if (onlyCalls) None else Some(CfgNode.Statement(s))
     case FixIn.EnterFunction(f) => Some(CfgNode.Enter(f))
@@ -48,7 +49,7 @@ trait Fix extends Interpreter:
     case (FixIn.EnterFunction(f), FixOut.ExitFunction(_)) => Some(CfgNode.Exit(f))
     case (FixIn.Eval(c: Exp.Call), _) => Some(CfgNode.CallReturn(CfgNode.Call(c)))
     case _ => None
-  }
+  } (using obsJoin, ObservableExcept.None)
 
   def allCfgNodes(prog: Program, onlyCalls: Boolean): Set[CfgNode] =
     prog.fold(using {

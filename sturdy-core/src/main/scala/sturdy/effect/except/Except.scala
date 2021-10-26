@@ -7,7 +7,7 @@ import sturdy.values.exceptions.Exceptional
 trait ExceptException extends SturdyException:
   override def isBottom: Boolean = false
 
-trait Except[Exc, E, MayJoin[_]]:
+trait Except[Exc, E, MayJoin[_]] extends ObservableExcept[Exc]:
   val exceptional: Exceptional[Exc, E, MayJoin]
 
   @throws[ExceptException]

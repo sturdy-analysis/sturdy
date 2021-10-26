@@ -1,6 +1,6 @@
 package sturdy.effect.except
 
-import sturdy.data.*
+import sturdy.data.{*, given}
 import sturdy.effect.Effectful
 import sturdy.values.Join
 import sturdy.values.exceptions.Exceptional
@@ -10,10 +10,11 @@ import scala.util.Success
 import JoinedExcept.*
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.ComputationJoinerWithSuper
+import sturdy.effect.SturdyException
 import sturdy.effect.TrySturdy
 
 case object AbstractException extends ExceptException:
-  override def toString: String = s"Exception (abstract)"
+  override def toString: String = s"Abstract exception"
 
 
 trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin], eJoin: Join[E]) extends Except[Exc, E, WithJoin], Effectful:
@@ -54,6 +55,16 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
     } finally {
       this.exception = originalException
     }
+
+  override def foreachException(ex: SturdyException)(f: Exc => Unit): Unit = ex match
+    case AbstractException =>
+      given Effectful = this
+      exception match
+        case OptionA.None() => throw new IllegalStateException(s"exception cannot be None here")
+        case OptionA.Some(exs) => exs.foreach(e => exceptional.handle(e)(f))
+        case OptionA.NoneSome(exs) => exs.foreach(e => exceptional.handle(e)(f))
+    case _ => throw new MatchError(ex)
+
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     val snapshot = exception

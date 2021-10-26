@@ -9,18 +9,21 @@ import scala.util.Failure
 import scala.util.Success
 import ControlFlowGraph.*
 import sturdy.effect.TrySturdy
+import sturdy.effect.except.ExceptObserver
+import sturdy.effect.except.ObservableExcept
+import sturdy.util.Exact
 
-def control[Ctx, Dom, Codom, Node]
+def control[Ctx, Dom, Codom, Exc, Node]
   (contextSensitive: Boolean)
   (getDomNode: Dom => Option[Node])
   (getCodomNode: (Dom, Codom) => Option[Node])
-  (using effect: ObservableJoin)
-  : ControlLogger[Ctx, Dom, Codom, Node] =
-  new ControlLogger(contextSensitive, getDomNode, getCodomNode, effect)
+  (using obsJoin: ObservableJoin, obsExcept: ObservableExcept[Exc])
+  : ControlLogger[Ctx, Dom, Codom, Exc, Node] =
+  new ControlLogger(contextSensitive, getDomNode, getCodomNode, obsJoin, obsExcept)
 
 object ControlFlowGraph:
   def startCNode[Node, Ctx] = CNode(null.asInstanceOf[Node], null.asInstanceOf[Ctx])
-  case class CNode[Node, Ctx](node: Node, ctx: Ctx):
+  case class CNode[Node, Ctx](node: Node, ctx: Ctx, exceptional: Boolean = false):
     def isStartNode = node == null && ctx == null
 
     override def toString: String =
@@ -73,22 +76,33 @@ trait ControlFlowGraph[Node, Ctx]:
         case _: ImportantControlNode => s"fillcolor=black, style=filled, fontcolor=white"
         case _ => s"fillcolor=white, style=filled, fontcolor=black"
         ) + s", label=\"${from.toString}\""
-  protected def edgeGraphVizAttributes(from: CNode[Node, Ctx], to: CNode[Node, Ctx]): String = "color=black"
+  protected def edgeGraphVizAttributes(from: CNode[Node, Ctx], to: CNode[Node, Ctx]): String =
+    if (from.exceptional)
+      "color=purple"
+    else
+      "color=black"
   protected def callReturnEdgeGraphVizAttributes(from: CNode[Node, Ctx], to: CNode[Node, Ctx]): String = "color=black, style=dashed"
 
 
-class ControlLogger[Ctx, Dom, Codom, Node]
+class ControlLogger[Ctx, Dom, Codom, Exc, Node]
   (contextSensitive: Boolean,
    getDomNode: Dom => Option[Node],
    getCodomNode: (Dom, Codom) => Option[Node],
-   effect: ObservableJoin
+   obsJoin: ObservableJoin,
+   obsExcept: ObservableExcept[Exc]
   )
-  extends JoinObserver, ControlFlowGraph[Node, Ctx]:
+  extends JoinObserver, ExceptObserver[Exc], ControlFlowGraph[Node, Ctx]:
 
-  effect.addJoinObserver(this)
+  obsJoin.addJoinObserver(this)
+  obsExcept.addExceptObserver(this)
 
   private var predecessors: Set[CNode[Node, Ctx]] = Set(startCNode)
   private var trace: List[Set[CNode[Node, Ctx]]] = List()
+  private var exceptions: Map[Exact[Exc], Set[CNode[Node, Ctx]]] = Map()
+
+  override def handled(exc: Exc): Unit = exceptions.get(new Exact(exc)) match
+    case Some(preds) => predecessors ++= preds
+    case None => // nothing
 
   override def joinStart(): Unit =
     trace = predecessors :: trace
@@ -152,9 +166,17 @@ class ControlLogger[Ctx, Dom, Codom, Node]
             addEdgeFromPredecessors(cnode)
             predecessors = Set(cnode)
           case None => // nothing
-        case TrySturdy.Failure(_: RecurrentCall[_, _]) =>
+        case TrySturdy.Failure(ex) if ex.isBottom =>
           predecessors = Set()
-        case _ => // nothing
+        case TrySturdy.Failure(ex) =>
+          val exceptionalPredecessors = predecessors.map(_.copy(exceptional = true))
+          nodes ++= exceptionalPredecessors
+          obsExcept.foreachException(ex) { exc =>
+            val key = new Exact(exc)
+            if (!exceptions.contains(key))
+              exceptions += key -> exceptionalPredecessors
+            predecessors = Set()
+          }
   }
 
 
