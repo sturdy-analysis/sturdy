@@ -109,12 +109,12 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     def setAllState(all: AllState) = setInState(all)
   }
 
-  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value], cfgSensitive: Boolean, cfgOnlyCalls: Boolean): Instance =
+  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value], cfgConfig: CfgConfig): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
     given Effects = effects
-    new Instance(effects, cfgSensitive, cfgOnlyCalls)
+    new Instance(effects, cfgConfig)
 
-  class Instance(effects: Effects, cfgSensitive: Boolean, cfgOnlyCalls: Boolean)(using Failure, Effectful)
+  class Instance(effects: Effects, cfgConfig: CfgConfig)(using Failure, Effectful)
     extends GenericInstance(effects) :
 
     private given Effects = effects
@@ -125,7 +125,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     val callSites = callSitesLogger()
     type Context = CallString
 
-    val cfg = control[Context](cfgSensitive, cfgOnlyCalls)
+    val cfg = control[Context](cfgConfig)
     val constantInstructions = constantInstructionsLogger()
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =

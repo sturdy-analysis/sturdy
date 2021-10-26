@@ -111,12 +111,12 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
     def setAllState(all: AllState) = setInState(all)
   }
 
-  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value], cfgOnlyCalls: Boolean): Instance =
+  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value], cfgConfig: CfgConfig): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
     given Effects = effects
-    new Instance(effects, cfgOnlyCalls)
+    new Instance(effects, cfgConfig)
 
-  class Instance(effects: Effects, cfgOnlyCalls: Boolean)(using Failure, Effectful)
+  class Instance(effects: Effects, cfgConfig: CfgConfig)(using Failure, Effectful)
     extends GenericInstance(effects) :
 
     private given Effects = effects
@@ -127,7 +127,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
     val callSites = callSitesLogger()
     type Context = CallString
 
-    val cfg = control[Context](sensitive = true, cfgOnlyCalls)
+    val cfg = control[Context](cfgConfig)
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
       fix.log(callSites,

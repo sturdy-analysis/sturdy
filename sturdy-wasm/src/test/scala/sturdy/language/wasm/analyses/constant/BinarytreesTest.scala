@@ -5,9 +5,12 @@ import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFallible
+import sturdy.fix.Fixpoint
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.CfgNode
+import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.generic.FrameData
 import sturdy.values.Topped
@@ -37,14 +40,19 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
   }
 
   def run(p: Path, binary: Boolean = false) =
+    val name = p.getFileName
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
-    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, cfgSensitive = false, cfgOnlyCalls = false)
+    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, CfgConfig.AllNodes(false))
     val modInst = interp.initializeModule(module)
     val result = interp.effects.fallible(
       interp.invokeExported(modInst, funcName, List.empty)
     )
-    println(result)
-    println(interp.cfg.toGraphViz)
+
+    val allNodes = ControlFlow.allCfgNodes(List(modInst))
+    val deadNodes = interp.cfg.filterDeadNodes(allNodes).size
+    val deadNodesPercent = (10000.0 * deadNodes / allNodes.size.toDouble).round / 100.0
+    println(s"Found $deadNodes dead nodes, $deadNodesPercent% of the ${allNodes.size} nodes in $name")
+
     val liveInstructions = interp.cfg.getNodes.view.map(_.node).flatMap {
       case CfgNode.Instruction(_, loc) => Some(loc)
       case CfgNode.Call(_, loc) => Some(loc)
@@ -52,23 +60,25 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
     }.toSet.size
     val constantInstructions = interp.constantInstructions.get.size
     val constantInstructionPercent = (10000.0 * constantInstructions / liveInstructions.toDouble).round / 100.0
-    println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions")
-    println(interp.constantInstructions.groupedCount)
-    println(interp.constantInstructions.grouped)
+    println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
 
-  // run constant analysis and print CFG
-  it must s"execute $funcName in binarytrees_repo with constant analysis without throwing a recurrent call exception" in {
-    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees.wasm").toURI;
-    val path = Paths.get(uri)
-    run(path, binary = true)
-  }
+    val eliminatable = deadNodes + constantInstructions
+    val eliminatablePercent = (10000.0 * eliminatable / allNodes.size.toDouble).round / 100.0
+    println(s"This analysis can eliminate $eliminatable, $eliminatablePercent% of the ${allNodes.size} nodes in $name")
 
-  // run constant analysis and print CFG
-  it must s"execute shortened $funcName in binarytrees_repo with constant analysis without throwing a recurrent call exception" in {
-    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees_shortened.wast").toURI;
-    val path = Paths.get(uri)
-    run(path)
-  }
+//  // run constant analysis and print CFG
+//  it must s"execute $funcName in binarytrees_repo with constant analysis without throwing a recurrent call exception" in {
+//    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees.wasm").toURI;
+//    val path = Paths.get(uri)
+//    run(path, binary = true)
+//  }
+//
+//  // run constant analysis and print CFG
+//  it must s"execute shortened $funcName in binarytrees_repo with constant analysis without throwing a recurrent call exception" in {
+//    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees_shortened.wast").toURI;
+//    val path = Paths.get(uri)
+//    run(path)
+//  }
 
   def readBinaryModule(path: Path): Module =
     implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)

@@ -177,7 +177,8 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
         val widenedResult = storeCorecurrentOutput(frame, result)
         (widenedResult, true)
       } else {
-        println(s"${stackHeightIndent}POP  $frame <- $result")
+        if (Fixpoint.DEBUG)
+          println(s"${stackHeightIndent}POP  $frame <- $result")
         (result, true)
       }
     } else {

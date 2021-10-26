@@ -2,6 +2,7 @@ package sturdy.language.wasm
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.generic.{FunctionInstance, FuncId, InstLoc, FrameData}
@@ -20,7 +21,7 @@ class CfgNodesTest extends AnyFlatSpec, Matchers:
 
 def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]) =
   val module = parse(path)
-  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, cfgSensitive = false, cfgOnlyCalls = false)
+  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, CfgConfig.AllNodes(sensitive = false))
   val modInst = interp.initializeModule(module)
   val result = interp.effects.fallible(
     interp.invokeExported(modInst, "fac-rec", List(ConstantAnalysis.Value.Int64(Topped.Actual(3))))

@@ -1,8 +1,9 @@
 package sturdy.language.wasm
 
-import org.openjdk.jmh.annotations.{Benchmark, BenchmarkMode, Mode, OutputTimeUnit, Scope, State}
+import org.openjdk.jmh.annotations.{Scope, OutputTimeUnit, Mode, Benchmark, State, BenchmarkMode}
+import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.ConstantAnalysis
-import sturdy.language.wasm.generic.{FrameData, ModuleInstance}
+import sturdy.language.wasm.generic.{ModuleInstance, FrameData}
 
 import java.nio.file.Paths
 import java.util.concurrent.TimeUnit
@@ -21,7 +22,7 @@ class Binarytrees:
 
     val resource = classOf[Binarytrees].getResourceAsStream(base ++ "/binarytrees.wasm")
     val module = readBinaryModule(resource)
-    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, cfgSensitive = true, cfgOnlyCalls = true)
+    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, CfgConfig.CallGraph)
     val modInst = interp.initializeModule(module)
     (interp,modInst)
 

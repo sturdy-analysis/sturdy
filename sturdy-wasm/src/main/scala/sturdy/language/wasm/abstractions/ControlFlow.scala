@@ -11,8 +11,10 @@ import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.FixIn
 import sturdy.language.wasm.generic.FixOut
 import sturdy.language.wasm.generic.*
+import swam.OpCode
 import swam.syntax.If
 import swam.syntax.CallIndirect
+
 import collection.mutable
 
 enum CfgNode:
@@ -33,13 +35,31 @@ enum CfgNode:
     case Enter(funId) => s"enter $funId"
     case Exit(funId) => s"exit $funId"
 
+case class CfgConfig(contextSensitive: Boolean, granularity: CfgGranularity)
+object CfgConfig:
+  val CallGraph: CfgConfig = CfgConfig(contextSensitive = true, CfgGranularity.OnlyCalls)
+  def ControlGraph(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.OnlyControl)
+  def AllNodes(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.AllNodes)
+enum CfgGranularity:
+  case AllNodes
+  case OnlyControl
+  case OnlyCalls
+
 trait ControlFlow extends Interpreter:
   import swam.syntax.Call
 
-  def control[Ctx](sensitive: Boolean, onlyCalls: Boolean)(using effect: ObservableJoin) = fix.control[Ctx, FixIn[Value], FixOut[Value], CfgNode](sensitive) {
+  def control[Ctx](config: CfgConfig)(using effect: ObservableJoin) = fix.control[Ctx, FixIn[Value], FixOut[Value], CfgNode](config.contextSensitive) {
     case FixIn.Eval(c: Call, loc) => Some(CfgNode.Call(c, loc))
     case FixIn.Eval(c: CallIndirect, loc) => Some(CfgNode.Call(c, loc))
-    case FixIn.Eval(inst, loc) => if (onlyCalls) None else Some(CfgNode.Instruction(inst, loc))
+    case FixIn.Eval(inst, loc) =>
+      val includeNode = config.granularity match
+        case CfgGranularity.AllNodes => true
+        case CfgGranularity.OnlyCalls => false
+        case CfgGranularity.OnlyControl => inst.opcode >= OpCode.Unreachable && inst.opcode <= OpCode.CallIndirect
+      if (includeNode)
+        Some(CfgNode.Instruction(inst, loc))
+      else
+        None
     case FixIn.EnterWasmFunction(id, _, _) => Some(CfgNode.Enter(id))
   } {
     case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
@@ -53,13 +73,11 @@ object ControlFlow:
     val nodes: mutable.Set[CfgNode] = mutable.Set.empty
     for (mod <- modules; fun <- mod.functions) fun match {
       case f@FunctionInstance.Wasm(modInst, funcIx, func, ft) =>
-        println(s"in function $f.")
         nodes += CfgNode.Enter(FuncId(modInst, funcIx))
         nodes += CfgNode.Exit(FuncId(modInst, funcIx))
         val (_,body) = withLocations(func.body, InstLoc.InFunction(FuncId(modInst, funcIx), 0))
-        println(body)
         nodes ++= body.flatMap(instToCfgNode)
-      case FunctionInstance.Host(hostF) => ???
+      case FunctionInstance.Host(hostF) =>
     }
     for (mod <- modules; exp <- mod.exports) exp._2 match {
       case ExternalValue.Function(funcIx) =>
@@ -71,7 +89,6 @@ object ControlFlow:
 
   def withLocations(instr: Vector[Inst], startLoc: InstLoc): (InstLoc, Vector[(Inst, InstLoc)]) =
     instr.foldLeft[(InstLoc, Vector[(Inst, InstLoc)])]((startLoc, Vector.empty)) { case ((loc, res), next) =>
-      println(s"visiting $next with loc $loc")
       next match
         case Block(_, body) =>
           val (nestedLoc, nestedRes) = withLocations(body, loc+1)
