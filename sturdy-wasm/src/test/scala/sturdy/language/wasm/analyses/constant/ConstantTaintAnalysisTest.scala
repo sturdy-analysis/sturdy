@@ -49,73 +49,16 @@ class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(simple, "test-memgrow", List.empty, List((Value.Int32(1), Untainted), (Value.Int32(2), Untainted)))
     testFunctionConstantArgs(simple, "test-call-indirect", List.empty, List((Value.Int32(0), Untainted)))
     testFunctionConstantArgs(simple, "call-first", List.empty, List((Value.Int32(0), Untainted)))
-//    testFunctionConstantArgs(simple, "nesting", List(Value.Float32(0), Value.Float32(2)), List(Value.Float32(0)))
-//    testFunctionConstantArgs(simple, "as-br_table-index", List.empty, List.empty)
-//    testFunctionConstantArgs(simple, "test-br1", List.empty, List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-br2", List.empty, List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(0)), List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-br3", List(Value.Int32(1)), List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(0)), List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-br-and-return", List(Value.Int32(1)), List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(0)), List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-br-and-return2", List(Value.Int32(1)), List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(0)), List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-br-and-return3", List(Value.Int32(1)), List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-unreachable", List.empty, List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-unreachable2", List.empty, List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-unreachable3", List.empty, List(Value.Int32(42)))
-//    testFailingFunction(simple, "test-unreachable4", List.empty, UnreachableInstruction)
-//    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(0)), List(Value.Int32(42)))
-//    testFunctionConstantArgs(simple, "test-unreachable5", List(Value.Int32(1)), List(Value.Int32(43)))
-//    testFunctionConstantArgs(simple, "test-global", List(Value.Int32(0)), List(Value.Int32(1)))
-//    testFunctionConstantArgs(simple, "test-global", List(Value.Int32(1)), List(Value.Int32(2)))
-//    testFunctionConstantArgs(simple, "test-call-indirect-parametric", List(Value.Int32(0)), List(Value.Int32(0)))
-//    testFailingFunction(simple, "division", List(ConstantAnalysis.Value.Int32(Topped.Actual(1)),
-//      ConstantAnalysis.Value.Int32(Topped.Actual(0))), IntDivisionByZero)
-//    testFunctionConstantArgs(simple, "effects", List(Value.Int32(1)), List(Value.Int32(-14)))
-//
-//    testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(0)), List(Value.Int64(1)))
 
     testFunctionConstantArgs(taintTest, "taint_memory_write", List(Value.Int32(0), Value.Int32(1)), List((Value.Int32(1), Tainted)))
+    testFunctionConstantArgsConst(taintTest, "taint_loop", List(Value.Int32(0)), List((ConstantAnalysis.Value.Int32(Topped.Top), TopTaint)))
+    testFunctionConstantArgs(taintTest, "write_mem_mixed", List(Value.Int32(0)), List((Value.Int32(0), TopTaint)))
+    testFunctionConstantArgs(taintTest, "write_mem_mixed", List(Value.Int32(10)), List((Value.Int32(43), Untainted)))
   }
-//
-//  {
-//    import sturdy.language.wasm.analyses.ConstantAnalysis.Value
-//    testFunction(simple, "const", List(ConstantAnalysis.Value.Int32(Topped.Top)), List(ConstantAnalysis.Value.Int32(Topped.Top)))
-//    testFunction(simple, "first", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(1))))
-//    testFunction(simple, "first", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Top)))
-//    testFunction(simple, "second", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//    testFunction(simple, "second", List(Value.Int32(Topped.Top), Value.Int32(Topped.Actual(2))), List(Value.Int32(Topped.Actual(2))))
-//    testFunction(simple, "test-mem", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//    testFunction(simple, "nesting", List(Value.Float32(Topped.Top), Value.Float32(Topped.Actual(2))), List(Value.Float32(Topped.Top)))
-//    testFunction(simple, "nesting", List(Value.Float32(Topped.Actual(1)), Value.Float32(Topped.Top)), List(Value.Float32(Topped.Top)))
-//    testFunction(simple, "test-br3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//    testFunction(simple, "test-br-and-return", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//    testFunction(simple, "test-br-and-return2", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//    testFunction(simple, "test-br-and-return3", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//    testFunction(simple, "test-br-and-return4", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(42))))
-//    testFunction(simple, "test-unreachable5", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//    testFunction(simple, "test-global", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//    testFunction(simple, "test-call-indirect-parametric", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(0))))
-//    testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntDivisionByZero)
-//    testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
-//
-//    (1 to 8).foreach { arg =>
-//      testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(arg))), List(Value.Int64(Topped.Top)))
-//    }
-//    testFunction(fact, "fac-rec", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-//    testFunction(fact, "fac-iter", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-//    testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-//    testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-//    testFunction(fact, "fac-opt", List(Value.Int64(Topped.Actual(25))), List(Value.Int64(Topped.Top)))
-//
-//    testFunction(fact, "fac-rec", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-//    testFunction(fact, "fac-iter", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-//    testFunction(fact, "fac-rec-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-//    testFunction(fact, "fac-iter-named", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-//    testFunction(fact, "fac-opt", List(Value.Int64(Topped.Top)), List(Value.Int64(Topped.Top)))
-//  }
 
+  def testFunctionConstantArgsConst(path: Path, funcName: String, args: List[CVal], expectedResult: List[(ConstVal, Taint)]) =
+    testFunction(path, funcName, args.map(ConstantAnalysis.liftConcreteValue),
+      expectedResult.map((x: ConstVal, taint: Taint) => ConstantTaintAnalysis.liftConstantValue(x,taint)))
 
   def testFunctionConstantArgs(path: Path, funcName: String, args: List[CVal], expectedResult: List[(CVal, Taint)]) =
     testFunction(path, funcName, args.map(ConstantAnalysis.liftConcreteValue),
@@ -147,5 +90,6 @@ def runConstantTaintAnalysis(path: Path, funName: String, args: List[Value]): AF
   val result = interp.effects.fallible(
     interp.invokeExported(modInst, funName, args)
   )
-  println(interp.cfg.toGraphViz)
+  println(interp.taintedMemoryAccesses.taintedMemoryAccesses)
+  println(interp.taintedMemoryAccesses.taintedMemoryAddresses)
   result
