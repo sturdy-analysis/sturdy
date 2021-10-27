@@ -1,12 +1,22 @@
 package sturdy.language.wasm.abstractions
 
+import sturdy.effect.TrySturdy
 import sturdy.effect.failure.Failure
+import sturdy.effect.operandstack.OperandStack
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.values.Finite
 import sturdy.values.Topped
 import sturdy.values.taint.*
+import sturdy.fix
+import sturdy.fix.Logger
+import sturdy.language.wasm.generic.{FixIn, FixOut, InstLoc}
+import swam.{OpCode, syntax}
+
+import scala.collection.MapView
+
+import java.security.KeyStore.TrustedCertificateEntry
 
 trait ConstantTaintValues extends Interpreter:
   final type I32 = TaintProduct[Topped[Int]]
@@ -52,3 +62,56 @@ trait ConstantTaintValues extends Interpreter:
     case Value.Int64(TaintProduct(_, v1)) => ConstantAnalysis.Value.Int64(v1)
     case Value.Float32(TaintProduct(_, v1)) => ConstantAnalysis.Value.Float32(v1)
     case Value.Float64(TaintProduct(_, v1)) => ConstantAnalysis.Value.Float64(v1)
+
+  def taintedMemoryAccessLogger()(using stack: OperandStack[Value]): TaintedMemoryAccessLogger = new TaintedMemoryAccessLogger
+
+  class TaintedMemoryAccessLogger(using stack: OperandStack[Value]) extends fix.Logger[FixIn[Value], FixOut[Value]]:
+    var taintedMemoryAccesses: Map[InstLoc, syntax.Inst] = Map()
+    var taintedMemoryAddresses: Map[InstLoc, Set[Value]] = Map()
+
+    override def enter(dom: FixIn[Value]): Unit = dom match
+      case FixIn.Eval(inst, loc) =>
+        if (isMemoryLoadStoreInstruction(inst))
+          val address = {
+            if (addressOnTopOfStack(inst))
+              stack.peek()
+            else
+              val v1 = stack.pop()
+              val a = stack.peek()
+              stack.push(v1)
+              a
+          }
+          if (maybeTainted(address))
+            addInstruction(inst, loc, address)
+      case _ => // nothing
+
+    override def exit(dom: FixIn[Value], codom: TrySturdy[FixOut[Value]]): Unit = ()
+
+    def addInstruction(inst: syntax.Inst, loc: InstLoc, v: Value): Unit =
+      taintedMemoryAccesses = taintedMemoryAccesses + (loc -> inst)
+      taintedMemoryAddresses.get(loc) match
+        case None =>
+          taintedMemoryAddresses = taintedMemoryAddresses + (loc -> Set(v))
+        case Some(previousResult) =>
+          val newVals = previousResult + v
+          taintedMemoryAddresses = taintedMemoryAddresses + (loc -> newVals)
+
+    def addressOnTopOfStack(inst: syntax.Inst): Boolean = inst match
+      case _: syntax.LoadInst => true
+      case _: syntax.LoadNInst => true
+      case _ => false
+
+    def isMemoryLoadStoreInstruction(inst: syntax.Inst): Boolean =
+      inst.opcode >= OpCode.I32Load && inst.opcode <= OpCode.I64Store32
+
+    def maybeTainted(v: Value): Boolean = v match
+      case Value.TopValue => true
+      case Value.Int32(TaintProduct(Taint.TopTaint,_)) => true
+      case Value.Int32(TaintProduct(Taint.Tainted,_)) => true
+      case Value.Int64(TaintProduct(Taint.TopTaint,_)) => true
+      case Value.Int64(TaintProduct(Taint.Tainted,_)) => true
+      case Value.Float32(TaintProduct(Taint.TopTaint,_)) => true
+      case Value.Float32(TaintProduct(Taint.Tainted,_)) => true
+      case Value.Float64(TaintProduct(Taint.TopTaint,_)) => true
+      case Value.Float64(TaintProduct(Taint.Tainted,_)) => true
+      case _ => false
