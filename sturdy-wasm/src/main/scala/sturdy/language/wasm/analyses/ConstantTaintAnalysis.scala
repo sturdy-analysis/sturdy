@@ -128,9 +128,10 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
     type Context = CallString
 
     val cfg = control[Context](cfgConfig)
+    val taintedMemoryAccesses = taintedMemoryAccessLogger()
 
     val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
-      fix.log(callSites,
+      fix.log(callSites && taintedMemoryAccesses,
         fix.contextSensitive[Context, FixIn[Value], FixOut[Value]](callSites.callString(0),
           fix.log(cfg.logger,
             fix.filter(isFunOrWhile,

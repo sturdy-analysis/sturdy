@@ -70,6 +70,8 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
 
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
+    //println(aInterp.taintedMemoryAccesses.taintedMemoryAccesses)
+    //println(aInterp.taintedMemoryAccesses.taintedMemoryAddresses)
 
   def getCModule(module: Option[String]): ModuleInstance = module match
     case None => cCurrent
