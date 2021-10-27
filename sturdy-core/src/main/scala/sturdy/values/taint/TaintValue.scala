@@ -45,6 +45,8 @@ case class TaintProduct[V](taint: Taint, value: V):
 def untainted[V](v: V) = TaintProduct(Untainted, v)
 def tainted[V](v: V) = TaintProduct(Tainted, v)
 
+def injectTaint[V](t: Taint, v: V) = TaintProduct(t,v)
+
 given TaintProductTop[V, W <: Widening](using vTop: Top[V]): Top[TaintProduct[V]] with
   override def top: TaintProduct[V] = TaintProduct(Top.top, Top.top)
 
@@ -183,7 +185,7 @@ given TaintPointwiseConvert[From, To, VFrom, VToElem, Config <: ConvertConfig[_]
 given TaintCoPointwiseConvert[From, To, VFromElem, VTo, Config <: ConvertConfig[_]](using conv: Convert[From, To, Seq[VFromElem], VTo, Config]):
   Convert[From, To, Seq[TaintProduct[VFromElem]], TaintProduct[VTo], Config] with
   override def apply(from: Seq[TaintProduct[VFromElem]], conf: Config): TaintProduct[VTo] =
-    var taint = Untainted
+    var taint = if (from.isEmpty) Untainted else from.head.taint
     val fromValue = from.map { tv =>
       taint = Join(taint, tv.taint).get
       tv.value

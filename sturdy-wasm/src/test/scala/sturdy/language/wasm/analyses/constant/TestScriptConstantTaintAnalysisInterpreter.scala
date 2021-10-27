@@ -14,6 +14,7 @@ import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
 import sturdy.values.{Abstractly, PartialOrder, Topped}
 import sturdy.values.relational.EqOps
+import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
 import sturdy.{*, given}
 import swam.ModuleLoader
 import swam.binary.ModuleParser
@@ -242,10 +243,10 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
 
   def constExprToAVal(inst: unresolved.Inst): ConstantTaintAnalysis.Value =
     inst match
-      case unresolved.i32.Const(i) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Int32(i), true)
-      case unresolved.i64.Const(l) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Int64(l), true)
-      case unresolved.f32.Const(f) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Float32(f), true)
-      case unresolved.f64.Const(d) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Float64(d), true)
+      case unresolved.i32.Const(i) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Int32(i), Tainted)
+      case unresolved.i64.Const(l) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Int64(l), Tainted)
+      case unresolved.f32.Const(f) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Float32(f), Tainted)
+      case unresolved.f64.Const(d) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Float64(d), Tainted)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def constExprToTops(e: unresolved.Expr): List[ConstantTaintAnalysis.Value] =
@@ -253,10 +254,10 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
 
   def constExprToTop(inst: unresolved.Inst): ConstantTaintAnalysis.Value =
     inst match
-      case unresolved.i32.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Int32(Topped.Top), true)
-      case unresolved.i64.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Int64(Topped.Top), true)
-      case unresolved.f32.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Float32(Topped.Top), true)
-      case unresolved.f64.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Float64(Topped.Top), true)
+      case unresolved.i32.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Int32(Topped.Top), Tainted)
+      case unresolved.i64.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Int64(Topped.Top), Tainted)
+      case unresolved.f32.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Float32(Topped.Top), Tainted)
+      case unresolved.f64.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Float64(Topped.Top), Tainted)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def readModule(mod: unresolved.Module): Module =
