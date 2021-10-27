@@ -60,7 +60,7 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
   }
 
   type CResult = CFallible[List[CValue]]
-  type AResult = AFallible[List[ConstantAnalysis.Value]]
+  type AResult = AFallible[List[AValue]]
 
   def eqVals(vs1: List[CValue], vs2: List[CValue]): Boolean =
     vs1.size == vs2.size && vs1.zip(vs2).forall {
@@ -227,61 +227,61 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
     assert(isNaN(h), clue)
 
 
-def constExprToVals(e: unresolved.Expr): List[ConcreteInterpreter.Value] =
-  e.map(constExprToVal).toList
+  def constExprToVals(e: unresolved.Expr): List[ConcreteInterpreter.Value] =
+    e.map(constExprToVal).toList
 
-def constExprToVal(inst: unresolved.Inst): ConcreteInterpreter.Value =
-  inst match
-    case unresolved.i32.Const(i) => ConcreteInterpreter.Value.Int32(i)
-    case unresolved.i64.Const(l) => ConcreteInterpreter.Value.Int64(l)
-    case unresolved.f32.Const(f) => ConcreteInterpreter.Value.Float32(f)
-    case unresolved.f64.Const(d) => ConcreteInterpreter.Value.Float64(d)
-    case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
+  def constExprToVal(inst: unresolved.Inst): ConcreteInterpreter.Value =
+    inst match
+      case unresolved.i32.Const(i) => ConcreteInterpreter.Value.Int32(i)
+      case unresolved.i64.Const(l) => ConcreteInterpreter.Value.Int64(l)
+      case unresolved.f32.Const(f) => ConcreteInterpreter.Value.Float32(f)
+      case unresolved.f64.Const(d) => ConcreteInterpreter.Value.Float64(d)
+      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
-def constExprToAVals(e: unresolved.Expr): List[ConstantAnalysis.Value] =
-  e.map(constExprToAVal).toList
+  def constExprToAVals(e: unresolved.Expr): List[ConstantAnalysis.Value] =
+    e.map(constExprToAVal).toList
 
-def constExprToAVal(inst: unresolved.Inst): ConstantAnalysis.Value =
-  inst match
-    case unresolved.i32.Const(i) => ConstantAnalysis.Value.Int32(Topped.Actual(i))
-    case unresolved.i64.Const(l) => ConstantAnalysis.Value.Int64(Topped.Actual(l))
-    case unresolved.f32.Const(f) => ConstantAnalysis.Value.Float32(Topped.Actual(f))
-    case unresolved.f64.Const(d) => ConstantAnalysis.Value.Float64(Topped.Actual(d))
-    case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
+  def constExprToAVal(inst: unresolved.Inst): ConstantAnalysis.Value =
+    inst match
+      case unresolved.i32.Const(i) => ConstantAnalysis.Value.Int32(Topped.Actual(i))
+      case unresolved.i64.Const(l) => ConstantAnalysis.Value.Int64(Topped.Actual(l))
+      case unresolved.f32.Const(f) => ConstantAnalysis.Value.Float32(Topped.Actual(f))
+      case unresolved.f64.Const(d) => ConstantAnalysis.Value.Float64(Topped.Actual(d))
+      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
-def constExprToTops(e: unresolved.Expr): List[ConstantAnalysis.Value] =
-  e.map(constExprToTop).toList
+  def constExprToTops(e: unresolved.Expr): List[ConstantAnalysis.Value] =
+    e.map(constExprToTop).toList
 
-def constExprToTop(inst: unresolved.Inst): ConstantAnalysis.Value =
-  inst match
-    case unresolved.i32.Const(_) => ConstantAnalysis.Value.Int32(Topped.Top)
-    case unresolved.i64.Const(_) => ConstantAnalysis.Value.Int64(Topped.Top)
-    case unresolved.f32.Const(_) => ConstantAnalysis.Value.Float32(Topped.Top)
-    case unresolved.f64.Const(_) => ConstantAnalysis.Value.Float64(Topped.Top)
-    case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
+  def constExprToTop(inst: unresolved.Inst): ConstantAnalysis.Value =
+    inst match
+      case unresolved.i32.Const(_) => ConstantAnalysis.Value.Int32(Topped.Top)
+      case unresolved.i64.Const(_) => ConstantAnalysis.Value.Int64(Topped.Top)
+      case unresolved.f32.Const(_) => ConstantAnalysis.Value.Float32(Topped.Top)
+      case unresolved.f64.Const(_) => ConstantAnalysis.Value.Float64(Topped.Top)
+      case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
-def readModule(mod: unresolved.Module): Module =
-  implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
-  Blocker[IO].use { blocker =>
-    for {
-      compiler <- Compiler[IO](blocker)
-      mod <- compiler.compile(mod)
-    } yield mod
-  }.unsafeRunSync()
+  def readModule(mod: unresolved.Module): Module =
+    implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
+    Blocker[IO].use { blocker =>
+      for {
+        compiler <- Compiler[IO](blocker)
+        mod <- compiler.compile(mod)
+      } yield mod
+    }.unsafeRunSync()
 
-def readBinaryModule(bytes: Array[Byte]): Module =
-  implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
-  Blocker[IO].use { blocker =>
-    for {
-      validator <- Validator[IO](blocker)
-      loader = new ModuleLoader[IO]()
-      binaryParser = new ModuleParser[IO](validator)
-      mod <- binaryParser.parse(loader.sections(bytes))
-    } yield mod
-  }.unsafeRunSync()
+  def readBinaryModule(bytes: Array[Byte]): Module =
+    implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
+    Blocker[IO].use { blocker =>
+      for {
+        validator <- Validator[IO](blocker)
+        loader = new ModuleLoader[IO]()
+        binaryParser = new ModuleParser[IO](validator)
+        mod <- binaryParser.parse(loader.sections(bytes))
+      } yield mod
+    }.unsafeRunSync()
 
-def isNaN(value: ConcreteInterpreter.Value): Boolean =
-  value match
-    case ConcreteInterpreter.Value.Float32(f) => f.isNaN
-    case ConcreteInterpreter.Value.Float64(d) => d.isNaN
-    case _ => false
+  def isNaN(value: ConcreteInterpreter.Value): Boolean =
+    value match
+      case ConcreteInterpreter.Value.Float32(f) => f.isNaN
+      case ConcreteInterpreter.Value.Float64(d) => d.isNaN
+      case _ => false
