@@ -76,7 +76,7 @@ trait ControlFlowGraph[Node, Ctx]:
   protected def nodeToGraphViz(n: CNode[Node, Ctx]): String =
     n.toString.replaceAll("[^a-zA-Z0-9]", "_")
   protected def nodeGraphVizAttributes(from: CNode[Node, Ctx]): String =
-    if (from.isInstanceOf[StartNode])
+    if (from.node.isInstanceOf[StartNode])
       s"fillcolor=red, style=filled, fontcolor=black"
     else
       (from.node match

@@ -53,43 +53,30 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
     val allInstructions = allNodes.filter(_.isInstruction)
     val deadInstructions = ControlFlow.deadInstruction(interp.cfg, List(modInst))
     val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
-    println(s"Found ${deadInstructions.size} dead nodes, $deadInstructionPercent% of the ${allInstructions.size} nodes in $name")
+    println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
 
     val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labeled])
     val deadLabels = ControlFlow.deadLabels(interp.cfg)
     val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
-    val (deadLabelsIf, deadLabelsEliminatable) = deadLabels.partition {
-      case CfgNode.Labeled(_: swam.syntax.If, _) => true
-      case _ => false
-    }
-    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name. Can optimize ${deadLabelsIf.size} if instructions, can eliminate ${deadLabelsEliminatable.size} block and loop instructions.")
+    val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)
+    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
+    val deadLabelsIf = deadLabelsGrouped.getOrElse("If", Set())
+    val deadLabelsBlock = deadLabelsGrouped.getOrElse("Block", Set())
+    val deadLabelLoop = deadLabelsGrouped.getOrElse("Loop", Set())
+    println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
 
-    val liveInstructions = interp.cfg.getNodes.view.map(_.node).filter(_.isInstruction).size
+    val liveInstructions = allInstructions.size - deadInstructions.size
     val constantInstructions = interp.constantInstructions.get.size
     val constantInstructionPercent = (10000.0 * constantInstructions / liveInstructions.toDouble).round / 100.0
     println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
 
-    val eliminatable = deadInstructions.size + deadLabelsEliminatable.size + constantInstructions
+    val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size + constantInstructions
     val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
     println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
 
     // write CFG to .dot file
     val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
     Files.writeString(dotPath, interp.cfg.toGraphViz)
-
-//  // run constant analysis and print CFG
-//  it must s"execute $funcName in binarytrees_repo with constant analysis without throwing a recurrent call exception" in {
-//    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees.wasm").toURI;
-//    val path = Paths.get(uri)
-//    run(path, binary = true)
-//  }
-//
-//  // run constant analysis and print CFG
-//  it must s"execute shortened $funcName in binarytrees_repo with constant analysis without throwing a recurrent call exception" in {
-//    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees_shortened.wast").toURI;
-//    val path = Paths.get(uri)
-//    run(path)
-//  }
 
   def readBinaryModule(path: Path): Module =
     implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
