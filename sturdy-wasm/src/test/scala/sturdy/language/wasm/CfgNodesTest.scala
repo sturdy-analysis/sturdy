@@ -23,20 +23,23 @@ def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]
   val module = parse(path)
   val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, CfgConfig.AllNodes(sensitive = false))
   val modInst = interp.initializeModule(module)
-  val result = interp.effects.fallible(
-    interp.invokeExported(modInst, "test1", List(ConstantAnalysis.Value.Int32(Topped.Actual(1))))
+  interp.effects.fallible(
+    interp.invokeExported(modInst, "test1", List(ConstantAnalysis.Value.Int32(Topped.Top)))
   )
-  //val result2 = interp.effects.fallible(
-  //  interp.invokeExported(modInst, "test1", List(ConstantAnalysis.Value.Int32(Topped.Actual(0))))
-  //)
+  interp.effects.fallible(
+    interp.invokeExported(modInst, "fac-rec", List(ConstantAnalysis.Value.Int64(Topped.Top)))
+  )
+  interp.effects.fallible(
+    interp.invokeExported(modInst, "fac-iter", List(ConstantAnalysis.Value.Int64(Topped.Top)))
+  )
   println(interp.cfg.toGraphViz)
 
   val allNodes = ControlFlow.allCfgNodes(List(modInst))
-  println("all nodes:")
-  allNodes.toList.sortBy(_.toString).foreach(println(_))
+  println(s"all nodes: ${allNodes.size}")
+//  allNodes.toList.sortBy(_.toString).foreach(println(_))
 
-  println("visited nodes:")
-  interp.cfg.getNodes.sortBy(_.toString).foreach(println(_))
+  println(s"visited nodes: ${interp.cfg.getNodes.size}")
+//  interp.cfg.getNodes.sortBy(_.toString).foreach(println(_))
 
   val deadNodes = interp.cfg.filterDeadNodes(allNodes)
   if (deadNodes.nonEmpty)
@@ -47,7 +50,6 @@ def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]
   if (missingNodes.nonEmpty)
     println("found missing nodes:")
     println(missingNodes.toList.sortBy(x => if (x == null) then "null" else x.toString))
-  //val FunctionInstance.Wasm(mi,fi,func,_) = modInst.functions(0)
-  //val body = func.body
-  //val loc = InstLoc.InFunction(FuncId(mi,fi),0)
-  //println(loc.withLoc(body))
+
+  assert(deadNodes.size == 5)
+  assert(missingNodes.size == 1)
