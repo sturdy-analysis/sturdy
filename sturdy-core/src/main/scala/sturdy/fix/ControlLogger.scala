@@ -14,22 +14,17 @@ import sturdy.effect.except.ObservableExcept
 import sturdy.util.Exact
 
 def control[Ctx, Dom, Codom, Exc, Node]
-  (contextSensitive: Boolean)
+  (contextSensitive: Boolean, startNode: Node & StartNode)
   (getDomNode: Dom => Option[Node])
   (getCodomNode: (Dom, Codom) => Option[Node])
   (using obsJoin: ObservableJoin, obsExcept: ObservableExcept[Exc])
   : ControlLogger[Ctx, Dom, Codom, Exc, Node] =
-  new ControlLogger(contextSensitive, getDomNode, getCodomNode, obsJoin, obsExcept)
+  new ControlLogger(contextSensitive, startNode, getDomNode, getCodomNode, obsJoin, obsExcept)
 
 object ControlFlowGraph:
-  def startCNode[Node, Ctx] = CNode(null.asInstanceOf[Node], null.asInstanceOf[Ctx])
   case class CNode[Node, Ctx](node: Node, ctx: Ctx, exceptional: Boolean = false):
-    def isStartNode = node == null && ctx == null
-
     override def toString: String =
-      if (this.isStartNode)
-        "Start"
-      else if (ctx == null)
+      if (ctx == null)
         node.toString
       else
         s"$node | $ctx"
@@ -38,9 +33,16 @@ trait ControlFlowGraph[Node, Ctx]:
   def getNodes: List[CNode[Node, Ctx]]
   def getEdges: Map[CNode[Node, Ctx], Set[CNode[Node, Ctx]]]
   def getEdgesFlat: List[(CNode[Node, Ctx], CNode[Node, Ctx])] = getEdges.toList.flatMap((from, tos) => tos.map(to => from -> to)).sortBy(_.toString)
+  def getReverseEdges: Map[CNode[Node, Ctx], Set[CNode[Node, Ctx]]] =
+    val revEdges: mutable.Map[CNode[Node, Ctx], Set[CNode[Node, Ctx]]] = mutable.Map()
+    for ((from, tos) <- getEdges; to <- tos) revEdges.get(to) match
+      case None => revEdges += to -> Set(from)
+      case Some(set) => revEdges += to -> (set + from)
+    revEdges.toMap
 
   def filterDeadNodes(programNodes: Set[Node]): Set[Node] =
-    programNodes.removedAll(getNodes.map(_.node))
+    val liveNodes = getNodes.map(_.node).toSet
+    programNodes.removedAll(liveNodes)
 
   def toGraphViz: String =
     val nodes = getNodes
@@ -69,13 +71,15 @@ trait ControlFlowGraph[Node, Ctx]:
   protected def nodeToGraphViz(n: CNode[Node, Ctx]): String =
     n.toString.replaceAll("[^a-zA-Z0-9]", "_")
   protected def nodeGraphVizAttributes(from: CNode[Node, Ctx]): String =
-    if (from.isStartNode)
+    if (from.isInstanceOf[StartNode])
       s"fillcolor=red, style=filled, fontcolor=black"
     else
       (from.node match
         case _: ImportantControlNode => s"fillcolor=black, style=filled, fontcolor=white"
+        case _ if from.exceptional => s"color=purple, fillcolor=white, style=filled, fontcolor=black"
         case _ => s"fillcolor=white, style=filled, fontcolor=black"
         ) + s", label=\"${from.toString}\""
+
   protected def edgeGraphVizAttributes(from: CNode[Node, Ctx], to: CNode[Node, Ctx]): String =
     if (from.exceptional)
       "color=purple"
@@ -86,6 +90,7 @@ trait ControlFlowGraph[Node, Ctx]:
 
 class ControlLogger[Ctx, Dom, Codom, Exc, Node]
   (contextSensitive: Boolean,
+   startNode: Node & StartNode,
    getDomNode: Dom => Option[Node],
    getCodomNode: (Dom, Codom) => Option[Node],
    obsJoin: ObservableJoin,
@@ -96,6 +101,7 @@ class ControlLogger[Ctx, Dom, Codom, Exc, Node]
   obsJoin.addJoinObserver(this)
   obsExcept.addExceptObserver(this)
 
+  private val startCNode: CNode[Node, Ctx] = CNode(startNode, null.asInstanceOf[Ctx])
   private var predecessors: Set[CNode[Node, Ctx]] = Set(startCNode)
   private var trace: List[Set[CNode[Node, Ctx]]] = List()
   private var exceptions: Map[Exact[Exc], Set[CNode[Node, Ctx]]] = Map()
@@ -181,6 +187,7 @@ class ControlLogger[Ctx, Dom, Codom, Exc, Node]
 
 
 /** Marker trait for important control nodes, used during GrpahViz generation */
+trait StartNode
 trait ImportantControlNode
 trait EndNode[Node]:
   val startNode: Node

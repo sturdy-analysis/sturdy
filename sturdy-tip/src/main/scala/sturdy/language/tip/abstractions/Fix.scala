@@ -33,23 +33,25 @@ trait Fix extends Interpreter:
   type Parameters = Map[Addr, Value]
 
   enum CfgNode:
+    case Start extends CfgNode, fix.StartNode
     case Statement(s: Stm)
     case Call(call: Exp.Call)
     case CallReturn(startNode: Call) extends CfgNode, fix.EndNode[Call]
     case Enter(fun: Function) extends CfgNode, fix.ImportantControlNode
     case Exit(fun: Function) extends CfgNode, fix.ImportantControlNode
 
-  def control[Ctx, V](sensitive: Boolean, onlyCalls: Boolean)(using obsJoin: ObservableJoin) = fix.control[Ctx, FixIn, FixOut[V], Unit, CfgNode](sensitive) {
-    case FixIn.Run(Stm.Block(_)) => None
-    case FixIn.Run(s) => if (onlyCalls) None else Some(CfgNode.Statement(s))
-    case FixIn.EnterFunction(f) => Some(CfgNode.Enter(f))
-    case FixIn.Eval(c: Exp.Call) => Some(CfgNode.Call(c))
-    case _ => None
-  } {
-    case (FixIn.EnterFunction(f), FixOut.ExitFunction(_)) => Some(CfgNode.Exit(f))
-    case (FixIn.Eval(c: Exp.Call), _) => Some(CfgNode.CallReturn(CfgNode.Call(c)))
-    case _ => None
-  } (using obsJoin, ObservableExcept.None)
+  def control[Ctx, V](sensitive: Boolean, onlyCalls: Boolean)(using obsJoin: ObservableJoin) =
+    fix.control[Ctx, FixIn, FixOut[V], Unit, CfgNode](sensitive, CfgNode.Start) {
+      case FixIn.Run(Stm.Block(_)) => None
+      case FixIn.Run(s) => if (onlyCalls) None else Some(CfgNode.Statement(s))
+      case FixIn.EnterFunction(f) => Some(CfgNode.Enter(f))
+      case FixIn.Eval(c: Exp.Call) => Some(CfgNode.Call(c))
+      case _ => None
+    } {
+      case (FixIn.EnterFunction(f), FixOut.ExitFunction(_)) => Some(CfgNode.Exit(f))
+      case (FixIn.Eval(c: Exp.Call), _) => Some(CfgNode.CallReturn(CfgNode.Call(c)))
+      case _ => None
+    } (using obsJoin, ObservableExcept.None)
 
   def allCfgNodes(prog: Program, onlyCalls: Boolean): Set[CfgNode] =
     prog.fold(using {

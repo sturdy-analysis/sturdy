@@ -9,6 +9,7 @@ import sturdy.language.wasm.generic.FuncId
 import swam.syntax.Inst
 import sturdy.fix
 import sturdy.fix.ControlFlowGraph
+import sturdy.fix.EndNode
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.FixIn
 import sturdy.language.wasm.generic.FixOut
@@ -20,6 +21,7 @@ import swam.syntax.CallIndirect
 import collection.mutable
 
 enum CfgNode:
+  case Start extends CfgNode, fix.StartNode
   case Instruction(inst: Inst, loc: InstLoc)
   case Labeled(inst: Block | Loop | If, loc: InstLoc)
   case LabeledEnd(startNode: Labeled) extends CfgNode, fix.EndNode[Labeled]
@@ -28,7 +30,12 @@ enum CfgNode:
   case Enter(funId: FuncId) extends CfgNode, fix.ImportantControlNode
   case Exit(funId: FuncId) extends CfgNode, fix.ImportantControlNode
 
+  def isInstruction: Boolean = this match
+    case _: (Instruction | Call | Labeled) => true
+    case _ => false
+
   override def toString: String = this match
+    case Start => "Start"
     case Instruction(inst, loc) => s"$inst @$loc"
     case Labeled(inst, loc) => inst match
       case Block(_, _) => s"Block @$loc"
@@ -53,35 +60,64 @@ enum CfgGranularity:
 trait ControlFlow extends Interpreter:
   import swam.syntax.Call
 
-  def control[Ctx](config: CfgConfig)(using ObservableJoin, ObservableExcept[WasmException[Value]]) = fix.control[Ctx, FixIn[Value], FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive) {
-    case FixIn.Eval(c: Call, loc) => Some(CfgNode.Call(c, loc))
-    case FixIn.Eval(c: CallIndirect, loc) => Some(CfgNode.Call(c, loc))
-    case FixIn.Eval(c: (Block | Loop | If), loc) => Some(CfgNode.Labeled(c, loc))
-    case FixIn.Eval(inst, loc) =>
-      val includeNode = config.granularity match
-        case CfgGranularity.AllNodes => true
-        case CfgGranularity.OnlyCalls => false
-        case CfgGranularity.OnlyControl => inst.opcode >= OpCode.Unreachable && inst.opcode <= OpCode.CallIndirect
-      if (includeNode)
-        Some(CfgNode.Instruction(inst, loc))
-      else
-        None
-    case FixIn.EnterWasmFunction(id, _, _) => Some(CfgNode.Enter(id))
-  } {
-    case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
-    case (FixIn.Eval(c: (Call | CallIndirect), loc), _) => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
-    case (FixIn.Eval(c: (Block | Loop | If), loc), _) => Some(CfgNode.LabeledEnd(CfgNode.Labeled(c, loc)))
-    case _ => None
-  }
+  def control[Ctx](config: CfgConfig)(using ObservableJoin, ObservableExcept[WasmException[Value]]) = 
+    fix.control[Ctx, FixIn[Value], FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive, CfgNode.Start) {
+      case FixIn.Eval(c: Call, loc) => Some(CfgNode.Call(c, loc))
+      case FixIn.Eval(c: CallIndirect, loc) => Some(CfgNode.Call(c, loc))
+      case FixIn.Eval(c: (Block | Loop | If), loc) => Some(CfgNode.Labeled(c, loc))
+      case FixIn.Eval(inst, loc) =>
+        val includeNode = config.granularity match
+          case CfgGranularity.AllNodes => true
+          case CfgGranularity.OnlyCalls => false
+          case CfgGranularity.OnlyControl => inst.opcode >= OpCode.Unreachable && inst.opcode <= OpCode.CallIndirect
+        if (includeNode)
+          Some(CfgNode.Instruction(inst, loc))
+        else
+          None
+      case FixIn.EnterWasmFunction(id, _, _) => Some(CfgNode.Enter(id))
+    } {
+      case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
+      case (FixIn.Eval(c: (Call | CallIndirect), loc), _) => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
+      case (FixIn.Eval(c: (Block | Loop | If), loc), _) => Some(CfgNode.LabeledEnd(CfgNode.Labeled(c, loc)))
+      case _ => None
+    }
 
 
 object ControlFlow:
   import ControlFlowGraph.CNode
 
+  /** A node in `modules` is _dead_ if its unreachable according to the `cfg`.
+   * Only returns nodes that represent actual instructions */
+  def deadInstruction[Ctx](cfg: ControlFlowGraph[CfgNode, Ctx], modules: List[ModuleInstance]): Set[CfgNode] =
+    val allNodes = allCfgNodes(modules)
+    cfg.filterDeadNodes(allNodes).filter(_.isInstruction)
+
+  /** The labels of a Block, Loop, or If instruction are dead if no jump reaches them according to the `cfg`. */
+  def deadLabels[Ctx](cfg: ControlFlowGraph[CfgNode, Ctx]): Set[CfgNode] =
+    val revEdges = cfg.getReverseEdges
+    cfg.getNodes.flatMap { endCNode => endCNode.node match
+      case endNode: CfgNode.LabeledEnd => endNode.startNode match
+        case lab@CfgNode.Labeled(_: (Block | If), _) =>
+          val preds = revEdges.getOrElse(endCNode, Set())
+          if (!preds.exists(_.exceptional))
+            Some(lab)
+          else
+            None
+        case lab@CfgNode.Labeled(_: Loop, _) =>
+          val preds = revEdges.getOrElse(CNode(lab, endCNode.ctx), Set())
+          if (!preds.exists(_.exceptional))
+            Some(lab)
+          else
+            None
+      case _ => None
+    }.toSet
 
   def allCfgNodes(modules: List[ModuleInstance]): Set[CfgNode] =
+    modules.toSet.flatMap(allCfgNodes)
+
+  def allCfgNodes(mod: ModuleInstance): Set[CfgNode] =
     val nodes: mutable.Set[CfgNode] = mutable.Set.empty
-    for (mod <- modules; fun <- mod.functions) fun match {
+    for (fun <- mod.functions) fun match {
       case f@FunctionInstance.Wasm(modInst, funcIx, func, ft) =>
         nodes += CfgNode.Enter(FuncId(modInst, funcIx))
         nodes += CfgNode.Exit(FuncId(modInst, funcIx))
@@ -89,12 +125,11 @@ object ControlFlow:
         nodes ++= body.flatMap(instToCfgNode)
       case FunctionInstance.Host(hostF) =>
     }
-    for (mod <- modules; exp <- mod.exports) exp._2 match {
+    for (exp <- mod.exports) exp._2 match {
       case ExternalValue.Function(funcIx) =>
         nodes ++= instToCfgNode(swam.syntax.Call(funcIx) -> InstLoc.InvokeExported(mod, exp._1))
       case _ => // nothing
     }
-
     Set.from(nodes)
 
   def withLocations(instr: Vector[Inst], startLoc: InstLoc): (InstLoc, Vector[(Inst, InstLoc)]) =
