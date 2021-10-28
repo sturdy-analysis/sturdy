@@ -12,7 +12,9 @@ case class ConcreteException[E](e: E) extends ExceptException:
 trait ConcreteExcept[E] extends Except[E, E, NoJoin], ObservableExcept[E]:
   override val exceptional = ConcreteExceptional[E]
 
-  override def throws(ex: E): Nothing = throw ConcreteException(ex)
+  override def throws(ex: E): Nothing =
+    thrown(ex)  
+    throw ConcreteException(ex)
 
   override protected def tries[A](f: => A): EitherC[A, E] =
     try {
@@ -21,8 +23,4 @@ trait ConcreteExcept[E] extends Except[E, E, NoJoin], ObservableExcept[E]:
       case ConcreteException(ex) => EitherC.Right(ex.asInstanceOf[E])
       case ex => throw ex
     }
-
-  override def foreachException(ex: SturdyException)(f: E => Unit): Unit = ex match
-    case ConcreteException(exc) => f(exc.asInstanceOf[E])
-    case _ => throw new MatchError(ex)
 

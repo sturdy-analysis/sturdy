@@ -3,6 +3,7 @@ package sturdy.effect.except
 import sturdy.effect.SturdyException
 
 trait ExceptObserver[Exc]:
+  def thrown(exc: Exc): Unit
   def handled(exc: Exc): Unit
 
 trait ObservableExcept[Exc]:
@@ -10,11 +11,10 @@ trait ObservableExcept[Exc]:
   def addExceptObserver(obs: ExceptObserver[Exc]): Unit =
     observers +:= obs
 
-  def foreachException(ex: SturdyException)(f: Exc => Unit): Unit
+  protected def thrown(exc: Exc): Unit =
+    observers.foreach(_.thrown(exc))
   def handled(exc: Exc): Unit =
     observers.foreach(_.handled(exc))
 
 object ObservableExcept:
-  def None: ObservableExcept[Unit] = new ObservableExcept[Unit] {
-    override def foreachException(ex: SturdyException)(f: Unit => Unit): Unit = {}
-  }
+  def None: ObservableExcept[Unit] = new ObservableExcept[Unit] {}
