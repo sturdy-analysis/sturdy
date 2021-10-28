@@ -45,7 +45,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
   type FuncIx = Topped[Int]
   type FunV = Topped[Powerset[FunctionInstance]]
 
-  given ConstantSpecialWasmOperations(using f: Failure): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32.value
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32.value
     override def valToSize(v: Value): Size = v.asInt32.value
@@ -61,15 +61,16 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
         case Topped.Top =>
           OptionA.NoneSome(vec)
 
-    val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(
-      HostFunction.proc_exit -> { args =>
+
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantTaintAnalysis.Value]): List[ConstantTaintAnalysis.Value] = hostFunc match
+      case HostFunction.proc_exit =>
         val exitCode = args.head
         f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
-      }
-    )
-
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantTaintAnalysis.Value]): List[ConstantTaintAnalysis.Value] =
-      runtime(hostFunc)(args)
+      case HostFunction.fd_close => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_read => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_seek => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
 
   type InState =
     (ConcreteCallFrame.Vars[Value],
