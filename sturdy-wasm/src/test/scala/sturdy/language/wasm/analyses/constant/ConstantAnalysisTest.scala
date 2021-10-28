@@ -10,6 +10,7 @@ import sturdy.effect.failure.FailureKind
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
+import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
 import sturdy.language.wasm.generic.FrameData
@@ -143,4 +144,11 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallib
     interp.invokeExported(modInst, funName, args)
   )
   println(interp.cfg.toGraphViz)
+
+  val deadInstructions = ControlFlow.deadInstruction(interp.cfg, List(modInst))
+  val deadLabels = ControlFlow.deadLabels(interp.cfg)
+  val constantInstructions = interp.constantInstructions.get
+  println(s"Found ${deadInstructions.size} dead instructions")
+  println(s"Found ${deadLabels.size} dead labels")
+  println(s"Found ${constantInstructions.size} constant instructions")
   result

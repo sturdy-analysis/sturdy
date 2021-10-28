@@ -1,7 +1,8 @@
 package sturdy.language.wasm.generic
 
 import scodec.bits.ByteVector
-import sturdy.{IsSound, Soundness, AbstractlySound, seqIsSound}
+import sturdy.language.wasm.abstractions.ControlFlow
+import sturdy.{Soundness, AbstractlySound, seqIsSound, IsSound}
 import swam.*
 import swam.syntax.*
 import sturdy.values.Finite
@@ -57,6 +58,8 @@ class ModuleInstance:
   /** For each block, where does each contained instruction start. */
   var blockInstLocs: Map[(BlockId, Int), InstLoc] = Map.empty
 
+  lazy val cfgNodes = ControlFlow.allCfgNodes(this)
+  
   def registerBlockSizes(block: BlockId, loc: InstLoc, insts: Iterable[Inst]): InstLoc =
     var current = loc
     for ((inst, ix) <- insts.zipWithIndex)
@@ -77,8 +80,7 @@ class ModuleInstance:
         case _ =>
           current = current + 1
     current
-
-
+  
   override def toString: Name = Integer.toHexString(this.hashCode)
 
 given Structural[Func] with {}
