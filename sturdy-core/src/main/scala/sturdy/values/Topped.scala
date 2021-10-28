@@ -20,6 +20,10 @@ enum Topped[+V] extends Iterable[V]:
     case Top => Top
     case Actual(v) => if (f(v)) this else Top
 
+  override def toString(): String = this match
+    case Top => s"Top"
+    case Actual(v) => v.toString
+
   final def toString(suffix: String): String = this match
     case Top => s"Top$suffix"
     case Actual(v) => v.toString

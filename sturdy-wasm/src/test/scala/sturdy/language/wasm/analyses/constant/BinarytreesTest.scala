@@ -5,6 +5,7 @@ import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFallible
+import sturdy.fix.EndNode
 import sturdy.fix.Fixpoint
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
@@ -57,14 +58,18 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
     val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labeled])
     val deadLabels = ControlFlow.deadLabels(interp.cfg)
     val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
-    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name")
+    val (deadLabelsIf, deadLabelsEliminatable) = deadLabels.partition {
+      case CfgNode.Labeled(_: swam.syntax.If, _) => true
+      case _ => false
+    }
+    println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name. Can optimize ${deadLabelsIf.size} if instructions, can eliminate ${deadLabelsEliminatable.size} block and loop instructions.")
 
     val liveInstructions = interp.cfg.getNodes.view.map(_.node).filter(_.isInstruction).size
     val constantInstructions = interp.constantInstructions.get.size
     val constantInstructionPercent = (10000.0 * constantInstructions / liveInstructions.toDouble).round / 100.0
     println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
 
-    val eliminatable = deadInstructions.size + constantInstructions
+    val eliminatable = deadInstructions.size + deadLabelsEliminatable.size + constantInstructions
     val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
     println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
 

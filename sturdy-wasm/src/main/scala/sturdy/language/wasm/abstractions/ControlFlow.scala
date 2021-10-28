@@ -60,7 +60,7 @@ enum CfgGranularity:
 trait ControlFlow extends Interpreter:
   import swam.syntax.Call
 
-  def control[Ctx](config: CfgConfig)(using ObservableJoin, ObservableExcept[WasmException[Value]]) = 
+  def control[Ctx](config: CfgConfig)(using ObservableJoin, ObservableExcept[WasmException[Value]]) =
     fix.control[Ctx, FixIn[Value], FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive, CfgNode.Start) {
       case FixIn.Eval(c: Call, loc) => Some(CfgNode.Call(c, loc))
       case FixIn.Eval(c: CallIndirect, loc) => Some(CfgNode.Call(c, loc))
@@ -93,19 +93,19 @@ object ControlFlow:
     cfg.filterDeadNodes(allNodes).filter(_.isInstruction)
 
   /** The labels of a Block, Loop, or If instruction are dead if no jump reaches them according to the `cfg`. */
-  def deadLabels[Ctx](cfg: ControlFlowGraph[CfgNode, Ctx]): Set[CfgNode] =
+  def deadLabels[Ctx](cfg: ControlFlowGraph[CfgNode, Ctx]): Set[CfgNode.Labeled] =
     val revEdges = cfg.getReverseEdges
     cfg.getNodes.flatMap { endCNode => endCNode.node match
       case endNode: CfgNode.LabeledEnd => endNode.startNode match
         case lab@CfgNode.Labeled(_: (Block | If), _) =>
           val preds = revEdges.getOrElse(endCNode, Set())
-          if (!preds.exists(_.exceptional))
+          if (!preds.exists(_._2.exceptional))
             Some(lab)
           else
             None
         case lab@CfgNode.Labeled(_: Loop, _) =>
           val preds = revEdges.getOrElse(CNode(lab, endCNode.ctx), Set())
-          if (!preds.exists(_.exceptional))
+          if (!preds.exists(_._2.exceptional))
             Some(lab)
           else
             None

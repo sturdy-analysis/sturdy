@@ -24,6 +24,7 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
   def getException: State[Exc, E] = exception
 
   override def throws(ex: Exc): Nothing =
+    thrown(ex)
     val e = exceptional.exception(ex)
     this.exception = exception match
       case OptionA.None() => OptionA.Some(e::Nil)
@@ -55,16 +56,6 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
     } finally {
       this.exception = originalException
     }
-
-  override def foreachException(ex: SturdyException)(f: Exc => Unit): Unit = ex match
-    case AbstractException =>
-      given Effectful = this
-      exception match
-        case OptionA.None() => throw new IllegalStateException(s"exception cannot be None here")
-        case OptionA.Some(exs) => exs.foreach(e => exceptional.handle(e)(f))
-        case OptionA.NoneSome(exs) => exs.foreach(e => exceptional.handle(e)(f))
-    case _ => throw new MatchError(ex)
-
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     val snapshot = exception

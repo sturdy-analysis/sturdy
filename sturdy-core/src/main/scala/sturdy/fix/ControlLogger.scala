@@ -22,22 +22,27 @@ def control[Ctx, Dom, Codom, Exc, Node]
   new ControlLogger(contextSensitive, startNode, getDomNode, getCodomNode, obsJoin, obsExcept)
 
 object ControlFlowGraph:
-  case class CNode[Node, Ctx](node: Node, ctx: Ctx, exceptional: Boolean = false):
+  case class CNode[Node, Ctx](node: Node, ctx: Ctx):
     override def toString: String =
       if (ctx == null)
         node.toString
       else
         s"$node | $ctx"
 
+  case class EdgeAttrib(exceptional: Boolean)
+  object EdgeAttrib:
+    def default: EdgeAttrib = EdgeAttrib(false)
+
 trait ControlFlowGraph[Node, Ctx]:
   def getNodes: List[CNode[Node, Ctx]]
-  def getEdges: Map[CNode[Node, Ctx], Set[CNode[Node, Ctx]]]
-  def getEdgesFlat: List[(CNode[Node, Ctx], CNode[Node, Ctx])] = getEdges.toList.flatMap((from, tos) => tos.map(to => from -> to)).sortBy(_.toString)
-  def getReverseEdges: Map[CNode[Node, Ctx], Set[CNode[Node, Ctx]]] =
-    val revEdges: mutable.Map[CNode[Node, Ctx], Set[CNode[Node, Ctx]]] = mutable.Map()
-    for ((from, tos) <- getEdges; to <- tos) revEdges.get(to) match
-      case None => revEdges += to -> Set(from)
-      case Some(set) => revEdges += to -> (set + from)
+  def getEdges: Map[CNode[Node, Ctx], Map[CNode[Node, Ctx], EdgeAttrib]]
+  def getEdgesFlat: List[(CNode[Node, Ctx], CNode[Node, Ctx], EdgeAttrib)] =
+    for ((from, tos) <- getEdges.toList; (to, attrib) <- tos) yield (from, to, attrib)
+  def getReverseEdges: Map[CNode[Node, Ctx], Map[CNode[Node, Ctx], EdgeAttrib]] =
+    val revEdges: mutable.Map[CNode[Node, Ctx], Map[CNode[Node, Ctx], EdgeAttrib]] = mutable.Map()
+    for ((from, tos) <- getEdges; (to, attrib) <- tos) revEdges.get(to) match
+      case None => revEdges += to -> Map(from -> attrib)
+      case Some(map) => revEdges += to -> (map + (from -> attrib))
     revEdges.toMap
 
   def filterDeadNodes(programNodes: Set[Node]): Set[Node] =
@@ -51,8 +56,8 @@ trait ControlFlowGraph[Node, Ctx]:
     val sb = new StringBuilder()
     nodes.foreach { from =>
       sb ++= s"\t${nodeToGraphViz(from)} [${nodeGraphVizAttributes(from)}];\n"
-      edges.getOrElse(from, Set()).foreach { to =>
-        val edge = s"\t${nodeToGraphViz(from)} -> ${nodeToGraphViz(to)} [${edgeGraphVizAttributes(from, to)}];\n"
+      edges.getOrElse(from, Map()).foreach { case (to, attrib) =>
+        val edge = s"\t${nodeToGraphViz(from)} -> ${nodeToGraphViz(to)} [${edgeGraphVizAttributes(from, to, attrib)}];\n"
         sb ++= edge
       }
       from.node match
@@ -76,12 +81,11 @@ trait ControlFlowGraph[Node, Ctx]:
     else
       (from.node match
         case _: ImportantControlNode => s"fillcolor=black, style=filled, fontcolor=white"
-        case _ if from.exceptional => s"color=purple, fillcolor=white, style=filled, fontcolor=black"
         case _ => s"fillcolor=white, style=filled, fontcolor=black"
         ) + s", label=\"${from.toString}\""
 
-  protected def edgeGraphVizAttributes(from: CNode[Node, Ctx], to: CNode[Node, Ctx]): String =
-    if (from.exceptional)
+  protected def edgeGraphVizAttributes(from: CNode[Node, Ctx], to: CNode[Node, Ctx], attrib: EdgeAttrib): String =
+    if (attrib.exceptional)
       "color=purple"
     else
       "color=black"
@@ -101,14 +105,26 @@ class ControlLogger[Ctx, Dom, Codom, Exc, Node]
   obsJoin.addJoinObserver(this)
   obsExcept.addExceptObserver(this)
 
+  private case class PredNode(cnode: CNode[Node, Ctx], exceptional: Boolean)
+
   private val startCNode: CNode[Node, Ctx] = CNode(startNode, null.asInstanceOf[Ctx])
-  private var predecessors: Set[CNode[Node, Ctx]] = Set(startCNode)
-  private var trace: List[Set[CNode[Node, Ctx]]] = List()
-  private var exceptions: Map[Exact[Exc], Set[CNode[Node, Ctx]]] = Map()
+  private var predecessors: Map[CNode[Node, Ctx], EdgeAttrib] = Map(startCNode -> EdgeAttrib.default)
+  private var trace: List[Map[CNode[Node, Ctx], EdgeAttrib]] = List()
+  private var exceptions: Map[Exact[Exc], Map[CNode[Node, Ctx], EdgeAttrib]] = Map()
+
+  private val nodes: mutable.Set[CNode[Node, Ctx]] = mutable.Set(startCNode)
+  private val edges: mutable.Map[CNode[Node, Ctx], Map[CNode[Node, Ctx], EdgeAttrib]] = mutable.Map()
+
+  override def thrown(exc: Exc): Unit =
+    val exceptionalPredecessors = predecessors.map(_.copy(_2 = EdgeAttrib(true)))
+    val key = new Exact(exc)
+    if (!exceptions.contains(key))
+      exceptions += key -> exceptionalPredecessors
+    predecessors = Map()
 
   override def handled(exc: Exc): Unit = exceptions.get(new Exact(exc)) match
     case Some(preds) => predecessors ++= preds
-    case None => // nothing
+    case None => throw new IllegalStateException(s"Unknown exception $exc")
 
   override def joinStart(): Unit =
     trace = predecessors :: trace
@@ -124,28 +140,25 @@ class ControlLogger[Ctx, Dom, Codom, Exc, Node]
     predecessors = predecessors ++ others
 
   override def repeating(): Unit =
-    predecessors = Set()
-
-  private val nodes: mutable.Set[CNode[Node, Ctx]] = mutable.Set(startCNode)
-  private val edges: mutable.Map[CNode[Node, Ctx], Set[CNode[Node, Ctx]]] = mutable.Map()
+    predecessors = Map()
 
   def clear(): Unit =
-    predecessors = Set(startCNode)
+    predecessors = Map(startCNode -> EdgeAttrib.default)
     trace = List()
     nodes.clear()
     nodes += startCNode
     edges.clear()
 
   inline private def addEdgeFromPredecessors(to: CNode[Node, Ctx]): Unit =
-    predecessors.foreach(from => addEdge(from, to))
+    predecessors.foreach((from, attrib) => addEdge(from, to, attrib))
 
-  private def addEdge(from: CNode[Node, Ctx], to: CNode[Node, Ctx]): Unit =
+  private def addEdge(from: CNode[Node, Ctx], to: CNode[Node, Ctx], attrib: EdgeAttrib): Unit =
     edges.get(from) match
-      case None => edges += from -> Set(to)
-      case Some(set) => edges += from -> (set + to)
+      case None => edges += from -> Map(to -> attrib)
+      case Some(map) => edges += from -> (map + (to -> attrib))
 
   def getNodes: List[CNode[Node, Ctx]] = nodes.toList.sortBy(_.toString)
-  def getEdges: Map[CNode[Node, Ctx], Set[CNode[Node, Ctx]]] = edges.toMap
+  def getEdges: Map[CNode[Node, Ctx], Map[CNode[Node, Ctx], EdgeAttrib]] = edges.toMap
 
   def logger(using contextual: Contextual[Ctx, Dom, Codom]): Logger[Dom, Codom] = new Logger {
     private def getContext: Ctx =
@@ -160,7 +173,7 @@ class ControlLogger[Ctx, Dom, Codom, Exc, Node]
           val cnode = CNode(node, getContext)
           nodes += cnode
           addEdgeFromPredecessors(cnode)
-          predecessors = Set(cnode)
+          predecessors = Map(cnode -> EdgeAttrib.default)
         case None => // nothing
 
     override def exit(dom: Dom, codom: TrySturdy[Codom]): Unit =
@@ -170,19 +183,10 @@ class ControlLogger[Ctx, Dom, Codom, Exc, Node]
             val cnode = CNode(node, getContext)
             nodes += cnode
             addEdgeFromPredecessors(cnode)
-            predecessors = Set(cnode)
+            predecessors = Map(cnode -> EdgeAttrib.default)
           case None => // nothing
-        case TrySturdy.Failure(ex) if ex.isBottom =>
-          predecessors = Set()
         case TrySturdy.Failure(ex) =>
-          val exceptionalPredecessors = predecessors.map(_.copy(exceptional = true))
-          nodes ++= exceptionalPredecessors
-          obsExcept.foreachException(ex) { exc =>
-            val key = new Exact(exc)
-            if (!exceptions.contains(key))
-              exceptions += key -> exceptionalPredecessors
-            predecessors = Set()
-          }
+          predecessors = Map()
   }
 
 
