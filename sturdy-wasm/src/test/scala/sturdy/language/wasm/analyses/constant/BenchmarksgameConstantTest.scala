@@ -25,14 +25,14 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import scala.jdk.StreamConverters.*
 
-class BinarytreesTest extends AnyFlatSpec, Matchers:
+class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
   behavior of "Benchmarksgame"
 
   //val testcases = List("binarytrees", "fankuchredux", "mandelbrot", "nbody", "spectral-norm")
   val base = "/sturdy/language/wasm/benchmarksgame/"
   val funcName = "_start"
 
-  val uri = classOf[BinarytreesTest].getResource("/sturdy/language/wasm/benchmarksgame").toURI();
+  val uri = classOf[BenchmarksgameConstantTest].getResource("/sturdy/language/wasm/benchmarksgame").toURI();
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
     it must s"execute constant analysis on benchmark ${p.getFileName}" in {

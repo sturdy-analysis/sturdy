@@ -1,9 +1,6 @@
 package sturdy.effect
 
 import sturdy.effect.Effectful.StarvedJoin
-import sturdy.effect.except.ExceptException
-import sturdy.effect.failure.FailureException
-import sturdy.fix.RecurrentCall
 import sturdy.values.Join
 
 import scala.util.Failure

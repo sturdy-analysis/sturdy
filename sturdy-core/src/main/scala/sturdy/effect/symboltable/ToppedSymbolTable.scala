@@ -45,7 +45,8 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
     tables += key -> Topped.Actual(Table(Map(), Set()))
     dirtyTables += key
 
-  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ToppedSymbolTableJoiner[A] 
+  class ToppedSymbolTableJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     val snapshot = tables
     val snapDirtyTables = dirtyTables
     dirtyTables = Set()
