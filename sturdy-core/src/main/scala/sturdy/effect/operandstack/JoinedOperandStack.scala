@@ -10,7 +10,8 @@ import sturdy.values.Join
 /** Stacks of different execution branches are joined. */
 trait JoinedOperandStack[V](using Join[V]) extends GenericOperandStack[V]:
 
-  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override def makeComputationJoiner[A]: ComputationJoiner[A] = new OperandStackJoiner[A]
+  class OperandStackJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     val snapshot = stack
     var fStack: List[V] = null
 

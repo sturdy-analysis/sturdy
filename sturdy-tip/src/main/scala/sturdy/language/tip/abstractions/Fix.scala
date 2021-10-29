@@ -6,6 +6,7 @@ import sturdy.fix
 import sturdy.language.tip.Exp
 import sturdy.data.unit
 import sturdy.effect.ObservableJoin
+import sturdy.effect.except.LanguageException
 import sturdy.effect.except.ObservableExcept
 import sturdy.fix.context.FiniteCallString
 import sturdy.language.tip.Function
@@ -41,7 +42,7 @@ trait Fix extends Interpreter:
     case Exit(fun: Function) extends CfgNode, fix.ImportantControlNode
 
   def control[Ctx, V](sensitive: Boolean, onlyCalls: Boolean)(using obsJoin: ObservableJoin) =
-    fix.control[Ctx, FixIn, FixOut[V], Unit, CfgNode](sensitive, CfgNode.Start) {
+    fix.control[Ctx, FixIn, FixOut[V], LanguageException, CfgNode](sensitive, CfgNode.Start) {
       case FixIn.Run(Stm.Block(_)) => None
       case FixIn.Run(s) => if (onlyCalls) None else Some(CfgNode.Statement(s))
       case FixIn.EnterFunction(f) => Some(CfgNode.Enter(f))

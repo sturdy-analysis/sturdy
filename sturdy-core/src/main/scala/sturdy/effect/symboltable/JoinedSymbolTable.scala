@@ -7,7 +7,8 @@ import sturdy.effect.TrySturdy
 import sturdy.values.Join
 
 trait JoinedSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends ConcreteSymbolTable[Key, Symbol, Entry]:
-  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override def makeComputationJoiner[A]: ComputationJoiner[A] = new SymbolTableJoiner[A] 
+  class SymbolTableJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     val snapshot = tables
     var fTables: Map[Key, Map[Symbol, Entry]] = null
 

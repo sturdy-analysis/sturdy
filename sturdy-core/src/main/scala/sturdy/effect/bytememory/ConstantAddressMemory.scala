@@ -117,7 +117,8 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
       case Topped.Actual(size) =>
         memories += key -> Topped.Actual(ByteMem(Array.fill[B](size*pageSize)(emptyB), mutable.BitSet(), sizeLimit.flatMap(_.toOption)))
 
-  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ConstantAddressMemoryJoiner[A] 
+  class ConstantAddressMemoryJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     var gmemories = mutable.Map() ++ memories.view.mapValues(_.map(_.cloned))
     var fmemories: mutable.Map[Key, Topped[Mem[B]]] = null
 

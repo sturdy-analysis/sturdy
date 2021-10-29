@@ -9,6 +9,7 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.{Soundness, fix, IsSound}
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
+import sturdy.effect.except.LanguageException
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.symboltable.SymbolTable
@@ -50,9 +51,10 @@ given frameDataIsSound: Soundness[FrameData, FrameData] with
 object FrameData:
   val empty: FrameData = FrameData(0, null)
 
-enum WasmException[V]:
-  case Jump(labelIndex: LabelIdx, operands: List[V], original: Option[WasmException[V]])
-  case Return(operands: List[V])
+enum WasmException[V] extends LanguageException:
+  case Jump(labelIndex: LabelIdx, operands: List[V], cause: Option[WasmException[V]])
+  case Return(operands: List[V], cause: Option[WasmException[V]])
+
 
 type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
   OperandStack[V]                                        
@@ -281,7 +283,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
     case Return =>
       val operands = stack.popN(getFrameData.returnArity)
-      throws(WasmException.Return(operands))
+      throws(WasmException.Return(operands, None))
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func)
@@ -325,14 +327,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       } { ex =>
         stack.clearCurrentOperandFrame()
         ex match {
-          case WasmException.Jump(labelIndex, operands, original) =>
+          case WasmException.Jump(labelIndex, operands, _) =>
             if (labelIndex == 0) {
-              handled(original.getOrElse(ex))
+              handled(ex)
               stack.pushN(operands)
               for ((i,loc) <- branchTarget)
                 eval(i, loc)
             } else {
-              throws(WasmException.Jump(labelIndex - 1, operands, Some(original.getOrElse(ex))))
+              throws(WasmException.Jump(labelIndex - 1, operands, Some(ex)))
             }
           case _: WasmException.Return[V] =>
             throws(ex)
@@ -365,7 +367,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     } { ex =>
       stack.clearCurrentOperandFrame()
       ex match {
-        case WasmException.Return(operands) =>
+        case WasmException.Return(operands, _) =>
           handled(ex)
           stack.pushN(operands)
         case WasmException.Jump(_, _, _) =>

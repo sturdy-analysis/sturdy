@@ -2,11 +2,11 @@ package sturdy.effect.except
 
 import sturdy.effect.SturdyException
 
-trait ExceptObserver[Exc]:
+trait ExceptObserver[Exc <: LanguageException]:
   def thrown(exc: Exc): Unit
   def handled(exc: Exc): Unit
 
-trait ObservableExcept[Exc]:
+trait ObservableExcept[Exc <: LanguageException]:
   private var observers: List[ExceptObserver[Exc]] = Nil
   def addExceptObserver(obs: ExceptObserver[Exc]): Unit =
     observers +:= obs
@@ -17,4 +17,4 @@ trait ObservableExcept[Exc]:
     observers.foreach(_.handled(exc))
 
 object ObservableExcept:
-  def None: ObservableExcept[Unit] = new ObservableExcept[Unit] {}
+  def None: ObservableExcept[LanguageException] = new ObservableExcept[LanguageException] {}
