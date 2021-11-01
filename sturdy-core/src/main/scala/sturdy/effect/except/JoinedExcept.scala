@@ -24,7 +24,7 @@ trait JoinedExcept[Exc <: LanguageException, E](using val exceptional: Exception
   def getException: State[Exc, E] = exception
 
   override def throws(ex: Exc): Nothing =
-    thrown(ex)
+    throwing(ex)
     val e = exceptional.exception(ex)
     this.exception = exception match
       case OptionA.None() => OptionA.Some(e::Nil)

@@ -10,9 +10,9 @@ import reflect.Selectable.reflectiveSelectable
 case class ConcreteSturdyException[E](e: E) extends ExceptSturdyException:
   override def toString: String = s"Exception ${e.toString}"
 
-trait ConcreteExcept[E <: LanguageException](using val exceptional: Exceptional[E, E, NoJoin]) extends Except[E, E, NoJoin], ObservableExcept[E]:
+trait ConcreteExcept[E <: LanguageException](using val exceptional: Exceptional[E, E, NoJoin]) extends Except[E, E, NoJoin]:
   override def throws(ex: E): Nothing =
-    thrown(ex)  
+    throwing(ex)  
     throw ConcreteSturdyException(ex)
 
   override protected def tries[A](f: => A): EitherC[A, E] =
@@ -21,5 +21,5 @@ trait ConcreteExcept[E <: LanguageException](using val exceptional: Exceptional[
     } catch {
       case ConcreteSturdyException(ex) => EitherC.Right(ex.asInstanceOf[E])
       case ex => throw ex
-    }
+    } 
 

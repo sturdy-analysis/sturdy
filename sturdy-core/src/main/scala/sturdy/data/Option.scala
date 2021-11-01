@@ -34,10 +34,8 @@ enum OptionA[A] extends Option[WithJoin, A]:
   case Some(as: Iterable[A])
 
   override def option[B](default: => B)(f: A => B): WithJoin[B] ?=> B = this match
-    case Some(as) if as.nonEmpty =>
-      joinComputationsIterable(as.map(a => () => f(a)))
-    case NoneSome(as) if as.nonEmpty =>
-      joinComputationsIterable(as.map(a => () => f(a)) ++ Iterable.single(() => default))
+    case Some(as) if as.nonEmpty => mapJoin(as, f)
+    case NoneSome(as) if as.nonEmpty => joinComputations(mapJoin(as, f))(default)
     case _ => default
 
   def +[AA <: A](a: AA): OptionA[A] = this match

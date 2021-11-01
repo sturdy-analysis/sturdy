@@ -52,8 +52,8 @@ object FrameData:
   val empty: FrameData = FrameData(0, null)
 
 enum WasmException[V] extends LanguageException:
-  case Jump(labelIndex: LabelIdx, operands: List[V], cause: Option[WasmException[V]])
-  case Return(operands: List[V], cause: Option[WasmException[V]])
+  case Jump(labelIndex: LabelIdx, operands: List[V])
+  case Return(operands: List[V])
 
 
 type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
@@ -283,7 +283,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
     case Return =>
       val operands = stack.popN(getFrameData.returnArity)
-      throws(WasmException.Return(operands, None))
+      throws(WasmException.Return(operands))
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func)
@@ -300,7 +300,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   def branch(labelIndex: LabelIdx): Unit =
     val returnArity: Int = labelStack.lookupLabel(labelIndex)
     val operands = stack.popN(returnArity)
-    throws(WasmException.Jump(labelIndex, operands, None))
+    throws(WasmException.Jump(labelIndex, operands))
 
   /* stack before label-call:  A p0 ... pn (n = params arity)
  * finish without exception: A r0 ... rm (m = return arity) => nothing to do
@@ -327,14 +327,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       } { ex =>
         stack.clearCurrentOperandFrame()
         ex match {
-          case WasmException.Jump(labelIndex, operands, _) =>
+          case WasmException.Jump(labelIndex, operands) =>
             if (labelIndex == 0) {
-              handled(ex)
               stack.pushN(operands)
               for ((i,loc) <- branchTarget)
                 eval(i, loc)
             } else {
-              throws(WasmException.Jump(labelIndex - 1, operands, Some(ex)))
+              throws(WasmException.Jump(labelIndex - 1, operands))
             }
           case _: WasmException.Return[V] =>
             throws(ex)
@@ -367,10 +366,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     } { ex =>
       stack.clearCurrentOperandFrame()
       ex match {
-        case WasmException.Return(operands, _) =>
-          handled(ex)
+        case WasmException.Return(operands) =>
           stack.pushN(operands)
-        case WasmException.Jump(_, _, _) =>
+        case WasmException.Jump(_, _) =>
           fail(InvalidModule, s"Tried to jump through a function boundary.")
       }
     }

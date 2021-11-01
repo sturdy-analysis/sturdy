@@ -83,16 +83,29 @@ trait Effectful extends ObservableJoin:
     }
   }
 
-  final def joinComputationsIterable[A](as: IterableOnce[() => A]): Joined[A] =
-    joinComputationsIt(as.iterator)
+  final def mapJoin[A, B](as: Iterable[A], f: A => B): Joined[B] = as.size match
+    case 0 => throw new IllegalArgumentException
+    case 1 => f(as.head)
+    case 2 =>
+      val List(a0, a1) = as.toList
+      joinComputations(f(a0))(f(a1))
+    case 3 =>
+      val List(a0, a1, a2) = as.toList
+      joinComputations(joinComputations(f(a0))(f(a1)))(f(a2))
+    case 4 =>
+      val List(a0, a1, a2, a3) = as.toList
+      joinComputations(joinComputations(joinComputations(f(a0))(f(a1)))(f(a2)))(f(a3))
+    case _ =>
+      mapJoinIt(as.iterator, f)
 
-  private final def joinComputationsIt[A](as: Iterator[() => A]): Joined[A] =
-    val next = as.next()
+  private final def mapJoinIt[A, B](as: Iterator[A], f: A => B): Joined[B] =
+    val a = as.next()
     if (as.isEmpty)
-      next()
+      f(a)
     else {
-      joinComputations(next())(joinComputationsIt(as))
+      joinComputations(f(a))(mapJoinIt(as, f))
     }
+
 
 object Effectful:
   def join[A](f: => A)(g: => A)(using j: Effectful): Join[A] ?=> A =
