@@ -16,7 +16,7 @@ enum Taint:
   case Untainted
   case TopTaint
 
-  def <(s2: Taint): Boolean = this == s2 || s2 == TopTaint
+  inline def <=(s2: Taint): Boolean = this == s2 || s2 == TopTaint
 
 import sturdy.values.taint.Taint.*
 

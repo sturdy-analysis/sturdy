@@ -27,6 +27,7 @@ object IntervalAnalysis extends Interpreter,
   Ints.Interval, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type MayJoin[A] = WithJoin[A]
+  override type Ctx = CallString
 
   given Lazy[Join[Value]] = lazily(CombineValue[Widening.No])
 
@@ -51,12 +52,12 @@ object IntervalAnalysis extends Interpreter,
     override def getAllState() = getOutState()
     override def setAllState(all: AllState) = setOutState(all)
 
-  def apply(initEnvironment: Environment, initStore: Store, steps: Int, cfgOnlyCalls: Boolean): Instance =
+  def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
     val effects = new Effects(initEnvironment, initStore)
     given Effects = effects
-    new Instance(effects, steps, cfgOnlyCalls)
+    new Instance(effects, steps)
 
-  class Instance(effects: Effects, steps: Int, cfgOnlyCalls: Boolean)(using Failure, Effectful)
+  class Instance(effects: Effects, steps: Int)(using Failure, Effectful)
     extends GenericInstance(effects):
 
     given Effects = effects
@@ -81,9 +82,7 @@ object IntervalAnalysis extends Interpreter,
       super.execute(p)
 
     val callSites = callSitesLogger()
-    val cfg = control[CallString, Value](sensitive = true, cfgOnlyCalls)
 
-    protected override type Ctx = CallString
     protected override def context = callSites.callString(2)
     protected override def contextFree = fix.log(callSites, _)
     override def contextSensitive = fix.dispatch(isFunOrWhile, Seq(

@@ -34,7 +34,7 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
   type AValue = ConstantTaintAnalysis.Value
 
   val cInterp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
-  val aInterp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty, CfgConfig.CallGraph)
+  val aInterp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

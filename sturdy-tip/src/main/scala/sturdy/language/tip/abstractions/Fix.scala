@@ -41,8 +41,8 @@ trait Fix extends Interpreter:
     case Enter(fun: Function) extends CfgNode, fix.ImportantControlNode
     case Exit(fun: Function) extends CfgNode, fix.ImportantControlNode
 
-  def control[Ctx, V](sensitive: Boolean, onlyCalls: Boolean)(using obsJoin: ObservableJoin) =
-    fix.control[Ctx, FixIn, FixOut[V], LanguageException, CfgNode](sensitive, CfgNode.Start) {
+  def controlFlow(sensitive: Boolean, onlyCalls: Boolean, analysis: Instance) =
+    val cfg = fix.control[Ctx, FixIn, FixOut[Value], LanguageException, CfgNode](sensitive, CfgNode.Start) {
       case FixIn.Run(Stm.Block(_)) => None
       case FixIn.Run(s) => if (onlyCalls) None else Some(CfgNode.Statement(s))
       case FixIn.EnterFunction(f) => Some(CfgNode.Enter(f))
@@ -52,7 +52,9 @@ trait Fix extends Interpreter:
       case (FixIn.EnterFunction(f), FixOut.ExitFunction(_)) => Some(CfgNode.Exit(f))
       case (FixIn.Eval(c: Exp.Call), _) => Some(CfgNode.CallReturn(CfgNode.Call(c)))
       case _ => None
-    } (using obsJoin, ObservableExcept.None)
+    } (using analysis.effects, ObservableExcept.None)
+    analysis.addContextSensitiveLogger(cfg.logger)
+    cfg
 
   def allCfgNodes(prog: Program, onlyCalls: Boolean): Set[CfgNode] =
     prog.fold(using {

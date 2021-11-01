@@ -27,6 +27,7 @@ object SignAnalysis extends Interpreter,
   Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
   override type MayJoin[A] = WithJoin[A]
+  override type Ctx = Parameters
 
   given Lazy[Join[Value]] = lazily(CombineValue)
 
@@ -51,12 +52,12 @@ object SignAnalysis extends Interpreter,
     override def getAllState() = getOutState()
     override def setAllState(all: AllState) = setOutState(all)
 
-  def apply(initEnvironment: Environment, initStore: Store, steps: Int, cfgOnlyCalls: Boolean): Instance =
+  def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
     val effects = new Effects(initEnvironment, initStore)
     given Effects = effects
-    new Instance(effects, steps, cfgOnlyCalls)
+    new Instance(effects, steps)
 
-  class Instance(effects: Effects, steps: Int, cfgOnlyCalls: Boolean)(using Failure, Effectful)
+  class Instance(effects: Effects, steps: Int)(using Failure, Effectful)
     extends GenericInstance(effects):
 
     given Effects = effects
@@ -74,10 +75,8 @@ object SignAnalysis extends Interpreter,
 
     given Lazy[Widen[Value]] = lazily(CombineValue)
 
-    val cfg = control[Parameters, Value](sensitive = true, cfgOnlyCalls)
     given Finite[Parameters] with {}
 
-    protected override type Ctx = Parameters
     protected override def context = parameters
     protected override def contextFree = identity
     override def contextSensitive = fix.dispatch(isFunOrWhile, Seq(

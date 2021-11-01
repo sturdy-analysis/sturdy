@@ -38,6 +38,7 @@ import scala.collection.IndexedSeqView
 
 object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue, Fix, ControlFlow:
   type MayJoin[A] = WithJoin[A]
+  override type Ctx = CallString
   type Addr = Topped[Int]
   type Bytes = Seq[Topped[Byte]]
   type Size = Topped[Int]
@@ -111,12 +112,12 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     def setAllState(all: AllState) = setInState(all)
   }
 
-  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value], cfgConfig: CfgConfig): Instance =
+  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value]): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
     given Effects = effects
-    new Instance(effects, cfgConfig)
+    new Instance(effects)
 
-  class Instance(effects: Effects, cfgConfig: CfgConfig)(using Failure, Effectful)
+  class Instance(effects: Effects)(using Failure, Effectful)
     extends GenericInstance(effects):
 
     private given Effects = effects
@@ -125,15 +126,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     val callSites = callSitesLogger()
-    val cfg = control[Ctx](cfgConfig)
-    val constantInstructions = constantInstructionsLogger()
 
-    protected override type Ctx = CallString
     protected override def context = callSites.callString(0)
-    protected override def contextFree = fix.log(callSites && constantInstructions, _)
-    protected override def contextSensitive =
-      fix.log(cfg.logger,
-        fix.filter(isFunOrWhile,
-          fix.iter.topmost
-        )
-      )
+    protected override def contextFree = fix.log(callSites, _)
+    protected override def contextSensitive = fix.filter(isFunOrWhile, fix.iter.topmost)

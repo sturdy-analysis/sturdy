@@ -60,8 +60,8 @@ enum CfgGranularity:
 trait ControlFlow extends Interpreter:
   import swam.syntax.Call
 
-  def control[Ctx](config: CfgConfig)(using ObservableJoin, ObservableExcept[WasmException[Value]]) =
-    fix.control[Ctx, FixIn[Value], FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive, CfgNode.Start) {
+  def controlFlow(config: CfgConfig, analysis: Instance) =
+    val cfg = fix.control[Ctx, FixIn[Value], FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive, CfgNode.Start) {
       case FixIn.Eval(c: Call, loc) => Some(CfgNode.Call(c, loc))
       case FixIn.Eval(c: CallIndirect, loc) => Some(CfgNode.Call(c, loc))
       case FixIn.Eval(c: (Block | Loop | If), loc) => Some(CfgNode.Labeled(c, loc))
@@ -80,7 +80,9 @@ trait ControlFlow extends Interpreter:
       case (FixIn.Eval(c: (Call | CallIndirect), loc), _) => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
       case (FixIn.Eval(c: (Block | Loop | If), loc), _) => Some(CfgNode.LabeledEnd(CfgNode.Labeled(c, loc)))
       case _ => None
-    }
+    }(using analysis.effects, analysis.effects)
+    analysis.addContextSensitiveLogger(cfg.logger)
+    cfg
 
 
 object ControlFlow:

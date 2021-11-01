@@ -25,6 +25,7 @@ import java.nio.ByteOrder
 
 trait Interpreter:
   type MayJoin[A]
+  type Ctx
   type I32
   type I64
   type F32
@@ -66,6 +67,9 @@ trait Interpreter:
   def topF64: F64
   def asBoolean(v: Value)(using Failure): Bool
   def boolean(b: Bool): Value
+
+  given Top[Value] with
+    def top = Value.TopValue
 
   given CombineValue[W <: Widening](using Combine[I32, W], Combine[I64, W], Combine[F32, W], Combine[F64, W]): Combine[Value, W] with
     import Value.*
@@ -246,4 +250,6 @@ trait Interpreter:
   abstract class GenericInstance
     (_effects: Effects)
     (using MayJoin[Unit], MayJoin[Value])
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin, Effects](_effects)
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin, Effects](_effects):
+
+    override type Ctx = Interpreter.this.Ctx

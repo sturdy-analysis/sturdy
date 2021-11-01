@@ -29,6 +29,7 @@ import java.nio.ByteOrder
 
 object ConcreteInterpreter extends Interpreter:
   override type MayJoin[A] = NoJoin[A]
+  override type Ctx = Unit
   override type I32 = Int
   override type I64 = Long
   override type F32 = Float

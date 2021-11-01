@@ -42,11 +42,14 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     val program = Parser.parse(sourceCode)
 
     if (program.funs.exists(_.name == "main")) {
+      val analysis = SignAnalysis(Map(), Map(), steps)
+
       val onlyCalls = false
-      val analysis = SignAnalysis(Map(), Map(), steps, onlyCalls)
+      val cfg = SignAnalysis.controlFlow(sensitive = true, onlyCalls, analysis)
+
       val aresult = analysis.effects.fallible(analysis.execute(program))
 
-      val deadNodes = analysis.cfg.filterDeadNodes(SignAnalysis.allCfgNodes(program, onlyCalls))
+      val deadNodes = cfg.filterDeadNodes(SignAnalysis.allCfgNodes(program, onlyCalls))
       if (deadNodes.nonEmpty)
         println(s"Found dead code: $deadNodes")
 
@@ -55,17 +58,17 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
       given CAllocationIntIncrement[AllocationSite] = interp.effects
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(cresult, aresult))
       assertResult(IsSound.Sound, p.getFileName)(Soundness.isSound(interp, analysis))
-      (aresult, analysis)
+      (aresult, analysis, cfg)
     } else {
       null
     }
 
 object RunSignAnalysis extends App {
   val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/record3.tip").toURI();
-  val (res, analysis) = new SignAnalysisTest().runSignAnalysis(Paths.get(uri), 10)
+  val (res, analysis, cfg) = new SignAnalysisTest().runSignAnalysis(Paths.get(uri), 10)
   println(res)
   println(analysis.effects.getCallFrame)
   println(analysis.effects.getStore)
   println(analysis.effects.getPrinted)
-  println(analysis.cfg.toGraphViz)
+  println(cfg.toGraphViz)
 }

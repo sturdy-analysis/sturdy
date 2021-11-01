@@ -85,11 +85,15 @@ class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
 
 def runConstantTaintAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.parse(path)
-  val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty, CfgConfig.AllNodes(sensitive = true))
+
+  val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)
+//  val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
+  //    val constants = ConstantTaintAnalysis.constantInstructions(interp)
+  val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
   val modInst = interp.initializeModule(module)
   val result = interp.effects.fallible(
     interp.invokeExported(modInst, funName, args)
   )
-  println(interp.taintedMemoryAccesses.taintedMemoryAccesses)
-  println(interp.taintedMemoryAccesses.taintedMemoryAddresses)
+  println(memory.instructions)
+  println(memory.instructionInfo)
   result

@@ -44,7 +44,11 @@ class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
     
     val name = p.getFileName
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
-    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, CfgConfig.AllNodes(false))
+
+    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)
+    val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
+    val constants = ConstantAnalysis.constantInstructions(interp)
+
     val modInst = interp.initializeModule(module)
     interp.effects.fallible(
       interp.invokeExported(modInst, funcName, List.empty)
@@ -52,12 +56,12 @@ class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
     val allInstructions = allNodes.filter(_.isInstruction)
-    val deadInstructions = ControlFlow.deadInstruction(interp.cfg, List(modInst))
+    val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
     val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
     println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
 
     val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labeled])
-    val deadLabels = ControlFlow.deadLabels(interp.cfg)
+    val deadLabels = ControlFlow.deadLabels(cfg)
     val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
     val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)
     println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
@@ -67,7 +71,7 @@ class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
     println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
 
     val liveInstructions = allInstructions.size - deadInstructions.size
-    val constantInstructions = interp.constantInstructions.get.size
+    val constantInstructions = constants.get.size
     val constantInstructionPercent = (10000.0 * constantInstructions / liveInstructions.toDouble).round / 100.0
     println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
 
@@ -77,7 +81,7 @@ class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
 
     // write CFG to .dot file
     val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
-    Files.writeString(dotPath, interp.cfg.toGraphViz)
+    Files.writeString(dotPath, cfg.toGraphViz)
 
   def readBinaryModule(path: Path): Module =
     implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)

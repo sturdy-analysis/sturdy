@@ -21,7 +21,8 @@ class CfgNodesTest extends AnyFlatSpec, Matchers:
 
 def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]) =
   val module = parse(path)
-  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, CfgConfig.AllNodes(sensitive = false))
+  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)
+  val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(sensitive = false), interp)
   val modInst = interp.initializeModule(module)
   interp.effects.fallible(
     interp.invokeExported(modInst, "test1", List(ConstantAnalysis.Value.Int32(Topped.Top)))
@@ -32,21 +33,21 @@ def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]
   interp.effects.fallible(
     interp.invokeExported(modInst, "fac-iter", List(ConstantAnalysis.Value.Int64(Topped.Top)))
   )
-  println(interp.cfg.toGraphViz)
+  println(cfg.toGraphViz)
 
   val allNodes = ControlFlow.allCfgNodes(List(modInst))
   println(s"all nodes: ${allNodes.size}")
 //  allNodes.toList.sortBy(_.toString).foreach(println(_))
 
-  println(s"visited nodes: ${interp.cfg.getNodes.size}")
+  println(s"visited nodes: ${cfg.getNodes.size}")
 //  interp.cfg.getNodes.sortBy(_.toString).foreach(println(_))
 
-  val deadNodes = interp.cfg.filterDeadNodes(allNodes)
+  val deadNodes = cfg.filterDeadNodes(allNodes)
   if (deadNodes.nonEmpty)
     println("found dead nodes:")
     println(deadNodes.toList.sortBy(_.toString))
 
-  val missingNodes = Set.from(interp.cfg.getNodes.map(_.node)).removedAll(allNodes)
+  val missingNodes = Set.from(cfg.getNodes.map(_.node)).removedAll(allNodes)
   if (missingNodes.nonEmpty)
     println("found missing nodes:")
     println(missingNodes.toList.sortBy(x => if (x == null) then "null" else x.toString))
