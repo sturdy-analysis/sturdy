@@ -9,10 +9,12 @@ import sturdy.effect.callframe.JoinedCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinedOperandStack
-import sturdy.effect.symboltable.{JoinedSymbolTable, ToppedSymbolTable}
+import sturdy.effect.symboltable.{ToppedSymbolTable, JoinedSymbolTable}
 import sturdy.effect.symboltable.ToppedSymbolTable.CombineTable
 import sturdy.fix
-import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.fix.Combinator
+import sturdy.fix.context.Sensitivity
+import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.values.doubles.DoubleOps
@@ -115,7 +117,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     new Instance(effects, cfgConfig)
 
   class Instance(effects: Effects, cfgConfig: CfgConfig)(using Failure, Effectful)
-    extends GenericInstance(effects) :
+    extends GenericInstance(effects):
 
     private given Effects = effects
     private given Instance = this
@@ -123,18 +125,15 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     val callSites = callSitesLogger()
-    type Context = CallString
-
-    val cfg = control[Context](cfgConfig)
+    val cfg = control[Ctx](cfgConfig)
     val constantInstructions = constantInstructionsLogger()
 
-    val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
-      fix.log(callSites && constantInstructions,
-        fix.contextSensitive[Context, FixIn[Value], FixOut[Value]](callSites.callString(0),
-          fix.log(cfg.logger,
-            fix.filter(isFunOrWhile,
-              fix.iter.topmost
-            )
-          )
+    protected override type Ctx = CallString
+    protected override def context = callSites.callString(0)
+    protected override def contextFree = fix.log(callSites && constantInstructions, _)
+    protected override def contextSensitive =
+      fix.log(cfg.logger,
+        fix.filter(isFunOrWhile,
+          fix.iter.topmost
         )
       )

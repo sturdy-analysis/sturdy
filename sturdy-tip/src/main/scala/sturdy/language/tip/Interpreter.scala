@@ -1,7 +1,7 @@
 package sturdy.language.tip
 
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.tip.GenericInterpreter.{FixOut, GenericPhi, TypeError, AllocationSite, GenericEffects, FixIn, Field}
+import sturdy.language.tip.GenericInterpreter.{FixOut, TypeError, AllocationSite, GenericEffects, FixIn, Field}
 import sturdy.values.MaybeChanged
 import sturdy.values.booleans.*
 import sturdy.values.{Top, Combine, Widening, Finite}

@@ -126,18 +126,15 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     val callSites = callSitesLogger()
-    type Context = CallString
-
-    val cfg = control[Context](cfgConfig)
+    val cfg = control[Ctx](cfgConfig)
     val taintedMemoryAccesses = taintedMemoryAccessLogger()
 
-    val phi: fix.Combinator[FixIn[Value], FixOut[Value]] =
-      fix.log(callSites && taintedMemoryAccesses,
-        fix.contextSensitive[Context, FixIn[Value], FixOut[Value]](callSites.callString(0),
-          fix.log(cfg.logger,
-            fix.filter(isFunOrWhile,
-              fix.iter.topmost
-            )
-          )
+    protected override type Ctx = CallString
+    protected override def context = callSites.callString(0)
+    protected override def contextFree = fix.log(callSites && taintedMemoryAccesses, _)
+    protected override def contextSensitive =
+      fix.log(cfg.logger,
+        fix.filter(isFunOrWhile,
+          fix.iter.topmost
         )
       )

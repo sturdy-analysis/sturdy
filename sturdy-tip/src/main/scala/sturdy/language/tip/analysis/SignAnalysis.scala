@@ -20,7 +20,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.GenericInterpreter.{AllocationSite, GenericPhi, FixIn, FixOut, Field, given}
+import sturdy.language.tip.GenericInterpreter.{AllocationSite, FixIn, FixOut, Field, given}
 import sturdy.language.tip.abstractions.*
 
 object SignAnalysis extends Interpreter,
@@ -77,17 +77,14 @@ object SignAnalysis extends Interpreter,
     val cfg = control[Parameters, Value](sensitive = true, cfgOnlyCalls)
     given Finite[Parameters] with {}
 
-    val phi =
-      fix.contextSensitive(parameters,
-        fix.log(cfg.logger,
-          fix.dispatch(isFunOrWhile, Seq(
-            // call
-            fix.iter.topmost,
-            // while
-            fix.unwind(steps,
-              fix.iter.innermost
-            )
-          ))
-        )
+    protected override type Ctx = Parameters
+    protected override def context = parameters
+    protected override def contextFree = identity
+    override def contextSensitive = fix.dispatch(isFunOrWhile, Seq(
+      // call
+      fix.iter.topmost,
+      // while
+      fix.unwind(steps,
+        fix.iter.innermost
       )
-
+    ))

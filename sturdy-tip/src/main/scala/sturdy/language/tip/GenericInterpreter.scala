@@ -68,13 +68,12 @@ object GenericInterpreter:
       case (FixOut.ExitFunction(v1), FixOut.ExitFunction(v2)) => Combine[V, W](v1, v2).map(FixOut.ExitFunction.apply)
       case _ => throw new IllegalArgumentException(s"Cannot combine outputs of different kind, $out1 and $out2")
 
-  type GenericPhi[V] = fix.Combinator[FixIn, FixOut[V]]
-
 import GenericInterpreter.*
 
 trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr, MayJoin]]
   (val effects: Effects)
-  (using MayJoin[Unit], MayJoin[V]):
+  (using MayJoin[Unit], MayJoin[V])
+  extends fix.Fixpoint[FixIn, FixOut[V]]:
 
   import effects.*
 
@@ -86,12 +85,10 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
   val recOps: RecordOps[Field, V, V]; import recOps.*
   val branchOps: BooleanBranching[V, MayJoin]; import branchOps.*
 
-  val phi: GenericPhi[V]
-
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
 
-  private lazy val fixed = fix.Fixpoint { (rec: FixIn => FixOut[V]) =>
+  private lazy val fixed = fixpoint { (rec: FixIn => FixOut[V]) =>
     inline def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
     inline def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case v => throw new IllegalStateException()}
     inline def enterFunction(fun: Function) = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }

@@ -20,7 +20,7 @@ import sturdy.values.references.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.util.{*, given}
 import sturdy.language.tip.{*, given}
-import sturdy.language.tip.GenericInterpreter.{FixIn, GenericPhi, AllocationSite, FixOut, Field}
+import sturdy.language.tip.GenericInterpreter.{FixIn, AllocationSite, FixOut, Field}
 import sturdy.language.tip.abstractions.*
 
 object IntervalAnalysis extends Interpreter,
@@ -82,19 +82,15 @@ object IntervalAnalysis extends Interpreter,
 
     val callSites = callSitesLogger()
     val cfg = control[CallString, Value](sensitive = true, cfgOnlyCalls)
-    
-    val phi =
-      fix.log(callSites,
-        fix.contextSensitive(callSites.callString(2),
-          fix.log(cfg.logger,
-            fix.dispatch(isFunOrWhile, Seq(
-              // call
-              fix.iter.topmost,
-              // while
-              fix.unwind(steps,
-                fix.iter.innermost
-              )
-            ))
-          )
-        )
+
+    protected override type Ctx = CallString
+    protected override def context = callSites.callString(2)
+    protected override def contextFree = fix.log(callSites, _)
+    override def contextSensitive = fix.dispatch(isFunOrWhile, Seq(
+      // call
+      fix.iter.topmost,
+      // while
+      fix.unwind(steps,
+        fix.iter.innermost
       )
+    ))

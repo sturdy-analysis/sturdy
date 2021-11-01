@@ -112,7 +112,8 @@ given finiteFixIn[V]: Finite[FixIn[V]] with {}
 
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], Effects <: GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin]]
   (val effects: Effects)
-  (using MayJoin[Unit], MayJoin[V]):
+  (using MayJoin[Unit], MayJoin[V])
+  extends fix.Fixpoint[FixIn[V], FixOut[V]]:
 
   import effects.*
   val stack: OperandStack[V] = effects
@@ -129,8 +130,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   private var memCount = 0
   private var tabCount = 0
   private var globCount = 0
-
-  val phi: fix.Combinator[FixIn[V], FixOut[V]]
 
   // add empty table at addr 0 for global variables
   assert(TableAddr(tabCount) == globalTableIndex)
@@ -389,7 +388,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   inline def enterFunction(id: FuncId, func: Func, ft: FuncType)(using rec: FixIn[V] => FixOut[V]): FixOut[V] =
     rec(FixIn.EnterWasmFunction(id, func, ft))
 
-  private lazy val fixed: Fixed[V] = fix.Fixpoint { (rec: Fixed[V]) =>
+  private lazy val fixed: Fixed[V] = fixpoint { (rec: Fixed[V]) =>
     phi {
       case FixIn.Eval(inst, loc) =>
         eval_open(inst, loc)(using rec)
