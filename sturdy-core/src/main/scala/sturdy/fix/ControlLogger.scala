@@ -183,7 +183,6 @@ class ControlLogger[Ctx, Dom, Codom, Exc <: LanguageException, Node]
 
   override def repeating(): Unit =
     predecessors = Map()
-    exceptions = Map()
 
   def clear(): Unit =
     predecessors = Map(startCNode -> EdgeAttrib.default)

@@ -129,4 +129,4 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
 
     protected override def context = callSites.callString(0)
     protected override def contextFree = fix.log(callSites, _)
-    protected override def contextSensitive = fix.filter(isFunOrWhile, fix.iter.topmost)
+    protected override def contextSensitive = fix.filter(isFunOrWhile, fix.iter.innermost)
