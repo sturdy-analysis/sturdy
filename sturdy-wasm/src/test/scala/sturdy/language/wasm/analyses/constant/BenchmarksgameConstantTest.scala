@@ -26,10 +26,9 @@ import java.nio.file.Paths
 import scala.jdk.StreamConverters.*
 
 class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
-  behavior of "Benchmarksgame"
+  behavior of "Benchmarksgame with new binary"
 
   //val testcases = List("binarytrees", "fankuchredux", "mandelbrot", "nbody", "spectral-norm")
-  val base = "/sturdy/language/wasm/benchmarksgame/"
   val funcName = "_start"
 
   val uri = classOf[BenchmarksgameConstantTest].getResource("/sturdy/language/wasm/benchmarksgame").toURI();
@@ -41,6 +40,8 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
   }
 
   def run(p: Path, binary: Boolean = false) =
+    Fixpoint.DEBUG = false
+
     val name = p.getFileName
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
     val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, CfgConfig.AllNodes(false))
