@@ -54,7 +54,7 @@ object ConcreteInterpreter extends Interpreter:
     override def initialCallFrameData: Unit = ()
     override def initialCallFrameVars: Map[String, Int] = initEnvironment
 
-  class Instance(effects: Effects) extends GenericInstance(effects):
+  class Instance(effects: Effects) extends GenericInstance(effects) with fix.Concrete[FixIn, FixOut[Value]]:
     final def vintOps: IntOps[VInt] = implicitly
     final def vcompareOps: CompareOps[VInt, VBool] = implicitly
     final def vintEqOps: EqOps[VInt, VBool] = implicitly
@@ -65,8 +65,6 @@ object ConcreteInterpreter extends Interpreter:
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
     final def vbranchOps: BooleanBranching[Boolean, MayJoin] = implicitly
-
-    override val phi: GenericPhi[Value] = fix.identity[FixIn, FixOut[Value]]
 
   def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): Instance =
     val effects = new Effects(initEnvironment, initStore, nextInput)

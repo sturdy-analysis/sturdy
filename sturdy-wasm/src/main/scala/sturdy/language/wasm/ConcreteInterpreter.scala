@@ -92,11 +92,9 @@ object ConcreteInterpreter extends Interpreter:
     override protected def makeGlobalsTable = new ConcreteSymbolTable[Unit, GlobalAddr, Value] {}
 
   class Instance(_effects: Effects)(using Failure)
-    extends GenericInstance(_effects):
+    extends GenericInstance(_effects) with fix.Concrete[FixIn[Value], FixOut[Value]]:
 
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
-
-    val phi: fix.Combinator[FixIn[Value], FixOut[Value]] = fix.identity
 
   def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value]): Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)
