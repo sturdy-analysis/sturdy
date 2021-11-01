@@ -126,8 +126,8 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
 
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
-    val callSites = callSitesLogger()
+    val callSites = surroundingCallSitesLogger()
 
-    protected override def context = callSites.callString(0)
+    protected override def context = callSites.callString(3)
     protected override def contextFree = fix.log(callSites, _)
     protected override def contextSensitive = fix.filter(isFunOrWhile, fix.iter.innermost)
