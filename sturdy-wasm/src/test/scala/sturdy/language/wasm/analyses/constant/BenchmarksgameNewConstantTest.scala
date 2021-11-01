@@ -29,18 +29,19 @@ class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
   behavior of "Benchmarksgame"
 
   //val testcases = List("binarytrees", "fankuchredux", "mandelbrot", "nbody", "spectral-norm")
-  val base = "/sturdy/language/wasm/benchmarksgame/"
   val funcName = "_start"
 
   val uri = classOf[BenchmarksgameNewConstantTest].getResource("/sturdy/language/wasm/benchmarksgame/src").toURI();
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
     it must s"execute constant analysis on benchmark ${p.getFileName}" in {
-      run(p)
+      run(p, binary = true)
     }
   }
 
   def run(p: Path, binary: Boolean = false) =
+    Fixpoint.DEBUG = false
+    
     val name = p.getFileName
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
     val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, CfgConfig.AllNodes(false))
