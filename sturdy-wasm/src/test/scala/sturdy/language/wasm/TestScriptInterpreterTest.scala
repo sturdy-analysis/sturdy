@@ -17,6 +17,7 @@ class TestScriptInterpreterTest extends AnyFlatSpec, Matchers:
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
+      println(s"Executing TestScript interpreter on ${p.getFileName}")
       val file = Source.fromURI(p.toUri)
       val sourceCode = file.getLines().mkString("\n")
       file.close()

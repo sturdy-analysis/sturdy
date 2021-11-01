@@ -4,8 +4,9 @@ ThisBuild / version := "0.1"
 ThisBuild / scalaVersion := "3.0.2"
 ThisBuild / licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 
-Test / parallelExecution := false
 Test / fork := true
+Test / parallelExecution := false
+Test / testForkedParallel := false
 
 lazy val root = (project in file("."))
   .settings(name := "sturdy")
