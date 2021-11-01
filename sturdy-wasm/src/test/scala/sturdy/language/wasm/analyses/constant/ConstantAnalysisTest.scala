@@ -147,7 +147,7 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallib
   val result = interp.effects.fallible(
     interp.invokeExported(modInst, funName, args)
   )
-  println(cfg.toGraphViz)
+//  println(cfg.toGraphViz)
 
   val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
   val deadLabels = ControlFlow.deadLabels(cfg)
