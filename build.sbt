@@ -7,6 +7,7 @@ ThisBuild / licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
 Test / fork := false
 Test / parallelExecution := false
 Test / testForkedParallel := false
+Test / logBuffered := false
 
 lazy val root = (project in file("."))
   .settings(name := "sturdy")
