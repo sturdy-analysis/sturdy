@@ -8,6 +8,8 @@ import scala.collection.mutable.ListBuffer
 import scala.util.Failure
 import scala.util.Success
 import ControlFlowGraph.*
+
+import sturdy.data.combineMaps
 import sturdy.effect.TrySturdy
 import sturdy.effect.except.ExceptObserver
 import sturdy.effect.except.LanguageException
@@ -112,63 +114,71 @@ class ControlLogger[Ctx, Dom, Codom, Exc <: LanguageException, Node]
   private case class PredNode(cnode: CNode[Node, Ctx], exceptional: Boolean)
 
   type Predecessors = Map[CNode[Node, Ctx], EdgeAttrib]
-  type Exceptions = Map[Exact[LanguageException], Predecessors]
+  type Exceptions = Map[LanguageException, Predecessors]
 
   private val startCNode: CNode[Node, Ctx] = CNode(startNode, null.asInstanceOf[Ctx])
+
   private var predecessors: Predecessors = Map(startCNode -> EdgeAttrib.default)
+  private var joinStack: List[Predecessors] = List()
+
+  /** Currently active exceptions and the CFG nodes that triggered them. */
   private var exceptions: Exceptions = Map()
-  private var trace: List[Predecessors] = List()
+  private var exceptStack: List[Exceptions] = List()
+  /** Exceptions currently handled in a catch block. Uncaught exceptions are propagated outwards. */
+  private var catchExceptions: Exceptions = Map()
 
   private val nodes: mutable.Set[CNode[Node, Ctx]] = mutable.Set(startCNode)
   private val edges: mutable.Map[CNode[Node, Ctx], Map[CNode[Node, Ctx], EdgeAttrib]] = mutable.Map()
 
-  override def thrown(exc: Exc): Unit =
+  override def throwing(exc: Exc): Unit =
     val exceptionalPredecessors = predecessors.map(_.copy(_2 = EdgeAttrib(true)))
-    val key = new Exact(exc.rootCause)
-    if (!exceptions.contains(key)) {
-      exceptions += key -> exceptionalPredecessors
-//      println(s"Registered ${exc.rootCause} -> $exceptionalPredecessors, now ${exceptions.size} exceptions")
-    }
+    exceptions.get(exc) match
+      case None =>
+        exceptions += exc -> exceptionalPredecessors
+      case Some(preds) =>
+        val combinedPreds = combinePredecessors(preds, exceptionalPredecessors)
+        exceptions += exc -> combinedPreds
     predecessors = Map()
 
-  override def handled(exc: Exc): Unit =
-    val root = exc.rootCause
-    val key = new Exact(root)
-    predecessors ++= exceptions(key)
-    exceptions -= key
-//    println(s"Handled $root, now ${exceptions.size} exceptions")
+  override def handling(exc: Exc): Unit =
+    predecessors = catchExceptions(exc)
+    catchExceptions -= exc
+
+  override def tryStart(): Unit =
+    exceptStack = exceptions :: exceptStack
+    exceptions = Map()
+
+  override def tryEnd(): Unit =
+    val fallthrough = exceptStack.head
+    exceptions = combineExceptions(exceptions, fallthrough)
+    exceptStack = exceptStack.tail
+
+  override def catchStart(): Unit =
+    catchExceptions = exceptions
+    exceptions = Map()
+
+  override def catchEnd(): Unit =
+    exceptions = combineExceptions(exceptions, catchExceptions)
 
   override def joinStart(): Unit =
-    trace = predecessors :: trace
+    joinStack = predecessors :: joinStack
 //    exceptions = Map()
 
   override def joinSwitch(): Unit =
-    val otherPredecessors = trace.head
-    trace = predecessors :: trace.tail
+    val otherPredecessors = joinStack.head
+    joinStack = predecessors :: joinStack.tail
     predecessors = otherPredecessors
 
   override def joinEnd(): Unit =
-    val otherPredecessors = trace.head
-    trace = trace.tail
+    val otherPredecessors = joinStack.head
+    joinStack = joinStack.tail
     predecessors = combinePredecessors(predecessors, otherPredecessors)
 
-  private def combinePredecessors(preds1: Predecessors, preds2: Predecessors): Predecessors =
-    var result = preds1
-    for ((cnode, attrib) <- preds2)
-      val newAttrib = preds1.get(cnode) match
-        case None => attrib
-        case Some(otherAttrib) => otherAttrib.combine(attrib)
-      result += cnode -> newAttrib
-    result
+  private inline def combinePredecessors(preds1: Predecessors, preds2: Predecessors): Predecessors =
+    combineMaps(preds1, preds2, _.combine(_))
 
-  private def combineExceptions(excs1: Exceptions, excs2: Exceptions): Exceptions =
-    var result = excs1
-    for ((exc, nodes) <- excs2)
-      val newNodes = excs1.get(exc) match
-        case None => nodes
-        case Some(otherNodes) => combinePredecessors(otherNodes, nodes)
-      result += exc -> newNodes
-    result
+  private inline def combineExceptions(excs1: Exceptions, excs2: Exceptions): Exceptions =
+    combineMaps(excs1, excs2, combinePredecessors(_, _))
 
 
   override def repeating(): Unit =
@@ -177,7 +187,7 @@ class ControlLogger[Ctx, Dom, Codom, Exc <: LanguageException, Node]
 
   def clear(): Unit =
     predecessors = Map(startCNode -> EdgeAttrib.default)
-    trace = List()
+    joinStack = List()
     nodes.clear()
     nodes += startCNode
     edges.clear()
