@@ -70,5 +70,5 @@ object RunIntervalAnalysis extends App {
   println(analysis.effects.getCallFrame)
   println(analysis.effects.getStore)
   println(analysis.effects.getPrinted)
-  println(cfg.toGraphViz)
+//  println(cfg.toGraphViz)
 }

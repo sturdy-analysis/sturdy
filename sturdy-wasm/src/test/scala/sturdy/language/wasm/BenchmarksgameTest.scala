@@ -18,7 +18,7 @@ import java.nio.file.{Path, Paths}
 
 import scala.jdk.StreamConverters.*
 
-class BinarytreesTest extends AnyFlatSpec, Matchers:
+class BenchmarksgameTest extends AnyFlatSpec, Matchers:
   behavior of "Benchmarksgame"
 
   //val testcases = List("binarytrees", "fankuchredux", "mandelbrot", "nbody", "spectral-norm")
@@ -26,7 +26,7 @@ class BinarytreesTest extends AnyFlatSpec, Matchers:
   val funcName = "_start"
 
   it must s"execute shortened $funcName in binarytrees_repo with concrete interpreter" in {
-    val uri = classOf[BinarytreesTest].getResource(base ++ "src/binarytrees_shortened.wast").toURI();
+    val uri = classOf[BenchmarksgameTest].getResource(base ++ "src/binarytrees_shortened.wast").toURI();
     val path = Paths.get(uri)
     val module = wasm.parse(path)
     val interp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
