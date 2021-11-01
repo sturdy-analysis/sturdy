@@ -15,8 +15,7 @@ lazy val root = (project in file("."))
     sturdy_core,
     sturdy_scheme,
     sturdy_tip,
-    sturdy_wasm,
-    sturdy_wasm_benchmarks
+    sturdy_wasm
   )
   .settings(skip / publish := true)
 
