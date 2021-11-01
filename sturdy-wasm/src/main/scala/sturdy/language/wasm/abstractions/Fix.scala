@@ -24,7 +24,12 @@ trait Fix extends Interpreter:
     case _ => -1
 
 
-  final def callSitesLogger() = fix.context.callSites[FixIn[Value], Call | CallIndirect] {
+  final def surroundingCallSitesLogger() = fix.context.surroundingCallSites[FixIn[Value], Call | CallIndirect] {
+    case FixIn.Eval(c: Call, _) => Some(c)
+    case FixIn.Eval(c: CallIndirect, _) => Some(c)
+    case _ => None
+  }
+  final def previousCallSitesLogger(k: Int) = fix.context.previousCallSites[FixIn[Value], Call | CallIndirect](k) {
     case FixIn.Eval(c: Call, _) => Some(c)
     case FixIn.Eval(c: CallIndirect, _) => Some(c)
     case _ => None
