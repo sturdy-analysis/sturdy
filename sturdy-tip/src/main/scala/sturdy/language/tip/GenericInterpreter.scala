@@ -88,122 +88,119 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
 
-  private lazy val fixed = fixpoint { (rec: FixIn => FixOut[V]) =>
-    inline def eval(e: Exp): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
-    inline def run(s: Stm): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case v => throw new IllegalStateException()}
-    inline def enterFunction(fun: Function) = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
-
-    def eval_open(e: Exp): V = e match {
-      case Exp.NumLit(n) => intLit(n)
-      case Exp.Input() => readInput()
-      case Exp.Var(x) => functions.get(x) match
-        case Some(fun) => funValue(fun)
-        case None =>
-          val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
-          read(addr).getOrElse(fail(UnboundAddr, s"$addr for variable $x"))
-      case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
-      case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
-      case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
-      case Exp.Div(e1, e2) => div(eval(e1), eval(e2))
-      case Exp.Gt(e1, e2) => gt(eval(e1), eval(e2))
-      case Exp.Eq(e1, e2) =>
-        val v1 = eval(e1)
-        val v2 = eval(e2)
-        equ(v1, v2)
-      case Exp.Call(fun, args) =>
-        invokeFun(eval(fun), args.map(eval(_)))(call)
-      case a@Exp.Alloc(e) =>
-        val addr = alloc(AllocationSite.Alloc(a))
-        write(addr, eval(e))
-        refValue(addr)
-      case Exp.VarRef(x) =>
+  def eval_open(e: Exp)(using Fixed): V = e match {
+    case Exp.NumLit(n) => intLit(n)
+    case Exp.Input() => readInput()
+    case Exp.Var(x) => functions.get(x) match
+      case Some(fun) => funValue(fun)
+      case None =>
         val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
-        unmanagedRefValue(addr)
-      case Exp.Deref(e) =>
-        val addr = refAddr(eval(e))
-        read(addr).getOrElse(fail(UnboundAddr, addr.toString))
-      case Exp.NullRef() =>
-        nullValue
-      case r@Exp.Record(fields) =>
-        // represents record as a reference to a record value
-        val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
-        val rec = makeRecord(fieldVals)
-        val addr = alloc(AllocationSite.Record(r))
-        write(addr, rec)
-        refValue(addr)
-      case Exp.FieldAccess(rec, field) =>
-        val recVal = eval(Exp.Deref(rec))
-        lookupRecordField(recVal, Field(field))
-    }
-
-    def run_open(s: Stm): Unit = s match
-      case Stm.Assign(lhs: Assignable, e: Exp) =>
-        val v = eval(e)
-        assign(lhs, v)
-      case Stm.If(cond: Exp, thn: Stm, els: Option[Stm]) =>
-        boolBranch(eval(cond), run(thn), els.map(run(_)).getOrElse(()))
-      case Stm.While(cond, body) =>
-        boolBranch(eval(cond), {run(body); run(s)}, {})
-      case Stm.Block(body) =>
-        body.foreach(run(_))
-      case Stm.Output(e) =>
-        print(eval(e))
-      case Stm.Error(e) =>
-        fail(UserError, eval(e).toString)
-
-    def assign(lhs: Assignable, v: V): Unit = lhs match
-      case Assignable.AVar(x) =>
-        val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
-        write(addr, v)
-      case Assignable.ADeref(e) =>
-        val addr = refAddr(eval(e))
-        write(addr, v)
-      case Assignable.AField(recVar, field) =>
-        val recRef = eval(Exp.Var(recVar))
-        val recAddr = refAddr(recRef)
-        val recVal = read(recAddr).getOrElse(fail(UnboundAddr, recAddr.toString))
-        val updated = updateRecordField(recVal, Field(field), v)
-        write(recAddr, updated)
-      case Assignable.ADerefField(rec, field) =>
-        val recRef = eval(rec)
-        val recAddr = refAddr(recRef)
-        val recVal = read(recAddr).getOrElse(fail(UnboundAddr, recAddr.toString))
-        val updated = updateRecordField(recVal, Field(field), v)
-        write(recAddr, updated)
-
-    def call(fun: Function, args: Seq[V]): V =
-      var locals: Map[String, Addr] = Map()
-      val paramAddrs = fun.params.map { name =>
-        val addr = alloc(AllocationSite.ParamBinding(fun, name))
-        locals += name -> addr
-        addr
-      }
-      val localsAddrs = fun.locals.map { name =>
-        val addr = alloc(AllocationSite.LocalBinding(fun, name))
-        locals += name -> addr
-        addr
-      }
-      inNewFrame((), locals) {
-        paramAddrs.zip(args).map(write)
-        try enterFunction(fun)
-        finally {
-          paramAddrs.foreach(free)
-          localsAddrs.foreach(free)
-        }
-      }
-
-    phi {
-      case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
-      case FixIn.Run(s) => {run_open(s); FixOut.Run()}
-      case FixIn.EnterFunction(f) => FixOut.ExitFunction({run(f.body); eval(f.ret)})
-    }
+        read(addr).getOrElse(fail(UnboundAddr, s"$addr for variable $x"))
+    case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
+    case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
+    case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
+    case Exp.Div(e1, e2) => div(eval(e1), eval(e2))
+    case Exp.Gt(e1, e2) => gt(eval(e1), eval(e2))
+    case Exp.Eq(e1, e2) =>
+      val v1 = eval(e1)
+      val v2 = eval(e2)
+      equ(v1, v2)
+    case Exp.Call(fun, args) =>
+      invokeFun(eval(fun), args.map(eval(_)))(call)
+    case a@Exp.Alloc(e) =>
+      val addr = alloc(AllocationSite.Alloc(a))
+      write(addr, eval(e))
+      refValue(addr)
+    case Exp.VarRef(x) =>
+      val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
+      unmanagedRefValue(addr)
+    case Exp.Deref(e) =>
+      val addr = refAddr(eval(e))
+      read(addr).getOrElse(fail(UnboundAddr, addr.toString))
+    case Exp.NullRef() =>
+      nullValue
+    case r@Exp.Record(fields) =>
+      // represents record as a reference to a record value
+      val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
+      val rec = makeRecord(fieldVals)
+      val addr = alloc(AllocationSite.Record(r))
+      write(addr, rec)
+      refValue(addr)
+    case Exp.FieldAccess(rec, field) =>
+      val recVal = eval(Exp.Deref(rec))
+      lookupRecordField(recVal, Field(field))
   }
 
-  def eval(e: Exp): V = fixed(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
-  def run(s: Stm): Unit = fixed(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
+  def run_open(s: Stm)(using Fixed): Unit = s match
+    case Stm.Assign(lhs: Assignable, e: Exp) =>
+      val v = eval(e)
+      assign(lhs, v)
+    case Stm.If(cond: Exp, thn: Stm, els: Option[Stm]) =>
+      boolBranch(eval(cond), run(thn), els.map(run(_)).getOrElse(()))
+    case Stm.While(cond, body) =>
+      boolBranch(eval(cond), {run(body); run(s)}, {})
+    case Stm.Block(body) =>
+      body.foreach(run(_))
+    case Stm.Output(e) =>
+      print(eval(e))
+    case Stm.Error(e) =>
+      fail(UserError, eval(e).toString)
 
-  def execute(p: Program): V =
+  def assign(lhs: Assignable, v: V)(using Fixed): Unit = lhs match
+    case Assignable.AVar(x) =>
+      val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
+      write(addr, v)
+    case Assignable.ADeref(e) =>
+      val addr = refAddr(eval(e))
+      write(addr, v)
+    case Assignable.AField(recVar, field) =>
+      val recRef = eval(Exp.Var(recVar))
+      val recAddr = refAddr(recRef)
+      val recVal = read(recAddr).getOrElse(fail(UnboundAddr, recAddr.toString))
+      val updated = updateRecordField(recVal, Field(field), v)
+      write(recAddr, updated)
+    case Assignable.ADerefField(rec, field) =>
+      val recRef = eval(rec)
+      val recAddr = refAddr(recRef)
+      val recVal = read(recAddr).getOrElse(fail(UnboundAddr, recAddr.toString))
+      val updated = updateRecordField(recVal, Field(field), v)
+      write(recAddr, updated)
+
+  def call(fun: Function, args: Seq[V])(using Fixed): V =
+    var locals: Map[String, Addr] = Map()
+    val paramAddrs = fun.params.map { name =>
+      val addr = alloc(AllocationSite.ParamBinding(fun, name))
+      locals += name -> addr
+      addr
+    }
+    val localsAddrs = fun.locals.map { name =>
+      val addr = alloc(AllocationSite.LocalBinding(fun, name))
+      locals += name -> addr
+      addr
+    }
+    inNewFrame((), locals) {
+      paramAddrs.zip(args).map(write)
+      try enterFunction(fun)
+      finally {
+        paramAddrs.foreach(free)
+        localsAddrs.foreach(free)
+      }
+    }
+
+  inline def eval(e: Exp)(using rec: Fixed): V = rec(FixIn.Eval(e)) match {case FixOut.Eval(v) => v; case _ => throw new IllegalStateException()}
+  inline def run(s: Stm)(using rec: Fixed): Unit = rec(FixIn.Run(s)) match {case FixOut.Run() => (); case _ => throw new IllegalStateException()}
+  private inline def enterFunction(fun: Function)(using rec: Fixed) = rec(FixIn.EnterFunction(fun)) match {case FixOut.ExitFunction(v) => v; case _ => throw new IllegalStateException() }
+
+  private lazy val fixed = fixpoint {
+    case FixIn.Eval(e) => FixOut.Eval(eval_open(e))
+    case FixIn.Run(s) => run_open(s); FixOut.Run()
+    case FixIn.EnterFunction(f) => FixOut.ExitFunction({run(f.body); eval(f.ret)})
+  }
+  inline def external[A](f: Fixed ?=> A): A = f(using fixed)
+
+  def execute(p: Program): V = external {
     functions = p.funs.map(f => f.name -> f).toMap
     val main = functions("main")
     val args = main.params.map(_ => Exp.Input())
     eval(Exp.Call(Exp.Var("main"), args))
+  }

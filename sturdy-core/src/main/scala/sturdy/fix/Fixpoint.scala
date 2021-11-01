@@ -3,10 +3,15 @@ package sturdy.fix
 import sturdy.fix.context.Sensitivity
 
 trait Fixpoint[Dom, Codom]:
-  def fixpoint(f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
-    f(dom => fixpoint(f)(dom))
+  final type Fixed = Dom => Codom
 
-  final lazy val phi: Combinator[Dom, Codom] =
+  def fixpoint(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
+    computeFixpoint(fixed => phi(f(using fixed)))
+
+  private def computeFixpoint(f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
+    f(dom => computeFixpoint(f)(dom))
+
+  private final lazy val phi: Combinator[Dom, Codom] =
     contextFree (
       sturdy.fix.contextSensitive(context, contextSensitive)
     )

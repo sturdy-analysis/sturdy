@@ -106,8 +106,6 @@ enum FixOut[V]:
   case Eval()
   case ExitWasmFunction(vals: List[V])
 
-type Fixed[V] = FixIn[V] => FixOut[V]
-
 given finiteFixIn[V]: Finite[FixIn[V]] with {}
 
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], Effects <: GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin]]
@@ -225,7 +223,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   def getGlobalValue(ga: GlobalAddr): V =
     readGlobal(ga)
 
-  def eval_open(inst: Inst, loc: InstLoc)(using Fixed[V]): Unit =
+  def eval_open(inst: Inst, loc: InstLoc)(using Fixed): Unit =
     val opcode = inst.opcode
     if (opcode >= OpCode.I32Const && opcode <= OpCode.I64Extend32S)
       stack.push(num.evalNumeric(inst))
@@ -250,7 +248,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
         }
       case _ => throw new IllegalArgumentException(s"Unexpected instruction $inst")
 
-  def evalControlInst(inst: Inst, loc: InstLoc)(using Fixed[V]): Unit = inst match
+  def evalControlInst(inst: Inst, loc: InstLoc)(using Fixed): Unit = inst match
     case Nop => // nothing
     case Unreachable => fail(UnreachableInstruction, inst.toString)
     case b@Block(bt, insts) =>
@@ -312,7 +310,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
  *   - stack: A g0 ... gok needs to become A
  *   - we don't know k, so we need to remember size of stack A
  */
-  def label(block: BlockId, paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[(Inst, InstLoc)])(using Fixed[V]): Unit =
+  def label(block: BlockId, paramsArity: Int, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[(Inst, InstLoc)])(using Fixed): Unit =
     stack.withFreshOperandFrame {
       tryCatch {
         labelStack.pushLabel(returnArity)
@@ -340,7 +338,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       }
     }
 
-  def invoke(fun: FunctionInstance)(using Fixed[V]): Unit =
+  def invoke(fun: FunctionInstance)(using Fixed): Unit =
     fun match
       case FunctionInstance.Wasm(mod, ix, func, funcType) =>
         val args = stack.popN(funcType.params.size)
@@ -358,7 +356,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
         }
         stack.pushN(res)
 
-  def enterFunction_open(id: FuncId, func: Func, funcType: FuncType)(using Fixed[V]): List[V] =
+  def enterFunction_open(id: FuncId, func: Func, funcType: FuncType)(using Fixed): List[V] =
     val returnN = funcType.t.size
     tryCatch {
       label(BlockId(id), 0, returnN, func.body, None)
@@ -373,7 +371,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     }
     stack.peekN(returnN)
 
-  def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V)(using Fixed[V]): Unit =
+  def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V)(using Fixed): Unit =
     functionOps.invokeFun(funV, Seq()) {
       case (func, _) =>
         val ftActual = func.funcType
@@ -383,25 +381,23 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     }
 
 
-  inline def eval(inst: Inst, loc: InstLoc)(using rec: FixIn[V] => FixOut[V]): FixOut[V] =
+  inline def eval(inst: Inst, loc: InstLoc)(using rec: Fixed): FixOut[V] =
     rec(FixIn.Eval(inst, loc))
-  inline def enterFunction(id: FuncId, func: Func, ft: FuncType)(using rec: FixIn[V] => FixOut[V]): FixOut[V] =
+  inline def enterFunction(id: FuncId, func: Func, ft: FuncType)(using rec: Fixed): FixOut[V] =
     rec(FixIn.EnterWasmFunction(id, func, ft))
 
-  private lazy val fixed: Fixed[V] = fixpoint { (rec: Fixed[V]) =>
-    phi {
-      case FixIn.Eval(inst, loc) =>
-        eval_open(inst, loc)(using rec)
-        FixOut.Eval()
-      case FixIn.EnterWasmFunction(id, func, funcType) =>
-        FixOut.ExitWasmFunction(enterFunction_open(id, func, funcType)(using rec))
-    }
+  private lazy val fixed: Fixed = fixpoint {
+    case FixIn.Eval(inst, loc) =>
+      eval_open(inst, loc)
+      FixOut.Eval()
+    case FixIn.EnterWasmFunction(id, func, funcType) =>
+      FixOut.ExitWasmFunction(enterFunction_open(id, func, funcType))
   }
-  inline def external[A](f: Fixed[V] ?=> A): A = f(using fixed)
+  inline def external[A](f: Fixed ?=> A): A = f(using fixed)
 
-  def invokeExported[Addr,Bytes,Size](modInst: ModuleInstance, funcName: String, args: List[V]): List[V] = external {
+  def invokeExported(modInst: ModuleInstance, funcName: String, args: List[V]): List[V] = external {
     stack.withFreshOperandStack {
-      modInst.exports.find((name, _) => name == funcName) match
+      modInst.exports.find(entry => entry._1 == funcName) match
         case Some((_, ExternalValue.Function(funcIx))) =>
           val fun = modInst.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
           val paramTys = fun.funcType.params
@@ -445,7 +441,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 //    // TODO WIP
 //    ???
 
-  def evalInstructionSequence(block: BlockId, insts: Vector[Inst], mod: ModuleInstance)(using Fixed[V]): V =
+  def evalInstructionSequence(block: BlockId, insts: Vector[Inst], mod: ModuleInstance)(using Fixed): V =
     val frameData = FrameData(1,mod)
     labelStack.withFresh(withFreshOperandStack(inNewFrame(frameData, Iterable.empty){
       for ((inst, ix) <- insts.zipWithIndex) {
