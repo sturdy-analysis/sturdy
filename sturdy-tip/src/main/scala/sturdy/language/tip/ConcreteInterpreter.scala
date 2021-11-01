@@ -21,6 +21,7 @@ import sturdy.values.{_, given}
 
 object ConcreteInterpreter extends Interpreter:
   override type MayJoin[A] = NoJoin[A]
+  override type Ctx = Unit
   
   override type VBool = Boolean
   override type VInt = Int

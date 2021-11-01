@@ -13,6 +13,7 @@ import sturdy.values.relational.{EqOps, CompareOps, LiftedCompareOps}
 
 trait Interpreter:
   type MayJoin[A]
+  type Ctx
   type VBool
   type VInt
   type VRef
@@ -74,6 +75,8 @@ trait Interpreter:
     (_effects: Effects)
     (using MayJoin[Unit], MayJoin[Value])
     extends GenericInterpreter[Value, Addr, MayJoin, Effects](_effects):
+
+    override type Ctx = Interpreter.this.Ctx
 
     given Instance = this.asInstanceOf[Instance]
     given Failure = this.effects

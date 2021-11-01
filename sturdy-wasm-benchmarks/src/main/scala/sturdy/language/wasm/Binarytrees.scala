@@ -22,7 +22,8 @@ class Binarytrees:
 
     val resource = classOf[Binarytrees].getResourceAsStream(base ++ "/binarytrees.wasm")
     val module = readBinaryModule(resource)
-    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty, CfgConfig.CallGraph)
+    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)
+    val cfg = ConstantAnalysis.controlFlow(CfgConfig.CallGraph, interp)
     val modInst = interp.initializeModule(module)
     (interp,modInst)
 

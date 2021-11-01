@@ -35,9 +35,16 @@ class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:
   }
 
   def run(p: Path, binary: Boolean = false) =
+    Fixpoint.DEBUG = false
+
     val name = p.getFileName
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
-    val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty, CfgConfig.AllNodes(false))
+
+    val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)
+    val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
+    val constants = ConstantTaintAnalysis.constantInstructions(interp)
+    val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
+
     val modInst = interp.initializeModule(module)
     interp.effects.fallible(
       interp.invokeExported(modInst, funcName, List.empty)
@@ -45,12 +52,12 @@ class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
     val allInstructions = allNodes.filter(_.isInstruction)
-    val deadInstructions = ControlFlow.deadInstruction(interp.cfg, List(modInst))
+    val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))
     val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
     println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
 
     val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labeled])
-    val deadLabels = ControlFlow.deadLabels(interp.cfg)
+    val deadLabels = ControlFlow.deadLabels(cfg)
     val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
     val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)
     println(s"Found ${deadLabels.size} dead labels, $deadLabelsPercent% of the ${allLabels.size} labels in $name.")
@@ -59,7 +66,10 @@ class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:
     val deadLabelLoop = deadLabelsGrouped.getOrElse("Loop", Set())
     println(s"  Can optimize ${deadLabelsIf.size} if instructions; can eliminate ${deadLabelsBlock.size} block and ${deadLabelLoop.size} loop instructions.")
 
-    // TODO constant instruction logger in ConstantTaintValues
+    val liveInstructions = allInstructions.size - deadInstructions.size
+    val constantInstructions = constants.get.size
+    val constantInstructionPercent = (10000.0 * constantInstructions / liveInstructions.toDouble).round / 100.0
+    println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
 
     val allMemoryInstructions = allNodes.filter{
       case CfgNode.Instruction(inst, _) => inst match
@@ -67,10 +77,14 @@ class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:
         case _ => false
       case _ => false
     }
-    val taintedAccesses = interp.taintedMemoryAccesses.taintedMemoryAccesses
+    val taintedAccesses = memory.instructions
     val taintedAccessesPercent = (10000.0 * taintedAccesses.size / allMemoryInstructions.size.toDouble).round / 100.0
     println(s"Found ${taintedAccesses.size} tainted memory accesses, $taintedAccessesPercent% of all load and store instructions in $name.")
     println(s"  This means, ${100.0 - taintedAccessesPercent}% of all load and store instructions in $name are safe.")
+
+    val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size + constantInstructions
+    val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
+    println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
 
   def readBinaryModule(path: Path): Module =
     implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
