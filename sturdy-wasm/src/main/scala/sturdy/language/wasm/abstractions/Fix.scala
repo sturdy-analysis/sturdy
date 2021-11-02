@@ -23,7 +23,7 @@ object Fix:
     case FixIn.Eval(_: Loop, _) => 1
     case _ => -1
 
-  final def surroundingCallSitesLogger() = fix.context.surroundingCallSites[FixIn, Call | CallIndirect] {
+  final def surroundingCallSitesLogger() = fix.context.callSites[FixIn, Call | CallIndirect] {
     case FixIn.Eval(c: Call, _) => Some(c)
     case FixIn.Eval(c: CallIndirect, _) => Some(c)
     case _ => None

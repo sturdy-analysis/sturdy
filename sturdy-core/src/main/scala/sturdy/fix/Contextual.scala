@@ -5,6 +5,7 @@ import sturdy.effect.AnalysisState
 import sturdy.fix.context.Sensitivity
 import sturdy.values.Join
 
+val ContextProperty = "context"
 
 def contextSensitive
   [Ctx, Dom, Codom]

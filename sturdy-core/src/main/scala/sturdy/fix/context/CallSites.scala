@@ -6,8 +6,8 @@ import sturdy.values.Finite
 
 import scala.util.Try
 
-def surroundingCallSites[Dom, Call](call: Dom => Option[Call]): SurroundingCallSiteLogger[Dom, Call] = new SurroundingCallSiteLogger(call)
-class SurroundingCallSiteLogger[Dom, Call](getCall: Dom => Option[Call]) extends Logger[Dom, Any]:
+def callSites[Dom, Call](call: Dom => Option[Call]): CallSiteLogger[Dom, Call] = new CallSiteLogger(call)
+class CallSiteLogger[Dom, Call](getCall: Dom => Option[Call]) extends Logger[Dom, Any]:
   private var calls = List[Call]()
 
   def enter(dom: Dom): Unit = getCall(dom) match

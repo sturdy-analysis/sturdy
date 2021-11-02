@@ -112,11 +112,13 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     def setAllState(all: AllState) = setInState(all)
   }
 
-  class Instance(config: WasmConfig)(using effects: Effects) extends
+  class Instance(conf: WasmConfig)(using effects: Effects) extends
       GenericInstance(effects),
-      WasmFixpoint[Value, InState, OutState, AllState](config):
+      WasmFixpoint[Value, InState, OutState, AllState](conf):
     private given Instance = this
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+
+    override def toString: String = s"constant $config"
 
   def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value]): WasmConfig => Instance =
     val effects = new Effects(rootFrameData, rootFrameValues)

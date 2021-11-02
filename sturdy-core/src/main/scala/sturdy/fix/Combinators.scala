@@ -25,6 +25,8 @@ final class Filter[Dom, Codom](pred: Dom => Boolean, val phi: Combinator[Dom, Co
       f(dom)
 }
 
+val UnwindingProperty = "loop unwinding"
+
 def unwind[Dom, Codom](steps: Int, phi: Combinator[Dom, Codom]): Unwind[Dom, Codom] = new Unwind(steps, phi)
 final class Unwind[Dom, Codom](steps: Int, val phi: Combinator[Dom, Codom]) extends Combinator[Dom, Codom] {
   private var stepsLeft: Int = steps
