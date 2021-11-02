@@ -90,7 +90,7 @@ enum InstLoc:
     case (InInit(mod1, pc1), InInit(mod2, pc2)) if mod1 == mod2 => pc2 - pc1
     case _ => throw new MatchError((this, that))
 
-enum FixIn[V]:
+enum FixIn:
   case Eval(inst: Inst, loc: InstLoc)
   case EnterWasmFunction(id: FuncId, func: Func, ft: FuncType)
 
@@ -106,12 +106,12 @@ enum FixOut[V]:
   case Eval()
   case ExitWasmFunction(vals: List[V])
 
-given finiteFixIn[V]: Finite[FixIn[V]] with {}
+given finiteFixIn: Finite[FixIn] with {}
 
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], Effects <: GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin]]
   (val effects: Effects)
   (using MayJoin[Unit], MayJoin[V])
-  extends fix.Fixpoint[FixIn[V], FixOut[V]]:
+  extends fix.Fixpoint[FixIn, FixOut[V]]:
 
   import effects.*
   val stack: OperandStack[V] = effects

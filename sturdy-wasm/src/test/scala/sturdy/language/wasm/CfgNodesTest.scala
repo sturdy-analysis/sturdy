@@ -5,6 +5,7 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.language.wasm.analyses.ConstantAnalysis
+import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.{FunctionInstance, FuncId, InstLoc, FrameData}
 import sturdy.values.Topped
 
@@ -21,7 +22,7 @@ class CfgNodesTest extends AnyFlatSpec, Matchers:
 
 def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]) =
   val module = parse(path)
-  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)
+  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)(WasmConfig.default)
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(sensitive = false), interp)
   val modInst = interp.initializeModule(module)
   interp.effects.fallible(

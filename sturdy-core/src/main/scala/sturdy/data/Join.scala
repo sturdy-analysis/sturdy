@@ -15,3 +15,4 @@ inline def mapJoin[A, B](as: Iterable[A], f: A => B)(using j: WithJoin[B]): B =
 //given JoinedJoin[A](using j: WithJoin[A]): Join[A] = j._1
 //given JoinedJoinEffects[A](using j: WithJoin[A]): Effectful = j._2
 given MakeJoined[A](using jv: Join[A], je: Effectful): WithJoin[A] = (jv, je)
+

@@ -18,6 +18,7 @@ import sturdy.{IsSound, Soundness}
 import sturdy.{*,given}
 import sturdy.effect.failure.fallibleAbstractly
 import sturdy.language.wasm.abstractions.CfgConfig
+import sturdy.language.wasm.analyses.WasmConfig
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
@@ -36,7 +37,7 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
   type AValue = ConstantAnalysis.Value
 
   val cInterp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
-  val aInterp = ConstantAnalysis(FrameData.empty, Iterable.empty)
+  val aInterp = ConstantAnalysis(FrameData.empty, Iterable.empty)(WasmConfig.default)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
