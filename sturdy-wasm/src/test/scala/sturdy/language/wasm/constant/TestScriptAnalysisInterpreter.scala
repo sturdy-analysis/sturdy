@@ -1,4 +1,4 @@
-package sturdy.language.wasm.analyses.constant
+package sturdy.language.wasm.constant
 
 import cats.effect.{IO, Blocker}
 import org.scalatest.Assertions.*
