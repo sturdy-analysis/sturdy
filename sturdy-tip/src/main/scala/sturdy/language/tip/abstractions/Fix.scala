@@ -19,7 +19,7 @@ trait Fix extends Interpreter:
     case FixIn.Run(Stm.While(_, _)) => 1
     case _ => -1
 
-  final def callSitesLogger() = fix.context.surroundingCallSites[FixIn, Exp.Call] {
+  final def callSitesLogger() = fix.context.callSites[FixIn, Exp.Call] {
     case FixIn.Eval(c: Exp.Call) => Some(c)
     case _ => None
   }

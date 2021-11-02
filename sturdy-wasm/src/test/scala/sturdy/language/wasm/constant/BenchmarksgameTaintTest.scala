@@ -12,7 +12,7 @@ import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.language.wasm.analyses.ConstantTaintAnalysis
-import sturdy.language.wasm.analyses.SurroundingCallSites
+import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.FrameData
 import sturdy.values.Topped
@@ -47,7 +47,7 @@ class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
 
-    val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = SurroundingCallSites(3)))
+    val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = CallSites(3)))
     val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantTaintAnalysis.constantInstructions(interp)
     val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
