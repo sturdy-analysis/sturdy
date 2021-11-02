@@ -11,7 +11,7 @@ import swam.OpCode
 import swam.syntax
 import swam.syntax.Inst
 
-trait InstructionLogger[Info, V](using Join[Info]) extends fix.Logger[FixIn[V], FixOut[V]]:
+trait InstructionLogger[Info, V](using Join[Info]) extends fix.Logger[FixIn, FixOut[V]]:
 
   def enterInfo(inst: syntax.Inst): Option[Info]
   def exitInfo(inst: syntax.Inst, success: Boolean): Option[Info]
@@ -28,13 +28,13 @@ trait InstructionLogger[Info, V](using Join[Info]) extends fix.Logger[FixIn[V], 
         val joined = Join(previousResult, v).get
         instructionInfo += loc -> joined
 
-  override def enter(dom: FixIn[V]): Unit = dom match
+  override def enter(dom: FixIn): Unit = dom match
     case FixIn.Eval(inst, loc) => enterInfo(inst) match
       case Some(info) => addInstruction(inst, loc, info)
       case None => // nothing
     case _ => // nothing
 
-  override def exit(dom: FixIn[V], codom: TrySturdy[FixOut[V]]): Unit = dom match
+  override def exit(dom: FixIn, codom: TrySturdy[FixOut[V]]): Unit = dom match
     case FixIn.Eval(inst, loc) => exitInfo(inst, codom.isSuccess) match
       case Some(info) => addInstruction(inst, loc, info)
       case None => // nothing

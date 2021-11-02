@@ -25,7 +25,6 @@ import java.nio.ByteOrder
 
 trait Interpreter:
   type MayJoin[A]
-  type Ctx
   type I32
   type I64
   type F32
@@ -250,6 +249,4 @@ trait Interpreter:
   abstract class GenericInstance
     (_effects: Effects)
     (using MayJoin[Unit], MayJoin[Value])
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin, Effects](_effects):
-
-    override type Ctx = Interpreter.this.Ctx
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin, Effects](_effects)

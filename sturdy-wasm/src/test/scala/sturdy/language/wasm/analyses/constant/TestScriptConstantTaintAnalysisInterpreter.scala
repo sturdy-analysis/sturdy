@@ -1,21 +1,22 @@
 package sturdy.language.wasm.analyses.constant
 
-import cats.effect.{Blocker, IO}
+import cats.effect.{IO, Blocker}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.{AFallible, CFailureException, CFallible, fallibleAbstractly, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
-import sturdy.language.wasm.analyses.{ConstantAnalysis, ConstantTaintAnalysis, ConstantTaintAnalysisSoundness}
+import sturdy.language.wasm.analyses.{ConstantTaintAnalysis, ConstantAnalysis, ConstantTaintAnalysisSoundness}
 import sturdy.language.wasm.analyses.ConstantTaintAnalysisSoundness.given
 import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
-import sturdy.values.{Abstractly, PartialOrder, Topped}
+import sturdy.language.wasm.generic.{UnboundGlobal, ExternalValue, ModuleInstance, FrameData}
+import sturdy.values.{Topped, PartialOrder, Abstractly}
 import sturdy.values.relational.EqOps
 import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
 import sturdy.{*, given}
+import sturdy.language.wasm.analyses.WasmConfig
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
@@ -23,7 +24,7 @@ import swam.text.*
 import swam.text.unresolved.{FreshId, NoId, SomeId}
 import swam.validation.Validator
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Path, Paths, Files}
 import scala.collection.mutable
 import scala.io.Source
 import scala.jdk.StreamConverters.*
@@ -34,7 +35,7 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
   type AValue = ConstantTaintAnalysis.Value
 
   val cInterp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
-  val aInterp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)
+  val aInterp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)(WasmConfig.default)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null

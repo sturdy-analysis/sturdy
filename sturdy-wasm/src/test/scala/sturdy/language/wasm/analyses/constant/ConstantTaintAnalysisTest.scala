@@ -1,6 +1,6 @@
 package sturdy.language.wasm.analyses.constant
 
-import cats.effect.{Blocker, IO}
+import cats.effect.{IO, Blocker}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.{AFallible, FailureException, FailureKind}
@@ -9,8 +9,10 @@ import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.analyses.ConstantTaintAnalysis
-import sturdy.language.wasm.analyses.ConstantTaintAnalysis.{Value, untaint}
-import sturdy.language.wasm.generic.{FrameData, UnreachableInstruction}
+import sturdy.language.wasm.analyses.ConstantTaintAnalysis.{untaint, Value}
+import sturdy.language.wasm.analyses.SurroundingCallSites
+import sturdy.language.wasm.analyses.WasmConfig
+import sturdy.language.wasm.generic.{UnreachableInstruction, FrameData}
 import sturdy.values.Topped
 import sturdy.values.taint.Taint
 import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
@@ -19,10 +21,10 @@ import sturdy.values.taint.TaintProduct
 import swam.syntax.Module
 import swam.text.*
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Path, Paths, Files}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
-import scala.reflect.{ClassTag, TypeTest}
+import scala.reflect.{TypeTest, ClassTag}
 
 
 class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
@@ -86,7 +88,7 @@ class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
 def runConstantTaintAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.parse(path)
 
-  val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)
+  val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = SurroundingCallSites(3)))
 //  val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
   //    val constants = ConstantTaintAnalysis.constantInstructions(interp)
   val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)

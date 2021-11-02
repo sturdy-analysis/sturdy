@@ -13,6 +13,8 @@ import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.language.wasm.analyses.ConstantAnalysis
+import sturdy.language.wasm.analyses.SurroundingCallSites
+import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.FrameData
 import sturdy.values.Topped
 import swam.ModuleLoader
@@ -45,7 +47,7 @@ class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
 
-    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)
+    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = SurroundingCallSites(3)))
     val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantAnalysis.constantInstructions(interp)
 

@@ -13,6 +13,8 @@ import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.analyses.ConstantAnalysis.Value
+import sturdy.language.wasm.analyses.SurroundingCallSites
+import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.generic.UnreachableInstruction
 import sturdy.values.Topped
@@ -139,7 +141,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.parse(path)
 
-  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)
+  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = SurroundingCallSites(3)))
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 

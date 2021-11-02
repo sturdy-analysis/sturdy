@@ -29,7 +29,6 @@ import java.nio.ByteOrder
 
 object ConcreteInterpreter extends Interpreter:
   override type MayJoin[A] = NoJoin[A]
-  override type Ctx = Unit
   override type I32 = Int
   override type I64 = Long
   override type F32 = Float
@@ -93,7 +92,7 @@ object ConcreteInterpreter extends Interpreter:
     override protected def makeGlobalsTable = new ConcreteSymbolTable[Unit, GlobalAddr, Value] {}
 
   class Instance(_effects: Effects)(using Failure)
-    extends GenericInstance(_effects) with fix.Concrete[FixIn[Value], FixOut[Value]]:
+    extends GenericInstance(_effects) with fix.Concrete[FixIn, FixOut[Value]]:
 
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
 

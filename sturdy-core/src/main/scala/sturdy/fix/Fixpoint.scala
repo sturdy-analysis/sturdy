@@ -9,8 +9,8 @@ trait Fixpoint[Dom, Codom]:
   final type Fixed = Dom => Codom
 
   def fixpoint(f: (Dom => Codom) ?=> (Dom => Codom)): Dom => Codom =
-    val thePhi = phi()
-    computeFixpoint(fixed => thePhi(f(using fixed)))
+    val phi = fixpointAlgorithm()
+    computeFixpoint(fixed => phi(f(using fixed)))
 
   private def computeFixpoint(f: (Dom => Codom) => (Dom => Codom)): Dom => Codom =
     f(dom => computeFixpoint(f)(dom))
@@ -31,7 +31,7 @@ trait Fixpoint[Dom, Codom]:
   def addContextSensitiveLogger(logger: Contextual[Ctx, Dom, Codom] ?=> Logger[Dom, Codom]): Unit = contextSensitiveLoggers += logger
   def removeContextSensitiveLogger(logger: Contextual[Ctx, Dom, Codom] ?=> Logger[Dom, Codom]): Unit = contextSensitiveLoggers -= logger
 
-  private def phi(): Combinator[Dom, Codom] =
+  private def fixpointAlgorithm(): Combinator[Dom, Codom] =
     val cs: Combinator[Dom, Codom] =
     if (contextSensitiveLoggers.isEmpty)
       withContext(contextSensitive)
@@ -48,12 +48,15 @@ trait Fixpoint[Dom, Codom]:
       log(manyLogger(contextFreeLoggers.toList), phi)
 
 
+trait ContextInsensitive[Dom, Codom] extends Fixpoint[Dom, Codom]:
+  final type Ctx = Unit
+  final protected override def context: Sensitivity[Dom, Ctx] = sturdy.fix.context.none
+  final protected override def contextFree: Combinator[Dom, Codom] => Combinator[Dom, Codom] = f => f
+  final protected override def contextSensitive: Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom] = contextInsensitive
+  protected def contextInsensitive: Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom]
 
-trait Concrete[Dom, Codom] extends Fixpoint[Dom, Codom]:
-  type Ctx = Unit
-  protected override def context: Sensitivity[Dom, Ctx] = sturdy.fix.context.none
-  protected override def contextFree: Combinator[Dom, Codom] => Combinator[Dom, Codom] = f => f
-  protected override def contextSensitive: Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom] = identity
+trait Concrete[Dom, Codom] extends ContextInsensitive[Dom, Codom]:
+  override protected def contextInsensitive = identity
 
 object Fixpoint:
   var DEBUG: Boolean = System.getProperty("STURDY_DEBUG_FIXPOINT", "true").toBoolean

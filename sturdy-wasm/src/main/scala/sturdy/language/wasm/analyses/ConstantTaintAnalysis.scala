@@ -14,6 +14,7 @@ import sturdy.effect.symboltable.ToppedSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
+import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
 import sturdy.values.doubles.DoubleOps
 import sturdy.values.floats.FloatOps
@@ -35,9 +36,8 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFunctionValue, Fix, ControlFlow:
+object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFunctionValue, ControlFlow:
   type MayJoin[A] = WithJoin[A]
-  override type Ctx = CallString
   type Addr = Topped[Int]
   type AByte = TaintProduct[Topped[Byte]]
   type Bytes = Seq[AByte]
@@ -113,21 +113,12 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
     def setAllState(all: AllState) = setInState(all)
   }
 
-  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value]): Instance =
-    val effects = new Effects(rootFrameData, rootFrameValues)
-    given Effects = effects
-    new Instance(effects)
-
-  class Instance(effects: Effects)(using Failure, Effectful)
-    extends GenericInstance(effects) :
-
-    private given Effects = effects
+  class Instance(config: WasmConfig)(using effects: Effects) extends
+    GenericInstance(effects),
+    WasmFixpoint[Value, InState, OutState, AllState](config):
     private given Instance = this
-
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
-    val callSites = surroundingCallSitesLogger()
-
-    protected override def context = callSites.callString(3)
-    protected override def contextFree = fix.log(callSites, _)
-    protected override def contextSensitive = fix.filter(isFunOrWhile, fix.iter.innermost)
+  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value]): WasmConfig => Instance =
+    val effects = new Effects(rootFrameData, rootFrameValues)
+    new Instance(_)(using effects)

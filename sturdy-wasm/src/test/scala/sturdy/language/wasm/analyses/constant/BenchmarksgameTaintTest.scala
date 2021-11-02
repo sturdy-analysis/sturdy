@@ -1,6 +1,6 @@
 package sturdy.language.wasm.analyses.constant
 
-import cats.effect.{Blocker, IO}
+import cats.effect.{IO, Blocker}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFallible
@@ -9,6 +9,8 @@ import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.{CfgConfig, CfgNode, ControlFlow}
 import sturdy.language.wasm.analyses.ConstantTaintAnalysis
+import sturdy.language.wasm.analyses.SurroundingCallSites
+import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.FrameData
 import sturdy.values.Topped
 import swam.ModuleLoader
@@ -16,7 +18,7 @@ import swam.binary.ModuleParser
 import swam.syntax.*
 import swam.validation.Validator
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.{Path, Paths, Files}
 import scala.jdk.StreamConverters.*
 
 class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:
@@ -40,7 +42,7 @@ class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
 
-    val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)
+    val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = SurroundingCallSites(3)))
     val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantTaintAnalysis.constantInstructions(interp)
     val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)

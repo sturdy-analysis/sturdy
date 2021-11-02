@@ -3,6 +3,8 @@ package sturdy.language.wasm
 import org.openjdk.jmh.annotations.{Scope, OutputTimeUnit, Mode, Benchmark, State, BenchmarkMode}
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.ConstantAnalysis
+import sturdy.language.wasm.analyses.FixpointConfig
+import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.{ModuleInstance, FrameData}
 
 import java.nio.file.Paths
@@ -22,7 +24,7 @@ class Binarytrees:
 
     val resource = classOf[Binarytrees].getResourceAsStream(base ++ "/binarytrees.wasm")
     val module = readBinaryModule(resource)
-    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)
+    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)(WasmConfig.default)
     val cfg = ConstantAnalysis.controlFlow(CfgConfig.CallGraph, interp)
     val modInst = interp.initializeModule(module)
     (interp,modInst)
