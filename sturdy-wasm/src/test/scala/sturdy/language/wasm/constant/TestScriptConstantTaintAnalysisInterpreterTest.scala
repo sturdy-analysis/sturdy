@@ -1,10 +1,13 @@
-package sturdy.language.wasm.analyses.constant
+package sturdy.language.wasm.constant
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.language.wasm.{TestScriptParserTest, parse, parseScript}
+import sturdy.language.wasm.TestScriptParserTest
+import sturdy.language.wasm.parse
+import sturdy.language.wasm.parseScript
 
-import java.nio.file.{Files, Paths}
+import java.nio.file.Files
+import java.nio.file.Paths
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 

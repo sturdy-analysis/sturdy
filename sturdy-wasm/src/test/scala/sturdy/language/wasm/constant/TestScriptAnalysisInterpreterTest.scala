@@ -1,4 +1,4 @@
-package sturdy.language.wasm.analyses.constant
+package sturdy.language.wasm.constant
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
