@@ -28,6 +28,18 @@ lazy val sturdy_core = (project in file("sturdy-core"))
     )
   )
 
+lazy val sturdy_jimple = (project in file("sturdy-jimple"))
+  .dependsOn(sturdy_core % "compile->compile;test->test")
+  .settings(
+    name := "sturdy-jimple",
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-parse" % "0.3.4",
+      "org.typelevel" %% "cats-core" % "2.6.1",
+      // test
+      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
+    )
+  )
+
 lazy val sturdy_tip = (project in file("sturdy-tip"))
   .dependsOn(sturdy_core % "compile->compile;test->test")
   .settings(
