@@ -1,7 +1,7 @@
 package sturdy.language.wasm.generic
 
 import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.OperandStack
+import sturdy.effect.operandstack.GenericOperandStack
 import sturdy.values.config
 import sturdy.values.convert.*
 import sturdy.values.doubles.*
@@ -13,7 +13,7 @@ import swam.ValType
 import swam.syntax.*
 
 class GenericInterpreterNumerics[V, MayJoin[_]]
-  (stack: OperandStack[V] & Failure, wasmOps: WasmOps[V, _, _, _, _, _, _, MayJoin])
+  (stack: GenericOperandStack[V] & Failure, wasmOps: WasmOps[V, _, _, _, _, _, _, MayJoin])
   (using MayJoin[V]):
 
   import wasmOps.*
@@ -36,28 +36,28 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
       case f32.Const(v) => floatOps.floatLit(v)
       case f64.Const(v) => doubleOps.doubleLit(v)
       case op: IUnop =>
-        val v = stack.pop()
+        val v = stack.safePop()
         evalIUnop(op, v)
       case op: FUnop =>
-        val v = stack.pop()
+        val v = stack.safePop()
         evalFUnop(op, v)
       case op: IBinop =>
-        val (v1, v2) = stack.pop2()
+        val (v1, v2) = stack.safePop2()
         evalIBinop(op, v1, v2)
       case op: FBinop =>
-        val (v1, v2) = stack.pop2()
+        val (v1, v2) = stack.safePop2()
         evalFBinop(op, v1, v2)
       case op: Testop =>
-        val v = stack.pop()
+        val v = stack.safePop()
         evalTestop(op, v)
       case op: IRelop =>
-        val (v1, v2) = stack.pop2()
+        val (v1, v2) = stack.safePop2()
         evalIRelop(op, v1, v2)
       case op: FRelop =>
-        val (v1, v2) = stack.pop2()
+        val (v1, v2) = stack.safePop2()
         evalFRelop(op, v1, v2)
       case op: Convertop =>
-        val v = stack.pop()
+        val v = stack.safePop()
         evalConvertop(op, v)
       case _ => throw new IllegalArgumentException(s"Expected numeric instruction, but got $inst")
 

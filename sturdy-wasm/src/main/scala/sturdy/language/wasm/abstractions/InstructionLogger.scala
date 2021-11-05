@@ -2,7 +2,7 @@ package sturdy.language.wasm.abstractions
 
 import sturdy.data.CombineEquiList
 import sturdy.effect.TrySturdy
-import sturdy.effect.operandstack.OperandStack
+import sturdy.effect.operandstack.GenericOperandStack
 import sturdy.fix
 import sturdy.language.wasm.generic.{FixIn, FixOut}
 import sturdy.language.wasm.generic.InstLoc
@@ -41,20 +41,20 @@ trait InstructionLogger[Info, V](using Join[Info]) extends fix.Logger[FixIn, Fix
     case _ => // nothing
 
 
-trait InstructionResultLogger[V](stack: OperandStack[V])(using Top[V], Join[V]) extends InstructionLogger[List[V], V]:
+trait InstructionResultLogger[V](stack: GenericOperandStack[V])(using Top[V], Join[V]) extends InstructionLogger[List[V], V]:
   def boolValue(v: V): V
   def dummyValue: V
 
   override def enterInfo(inst: Inst): Option[List[V]] =
     if (readsSingleValueFromStack(inst)) {
-      val value = stack.peek()
+      val value = stack.safePeek()
       Some(List(value))
     } else if (readsSingleBooleanFromStack(inst)) {
-      val v = boolValue(stack.peek())
+      val v = boolValue(stack.safePeek())
       Some(List(v))
     } else inst match {
       case _: syntax.StoreInst | _: syntax.StoreNInst =>
-        val values = stack.peekN(2)
+        val values = stack.safePeekN(2)
         Some(values)
       case _ => None
     }
@@ -63,11 +63,11 @@ trait InstructionResultLogger[V](stack: OperandStack[V])(using Top[V], Join[V]) 
     if (inst == syntax.Nop || inst == syntax.Unreachable) {
       Some(List(dummyValue))
     } else if (writesSingleValueToStack(inst)) {
-      val result = if (success) stack.peek() else Top.top[V]
+      val result = if (success) stack.safePeek() else Top.top[V]
       Some(List(result))
     } else inst match {
       case _: syntax.LoadInst | _: syntax.LoadNInst =>
-        val loaded = stack.peek()
+        val loaded = stack.safePeek()
         val values = List(loaded)
         Some(values)
       case _ => None

@@ -12,6 +12,13 @@ trait Option[J[_], A]:
   final def get: J[A] ?=> A = option(throw new MatchError(this))(identity)
 
 
+case class LiftedOption[J[_],X,Y,R](x: Option[J,X], y: Option[J,Y], combine: (X,Y) => R) extends Option[J, R]:
+  override def option[B](default: => B)(f: R => B): J[B] ?=> B =
+    x.option(default)(x => y.option(default)(y => f(combine(x,y))))
+    
+case class SingletonOption[J[_], A](a: A) extends Option[J, A]:
+  override def option[B](default: => B)(f: A => B): J[B] ?=> B =
+    f(a)
 
 enum OptionC[A] extends Option[NoJoin, A]:
   case None()
