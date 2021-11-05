@@ -3,7 +3,7 @@ package sturdy.language.wasm.abstractions
 import sturdy.data.CombineEquiList
 import sturdy.effect.TrySturdy
 import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.OperandStack
+import sturdy.effect.operandstack.GenericOperandStack
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
@@ -83,7 +83,7 @@ trait ConstantTaintValues extends Interpreter:
     analysis.addContextFreeLogger(constants)
     constants
 
-  class ConstantInstructionsLogger(stack: OperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):
+  class ConstantInstructionsLogger(stack: GenericOperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):
     override def boolValue(v: Value): Value = boolean(asBoolean(v))
     override def dummyValue: Value = Value.Int32(TaintProduct(Taint.Untainted, Topped.Actual(0)))
 
@@ -109,14 +109,14 @@ trait ConstantTaintValues extends Interpreter:
     logger
   }
 
-  class TaintedMemoryAccessLogger(stack: OperandStack[Value]) extends InstructionLogger[Powerset[Value], Value]:
+  class TaintedMemoryAccessLogger(stack: GenericOperandStack[Value]) extends InstructionLogger[Powerset[Value], Value]:
     override def enterInfo(inst: Inst): Option[Powerset[Value]] =
       if (isMemoryLoadStoreInstruction(inst)) {
         val address =
           if (addressOnTopOfStack(inst))
-            stack.peek()
+            stack.safePeek()
           else
-            stack.peekN(2).tail.head
+            stack.safePeekN(2).tail.head
 
         if (maybeTainted(address))
           Some(Powerset(address))

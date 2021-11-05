@@ -3,7 +3,7 @@ package sturdy.language.wasm.abstractions
 import sturdy.data.CombineEquiList
 import sturdy.effect.TrySturdy
 import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.OperandStack
+import sturdy.effect.operandstack.GenericOperandStack
 import sturdy.fix
 import sturdy.fix.Logger
 import sturdy.language.wasm.generic.FixIn
@@ -57,7 +57,7 @@ trait ConstantValues extends Interpreter:
     analysis.addContextFreeLogger(constants)
     constants
 
-  class ConstantInstructionsLogger(stack: OperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):
+  class ConstantInstructionsLogger(stack: GenericOperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):
     override def boolValue(v: Value): Value = boolean(asBoolean(v))
     override def dummyValue: Value = Value.Int32(Topped.Actual(0))
 

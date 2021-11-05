@@ -1,9 +1,10 @@
 package sturdy.effect.operandstack
 
-import sturdy.data.CombineEquiList
+import sturdy.data.{CombineEquiList, NoJoin, OptionC}
 import sturdy.values.*
+import sturdy.data.unit
 
-trait GenericOperandStack[V] extends OperandStack[V]:
+trait GenericOperandStack[V] extends OperandStack[V, NoJoin]:
   protected var stack: List[V] = Nil
   protected var framePointer: Int = 0
 
@@ -14,22 +15,40 @@ trait GenericOperandStack[V] extends OperandStack[V]:
   def push(v: V): Unit =
     stack = v :: stack
 
-  def pop(): V =
-    val v = stack.head
-    stack = stack.tail
-    v
-
-  def peek(): V =
-    stack.head
-    
-  def ifEmpty[A](empty: => A, notEmpty: => A): A =
+  def pop(): OptionC[V] =
     if (stack.isEmpty)
-      empty
+      OptionC.none
     else
-      notEmpty
+      val v = stack.head
+      stack = stack.tail
+      OptionC.some(v)
 
-  override def peekN(n: Int): List[V] =
-    stack.take(n)
+  def safePop(): V =
+    pop().getOrElse(throw IllegalStateException("pop on empty stack"))
+    
+  def safePeek(): V =
+    peek().getOrElse(throw IllegalStateException("peek on empty stack"))
+    
+  def safePop2(): (V,V) =
+    pop2().getOrElse((throw IllegalStateException("pop2 on emtpy stack")))
+    
+  def safePeekN(n: Int): List[V] =
+    peekN(n).getOrElse(throw IllegalStateException("peekN on empty stack"))
+
+  def safePopN(n: Int): List[V] =
+    popN(n).getOrElse(throw IllegalStateException("popN on empty stack"))
+  
+  def peek(): OptionC[V] =
+    if (stack.isEmpty)
+      OptionC.none
+    else
+      OptionC.some(stack.head)
+
+  override def peekN(n: Int): OptionC[List[V]] =
+    if (n > stack.size)
+      OptionC.none
+    else
+      OptionC.some(stack.take(n))
 
   def withFreshOperandStack[A](f: => A): A =
     val snapshot = stack
