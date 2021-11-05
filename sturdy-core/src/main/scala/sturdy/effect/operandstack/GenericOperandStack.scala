@@ -22,21 +22,6 @@ trait GenericOperandStack[V] extends OperandStack[V, NoJoin]:
       val v = stack.head
       stack = stack.tail
       OptionC.some(v)
-
-  def safePop(): V =
-    pop().getOrElse(throw IllegalStateException("pop on empty stack"))
-    
-  def safePeek(): V =
-    peek().getOrElse(throw IllegalStateException("peek on empty stack"))
-    
-  def safePop2(): (V,V) =
-    pop2().getOrElse((throw IllegalStateException("pop2 on emtpy stack")))
-    
-  def safePeekN(n: Int): List[V] =
-    peekN(n).getOrElse(throw IllegalStateException("peekN on empty stack"))
-
-  def safePopN(n: Int): List[V] =
-    popN(n).getOrElse(throw IllegalStateException("popN on empty stack"))
   
   def peek(): OptionC[V] =
     if (stack.isEmpty)
@@ -65,3 +50,17 @@ trait GenericOperandStack[V] extends OperandStack[V, NoJoin]:
   override def clearCurrentOperandFrame(): Unit =
     stack = stack.drop(stack.size - framePointer)
 
+  def safePop(): V =
+      pop().getOrElse(throw IllegalStateException("pop on empty stack"))
+
+  def safePeek(): V =
+    peek().getOrElse(throw IllegalStateException("peek on empty stack"))
+
+  def safePop2(): (V,V) =
+    pop2().getOrElse((throw IllegalStateException("pop2 on emtpy stack")))
+
+  def safePopN(n: Int): List[V] =
+    popN(n).getOrElse(throw IllegalStateException("popN on empty stack"))
+
+  def safePeekN(n: Int): List[V] =
+    peekN(n).getOrElse(throw IllegalStateException("peekN on empty stack"))
