@@ -63,7 +63,7 @@ type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
     with SymbolTable[TableAddr, FuncIx, FunV, MayJoin]   
     with DecidableMutableCallFrame[FrameData, Int, V]
     with Except[WasmException[V], ExcV, MayJoin]         
-    with Failure                                         
+    with Failure
 
 type Imports = mutable.Map[String, ModuleInstance]
 
