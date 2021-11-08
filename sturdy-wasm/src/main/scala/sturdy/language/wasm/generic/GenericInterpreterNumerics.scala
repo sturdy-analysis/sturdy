@@ -35,28 +35,28 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
       case f32.Const(v) => floatOps.floatLit(v)
       case f64.Const(v) => doubleOps.doubleLit(v)
       case op: IUnop =>
-        val v = stack.safePop()
+        val v = stack.popOrFail()
         evalIUnop(op, v)
       case op: FUnop =>
-        val v = stack.safePop()
+        val v = stack.popOrFail()
         evalFUnop(op, v)
       case op: IBinop =>
-        val (v1, v2) = stack.safePop2()
+        val (v1, v2) = stack.pop2OrFail()
         evalIBinop(op, v1, v2)
       case op: FBinop =>
-        val (v1, v2) = stack.safePop2()
+        val (v1, v2) = stack.pop2OrFail()
         evalFBinop(op, v1, v2)
       case op: Testop =>
-        val v = stack.safePop()
+        val v = stack.popOrFail()
         evalTestop(op, v)
       case op: IRelop =>
-        val (v1, v2) = stack.safePop2()
+        val (v1, v2) = stack.pop2OrFail()
         evalIRelop(op, v1, v2)
       case op: FRelop =>
-        val (v1, v2) = stack.safePop2()
+        val (v1, v2) = stack.pop2OrFail()
         evalFRelop(op, v1, v2)
       case op: Convertop =>
-        val v = stack.safePop()
+        val v = stack.popOrFail()
         evalConvertop(op, v)
       case _ => throw new IllegalArgumentException(s"Expected numeric instruction, but got $inst")
 

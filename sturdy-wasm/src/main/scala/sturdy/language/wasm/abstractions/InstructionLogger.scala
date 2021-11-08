@@ -48,14 +48,14 @@ trait InstructionResultLogger[V](stack: DecidableOperandStack[V])(using Top[V], 
 
   override def enterInfo(inst: Inst): Option[List[V]] =
     if (readsSingleValueFromStack(inst)) {
-      val value = stack.safePeek()
+      val value = stack.peekOrFail()
       Some(List(value))
     } else if (readsSingleBooleanFromStack(inst)) {
-      val v = boolValue(stack.safePeek())
+      val v = boolValue(stack.peekOrFail())
       Some(List(v))
     } else inst match {
       case _: syntax.StoreInst | _: syntax.StoreNInst =>
-        val values = stack.safePeekN(2)
+        val values = stack.peekNOrFail(2)
         Some(values)
       case _ => None
     }
@@ -64,11 +64,11 @@ trait InstructionResultLogger[V](stack: DecidableOperandStack[V])(using Top[V], 
     if (inst == syntax.Nop || inst == syntax.Unreachable) {
       Some(List(dummyValue))
     } else if (writesSingleValueToStack(inst)) {
-      val result = if (success) stack.safePeek() else Top.top[V]
+      val result = if (success) stack.peekOrFail() else Top.top[V]
       Some(List(result))
     } else inst match {
       case _: syntax.LoadInst | _: syntax.LoadNInst =>
-        val loaded = stack.safePeek()
+        val loaded = stack.peekOrFail()
         val values = List(loaded)
         Some(values)
       case _ => None
