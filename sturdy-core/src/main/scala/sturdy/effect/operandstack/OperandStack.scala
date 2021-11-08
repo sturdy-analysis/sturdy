@@ -1,7 +1,7 @@
 package sturdy.effect.operandstack
 
 import sturdy.effect.Effectful
-import sturdy.data.{LiftedOption, Option, SingletonOption}
+import sturdy.data.Option
 
 trait OperandStack[V, MayJoin[_]] extends Effectful:
   def push(v: V): Unit
@@ -22,13 +22,16 @@ trait OperandStack[V, MayJoin[_]] extends Effectful:
   final def pop2(): Option[MayJoin, (V, V)] =
     val v2 = pop()
     val v1 = pop()
-    LiftedOption(v1,v2,((x:V,y:V) => (x,y)))
+    v1.flatMap(a => v2.map(b => (a, b)))
 
   final def popN(n: Int): Option[MayJoin,List[V]] =
-    var vs: Option[MayJoin,List[V]] = SingletonOption(Nil)
-    for (_ <- 1 to n)
-      val v = pop()
-      vs = LiftedOption(v,vs, (x:V, y:List[V]) => x::y)
+    if (n <= 0)
+      throw new IllegalArgumentException
+    val v = pop()
+    var vs: Option[MayJoin, List[V]] = v.map(_::Nil)
+    for (_ <- 2 to n)
+      val popped = pop()
+      vs = popped.flatMap(v => vs.map(v::_))
     vs
 
   final def pushN(vs: List[V]): Unit =
