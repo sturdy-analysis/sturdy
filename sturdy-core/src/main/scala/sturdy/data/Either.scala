@@ -17,12 +17,12 @@ enum EitherC[A, B] extends Either[NoJoin, A, B]:
 
 
 enum EitherA[A, B] extends Either[WithJoin, A, B]:
-  case Left(as: Iterable[A])
-  case Right(bs: Iterable[B])
-  case LeftRight(as: Iterable[A], bs: Iterable[B])
+  case Left(as: A)
+  case Right(bs: B)
+  case LeftRight(as: A, bs: B)
 
   override def either[C](f: A => C)(g: B => C): WithJoin[C] ?=> C = this match
-    case Left(as) => mapJoin(as, f)
-    case Right(bs) => mapJoin(bs, g)
-    case LeftRight(as, bs) => joinComputations(mapJoin(as, f))(mapJoin(bs, g))
+    case Left(a) => f(a)
+    case Right(b) => g(b)
+    case LeftRight(a, b) => joinComputations(f(a))(g(b))
 

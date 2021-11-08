@@ -33,9 +33,9 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
     if (vs.isEmpty)
       OptionA.None()
     else if (needsNotFound)
-      OptionA.NoneSome(vs.toList)
+      OptionA.NoneSome(vs.reduce(Join(_, _).get))
     else
-      OptionA.Some(vs.toList)
+      OptionA.Some(vs.reduce(Join(_, _).get))
   }
 
   override def write(xs: Powerset[Addr], v: V): Unit =

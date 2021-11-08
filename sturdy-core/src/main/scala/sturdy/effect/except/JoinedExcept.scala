@@ -27,9 +27,9 @@ trait JoinedExcept[Exc <: LanguageException, E](using val exceptional: Exception
     throwing(ex)
     val e = exceptional.exception(ex)
     this.exception = exception match
-      case OptionA.None() => OptionA.Some(e::Nil)
-      case OptionA.NoneSome(old::Nil) => OptionA.Some(Join(old, e).get::Nil)
-      case OptionA.Some(old::Nil) => OptionA.Some(Join(old, e).get::Nil)
+      case OptionA.None() => OptionA.Some(e)
+      case OptionA.NoneSome(old) => OptionA.Some(Join(old, e).get)
+      case OptionA.Some(old) => OptionA.Some(Join(old, e).get)
       case _ => throw new IllegalStateException()
     throw AbstractSturdyException$
 
@@ -39,20 +39,20 @@ trait JoinedExcept[Exc <: LanguageException, E](using val exceptional: Exception
     try {
       val a = f
       exception match
-        case OptionA.None() => EitherA.Left(Iterable.single(a))
-        case OptionA.Some(exs) => EitherA.LeftRight(Iterable.single(a), exs)
-        case OptionA.NoneSome(exs) => EitherA.LeftRight(Iterable.single(a), exs)
+        case OptionA.None() => EitherA.Left(a)
+        case OptionA.Some(ex) => EitherA.LeftRight(a, ex)
+        case OptionA.NoneSome(ex) => EitherA.LeftRight(a, ex)
     } catch {
       case AbstractSturdyException$ =>
         exception match
           case OptionA.None() => throw new IllegalStateException(s"exception cannot be None here")
-          case OptionA.NoneSome(exs) => EitherA.Right(exs)
-          case OptionA.Some(exs) => EitherA.Right(exs)
+          case OptionA.NoneSome(ex) => EitherA.Right(ex)
+          case OptionA.Some(ex) => EitherA.Right(ex)
       case ex =>
         exception match
           case OptionA.None() => throw ex
-          case OptionA.NoneSome(exs) => EitherA.Right(exs)
-          case OptionA.Some(exs) => EitherA.Right(exs)
+          case OptionA.NoneSome(ex) => EitherA.Right(ex)
+          case OptionA.Some(ex) => EitherA.Right(ex)
     } finally {
       this.exception = originalException
     }
