@@ -5,21 +5,20 @@ import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFallible
-import sturdy.fix.EndNode
 import sturdy.fix.Fixpoint
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.abstractions.ControlFlow
-import sturdy.language.wasm.analyses.ConstantAnalysis
+import sturdy.language.wasm.analyses.ConstantTaintAnalysis
 import sturdy.language.wasm.analyses.CallSites
 import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.FrameData
 import sturdy.values.Topped
 import swam.ModuleLoader
 import swam.binary.ModuleParser
-import swam.syntax.Module
+import swam.syntax.*
 import swam.validation.Validator
 
 import java.nio.file.Files
@@ -27,27 +26,28 @@ import java.nio.file.Path
 import java.nio.file.Paths
 import scala.jdk.StreamConverters.*
 
-class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
+class BenchmarksgameNewTaintTest extends AnyFlatSpec, Matchers:
   behavior of "Benchmarksgame"
 
   val funcName = "_start"
   val uri = classOf[BenchmarksgameNewConstantTest].getResource("/sturdy/language/wasm/benchmarksgame/src").toURI();
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
-    it must s"execute constant analysis on benchmark ${p.getFileName}" in {
+    it must s"execute constant taint analysis on benchmark ${p.getFileName}" in {
       run(p, binary = true)
     }
   }
 
   def run(p: Path, binary: Boolean = false) =
     Fixpoint.DEBUG = false
-    
+
     val name = p.getFileName
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
 
-    val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = CallSites(3)))
-    val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
-    val constants = ConstantAnalysis.constantInstructions(interp)
+    val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = CallSites(3)))
+    val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
+    val constants = ConstantTaintAnalysis.constantInstructions(interp)
+    val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
 
     val modInst = interp.initializeModule(module)
     interp.effects.fallible(
@@ -75,13 +75,20 @@ class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
     val constantInstructionPercent = (10000.0 * constantInstructions / liveInstructions.toDouble).round / 100.0
     println(s"Found $constantInstructions constant instructions, $constantInstructionPercent% of the $liveInstructions live instructions in $name")
 
+    val allMemoryInstructions = allNodes.filter{
+      case CfgNode.Instruction(inst, _) => inst match
+        case _: LoadInst | _: LoadNInst | _: StoreInst | _: StoreNInst => true
+        case _ => false
+      case _ => false
+    }
+    val taintedAccesses = memory.instructions
+    val taintedAccessesPercent = (10000.0 * taintedAccesses.size / allMemoryInstructions.size.toDouble).round / 100.0
+    println(s"Found ${taintedAccesses.size} tainted memory accesses, $taintedAccessesPercent% of all load and store instructions in $name.")
+    println(s"  This means, ${100.0 - taintedAccessesPercent}% of all load and store instructions in $name are safe.")
+
     val eliminatable = deadInstructions.size + deadLabelsBlock.size + deadLabelLoop.size + constantInstructions
     val eliminatablePercent = (10000.0 * eliminatable / allInstructions.size.toDouble).round / 100.0
     println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
-
-    // write CFG to .dot file
-    val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
-    Files.writeString(dotPath, cfg.toGraphViz)
 
   def readBinaryModule(path: Path): Module =
     implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
