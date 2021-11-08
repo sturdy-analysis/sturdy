@@ -8,7 +8,7 @@ import sturdy.{Soundness, IsSound}
 import sturdy.values.Join
 
 /** Stacks of different execution branches are joined. */
-trait JoinedOperandStack[V](using Join[V]) extends GenericOperandStack[V]:
+trait JoinedOperandStack[V](using Join[V]) extends ConcreteOperandStack[V]:
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new OperandStackJoiner[A]
   class OperandStackJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {

@@ -1,6 +1,6 @@
 package sturdy.effect.callframe
 import sturdy.{IsSound, Soundness, seqIsSound}
-import sturdy.effect.operandstack.GenericOperandStack
+import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.{ComputationJoiner, ComputationJoinerWithSuper, TrySturdy}
 import sturdy.values.Join
 

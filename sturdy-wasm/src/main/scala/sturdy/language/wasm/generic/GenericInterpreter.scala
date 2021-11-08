@@ -10,7 +10,8 @@ import sturdy.{Soundness, fix, IsSound}
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
 import sturdy.effect.except.LanguageException
-import sturdy.effect.operandstack.GenericOperandStack
+import sturdy.effect.operandstack.DecidableOperandStack
+import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.symboltable.SymbolTable
 import sturdy.effect.symboltable.JoinedSymbolTable
@@ -57,7 +58,7 @@ enum WasmException[V] extends LanguageException:
 
 
 type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
-  GenericOperandStack[V]
+  DecidableOperandStack[V]
     with Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]  
     with Globals[V]                                      
     with SymbolTable[TableAddr, FuncIx, FunV, MayJoin]   
@@ -114,7 +115,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   extends fix.Fixpoint[FixIn, FixOut[V]]:
 
   import effects.*
-  val stack: GenericOperandStack[V] = effects
+  private given Failure = effects
+  val stack: DecidableOperandStack[V] = effects
 
   val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin]
   import wasmOps.*
