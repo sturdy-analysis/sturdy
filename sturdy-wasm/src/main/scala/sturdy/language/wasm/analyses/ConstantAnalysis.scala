@@ -60,7 +60,10 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
           else
             OptionPowerset.None()
         case Topped.Top =>
-          OptionPowerset.NoneSome(Powerset(vec.toSet))
+          if (vec.isEmpty)
+            OptionPowerset.None()
+          else
+            OptionPowerset.NoneSome(Powerset(vec.toSet))
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] = hostFunc match
       case HostFunction.proc_exit =>

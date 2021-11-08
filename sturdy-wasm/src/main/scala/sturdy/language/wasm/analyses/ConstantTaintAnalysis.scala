@@ -60,7 +60,10 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
           else
             OptionPowerset.None()
         case Topped.Top =>
-          OptionPowerset.NoneSome(Powerset(vec.toSet))
+          if (vec.isEmpty)
+            OptionPowerset.None()
+          else
+            OptionPowerset.NoneSome(Powerset(vec.toSet))
 
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantTaintAnalysis.Value]): List[ConstantTaintAnalysis.Value] = hostFunc match

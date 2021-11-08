@@ -39,9 +39,7 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
         stack.repeatUntilStable { () =>
           hasLoop = false
           val result = step(f, dom)
-          if (!hasLoop)
-            return result.get
-          result
+          (result, hasLoop)
         }.get
       }
     apply_

@@ -27,13 +27,13 @@ trait WasmFixpoint[V, In, Out, All](val config: WasmConfig)
   override protected def context: Sensitivity[FixIn, Ctx] = sensitivity
   override protected def contextSensitive = config.fix.get
 
-case class WasmConfig(fix: FixpointConfig = FixpointConfig(fix.iter.Config.Innermost, 0), ctx: ContextConfig = Insensitive):
+case class WasmConfig(fix: FixpointConfig = FixpointConfig(), ctx: ContextConfig = Insensitive):
   override def toString: String = s"$fix $ctx"
 
 object WasmConfig:
   def default = WasmConfig()
 
-case class FixpointConfig(iter: fix.iter.Config, loopUnwinding: Int):
+case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost, loopUnwinding: Int = 0):
   override def toString: String =
     if (loopUnwinding <= 0)
       iter.toString

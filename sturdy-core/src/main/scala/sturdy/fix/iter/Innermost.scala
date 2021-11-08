@@ -32,12 +32,7 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
   /** Runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
     def apply_(dom: Dom): Codom =
-      stack.repeatUntilStable { () =>
-        val (result, hasLoop) = step(f, dom)
-        if (!hasLoop)
-          return result.get
-        result
-      }.get
+      stack.repeatUntilStable(() => step(f, dom)).get
     apply_
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior.
