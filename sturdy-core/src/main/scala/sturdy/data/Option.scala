@@ -58,6 +58,14 @@ enum OptionA[A] extends Option[WithJoin, A]:
     case (Some(a1), Some(a2)) => Some(Join(a1,a2).get)
     case _ => throw new IllegalStateException()
 
+object OptionA:
+  inline def none[A]: OptionA[A] = OptionA.None()
+  inline def noneSome[A](a: A): OptionA[A] = OptionA.NoneSome(a)
+  inline def some[A](a: A): OptionA[A] = OptionA.Some(a)
+  def apply[A](opt: scala.Option[A]): OptionA[A] = opt match
+    case scala.Some(a) => OptionA.Some(a)
+    case scala.None => OptionA.None()
+
 enum OptionPowerset[A] extends Option[WithJoin, A]:
   case None()
   case NoneSome(as: Powerset[A])

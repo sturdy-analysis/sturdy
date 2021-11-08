@@ -13,7 +13,7 @@ import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.SturdyException
 import sturdy.effect.TrySturdy
 
-case object AbstractSturdyException$ extends ExceptSturdyException:
+case object AbstractSturdyException extends ExceptSturdyException:
   override def toString: String = s"Abstract exception"
 
 
@@ -30,8 +30,7 @@ trait JoinedExcept[Exc <: LanguageException, E](using val exceptional: Exception
       case OptionA.None() => OptionA.Some(e)
       case OptionA.NoneSome(old) => OptionA.Some(Join(old, e).get)
       case OptionA.Some(old) => OptionA.Some(Join(old, e).get)
-      case _ => throw new IllegalStateException()
-    throw AbstractSturdyException$
+    throw AbstractSturdyException
 
   override protected def tries[A](f: => A): EitherA[A, E] =
     val originalException = this.exception
@@ -43,7 +42,7 @@ trait JoinedExcept[Exc <: LanguageException, E](using val exceptional: Exception
         case OptionA.Some(ex) => EitherA.LeftRight(a, ex)
         case OptionA.NoneSome(ex) => EitherA.LeftRight(a, ex)
     } catch {
-      case AbstractSturdyException$ =>
+      case AbstractSturdyException =>
         exception match
           case OptionA.None() => throw new IllegalStateException(s"exception cannot be None here")
           case OptionA.NoneSome(ex) => EitherA.Right(ex)

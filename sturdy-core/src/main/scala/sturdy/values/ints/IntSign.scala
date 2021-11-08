@@ -43,10 +43,8 @@ given CombineIntSign[W <: Widening]: Combine[IntSign, W] with
   override def apply(v1: IntSign, v2: IntSign): MaybeChanged[IntSign] =
     if v1 == v2 then Unchanged(v1)
     else if v1 < v2 then Changed(v2)
-    else if v2 < v1 then Changed(v1)
+    else if v2 < v1 then Unchanged(v1)
     else (v1, v2) match
-      case (TopSign, _) => Unchanged(TopSign)
-      case (_, TopSign) => Changed(TopSign)
       case (Neg, Zero) => Changed(NegOrZero)
       case (Zero, Neg) => Changed(NegOrZero)
       case (Zero, Pos) => Changed(ZeroOrPos)

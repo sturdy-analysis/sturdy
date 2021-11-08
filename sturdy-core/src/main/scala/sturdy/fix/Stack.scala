@@ -17,7 +17,7 @@ case class RecurrentCall[Dom, Ctx](frame: Frame[Dom, Ctx]) extends SturdyExcepti
   override def toString: String = s"RecurrentCall $frame"
 
 case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
-class FrameEntry[In](var inState: In, var correcurrentFrame: Int, var count: Int)
+class FrameEntry[In](var inState: In, val correcurrentFrame: Int, var count: Int)
 
 /** This class implements the central data structure for computing fixpoints.
  *
@@ -64,7 +64,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
   def stackHeightIndent: String = "  " * (stackHeight - 1)
 
   /** Iterates `f` until the outCache is stable. */
-  def repeatUntilStable[A](f: () => A): A = {
+  def repeatUntilStable[A](f: () => (A, Boolean)): A = {
     val originalState = state.getAllState()
     var iterationCount = 0
 
@@ -77,23 +77,24 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
     outCacheDirty = false
 
     while (true) {
-      val result = f()
+      val (result, looping) = f()
 
-      if (!inCacheDirty && !outCacheDirty) {
+      if (!looping || !inCacheDirty && !outCacheDirty) {
         if (Fixpoint.DEBUG_CACHE_CHANGES) {
-          if (inCache != previousInCache) throw new IllegalStateException(s"inChacheDirty was wrong")
-          if (outCache != previousOutCache) throw new IllegalStateException(s"outChacheDirty was wrong")
+          if (looping && inCache != previousInCache) throw new IllegalStateException(s"inChacheDirty was wrong")
+          if (looping && outCache != previousOutCache) throw new IllegalStateException(s"outChacheDirty was wrong")
         }
-        inCacheDirty = outerInCacheDirty
-        outCacheDirty = outerOutCacheDirty
+        inCacheDirty |= outerInCacheDirty
+        outCacheDirty |= outerOutCacheDirty
         return result
       } else {
         if (Fixpoint.DEBUG_CACHE_CHANGES) {
-          if (inCacheDirty && inCache == previousInCache) throw new IllegalStateException(s"inChacheDirty was wrong")
+          if (inCacheDirty && inCache == previousInCache)
+            throw new IllegalStateException(s"inChacheDirty was wrong")
           if (outCacheDirty && outCache == previousOutCache) throw new IllegalStateException(s"outChacheDirty was wrong")
         }
         outerInCacheDirty |= inCacheDirty
-        outerInCacheDirty |= outCacheDirty
+        outerOutCacheDirty |= outCacheDirty
         inCacheDirty = false
         outCacheDirty = false
 
@@ -147,7 +148,6 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
             // call is semi-recurrent: the frame occurs on the stack but with a different state
             entry.inState = newIn
             entry.count += 1
-            entry.correcurrentFrame = stackHeight
             stackHeight += 1
             state.setInState(newIn)
             if (Fixpoint.DEBUG)
@@ -157,9 +157,9 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
             // call is recurrent
             recurrentCalls += entry.correcurrentFrame
             // store the input state so the co-recurrent call considers it
-            storeRecurrentInput(frame, in)
+            storeRecurrentInput(frame, entry.inState)
             // load any previous output or throw RecurrentCall exception
-            loadRecurrentOutput(frame)
+            Some(loadRecurrentOutput(frame))
       }
 
   /** Pops a frame from the stack and detects if this frame recurred recursively.
@@ -173,7 +173,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
     val newStackHeight = stackHeight - 1
     val updatedResult = if (recurrentCalls.remove(newStackHeight)) {
       corecurrentCalls += frame
-      if (result.isSuccess) {
+      if (!result.isBottom) {
         val widenedResult = storeCorecurrentOutput(frame, result)
         (widenedResult, true)
       } else {
@@ -215,16 +215,16 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
       }
       state.setInState(newIn.get)
 
-  @inline private def loadRecurrentOutput(frame: Frame[Dom, Ctx]): Option[TrySturdy[Codom]] = outCache.get(frame) match
+  @inline private def loadRecurrentOutput(frame: Frame[Dom, Ctx]): TrySturdy[Codom] = outCache.get(frame) match
     case None =>
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}  POP RECURRENT  $frame")
-      throw RecurrentCall(frame)
+      TrySturdy.Failure(RecurrentCall(frame))
     case Some((res, previousOut)) =>
       state.setOutState(previousOut)
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}  POP RECURRENT  $frame <- $res")
-      Some(res)
+      res
 
   @inline private def storeCorecurrentOutput(frame: Frame[Dom, Ctx], result: TrySturdy[Codom]): TrySturdy[Codom] = outCache.get(frame) match
     case None =>
