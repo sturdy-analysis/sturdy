@@ -1,4 +1,54 @@
 package sturdy.effect.operandstack
 
-trait ConcreteOperandStack[V] extends GenericOperandStack[V]:
+import sturdy.data.{CombineEquiList, NoJoin, OptionC}
+import sturdy.values.*
+import sturdy.data.unit
+
+trait ConcreteOperandStack[V] extends DecidableOperandStack[V]:
+  protected var stack: List[V] = Nil
+  protected var framePointer: Int = 0
+
   def getStack: List[V] = stack
+  
+  def getOperandFrame: List[V] = stack.take(stack.size - framePointer)
+  protected def setOperandFrame(s: List[V]): Unit =
+    this.stack = s ++ stack.drop(stack.size - framePointer)
+
+  def push(v: V): Unit =
+    stack = v :: stack
+
+  def pop(): OptionC[V] =
+    if (stack.isEmpty)
+      OptionC.none
+    else
+      val v = stack.head
+      stack = stack.tail
+      OptionC.some(v)
+  
+  def peek(): OptionC[V] =
+    if (stack.isEmpty)
+      OptionC.none
+    else
+      OptionC.some(stack.head)
+
+  override def peekN(n: Int): OptionC[List[V]] =
+    if (n > stack.size)
+      OptionC.none
+    else
+      OptionC.some(stack.take(n))
+
+  def withFreshOperandStack[A](f: => A): A =
+    val snapshot = stack
+    stack = Nil
+    try f finally
+      stack = snapshot
+
+  override def withFreshOperandFrame[A](f: => A): A =
+    val snapshotframePointer = framePointer
+    framePointer = stack.size
+    try f finally
+      framePointer = snapshotframePointer
+
+  override def clearCurrentOperandFrame(): Unit =
+    stack = stack.drop(stack.size - framePointer)
+  

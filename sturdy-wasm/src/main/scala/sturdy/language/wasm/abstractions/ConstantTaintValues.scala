@@ -1,9 +1,9 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.data.CombineEquiList
+import sturdy.data.{CombineEquiList, unit}
 import sturdy.effect.TrySturdy
 import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.GenericOperandStack
+import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
@@ -83,7 +83,7 @@ trait ConstantTaintValues extends Interpreter:
     analysis.addContextFreeLogger(constants)
     constants
 
-  class ConstantInstructionsLogger(stack: GenericOperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):
+  class ConstantInstructionsLogger(stack: DecidableOperandStack[Value])(using Failure) extends InstructionResultLogger[Value](stack):
     override def boolValue(v: Value): Value = boolean(asBoolean(v))
     override def dummyValue: Value = Value.Int32(TaintProduct(Taint.Untainted, Topped.Actual(0)))
 
@@ -104,12 +104,12 @@ trait ConstantTaintValues extends Interpreter:
 
 
   def taintedMemoryAccessLogger(analysis: Instance): TaintedMemoryAccessLogger = {
-    val logger = new TaintedMemoryAccessLogger(analysis.stack)
+    val logger = new TaintedMemoryAccessLogger(analysis.stack)(using analysis.effects)
     analysis.addContextFreeLogger(logger)
     logger
   }
 
-  class TaintedMemoryAccessLogger(stack: GenericOperandStack[Value]) extends InstructionLogger[Powerset[Value], Value]:
+  class TaintedMemoryAccessLogger(stack: DecidableOperandStack[Value])(using Failure) extends InstructionLogger[Powerset[Value], Value]:
     override def enterInfo(inst: Inst): Option[Powerset[Value]] =
       if (isMemoryLoadStoreInstruction(inst)) {
         val address =

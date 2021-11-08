@@ -1,7 +1,8 @@
 package sturdy.language.wasm.generic
 
+import sturdy.data.unit
 import sturdy.effect.failure.Failure
-import sturdy.effect.operandstack.GenericOperandStack
+import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.values.config
 import sturdy.values.convert.*
 import sturdy.values.doubles.*
@@ -13,8 +14,8 @@ import swam.ValType
 import swam.syntax.*
 
 class GenericInterpreterNumerics[V, MayJoin[_]]
-  (stack: GenericOperandStack[V] & Failure, wasmOps: WasmOps[V, _, _, _, _, _, _, MayJoin])
-  (using MayJoin[V]):
+  (stack: DecidableOperandStack[V], wasmOps: WasmOps[V, _, _, _, _, _, _, MayJoin])
+  (using MayJoin[V], Failure):
 
   import wasmOps.*
   import eqOps.*
@@ -27,8 +28,6 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
   import convertLongFloat.*
   import convertFloatDouble.*
 
-  import stack.fail
-  
   def evalNumeric(inst: Inst): V =
     inst match
       case i32.Const(v) => intOps.intLit(v)
@@ -99,7 +98,7 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
       val v2IsMinusOne = eqOps.equ(v2, intOps.intLit(-1))
       val isOverflow = intOps.bitAnd(v1IsMinValue, v2IsMinusOne)
       wasmOps.branchOps.boolBranch(isOverflow) {
-        fail(IntOverflow, s"$v1 / $v2")
+        Failure(IntOverflow, s"$v1 / $v2")
       } {
         intOps.div(v1, v2)
       }
@@ -124,7 +123,7 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
       val v2IsMinusOne = eqOps.equ(v2, longOps.longLit(-1))
       val isOverflow = intOps.bitAnd(v1IsMinValue, v2IsMinusOne)
       wasmOps.branchOps.boolBranch(isOverflow) {
-        fail(LongOverflow, s"$v1 / $v2")
+        Failure(LongOverflow, s"$v1 / $v2")
       } {
         longOps.div(v1, v2)
       }

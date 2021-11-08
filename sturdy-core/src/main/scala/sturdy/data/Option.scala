@@ -15,7 +15,10 @@ trait Option[J[_], A]:
   def map[B](f: A => B): Option[J, B]
   def flatMap[B](f: A => Option[J, B]): Option[J, B]
 
-
+case class SomeOption[J[_], A](a: A) extends Option[J, A]:
+  override def option[B](default: => B)(f: A => B): J[B] ?=> B = f(a)
+  override def map[B](f: A => B): Option[J, B] = SomeOption(f(a))
+  override def flatMap[B](f: A => Option[J, B]): Option[J, B] = f(a)
 
 enum OptionC[A] extends Option[NoJoin, A]:
   case None()
