@@ -9,9 +9,9 @@ import sturdy.values.relational.EqOps
 case class Powerset[A](val set: Set[A]) extends AnyVal {
   def size: Int = set.size
   def ++(that: Powerset[A]): Powerset[A] = Powerset(this.set ++ that.set)
-  def pureMap[B](f: A => B): Powerset[B] = Powerset(set.map(f))
-  def map[B](f: A => B)(using Effectful): Powerset[B] =
-    mapJoin(set, b => Powerset(f(b)))
+  def map[B](f: A => B): Powerset[B] = Powerset(set.map(f))
+  def mapJoin[B](f: A => B)(using Effectful): Powerset[B] =
+    sturdy.data.mapJoin(set, b => Powerset(f(b)))
   def foreach(f: A => Unit): Unit = set.foreach(f)
   override def toString: String = s"Powerset(${set.mkString(", ")})"
 }
