@@ -22,9 +22,11 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
   
   override def tableGet(key: Key, symbol: Topped[Symbol]): OptionA[Entry] =
     tables(key) match
-      case Topped.Top => OptionA.NoneSome(Iterable.single(Top.top))
+      case Topped.Top => OptionA.NoneSome(Top.top)
       case Topped.Actual(tab) => symbol match
-        case Topped.Top => OptionA.NoneSome(tab.underlying.values.map(_.get))
+        case Topped.Top =>
+          val vals = tab.underlying.values.map(_.get)
+          OptionA.NoneSome(vals.reduce(Join(_, _).get))
         case Topped.Actual(sym) => tab.underlying.get(sym) match
           case None => OptionA.None()
           case Some(MayMust.Must(entry)) => OptionA.some(entry)

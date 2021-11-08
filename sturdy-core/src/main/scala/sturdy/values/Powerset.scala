@@ -16,8 +16,8 @@ case class Powerset[A](val set: Set[A]) extends AnyVal {
   override def toString: String = s"Powerset(${set.mkString(", ")})"
 }
 object Powerset {
-  def empty[A]: Powerset[A] = Powerset[A](Set.empty[A])
-  def apply[A](as: A*): Powerset[A] = Powerset(Set.from(as))
+  def empty[A]: Powerset[A] = new Powerset[A](Set.empty[A])
+  def apply[A](as: A*): Powerset[A] = new Powerset(Set.from(as))
 }
 
 given finitePowerset[T](using Finite[T]): Finite[Powerset[T]] with {}

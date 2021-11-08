@@ -2,6 +2,7 @@ package sturdy.data
 
 import sturdy.effect.Effectful
 import sturdy.values.Join
+import sturdy.values.Powerset
 
 trait Option[J[_], A]:
   def option[B](default: => B)(f: A => B): J[B] ?=> B
@@ -37,46 +38,45 @@ object OptionC:
 
 enum OptionA[A] extends Option[WithJoin, A]:
   case None()
-  case NoneSome(as: Iterable[A])
-  case Some(as: Iterable[A])
+  case NoneSome(as: A)
+  case Some(as: A)
 
   override def option[B](default: => B)(f: A => B): WithJoin[B] ?=> B = this match
-    case Some(as) if as.nonEmpty => mapJoin(as, f)
-    case NoneSome(as) if as.nonEmpty => joinComputations(mapJoin(as, f))(default)
-    case _ => default
-
-  def +[AA <: A](a: AA): OptionA[A] = this match
-    case None() => Some(Iterable.single(a))
-    case NoneSome(as) => NoneSome(as concat Iterable.single(a))
-    case Some(as) => Some(as concat Iterable.single(a))
-
-  def joinShallow[AA <: A](that: OptionA[AA]): OptionA[A] = (this, that) match
-    case (None(), None()) => None()
-    case (None(), NoneSome(as2)) => NoneSome(as2)
-    case (None(), Some(as2)) => NoneSome(as2)
-    case (NoneSome(as1), None()) => NoneSome(as1)
-    case (NoneSome(as1), NoneSome(as2)) => NoneSome(as1 ++ as2)
-    case (NoneSome(as1), Some(as2)) => NoneSome(as1 ++ as2)
-    case (Some(as1), None()) => NoneSome(as1)
-    case (Some(as1), NoneSome(as2)) => NoneSome(as1 ++ as2)
-    case (Some(as1), Some(as2)) => Some(as1 ++ as2)
+    case Some(a) => f(a)
+    case NoneSome(a) => joinComputations(f(a))(default)
+    case None() => default
 
   def joinDeep[AA <: A](that: OptionA[AA])(using Join[A]): OptionA[A] = (this, that) match
     case (None(), None()) => None()
-    case (None(), NoneSome(e2::Nil)) => NoneSome(e2::Nil)
-    case (None(), Some(e2::Nil)) => NoneSome(e2::Nil)
-    case (NoneSome(e1::Nil), None()) => NoneSome(e1::Nil)
-    case (NoneSome(e1::Nil), NoneSome(e2::Nil)) => NoneSome(Join(e1,e2).get::Nil)
-    case (NoneSome(e1::Nil), Some(e2::Nil)) => NoneSome(Join(e1,e2).get::Nil)
-    case (Some(e1::Nil), None()) => NoneSome(e1::Nil)
-    case (Some(e1::Nil), NoneSome(e2::Nil)) => NoneSome(Join(e1,e2).get::Nil)
-    case (Some(e1::Nil), Some(e2::Nil)) => Some(Join(e1,e2).get::Nil)
+    case (None(), NoneSome(a2)) => NoneSome(a2)
+    case (None(), Some(a2)) => NoneSome(a2)
+    case (NoneSome(a1), None()) => NoneSome(a1)
+    case (NoneSome(a1), NoneSome(a2)) => NoneSome(Join(a1,a2).get)
+    case (NoneSome(a1), Some(a2)) => NoneSome(Join(a1,a2).get)
+    case (Some(a1), None()) => NoneSome(a1)
+    case (Some(a1), NoneSome(a2)) => NoneSome(Join(a1,a2).get)
+    case (Some(a1), Some(a2)) => Some(Join(a1,a2).get)
     case _ => throw new IllegalStateException()
 
-object OptionA:
-  inline def none[A]: OptionA[A] = OptionA.None()
-  inline def noneSome[A](as: A*): OptionA[A] = OptionA.NoneSome(as)
-  inline def some[A](as: A*): OptionA[A] = OptionA.Some(as)
-  def apply[A](opt: scala.Option[A]): OptionA[A] = opt match
-    case scala.Some(a) => OptionA.Some(Iterable.single(a))
-    case scala.None => OptionA.None()
+enum OptionPowerset[A] extends Option[WithJoin, A]:
+  case None()
+  case NoneSome(as: Powerset[A])
+  case Some(as: Powerset[A])
+
+  override def option[B](default: => B)(f: A => B): WithJoin[B] ?=> B = this match
+    case Some(as) => mapJoin(as.set, f)
+    case NoneSome(as) => joinComputations(mapJoin(as.set, f))(default)
+    case None() => default
+
+  import sturdy.values.JoinPowerset
+  def joinDeep(that: OptionPowerset[A]): OptionPowerset[A] = (this, that) match
+    case (None(), None()) => None()
+    case (None(), NoneSome(a2)) => NoneSome(a2)
+    case (None(), Some(a2)) => NoneSome(a2)
+    case (NoneSome(a1), None()) => NoneSome(a1)
+    case (NoneSome(a1), NoneSome(a2)) => NoneSome(Join(a1,a2).get)
+    case (NoneSome(a1), Some(a2)) => NoneSome(Join(a1,a2).get)
+    case (Some(a1), None()) => NoneSome(a1)
+    case (Some(a1), NoneSome(a2)) => NoneSome(Join(a1,a2).get)
+    case (Some(a1), Some(a2)) => Some(Join(a1,a2).get)
+    case _ => throw new IllegalStateException()
