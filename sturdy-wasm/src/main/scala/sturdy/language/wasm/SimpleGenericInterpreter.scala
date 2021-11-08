@@ -1,36 +1,39 @@
-//package sturdy.language.wasm
-//
-//import sturdy.effect.failure.Failure
-//import sturdy.effect.operandstack.OperandStack
-//import sturdy.values.booleans.BooleanBranching
-//import sturdy.values.ints.IntOps
-//import sturdy.values.relational.EqOps
-//
-//import swam.syntax.*
-//
-///** Effects are stacked so that their behavior is interleaved. */
-//type Effects[V, MayJoin[_]] = OperandStack[V, MayJoin] & Failure
-//
-//trait SimpleGenericInterpreter[V, MayJoin[_]]:
-//  val effects: Effects[V, MayJoin]
-//
-//  val intOps: IntOps[V]
-//  val eqOps: EqOps[V, V]
-//  val branchOps: BooleanBranching[V, MayJoin]
-//
-//  def evalInst(inst: Inst): Unit = inst match
-//    case i32.Const(i) => effects.push(intOps.intLit(i))
-//    case i32.Add =>
-//      val v1 = effects.safePop()
-//      val v2 = effects.safePop()
-//      effects.push(intOps.add(v1,v2))
-//    case If(thn, els) =>
-//      val c = stack.safePop()
-//      val isZero = eqOps.equ(c, intOps.intLit(0))
-//      branching.boolBranch(isZero) {
-//        els.foreach(evalInst)
-//      } {
-//        thn.foreach(evalInst)
-//      }
-//    case Trap => fail.fail(FailTrap, "trap")
-//
+package sturdy.language.wasm
+
+import sturdy.data.unit
+import sturdy.effect.except.Except
+import sturdy.effect.failure.Failure
+import sturdy.effect.operandstack.DecidableOperandStack
+import sturdy.language.wasm.generic.FrameData
+import sturdy.language.wasm.generic.UnreachableInstruction
+import sturdy.language.wasm.generic.WasmException
+import sturdy.values.booleans.BooleanBranching
+import sturdy.values.floats.FloatOps
+import sturdy.values.ints.IntOps
+import sturdy.values.relational.EqOps
+import swam.syntax.*
+
+
+trait SimpleGenericInterpreter[V, ExcV, MayJoin[_]]:
+  /** Effects are stacked so that their behavior gets interleaved. */
+  val effects: DecidableOperandStack[V] & Except[WasmException[V], ExcV, MayJoin]
+
+  val intOps: IntOps[V]
+  val floatOps: FloatOps[V]
+
+  def evalInst(inst: Inst): Unit = inst match
+    case i32.Sub =>
+      val v2 = effects.popOrFail()
+      val v1 = effects.popOrFail()
+      effects.push(intOps.sub(v1,v2))
+    case f32.Sqrt =>
+      val v = effects.popOrFail()
+      effects.push(floatOps.sqrt(v))
+    case Return =>
+      val operands = effects.popNOrFail(getFrameData.returnArity)
+      effects.throws(WasmException.Return(operands))
+    case _ => ???
+
+
+  private given Failure = ???
+  def getFrameData: FrameData = ???
