@@ -114,9 +114,9 @@ trait ConstantTaintValues extends Interpreter:
       if (isMemoryLoadStoreInstruction(inst)) {
         val address =
           if (addressOnTopOfStack(inst))
-            stack.safePeek()
+            stack.peekOrFail()
           else
-            stack.safePeekN(2).tail.head
+            stack.peekNOrFail(2).tail.head
 
         if (maybeTainted(address))
           Some(Powerset(address))

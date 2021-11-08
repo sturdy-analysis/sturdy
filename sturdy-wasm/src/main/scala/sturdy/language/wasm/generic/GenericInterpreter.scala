@@ -148,10 +148,10 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       val v = getLocal(ix).getOrElse(fail(UnboundLocal, ix.toString))
       stack.push(v)
     case LocalSet(ix) =>
-      val v = stack.safePop()
+      val v = stack.popOrFail()
       setLocal(ix, v).getOrElse(fail(UnboundLocal, ix.toString))
     case LocalTee(ix) =>
-      val v = stack.safePeek()
+      val v = stack.peekOrFail()
       setLocal(ix, v).getOrElse(fail(UnboundLocal, ix.toString))
     case GlobalGet(globalIx) =>
       val globalIdx = module.globalAddrs.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
@@ -159,7 +159,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       stack.push(global)
     case GlobalSet(globalIx) =>
       val globalIdx = module.globalAddrs.lift(globalIx).getOrElse(fail(UnboundGlobal, globalIx.toString))
-      val v = stack.safePop()
+      val v = stack.popOrFail()
       val _ = readGlobal(globalIdx) // fails when global is undefined
       writeGlobal(globalIdx, v)
 
@@ -174,7 +174,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       val memIdx = memoryIndex
       stack.push(sizeToVal(memSize(memIdx)))
     case MemoryGrow =>
-      val delta = valToSize(stack.safePop())
+      val delta = valToSize(stack.popOrFail())
       val memIdx = memoryIndex
       val res = memGrow(memIdx, delta).option
         (num.evalNumeric(i32.Const(0xFFFFFFFF))) // 0xFFFFFFFF ~= -1
@@ -186,7 +186,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     // add offset to base address (which is already on the stack)
     stack.push(intOps.intLit(inst.offset))
     addWithOverflowCheck
-    val effectiveAddr = stack.safePop()
+    val effectiveAddr = stack.popOrFail()
     val addr = valueToAddr(effectiveAddr)
 
     val memIdx = memoryIndex
@@ -198,7 +198,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
         stack.push(v)}
 
   def store(inst: StoreInst | StoreNInst): Unit =
-    val v = stack.safePop()
+    val v = stack.popOrFail()
     val bytes = encode(v, SomeCC(inst, false))
 
     // add offset to base address (which is already on the stack)
@@ -238,17 +238,17 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     else inst match
       case i: VarInst => evalVarInst(i)
       case op: Miscop =>
-        val v = stack.safePop()
+        val v = stack.popOrFail()
         stack.push(num.evalMiscop(op, v))
-      case Drop => stack.safePop()
+      case Drop => stack.popOrFail()
       case Select =>
         val isZero = num.evalNumeric(i32.Eqz)
         boolBranch[Unit](isZero) {
           // v == 0: else branch
-          val (_, v2) = stack.safePop2()
+          val (_, v2) = stack.pop2OrFail()
           stack.push(v2)
         } {
-          stack.safePop()
+          stack.popOrFail()
         }
       case _ => throw new IllegalArgumentException(s"Unexpected instruction $inst")
 
@@ -280,17 +280,17 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
         branch(labelIndex)
       }
     case BrTable(labels, defaultLabel) =>
-      val ix = stack.safePop()
+      val ix = stack.popOrFail()
       indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
     case Return =>
-      val operands = stack.safePopN(getFrameData.returnArity)
+      val operands = stack.popNOrFail(getFrameData.returnArity)
       throws(WasmException.Return(operands))
     case Call(funcIx) =>
       val func = module.functions.lift(funcIx).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
       invoke(func)
     case CallIndirect(typeIx) =>
       val ftExpected = module.functionTypes(typeIx)
-      val funcIx = stack.safePop()
+      val funcIx = stack.popOrFail()
       tableGet(tableIndex, valueToFuncIx(funcIx)).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
         if (func == null)
           fail(UninitializedFunction, funcIx.toString)
@@ -300,7 +300,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 
   def branch(labelIndex: LabelIdx): Unit =
     val returnArity: Int = labelStack.lookupLabel(labelIndex)
-    val operands = stack.safePopN(returnArity)
+    val operands = stack.popNOrFail(returnArity)
     throws(WasmException.Jump(labelIndex, operands))
 
   /* stack before label-call:  A p0 ... pn (n = params arity)
@@ -345,14 +345,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   def invoke(fun: FunctionInstance)(using Fixed): Unit =
     fun match
       case FunctionInstance.Wasm(mod, ix, func, funcType) =>
-        val args = stack.safePopN(funcType.params.size)
+        val args = stack.popNOrFail(funcType.params.size)
         val frameData = FrameData(funcType.t.size, mod)
         val vars = args.view ++ func.locals.map(num.defaultValue)
         labelStack.withFresh(stack.withFreshOperandFrame(inNewFrame(frameData, vars.view.zipWithIndex.map(_.swap)) {
           enterFunction(FuncId(mod, ix), func, funcType)
         }))
       case FunctionInstance.Host(hostFunc) =>
-        val args = stack.safePopN(hostFunc.funcType.params.size)
+        val args = stack.popNOrFail(hostFunc.funcType.params.size)
         val res = invokeHostFunction(hostFunc, args)
         val expectedSize = hostFunc.funcType.t.size
         if (res.length != expectedSize) {
@@ -373,7 +373,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
           fail(InvalidModule, s"Tried to jump through a function boundary.")
       }
     }
-    stack.safePeekN(returnN)
+    stack.peekNOrFail(returnN)
 
   def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V)(using Fixed): Unit =
     functionOps.invokeFun(funV, Seq()) {
@@ -413,7 +413,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
           inNewFrame(FrameData(0, modInst), Iterable.empty) {
             eval(Call(funcIx), InstLoc.InvokeExported(modInst, funcName))
           }
-          stack.safePopN(rtLength)
+          stack.popNOrFail(rtLength)
         case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
     }
   }
@@ -452,12 +452,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
         val loc = mod.blockInstLocs((block, ix))
         eval(inst, loc)
       }
-      stack.safePop()
+      stack.popOrFail()
     }))
 
   def addWithOverflowCheck =
-    val v1 = stack.safePop()
-    val v2 = stack.safePop()
+    val v1 = stack.popOrFail()
+    val v2 = stack.popOrFail()
     val res = intOps.add(v1,v2)
     val cmp = unsignedCompareOps.ltUnsigned(res,v1)
     boolBranch[Unit](cmp) {
@@ -627,7 +627,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
           stack.push(base)
           stack.push(num.evalNumeric(i32.Const(i)))
           stack.push(num.evalNumeric(i32.Add)) // adds index to base
-          val idx = stack.safePop() // stack is empty
+          val idx = stack.popOrFail() // stack is empty
           val funV = functionOps.funValue(modInst.functions(funcIx)) // funcIx is valid due to validation
           tableSet(TableAddr(modInst.tableAddrs(tableIdx).addr), valueToFuncIx(idx), funV)
           // TODO add failure conditions for table writing

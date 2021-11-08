@@ -48,21 +48,21 @@ trait OperandStack[V, MayJoin[_]] extends Effectful:
       rest = rest.tail
     }
 
-  def safePop()(using MayJoin[V], Failure): V =
+  inline def popOrFail()(using MayJoin[V], Failure): V =
     pop().getOrElse(Failure(StackUnderflow, "pop on empty stack"))
 
-  def safePeek()(using MayJoin[V], Failure): V =
+  inline def peekOrFail()(using MayJoin[V], Failure): V =
     peek().getOrElse(Failure(StackUnderflow, "peek on empty stack"))
 
-  def safePop2()(using MayJoin[V], Failure): (V,V) =
-    val v2 = safePop()
-    val v1 = safePop()
+  inline def pop2OrFail()(using MayJoin[V], Failure): (V,V) =
+    val v2 = popOrFail()
+    val v1 = popOrFail()
     (v1, v2)
 
-  def safePopN(n: Int)(using MayJoin[List[V]], Failure): List[V] =
+  inline def popNOrFail(n: Int)(using MayJoin[List[V]], Failure): List[V] =
     popN(n).getOrElse(Failure(StackUnderflow, s"popN($n) on stack with less than $n elements"))
 
-  def safePeekN(n: Int)(using MayJoin[List[V]], Failure): List[V] =
+  inline def peekNOrFail(n: Int)(using MayJoin[List[V]], Failure): List[V] =
     peekN(n).getOrElse(Failure(StackUnderflow, s"peekN($n) on stack with less than $n elements"))
 
 trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]
