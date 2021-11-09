@@ -11,17 +11,14 @@ import sturdy.fix
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.*
 import sturdy.values.booleans.BooleanBranching
-import sturdy.values.doubles.DoubleOps
-import sturdy.values.floats.FloatOps
+import sturdy.values.floating.FloatingOps
 import swam.syntax.*
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.*
-import sturdy.values.doubles.{*, given}
 import sturdy.values.exceptions.{*, given}
-import sturdy.values.floats.{*, given}
+import sturdy.values.floating.{*, given}
 import sturdy.values.functions.{*, given}
-import sturdy.values.ints.{*, given}
-import sturdy.values.longs.{*, given}
+import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
 
 import java.nio.ByteBuffer

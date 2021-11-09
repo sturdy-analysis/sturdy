@@ -11,10 +11,8 @@ import sturdy.values.Finite
 import sturdy.values.Topped
 import sturdy.values.taint.{*, given}
 import sturdy.values.booleans.given
-import sturdy.values.doubles.given
-import sturdy.values.floats.given
-import sturdy.values.ints.given
-import sturdy.values.longs.given
+import sturdy.values.floating.given
+import sturdy.values.integer.given
 import sturdy.values.given
 import sturdy.fix
 import sturdy.fix.Logger

@@ -1,11 +1,10 @@
-package sturdy.values.doubles
+package sturdy.values.floating
 
 import sturdy.effect.Effectful
 import sturdy.values.*
-import sturdy.values.Widening
 import sturdy.values.relational.*
 
-enum DoubleSign:
+enum FloatSign:
   case TopSign
   case Neg
   case NegOrZero
@@ -13,13 +12,13 @@ enum DoubleSign:
   case ZeroOrPos
   case Pos
 
-  def <(s2: DoubleSign): Boolean = s2 == TopSign || (this match
+  def <(s2: FloatSign): Boolean = s2 == TopSign || (this match
     case Neg => s2 == NegOrZero
     case Zero => s2 == NegOrZero || s2 == ZeroOrPos
     case Pos => s2 == ZeroOrPos
     case _ => false
   )
-  def negated: DoubleSign = this match
+  def negated: FloatSign = this match
     case TopSign => TopSign
     case Neg => Pos
     case NegOrZero => ZeroOrPos
@@ -28,19 +27,19 @@ enum DoubleSign:
     case Pos => Neg
 
 
-import DoubleSign.*
+import FloatSign.*
 
-given Abstractly[Double, DoubleSign] with
-  override def abstractly(d: Double): DoubleSign =
+given Abstractly[Float, FloatSign] with
+  override def abstractly(d: Float): FloatSign =
     if d < 0 then Neg
     else if d > 0 then Pos
     else Zero
 
-given PartialOrder[DoubleSign] with
-  override def lteq(x: DoubleSign, y: DoubleSign): Boolean = x == y || x < y
+given PartialOrder[FloatSign] with
+  override def lteq(x: FloatSign, y: FloatSign): Boolean = x == y || x < y
 
-given CombineDoubleSign[W <: Widening]: Combine[DoubleSign, W] with
-  override def apply(v1: DoubleSign, v2: DoubleSign): MaybeChanged[DoubleSign] =
+given CombineFloatSign[W <: Widening]: Combine[FloatSign, W] with
+  override def apply(v1: FloatSign, v2: FloatSign): MaybeChanged[FloatSign] =
     if v1 == v2 then Unchanged(v1)
     else if v1 < v2 then Changed(v2)
     else if v2 < v1 then Changed(v1)
@@ -54,15 +53,15 @@ given CombineDoubleSign[W <: Widening]: Combine[DoubleSign, W] with
       case _ => Changed(TopSign)
 
 
-given SignDoubleOps: DoubleOps[DoubleSign] with
-  def doubleLit(d: Double): DoubleSign =
-    if d < 0 then Neg
-    else if d > 0 then Pos
+given SignFloatingOps[B] (using base: Fractional[B]): FloatingOps[B, FloatSign] with
+  def floatingLit(f: B): FloatSign =
+    if base.lt(f, base.zero) then Neg
+    else if base.gt(f, base.zero) then Pos
     else Zero
 
-  def randomDouble(): DoubleSign = ZeroOrPos
+  def randomFloat(): FloatSign = ZeroOrPos
 
-  def add(v1: DoubleSign, v2: DoubleSign): DoubleSign = (v1, v2) match
+  def add(v1: FloatSign, v2: FloatSign): FloatSign = (v1, v2) match
     case (TopSign, _) => TopSign
     case (_, TopSign) => TopSign
     case (_, Zero) => v1
@@ -88,7 +87,7 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
     case (Pos, ZeroOrPos) => Pos
     case (Pos, Pos) => Pos
 
-  def sub(v1: DoubleSign, v2: DoubleSign): DoubleSign =
+  def sub(v1: FloatSign, v2: FloatSign): FloatSign =
     val negV2 = v2 match
       case TopSign => TopSign
       case Neg => Pos
@@ -98,7 +97,7 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
       case Pos => Neg
     add(v1, negV2)
 
-  def mul(v1: DoubleSign, v2: DoubleSign): DoubleSign = (v1, v2) match
+  def mul(v1: FloatSign, v2: FloatSign): FloatSign = (v1, v2) match
     case (TopSign, _) => TopSign
     case (_, TopSign) => TopSign
     case (_, Zero) => Zero
@@ -124,28 +123,26 @@ given SignDoubleOps: DoubleOps[DoubleSign] with
     case (Pos, ZeroOrPos) => ZeroOrPos
     case (Pos, Pos) => Pos
 
-  def div(v1: DoubleSign, v2: DoubleSign): DoubleSign = v2 match
+  def div(v1: FloatSign, v2: FloatSign): FloatSign = v2 match
     case Zero => v1 // division by zero yields infinity with the sign of v1
     case ZeroOrPos => v1
     case NegOrZero => v1.negated
     case _ => mul(v1, v2)
 
-  def min(v1: DoubleSign, v2: DoubleSign): DoubleSign = ???
-  def max(v1: DoubleSign, v2: DoubleSign): DoubleSign = ???
+  def min(v1: FloatSign, v2: FloatSign): FloatSign = ???
+  def max(v1: FloatSign, v2: FloatSign): FloatSign = ???
 
-  def absolute(v: DoubleSign): DoubleSign = ???
-  def negated(v: DoubleSign): DoubleSign = ???
-  def sqrt(v: DoubleSign): DoubleSign = ???
-  def ceil(v: DoubleSign): DoubleSign = ???
-  def floor(v: DoubleSign): DoubleSign = ???
-  def truncate(v: DoubleSign): DoubleSign = ???
-  def nearest(v: DoubleSign): DoubleSign = ???
-  def copysign(v: DoubleSign, sign: DoubleSign): DoubleSign = ???
+  def absolute(v: FloatSign): FloatSign = ???
+  def negated(v: FloatSign): FloatSign = ???
+  def sqrt(v: FloatSign): FloatSign = ???
+  def ceil(v: FloatSign): FloatSign = ???
+  def floor(v: FloatSign): FloatSign = ???
+  def truncate(v: FloatSign): FloatSign = ???
+  def nearest(v: FloatSign): FloatSign = ???
+  def copysign(v: FloatSign, sign: FloatSign): FloatSign = ???
 
-  def logNatural(v: DoubleSign): DoubleSign = ???
-
-given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
-  def lt(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match
+given SignCompareOps: CompareOps[FloatSign, Topped[Boolean]] with
+  def lt(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Topped.Actual(true)
     case (Neg, ZeroOrPos) => Topped.Actual(true)
     case (Neg, Pos) => Topped.Actual(true)
@@ -158,7 +155,7 @@ given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
     case (Pos, NegOrZero) => Topped.Actual(false)
     case (Pos, Zero) => Topped.Actual(false)
     case _ => Topped.Top
-  def le(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match
+  def le(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Topped.Actual(true)
     case (Neg, ZeroOrPos) => Topped.Actual(true)
     case (Neg, Pos) => Topped.Actual(true)
@@ -171,11 +168,11 @@ given SignCompareOps: CompareOps[DoubleSign, Topped[Boolean]] with
     case (Pos, NegOrZero) => Topped.Actual(false)
     case (Pos, Zero) => Topped.Actual(false)
     case _ => Topped.Top
-  def ge(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = lt(v2, v1)
-  def gt(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = le(v2, v1)
+  def ge(v1: FloatSign, v2: FloatSign): Topped[Boolean] = lt(v2, v1)
+  def gt(v1: FloatSign, v2: FloatSign): Topped[Boolean] = le(v2, v1)
 
-given SignEqOps: EqOps[DoubleSign, Topped[Boolean]] with
-  def equ(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = (v1, v2) match
+given SignEqOps: EqOps[FloatSign, Topped[Boolean]] with
+  def equ(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Topped.Actual(false)
     case (Neg, ZeroOrPos) => Topped.Actual(false)
     case (Neg, Pos) => Topped.Actual(false)
@@ -188,5 +185,5 @@ given SignEqOps: EqOps[DoubleSign, Topped[Boolean]] with
     case (Pos, NegOrZero) => Topped.Actual(false)
     case (Pos, Zero) => Topped.Actual(false)
     case _ => Topped.Top
-  def neq(v1: DoubleSign, v2: DoubleSign): Topped[Boolean] = equ(v1, v2).map(!_)
+  def neq(v1: FloatSign, v2: FloatSign): Topped[Boolean] = equ(v1, v2).map(!_)
 

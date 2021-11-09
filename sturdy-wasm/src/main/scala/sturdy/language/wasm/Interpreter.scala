@@ -7,12 +7,10 @@ import sturdy.values.booleans.BooleanBranching
 import sturdy.values.booleans.LiftedBooleanBranching
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
-import sturdy.values.doubles.*
 import sturdy.values.exceptions.Exceptional
-import sturdy.values.floats.*
+import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
-import sturdy.values.ints.*
-import sturdy.values.longs.*
+import sturdy.values.integer.*
 import sturdy.values.relational.*
 import swam.syntax.LoadInst
 import swam.syntax.LoadNInst
@@ -89,10 +87,10 @@ trait Interpreter:
 
   given ValueWasmOps
     (using failure: Failure
-         , i32Ops: IntOps[I32]
-         , i64Ops: LongOps[I64]
-         , f32Ops: FloatOps[F32]
-         , f64Ops: DoubleOps[F64]
+         , i32Ops: IntegerOps[Int, I32]
+         , i64Ops: IntegerOps[Long, I64]
+         , f32Ops: FloatingOps[Float, F32]
+         , f64Ops: FloatingOps[Double, F64]
          , i32EqOps: EqOps[I32, Bool]
          , i64EqOps: EqOps[I64, Bool]
          , f32EqOps: EqOps[F32, Bool]
@@ -134,10 +132,10 @@ trait Interpreter:
     val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, MayJoin] = specOps
     val branchOps: BooleanBranching[Value, MayJoin] = new LiftedBooleanBranching[Value, Bool, MayJoin](v => v.asBoolean)(using boolBranchOps)
 
-    final val intOps: IntOps[Value] = new LiftedIntOps(_.asInt32, Value.Int32.apply)
-    final val longOps: LongOps[Value] = new LiftedLongOps(_.asInt64, Value.Int64.apply)
-    final val floatOps: FloatOps[Value] = new LiftedFloatOps(_.asFloat32, Value.Float32.apply)
-    final val doubleOps: DoubleOps[Value] = new LiftedDoubleOps(_.asFloat64, Value.Float64.apply)
+    final val intOps: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
+    final val longOps: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, Value.Int64.apply)
+    final val floatOps: FloatingOps[Float, Value] = new LiftedFloatingOps(_.asFloat32, Value.Float32.apply)
+    final val doubleOps: FloatingOps[Double, Value] = new LiftedFloatingOps(_.asFloat64, Value.Float64.apply)
 
     final val eqOps: EqOps[Value, Value] = new EqOps[Value, Value]:
       import Value.*

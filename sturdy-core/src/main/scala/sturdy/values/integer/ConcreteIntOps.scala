@@ -1,4 +1,4 @@
-package sturdy.values.ints
+package sturdy.values.integer
 
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
@@ -15,9 +15,9 @@ import java.nio.ByteOrder
 
 given Structural[Int] with {}
 
-given ConcreteIntOps(using f: Failure): IntOps[Int] with
-  def intLit(i: Int): Int = i
-  def randomInt(): Int = Random.nextInt()
+given ConcreteIntegerOps(using f: Failure): IntegerOps[Int, Int] with
+  def integerLit(i: Int): Int = i
+  def randomInteger(): Int = Random.nextInt()
 
   def add(v1: Int, v2: Int): Int = v1 + v2
   def sub(v1: Int, v2: Int): Int = v1 - v2
@@ -28,27 +28,27 @@ given ConcreteIntOps(using f: Failure): IntOps[Int] with
 
   def div(v1: Int, v2: Int): Int =
     if (v2 == 0)
-      f.fail(IntDivisionByZero, s"$v1 / $v2")
+      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     else
       v1 / v2
   def divUnsigned(v1: Int, v2: Int): Int =
     if (v2 == 0)
-      f.fail(IntDivisionByZero, s"$v1 / $v2")
+      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     else
       Integer.divideUnsigned(v1, v2)
   def remainder(v1: Int, v2: Int): Int =
     if (v2 == 0)
-      f.fail(IntDivisionByZero, s"$v1 / $v2")
+      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     else
       v1 % v2
   def remainderUnsigned(v1: Int, v2: Int): Int =
     if (v2 == 0)
-      f.fail(IntDivisionByZero, s"$v1 / $v2")
+      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     else
       Integer.remainderUnsigned(v1, v2)
   def modulo(v1: Int, v2: Int): Int =
     if (v2 == 0)
-      f.fail(IntDivisionByZero, s"$v1 / $v2")
+      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     else {
       val r = v1 % v2
       if (r < 0)

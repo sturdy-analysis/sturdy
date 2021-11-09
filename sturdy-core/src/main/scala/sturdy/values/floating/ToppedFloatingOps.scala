@@ -1,4 +1,4 @@
-package sturdy.values.floats
+package sturdy.values.floating
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
@@ -8,8 +8,8 @@ import sturdy.values.convert.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-given ToppedFloatOps[T](using ops: FloatOps[T]): FloatOps[Topped[T]] with
-  def floatLit(f: Float): Topped[T] = Topped.Actual(ops.floatLit(f))
+given ToppedFloatingOps[B, T] (using ops: FloatingOps[B, T]): FloatingOps[B, Topped[T]] with
+  def floatingLit(f: B): Topped[T] = Topped.Actual(ops.floatingLit(f))
   def randomFloat(): Topped[T] = Topped.Top
 
   def add(v1: Topped[T], v2: Topped[T]): Topped[T] = v1.binary(ops.add, v2)
@@ -32,5 +32,12 @@ given ToppedConvertFloatBytes[T, B](using c: ConvertFloatBytes[T, Seq[B]])(using
   override def apply(from: Topped[T], conf: SomeCC[ByteOrder]): Seq[Topped[B]] = from match
     case Topped.Top =>
       val bytes = Seq.fill(4)(Topped.Top)
+      safeTopConversion(conf, bytes)
+    case Topped.Actual(v) => c(v, conf).map(Topped.Actual.apply)
+
+given ToppedConvertDoubleBytes[T, B](using c: ConvertDoubleBytes[T, Seq[B]])(using Effectful, Failure): ConvertDoubleBytes[Topped[T], Seq[Topped[B]]] with
+  override def apply(from: Topped[T], conf: SomeCC[ByteOrder]): Seq[Topped[B]] = from match
+    case Topped.Top =>
+      val bytes = Seq.fill(8)(Topped.Top)
       safeTopConversion(conf, bytes)
     case Topped.Actual(v) => c(v, conf).map(Topped.Actual.apply)

@@ -4,12 +4,10 @@ import sturdy.data.Option
 import sturdy.values.booleans.BooleanBranching
 import swam.{FuncType, GlobalIdx}
 import sturdy.values.convert.*
-import sturdy.values.doubles.*
 import sturdy.values.exceptions.Exceptional
-import sturdy.values.floats.*
+import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
-import sturdy.values.ints.*
-import sturdy.values.longs.*
+import sturdy.values.integer.*
 import sturdy.values.relational.CompareOps
 import sturdy.values.relational.EqOps
 import sturdy.values.relational.UnsignedCompareOps
@@ -20,10 +18,10 @@ import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
 
 trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]]:
-  val intOps: IntOps[V]
-  val longOps: LongOps[V]
-  val floatOps: FloatOps[V]
-  val doubleOps: DoubleOps[V]
+  val intOps: IntegerOps[Int, V]
+  val longOps: IntegerOps[Long, V]
+  val floatOps: FloatingOps[Float, V]
+  val doubleOps: FloatingOps[Double, V]
   val eqOps: EqOps[V, V]
   val compareOps: CompareOps[V, V]
   val unsignedCompareOps: UnsignedCompareOps[V, V]

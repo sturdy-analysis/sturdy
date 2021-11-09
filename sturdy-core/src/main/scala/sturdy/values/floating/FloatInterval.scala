@@ -1,4 +1,4 @@
-package sturdy.values.floats
+package sturdy.values.floating
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
@@ -58,8 +58,8 @@ given WidenFloatInterval: Widen[FloatInterval] with
         Float.PositiveInfinity
     MaybeChanged(FloatInterval(low, high), v1)
 
-given IntervalFloatOps: FloatOps[FloatInterval] with
-  def floatLit(f: Float): FloatInterval = FloatInterval(f, f)
+given IntervalFloatingOps: FloatingOps[Float, FloatInterval] with
+  def floatingLit(f: Float): FloatInterval = FloatInterval(f, f)
   def randomFloat(): FloatInterval = FloatInterval(0, 1)
   def add(v1: FloatInterval, v2: FloatInterval): FloatInterval = v1 + v2
   def sub(v1: FloatInterval, v2: FloatInterval): FloatInterval = v1 - v2

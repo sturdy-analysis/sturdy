@@ -1,4 +1,4 @@
-package sturdy.values.ints
+package sturdy.values.integer
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
@@ -64,19 +64,19 @@ class IntIntervalWiden(bounds: => Set[Int]) extends Widen[IntInterval]:
         treeSet.minAfter(v2.h).getOrElse(Int.MaxValue)
     MaybeChanged(IntInterval(low, high), v1)
 
-given IntervalIntOps(using f: Failure, j: Effectful): IntOps[IntInterval] with
-  def intLit(i: Int): IntInterval = IntInterval(i, i)
-  def randomInt(): IntInterval = IntInterval.Top
+given IntervalIntegerOps(using f: Failure, j: Effectful): IntegerOps[Int, IntInterval] with
+  def integerLit(i: Int): IntInterval = IntInterval(i, i)
+  def randomInteger(): IntInterval = IntInterval.Top
   def add(v1: IntInterval, v2: IntInterval): IntInterval = v1 + v2
   def sub(v1: IntInterval, v2: IntInterval): IntInterval = v1 - v2
   def mul(v1: IntInterval, v2: IntInterval): IntInterval = v1 * v2
   def div(v1: IntInterval, v2: IntInterval): IntInterval = v2 match
-    case IntInterval(0, 0) => f.fail(IntDivisionByZero, s"$v1 / $v2")
-    case IntInterval(0, h) => j.joinComputations(v1 / IntInterval(1, h))(f.fail(IntDivisionByZero, s"$v1 / $v2"))
-    case IntInterval(l, 0) => j.joinComputations(v1 / IntInterval(l, -1))(f.fail(IntDivisionByZero, s"$v1 / $v2"))
+    case IntInterval(0, 0) => f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+    case IntInterval(0, h) => j.joinComputations(v1 / IntInterval(1, h))(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+    case IntInterval(l, 0) => j.joinComputations(v1 / IntInterval(l, -1))(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
     case IntInterval(l, h) =>
       if (l <= 0 && h >= 0)
-        j.joinComputations(v1 / v2)(f.fail(IntDivisionByZero, s"$v1 / $v2"))
+        j.joinComputations(v1 / v2)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
       else
         v1 / v2
 

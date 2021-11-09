@@ -12,7 +12,7 @@ import sturdy.language.tip.Interpreter
 import sturdy.language.tip.Function
 import sturdy.language.tip.GenericInterpreter.*
 import sturdy.values.booleans.{_, given}
-import sturdy.values.ints.{_, given}
+import sturdy.values.integer.{_, given}
 import sturdy.values.functions.{_, given}
 import sturdy.values.records.{_, given}
 import sturdy.values.references.{_, given}
@@ -56,7 +56,7 @@ object ConcreteInterpreter extends Interpreter:
     override def initialCallFrameVars: Map[String, Int] = initEnvironment
 
   class Instance(effects: Effects) extends GenericInstance(effects) with fix.Concrete[FixIn, FixOut[Value]]:
-    final def vintOps: IntOps[VInt] = implicitly
+    final def vintOps: IntegerOps[Int, VInt] = implicitly
     final def vcompareOps: CompareOps[VInt, VBool] = implicitly
     final def vintEqOps: EqOps[VInt, VBool] = implicitly
     final def vrefEqOps: EqOps[VRef, VBool] = implicitly

@@ -3,10 +3,8 @@ package sturdy.values.taint
 import sturdy.effect.failure.Failure
 import sturdy.values.MaybeChanged
 import sturdy.values.booleans.BooleanBranching
-import sturdy.values.doubles.DoubleOps
-import sturdy.values.floats.FloatOps
-import sturdy.values.ints.IntOps
-import sturdy.values.longs.LongOps
+import sturdy.values.floating.FloatingOps
+import sturdy.values.integer.IntegerOps
 import sturdy.values.relational.{UnsignedCompareOps, EqOps, CompareOps}
 import sturdy.values.*
 import sturdy.values.convert.*
@@ -57,9 +55,9 @@ given CombineTaintProduct[V, W <: Widening](using comb: Combine[V, W]): Combine[
     MaybeChanged(TaintProduct(joinedTaint.get, joinedVal.get), joinedTaint.hasChanged || joinedVal.hasChanged)
 
 
-given TaintIntOps[V](using ops: IntOps[V]): IntOps[TaintProduct[V]] with
-  def intLit(i: Int): TaintProduct[V] = untainted(ops.intLit(i))
-  def randomInt(): TaintProduct[V] = untainted(ops.randomInt())
+given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintProduct[V]] with
+  def integerLit(i: B): TaintProduct[V] = untainted(ops.integerLit(i))
+  def randomInteger(): TaintProduct[V] = untainted(ops.randomInteger())
 
   def add(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.add, v2)
   def sub(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.sub, v2)
@@ -88,55 +86,8 @@ given TaintIntOps[V](using ops: IntOps[V]): IntOps[TaintProduct[V]] with
   def countTrailinZeros(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.countTrailinZeros)
   def nonzeroBitCount(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nonzeroBitCount)
 
-given TaintLongOps[V](using ops: LongOps[V], f: Failure): LongOps[TaintProduct[V]] with
-  def longLit(l: Long): TaintProduct[V] = untainted(ops.longLit(l))
-  def randomLong(): TaintProduct[V] = untainted(ops.randomLong())
-
-  def add(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.add, v2)
-  def sub(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.sub, v2)
-  def mul(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.mul, v2)
-
-  def div(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.div, v2)
-  def divUnsigned(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.divUnsigned, v2)
-  def remainder(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.remainder, v2)
-  def remainderUnsigned(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.remainderUnsigned, v2)
-
-  def bitAnd(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.bitAnd, v2)
-  def bitOr(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.bitOr, v2)
-  def bitXor(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.bitXor, v2)
-  def shiftLeft(v: TaintProduct[V], shift: TaintProduct[V]): TaintProduct[V] = v.binary(ops.shiftLeft, shift)
-  def shiftRight(v: TaintProduct[V], shift: TaintProduct[V]): TaintProduct[V] = v.binary(ops.shiftRight, shift)
-  def shiftRightUnsigned(v: TaintProduct[V], shift: TaintProduct[V]): TaintProduct[V] = v.binary(ops.shiftRightUnsigned, shift)
-  def rotateLeft(v: TaintProduct[V], shift: TaintProduct[V]): TaintProduct[V] = v.binary(ops.rotateLeft, shift)
-  def rotateRight(v: TaintProduct[V], shift: TaintProduct[V]): TaintProduct[V] = v.binary(ops.rotateRight, shift)
-  def countLeadingZeros(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.countLeadingZeros)
-  def countTrailinZeros(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.countTrailinZeros)
-  def nonzeroBitCount(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nonzeroBitCount)
-
-given TaintDoubleOps[V](using ops: DoubleOps[V]): DoubleOps[TaintProduct[V]] with
-  def doubleLit(d: Double): TaintProduct[V] = untainted(ops.doubleLit(d))
-  def randomDouble(): TaintProduct[V] = untainted(ops.randomDouble())
-
-  def add(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.add, v2)
-  def sub(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.sub, v2)
-  def mul(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.mul, v2)
-  def div(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.div, v2)
-  def min(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.min, v2)
-  def max(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.max, v2)
-
-  def absolute(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.absolute)
-  def negated(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.negated)
-  def sqrt(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.sqrt)
-  def ceil(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.ceil)
-  def floor(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.floor)
-  def truncate(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.truncate)
-  def nearest(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nearest)
-  def copysign(v: TaintProduct[V], sign: TaintProduct[V]): TaintProduct[V] = v.binary(ops.copysign, sign)
-
-  def logNatural(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.logNatural)
-
-given TaintFloatOps[V](using ops: FloatOps[V]): FloatOps[TaintProduct[V]] with
-  def floatLit(f: Float): TaintProduct[V] =  untainted(ops.floatLit(f))
+given TaintFloatingOps[B, V] (using ops: FloatingOps[B, V]): FloatingOps[B, TaintProduct[V]] with
+  def floatingLit(f: B): TaintProduct[V] =  untainted(ops.floatingLit(f))
   def randomFloat(): TaintProduct[V] = untainted(ops.randomFloat())
 
   def add(v1: TaintProduct[V], v2: TaintProduct[V]): TaintProduct[V] = v1.binary(ops.add, v2)

@@ -6,7 +6,7 @@ import sturdy.values.MaybeChanged
 import sturdy.values.booleans.*
 import sturdy.values.{Top, Combine, Widening, Finite}
 import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
-import sturdy.values.ints.{IntOps, LiftedIntOps}
+import sturdy.values.integer.{IntegerOps, LiftedIntegerOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
 import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
 import sturdy.values.relational.{EqOps, CompareOps, LiftedCompareOps}
@@ -81,7 +81,7 @@ trait Interpreter:
     given Instance = this.asInstanceOf[Instance]
     given Failure = this.effects
 
-    def vintOps: IntOps[VInt]
+    def vintOps: IntegerOps[Int, VInt]
     def vcompareOps: CompareOps[VInt, VBool]
     def vintEqOps: EqOps[VInt, VBool]
     def vrefEqOps: EqOps[VRef, VBool]
@@ -93,7 +93,7 @@ trait Interpreter:
     def vbranchOps: BooleanBranching[VBool, MayJoin]
 
     import Value.*
-    final val intOps = new LiftedIntOps[Value, VInt](_.asInt, IntValue.apply)(using vintOps)
+    final val intOps = new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)(using vintOps)
     final val compareOps = new LiftedCompareOps[Value, Value, VInt, VBool](_.asInt, boolean)(using vcompareOps)
     final val eqOps = new EqOps[Value, Value]:
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
