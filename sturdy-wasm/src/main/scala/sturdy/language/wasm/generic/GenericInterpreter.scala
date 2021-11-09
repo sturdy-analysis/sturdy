@@ -373,7 +373,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     stack.peekNOrFail(returnN)
 
   def invokeIndirect(funV: FunV, ftExpected: swam.FuncType, funcIx: V)(using Fixed): Unit =
-    functionOps.invokeFun(funV, Seq()) {
+    functionOps.invokeFun(funV, ftExpected) {
       case (func, _) =>
         val ftActual = func.funcType
         if (ftExpected != ftActual)

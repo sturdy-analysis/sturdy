@@ -3,7 +3,7 @@ package sturdy.language.tip.analysis
 import sturdy.data.{WithJoin, given}
 import sturdy.effect.{AnalysisState, Effectful, given}
 import sturdy.effect.allocation.AAllocationFromContext
-import sturdy.effect.callframe.JoinedCallFrame
+import sturdy.effect.callframe.JoinedDecidableCallFrame
 import sturdy.effect.failure.{AFailureCollect, Failure}
 import sturdy.effect.print.{APrintPrefix, given}
 import sturdy.effect.store.AStoreMultiAddrThreadded
@@ -36,7 +36,7 @@ object SignAnalysis extends Interpreter,
   type AllState = OutState
 
   class Effects(initEnvironment: Environment, initStore: Store)
-    extends JoinedCallFrame[Unit, String, Addr]
+    extends JoinedDecidableCallFrame[Unit, String, Addr]
       with AStoreMultiAddrThreadded[AllocationSiteAddr, Value](initStore)
       with AAllocationFromContext[AllocationSite, Addr](fromAllocationSite)
       with APrintPrefix[Value]
@@ -68,7 +68,7 @@ object SignAnalysis extends Interpreter,
     final def vrefEqOps: EqOps[VRef, VBool] = implicitly
     final def vfunEqOps: EqOps[VFun, VBool] = implicitly
     final def vrecEqOps: EqOps[VRecord, VBool] = ??? // new ARecordEqOps(using lazily(eqOps))
-    final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
+    final def vfunOps: FunctionOps[Function, Seq[Value], Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
     final def vbranchOps: BooleanBranching[Topped[Boolean], MayJoin] = implicitly

@@ -37,7 +37,7 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]]:
   val convertDoubleInt: ConvertDoubleInt[V, V]
   val convertDoubleLong: ConvertDoubleLong[V, V]
   val convertDoubleFloat: ConvertDoubleFloat[V, V]
-  val functionOps: FunctionOps[FunctionInstance, Nothing, Unit, FunV]
+  val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, MayJoin]

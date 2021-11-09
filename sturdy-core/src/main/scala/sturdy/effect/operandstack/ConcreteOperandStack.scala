@@ -37,6 +37,8 @@ trait ConcreteOperandStack[V] extends DecidableOperandStack[V]:
     else
       OptionC.some(stack.take(n))
 
+  override def size: Int = stack.size
+  
   def withFreshOperandStack[A](f: => A): A =
     val snapshot = stack
     stack = Nil

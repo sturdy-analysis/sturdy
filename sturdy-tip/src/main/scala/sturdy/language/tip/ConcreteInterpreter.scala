@@ -62,7 +62,7 @@ object ConcreteInterpreter extends Interpreter:
     final def vrefEqOps: EqOps[VRef, VBool] = implicitly
     final def vfunEqOps: EqOps[VFun, VBool] = implicitly
     final def vrecEqOps: EqOps[VRecord, VBool] = implicitly
-    final def vfunOps: FunctionOps[Function, Value, Value, VFun] = implicitly
+    final def vfunOps: FunctionOps[Function, Seq[Value], Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
     final def vbranchOps: BooleanBranching[Boolean, MayJoin] = implicitly

@@ -5,10 +5,10 @@ import sturdy.effect.{AnalysisState, Effectful}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
-import sturdy.effect.callframe.JoinedCallFrame
+import sturdy.effect.callframe.JoinedDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.operandstack.JoinedOperandStack
+import sturdy.effect.operandstack.JoinedDecidableOperandStack
 import sturdy.effect.symboltable.{JoinedSymbolTable, ToppedSymbolTable}
 import sturdy.effect.symboltable.ToppedSymbolTable.CombineTable
 import sturdy.fix
@@ -77,19 +77,19 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
     (ConcreteCallFrame.Vars[Value],
       ConstantAddressMemory.Memories[MemoryAddr, AByte],
       Globals.Values[Value],
-      JoinedOperandStack.Operands[Value])
+      JoinedDecidableOperandStack.Operands[Value])
   type OutState =
     (ConstantAddressMemory.Memories[MemoryAddr, AByte],
       Globals.Values[Value],
-      JoinedOperandStack.Operands[Value])
+      JoinedDecidableOperandStack.Operands[Value])
   type AllState = InState
 
   class Effects(rootFrameData: FrameData, rootFrameValues: Iterable[Value])
-    extends JoinedOperandStack[Value]
+    extends JoinedDecidableOperandStack[Value]
       with ConstantAddressMemory[MemoryAddr, AByte](untainted(Topped.Actual(0)))
       with Globals[Value]
       with ToppedSymbolTable[TableAddr, Int, FunV]
-      with JoinedCallFrame[FrameData, Int, Value]
+      with JoinedDecidableCallFrame[FrameData, Int, Value]
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
       with AnalysisState[InState, OutState, AllState] {

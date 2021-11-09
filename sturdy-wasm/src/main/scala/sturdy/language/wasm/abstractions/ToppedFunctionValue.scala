@@ -1,18 +1,26 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.data.{CombineUnit, mapJoin, MakeJoined}
+import sturdy.data.{CombineUnit, MakeJoined, mapJoin}
 import sturdy.effect.Effectful
-import sturdy.language.wasm.generic.{GenericInterpreter, GenericEffects, FunctionInstance}
+import sturdy.effect.failure.Failure
+import sturdy.language.wasm.generic.IndirectCallTypeMismatch
+import sturdy.language.wasm.generic.{FunctionInstance, GenericInterpreter, GenericEffects}
 import sturdy.values.Topped
-import sturdy.values.functions.FunctionOps
+import sturdy.values.functions.{ToppedFunctionOps, FunctionOps}
+import swam.FuncType
 
 trait ToppedFunctionValue:
-  given ToppedFunctionOps[V,FunV]
-    (using interp: GenericInterpreter[V,_,_,_,_,_,_,_,_])(using Effectful)
-    (using ops: FunctionOps[FunctionInstance, Nothing, Unit, FunV]): FunctionOps[FunctionInstance, Nothing, Unit, Topped[FunV]] with
-    def funValue(fun: FunctionInstance): Topped[FunV] = Topped.Actual(ops.funValue(fun))
-    def invokeFun(funV: Topped[FunV], args: Seq[Nothing])(invoke: (FunctionInstance, Seq[Nothing]) => Unit): Unit = funV match
-      case Topped.Actual(fun) => ops.invokeFun(fun, args)(invoke)
-      case Topped.Top => mapJoin(interp.module.functions, fun => invoke(fun, args))
+  given WasmToppedFunctionOps[V,FunV]
+    (using ops: FunctionOps[FunctionInstance, FuncType, Unit, FunV])
+    (using interp: GenericInterpreter[V,_,_,_,_,_,_,_,_])
+    (using Effectful, Failure): FunctionOps[FunctionInstance, FuncType, Unit, Topped[FunV]] =
+    // (A, (F, A) => R) => R
+    ToppedFunctionOps(using (ft, invoke) => {
+      val funs = interp.module.functions.filter(_.funcType == ft)
+      if (funs.isEmpty)
+        Failure(IndirectCallTypeMismatch, s"Expected function of type $ft, but none found")
+      else
+        mapJoin(funs, invoke(_, ft))
+    })
 
 

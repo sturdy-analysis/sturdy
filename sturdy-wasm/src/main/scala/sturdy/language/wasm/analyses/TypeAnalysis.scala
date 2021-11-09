@@ -2,15 +2,13 @@ package sturdy.language.wasm.analyses
 
 import sturdy.data.{*, given}
 import sturdy.effect.{AnalysisState, Effectful}
-import sturdy.effect.bytememory.ConstantAddressMemory
-import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
+import sturdy.effect.bytememory.TopMemory
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.callframe.JoinedDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinedDecidableOperandStack
-import sturdy.effect.symboltable.{ToppedSymbolTable, JoinedSymbolTable}
-import sturdy.effect.symboltable.ToppedSymbolTable.CombineTable
+import sturdy.effect.symboltable.{TopSymbolTable, JoinedSymbolTable}
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
@@ -28,66 +26,58 @@ import sturdy.values.functions.{*, given}
 import sturdy.values.floating.{*, given}
 import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
+import sturdy.values.types.{*, given}
 import sturdy.values.{*, given}
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue, ControlFlow:
+object TypeAnalysis extends Interpreter, TypeValues, ToppedFunctionValue, ControlFlow:
   type MayJoin[A] = WithJoin[A]
   type Addr = I32
-  type Bytes = Seq[Topped[Byte]]
+  type Bytes = BaseType[Seq[Byte]]
   type Size = I32
   type ExcV = Powerset[WasmException[Value]]
   type FuncIx = I32
   type FunV = Topped[Powerset[FunctionInstance]]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+  given TypeSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Int32(sz)
 
     override def indexLookup[A](ix: Value, vec: Vector[A]): OptionPowerset[A] =
-      ix.asInt32 match
-        case Topped.Actual(i) =>
-          if (i >= 0 && i < vec.size)
-            OptionPowerset.Some(Powerset(vec(i)))
-          else
-            OptionPowerset.None()
-        case Topped.Top =>
-          if (vec.isEmpty)
-            OptionPowerset.None()
-          else
-            OptionPowerset.NoneSome(Powerset(vec.toSet))
+      if (vec.isEmpty)
+        OptionPowerset.None()
+      else
+        OptionPowerset.NoneSome(Powerset(vec.toSet))
 
-    override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantAnalysis.Value]): List[ConstantAnalysis.Value] = hostFunc match
+    override def invokeHostFunction(hostFunc: HostFunction, args: List[TypeAnalysis.Value]): List[TypeAnalysis.Value] = hostFunc match
       case HostFunction.proc_exit =>
         val exitCode = args.head
         f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
-      case HostFunction.fd_close => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
-      case HostFunction.fd_read => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
-      case HostFunction.fd_seek => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
-      case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
-      case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(Topped.Top)))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_close => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_read => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_seek => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
+      case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
 
   type InState =
     (ConcreteCallFrame.Vars[Value],
-      ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
       Globals.Values[Value],
       JoinedDecidableOperandStack.Operands[Value])
   type OutState =
-    (ConstantAddressMemory.Memories[MemoryAddr, Topped[Byte]],
-      Globals.Values[Value],
+    (Globals.Values[Value],
       JoinedDecidableOperandStack.Operands[Value])
   type AllState = InState
 
   class Effects(rootFrameData: FrameData, rootFrameValues: Iterable[Value])
     extends JoinedDecidableOperandStack[Value]
-      with ConstantAddressMemory[MemoryAddr, Topped[Byte]](Topped.Actual(0))
+      with TopMemory[MemoryAddr, Addr, Bytes, Size]
       with Globals[Value]
-      with ToppedSymbolTable[TableAddr, Int, FunV]
+      with TopSymbolTable[TableAddr, FuncIx, FunV]
       with JoinedDecidableCallFrame[FrameData, Int, Value]
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect
@@ -97,18 +87,16 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue
     override def initialCallFrameVars = rootFrameValues.view.zipWithIndex.map(_.swap)
     override protected def makeGlobalsTable = new JoinedSymbolTable[Unit, GlobalAddr, Value] {}
 
-    override def getInState() = (getFrameVars, getMemories, getGlobalValues, getOperandFrame)
-    override def getOutState() = (getMemories, getGlobalValues, getOperandFrame)
+    override def getInState() = (getFrameVars, getGlobalValues, getOperandFrame)
+    override def getOutState() = (getGlobalValues, getOperandFrame)
     override def getAllState() = getInState()
     def setInState(in: InState) =
       setFrameVars(in._1)
-      setMemories(in._2)
-      setGlobalValues(in._3)
-      setOperandFrame(in._4)
+      setGlobalValues(in._2)
+      setOperandFrame(in._3)
     def setOutState(out: OutState) =
-      setMemories(out._1)
-      setGlobalValues(out._2)
-      setOperandFrame(out._3)
+      setGlobalValues(out._1)
+      setOperandFrame(out._2)
     def setAllState(all: AllState) = setInState(all)
   }
 

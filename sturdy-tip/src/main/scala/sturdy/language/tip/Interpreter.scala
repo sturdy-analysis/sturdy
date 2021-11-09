@@ -87,7 +87,7 @@ trait Interpreter:
     def vrefEqOps: EqOps[VRef, VBool]
     def vfunEqOps: EqOps[VFun, VBool]
     def vrecEqOps: EqOps[VRecord, VBool]
-    def vfunOps: FunctionOps[Function, Value, Value, VFun]
+    def vfunOps: FunctionOps[Function, Seq[Value], Value, VFun]
     def vrefOps: ReferenceOps[Addr, VRef]
     def vrecOps: RecordOps[Field, Value, VRecord]
     def vbranchOps: BooleanBranching[VBool, MayJoin]
@@ -108,7 +108,7 @@ trait Interpreter:
         case (FunValue(f1), FunValue(f2)) => boolean(vfunEqOps.neq(f1, f2))
         case (RecValue(r1), RecValue(r2)) => boolean(vrecEqOps.neq(r1, r2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
-    final val functionOps = new LiftedFunctionOps[Function, Value, Value, Value, VFun](_.asFunction, FunValue.apply)(using vfunOps)
+    final val functionOps = new LiftedFunctionOps[Function, Seq[Value], Value, Value, VFun](_.asFunction, FunValue.apply)(using vfunOps)
     final val refOps = new LiftedReferenceOps[Value, Addr, VRef](_.asReference, RefValue.apply)(using vrefOps)
     final val recOps = new LiftedRecordOps[Field, Value, Value, Value, VRecord](_.asRecord, identity, RecValue.apply, identity)(using vrecOps)
     final val branchOps = new LiftedBooleanBranching[Value, VBool, MayJoin](v => v.asBoolean(using effects))(using vbranchOps)

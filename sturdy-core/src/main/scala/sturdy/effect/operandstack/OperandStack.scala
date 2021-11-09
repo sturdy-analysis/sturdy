@@ -65,4 +65,5 @@ trait OperandStack[V, MayJoin[_]] extends Effectful:
   inline def peekNOrFail(n: Int)(using MayJoin[List[V]], Failure): List[V] =
     peekN(n).getOrElse(Failure(StackUnderflow, s"peekN($n) on stack with less than $n elements"))
 
-trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]
+trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
+  def size: Int
