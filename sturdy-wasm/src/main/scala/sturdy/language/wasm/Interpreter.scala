@@ -18,6 +18,7 @@ import swam.syntax.MemoryInst
 import swam.syntax.StoreInst
 import swam.syntax.StoreNInst
 import swam.syntax.{f32, f64, i64, i32}
+import swam.FuncType
 
 import java.nio.ByteOrder
 
@@ -122,12 +123,12 @@ trait Interpreter:
          , decodeF32: ConvertBytesFloat[Bytes, F32]
          , decodeF64: ConvertBytesDouble[Bytes, F64]
          , boolBranchOps: BooleanBranching[Bool, MayJoin]
-         , funOps: FunctionOps[FunctionInstance,Nothing, Unit, FunV]
+         , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
          , excOps: Exceptional[WasmException[Value], ExcV, MayJoin]
          , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, MayJoin]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin] with
 
-    final val functionOps: FunctionOps[FunctionInstance, Nothing, Unit, FunV] = funOps
+    final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, MayJoin] = excOps
     val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, MayJoin] = specOps
     val branchOps: BooleanBranching[Value, MayJoin] = new LiftedBooleanBranching[Value, Bool, MayJoin](v => v.asBoolean)(using boolBranchOps)

@@ -28,7 +28,7 @@ import java.nio.file.Paths
 import scala.jdk.StreamConverters.*
 
 class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
-  behavior of "Benchmarksgame"
+  behavior of "Benchmarksgame (recompiled) constant analysis"
 
   val funcName = "_start"
   val uri = classOf[BenchmarksgameNewConstantTest].getResource("/sturdy/language/wasm/benchmarksgame/src").toURI();

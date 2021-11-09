@@ -80,7 +80,7 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
   val intOps: IntegerOps[Int, V]; import intOps.*
   val compareOps: CompareOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
-  val functionOps: FunctionOps[Function, V, V, V]; import functionOps.*
+  val functionOps: FunctionOps[Function, Seq[V], V, V]; import functionOps.*
   val refOps: ReferenceOps[Addr, V]; import refOps.*
   val recOps: RecordOps[Field, V, V]; import recOps.*
   val branchOps: BooleanBranching[V, MayJoin]; import branchOps.*

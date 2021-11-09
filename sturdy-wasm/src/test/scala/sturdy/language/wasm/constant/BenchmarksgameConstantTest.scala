@@ -32,7 +32,7 @@ import scala.collection.mutable.ListBuffer
 import scala.jdk.StreamConverters.*
 
 class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
-  behavior of "Benchmarksgame with new binary"
+  behavior of "Benchmarksgame constant analysis"
 
   //val testcases = List("binarytrees", "fankuchredux", "mandelbrot", "nbody", "spectral-norm")
   val funcName = "_start"

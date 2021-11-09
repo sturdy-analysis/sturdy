@@ -6,7 +6,7 @@ import sturdy.values.Join
 
 import scala.reflect.ClassTag
 
-trait JoinedCallFrame[Data, Var, V](using Join[V], ClassTag[V]) extends ConcreteCallFrame[Data, Var, V]:
+trait JoinedDecidableCallFrame[Data, Var, V](using Join[V], ClassTag[V]) extends ConcreteCallFrame[Data, Var, V]:
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new CallFrameJoiner[A] 
   class CallFrameJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     private val snapshot = vars
