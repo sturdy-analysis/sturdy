@@ -14,7 +14,6 @@
 //import sturdy.values.config
 //import sturdy.values.ints.*
 //import sturdy.values.rationals.*
-//import sturdy.values.doubles.*
 //import sturdy.values.booleans.BooleanOps
 //import sturdy.values.closures.ClosureOps
 //import sturdy.values.relational.{EqOps, CompareOps}

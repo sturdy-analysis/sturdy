@@ -8,7 +8,7 @@ import sturdy.values.PartialOrder
 import sturdy.{*, given}
 import sturdy.util.{*, given}
 import sturdy.values.{*, given}
-import sturdy.values.ints.{*, given}
+import sturdy.values.integer.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.references.{*, given}

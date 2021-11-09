@@ -1,4 +1,4 @@
-package sturdy.values.ints
+package sturdy.values.integer
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
@@ -28,7 +28,7 @@ enum IntSign:
     case Pos => Neg
 
 
-import sturdy.values.ints.IntSign.*
+import sturdy.values.integer.IntSign.*
 
 given Abstractly[Int, IntSign] with
   override def abstractly(i: Int): IntSign =
@@ -51,13 +51,13 @@ given CombineIntSign[W <: Widening]: Combine[IntSign, W] with
       case (Pos, Zero) => Changed(ZeroOrPos)
       case _ => Changed(TopSign)
 
-given SignIntOps(using f: Failure, j: Effectful): IntOps[IntSign] with
-  def intLit(i: Int): IntSign =
-    if i < 0 then Neg
-    else if i > 0 then Pos
+given SignIntegerOps[B](using f: Failure, j: Effectful, base: Integral[B]): IntegerOps[B, IntSign] with
+  def integerLit(i: B): IntSign =
+    if base.lt(i, base.zero) then Neg
+    else if base.gt(i, base.zero) then Pos
     else Zero
 
-  def randomInt(): IntSign = ZeroOrPos
+  def randomInteger(): IntSign = ZeroOrPos
 
   def add(v1: IntSign, v2: IntSign): IntSign = (v1, v2) match
     case (TopSign, _) => TopSign
@@ -125,10 +125,10 @@ given SignIntOps(using f: Failure, j: Effectful): IntOps[IntSign] with
   def min(v1: IntSign, v2: IntSign): IntSign = ???
 
   def div(v1: IntSign, v2: IntSign): IntSign = v2 match
-    case Zero => f.fail(IntDivisionByZero, s"$v1 / $v2")
-    case ZeroOrPos => j.joinComputations(v1)(f.fail(IntDivisionByZero, s"$v1 / $v2"))
-    case NegOrZero => j.joinComputations(v1.negated)(f.fail(IntDivisionByZero, s"$v1 / $v2"))
-    case TopSign => j.joinComputations(TopSign)(f.fail(IntDivisionByZero, s"$v1 / $v2"))
+    case Zero => f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+    case ZeroOrPos => j.joinComputations(v1)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+    case NegOrZero => j.joinComputations(v1.negated)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
+    case TopSign => j.joinComputations(TopSign)(f.fail(IntegerDivisionByZero, s"$v1 / $v2"))
     case _ => mul(v1, v2)
 
   def divUnsigned(v1: IntSign, v2: IntSign): IntSign = ???

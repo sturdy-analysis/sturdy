@@ -1,4 +1,4 @@
-package sturdy.values.longs
+package sturdy.values.integer
 
 import scala.util.Random
 import sturdy.effect.failure.Failure
@@ -19,33 +19,50 @@ import java.nio.ByteOrder
 
 given Structural[Long] with {}
 
-given ConcreteLongOps(using f: Failure): LongOps[Long] with
-  def longLit(l: Long): Long = l
-  def randomLong(): Long = Random.nextLong()
+given ConcreteLongOps(using f: Failure): IntegerOps[Long, Long] with
+  def integerLit(l: Long): Long = l
+  def randomInteger(): Long = Random.nextLong()
+
   def add(v1: Long, v2: Long): Long = v1 + v2
   def sub(v1: Long, v2: Long): Long = v1 - v2
   def mul(v1: Long, v2: Long): Long = v1 * v2
+
+  def max(v1: Long, v2: Long): Long = v1.max(v2)
+  def min(v1: Long, v2: Long): Long = v1.min(v2)
+
   def div(v1: Long, v2: Long): Long =
     if (v2 == 0)
-      f.fail(LongDivisionByZero, s"$v1 / $v2")
+      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     else
       v1 / v2
   def divUnsigned(v1: Long, v2: Long): Long =
     if (v2 == 0)
-      f.fail(LongDivisionByZero, s"$v1 / $v2")
+      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     else
       JLong.divideUnsigned(v1, v2)
   def remainder(v1: Long, v2: Long): Long =
     if (v2 == 0)
-      f.fail(LongDivisionByZero, s"$v1 / $v2")
+      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     else
       v1 % v2
   def remainderUnsigned(v1: Long, v2: Long): Long =
     if (v2 == 0)
-      f.fail(LongDivisionByZero, s"$v1 / $v2")
+      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
     else
       JLong.remainderUnsigned(v1, v2)
+  def modulo(v1: Long, v2: Long): Long =
+    if (v2 == 0)
+      f.fail(IntegerDivisionByZero, s"$v1 / $v2")
+    else {
+      val r = v1 % v2
+      if (r < 0)
+        r + v2
+      else
+        r
+    }
+  def gcd(v1: Long, v2: Long): Long = BigInt(v1).gcd(BigInt(v2)).toLong
 
+  def absolute(v: Long): Long = v.abs
   def bitAnd(v1: Long, v2: Long): Long = v1 & v2
   def bitOr(v1: Long, v2: Long): Long = v1 | v2
   def bitXor(v1: Long, v2: Long): Long = v1 ^ v2

@@ -10,7 +10,7 @@ import sturdy.effect.userinput.UserInput
 import sturdy.util.Label
 import sturdy.values.*
 import sturdy.values.booleans.{BooleanBranching, BooleanOps}
-import sturdy.values.ints.IntOps
+import sturdy.values.integer.IntegerOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.records.RecordOps
 import sturdy.values.relational.{EqOps, CompareOps}
@@ -77,7 +77,7 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
 
   import effects.*
 
-  val intOps: IntOps[V]; import intOps.*
+  val intOps: IntegerOps[Int, V]; import intOps.*
   val compareOps: CompareOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
   val functionOps: FunctionOps[Function, V, V, V]; import functionOps.*
@@ -89,7 +89,7 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
   def getFunctions: Iterable[Function] = functions.values
 
   def eval_open(e: Exp)(using Fixed): V = e match {
-    case Exp.NumLit(n) => intLit(n)
+    case Exp.NumLit(n) => integerLit(n)
     case Exp.Input() => readInput()
     case Exp.Var(x) => functions.get(x) match
       case Some(fun) => funValue(fun)

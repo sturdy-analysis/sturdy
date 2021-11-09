@@ -1,12 +1,12 @@
-package sturdy.values.floats
+package sturdy.values.floating
 
 import sturdy.values.config
 import sturdy.values.convert.*
 
 import java.nio.ByteOrder
 
-trait FloatOps[V]:
-  def floatLit(f: Float): V
+trait FloatingOps[B, V]:
+  def floatingLit(f: B): V
   def randomFloat(): V
 
   def add(v1: V, v2: V): V
@@ -30,3 +30,9 @@ type ConvertFloatLong[VFrom, VTo] = Convert[Long, Int, VFrom, VTo, config.Overfl
 type ConvertFloatDouble[VFrom, VTo] = Convert[Float, Double, VFrom, VTo, NilCC.type]
 type ConvertFloatBytes[VFrom, VTo] = Convert[Float, Seq[Byte], VFrom, VTo, SomeCC[ByteOrder]]
 type ConvertBytesFloat[VFrom, VTo] = Convert[Seq[Byte], Float, VFrom, VTo, SomeCC[ByteOrder]]
+
+type ConvertDoubleInt[VFrom, VTo] = Convert[Double, Float, VFrom, VTo, config.Overflow && config.Bits]
+type ConvertDoubleLong[VFrom, VTo] = Convert[Double, Long, VFrom, VTo, config.Overflow && config.Bits]
+type ConvertDoubleFloat[VFrom, VTo] = Convert[Double, Float, VFrom, VTo, NilCC.type]
+type ConvertDoubleBytes[VFrom, VTo] = Convert[Double, Seq[Byte], VFrom, VTo, SomeCC[ByteOrder]]
+type ConvertBytesDouble[VFrom, VTo] = Convert[Seq[Byte], Double, VFrom, VTo, SomeCC[ByteOrder]]

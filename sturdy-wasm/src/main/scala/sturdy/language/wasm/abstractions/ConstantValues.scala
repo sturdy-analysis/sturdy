@@ -14,10 +14,8 @@ import sturdy.values.Finite
 import sturdy.values.Join
 import sturdy.values.Topped
 import sturdy.values.booleans.given
-import sturdy.values.doubles.given
-import sturdy.values.floats.given
-import sturdy.values.ints.given
-import sturdy.values.longs.given
+import sturdy.values.floating.given
+import sturdy.values.integer.given
 import sturdy.values.given
 import swam.OpCode
 import swam.syntax

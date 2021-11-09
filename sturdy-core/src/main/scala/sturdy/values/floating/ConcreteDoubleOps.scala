@@ -1,11 +1,12 @@
-package sturdy.values.doubles
+package sturdy.values.floating
 
 import sturdy.values.convert.*
 import sturdy.values.config
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.config.UnsupportedConfiguration
-import sturdy.values.relational.{EqOps, CompareOps}
+import sturdy.values.relational.CompareOps
+import sturdy.values.relational.EqOps
 
 import scala.util.Random
 import java.lang.Float as JFloat
@@ -15,9 +16,9 @@ import java.nio.ByteOrder
 
 given Structural[Double] with {}
 
-given ConcreteDoubleOps: DoubleOps[Double] with
-  def doubleLit(d: Double): Double = d
-  def randomDouble(): Double = Random.nextDouble()
+given ConcreteDoubleOps: FloatingOps[Double, Double] with
+  def floatingLit(f: Double): Double = f
+  def randomFloat(): Double = Random.nextDouble()
   def add(v1: Double, v2: Double): Double = v1 + v2
   def sub(v1: Double, v2: Double): Double = v1 - v2
   def mul(v1: Double, v2: Double): Double = v1 * v2
@@ -171,3 +172,4 @@ given ConcreteConvertBytesDouble: ConvertBytesDouble[Seq[Byte], Double] with
     val buf = ByteBuffer.wrap(from.toArray)
     buf.order(conf.t)
     buf.getDouble
+

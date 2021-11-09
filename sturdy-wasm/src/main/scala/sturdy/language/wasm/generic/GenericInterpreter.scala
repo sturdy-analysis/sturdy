@@ -19,11 +19,9 @@ import sturdy.values.Finite
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.convert.*
-import sturdy.values.doubles.*
-import sturdy.values.floats.*
+import sturdy.values.floating.*
 import sturdy.values.functions.FunctionOps
-import sturdy.values.ints.*
-import sturdy.values.longs.*
+import sturdy.values.integer.*
 import sturdy.values.relational.*
 import swam.{ValType, GlobalType, LabelIdx, MemType, FuncType, TableType, GlobalIdx, FuncIdx, OpCode, BlockType, Limits}
 import swam.syntax.*
@@ -184,7 +182,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 
   def load(inst: LoadInst | LoadNInst): Unit =
     // add offset to base address (which is already on the stack)
-    stack.push(intOps.intLit(inst.offset))
+    stack.push(intOps.integerLit(inst.offset))
     addWithOverflowCheck
     val effectiveAddr = stack.popOrFail()
     val addr = valueToAddr(effectiveAddr)
@@ -202,7 +200,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     val bytes = encode(v, SomeCC(inst, false))
 
     // add offset to base address (which is already on the stack)
-    stack.push(intOps.intLit(inst.offset))
+    stack.push(intOps.integerLit(inst.offset))
     val addr = valueToAddr(num.evalNumeric(i32.Add))
 
     val memIdx = memoryIndex
@@ -461,7 +459,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     val res = intOps.add(v1,v2)
     val cmp = unsignedCompareOps.ltUnsigned(res,v1)
     boolBranch[Unit](cmp) {
-      fail(IntOverflow, s"$v1 + $v2")
+      fail(IntegerOverflow, s"$v1 + $v2")
     } {
       stack.push(res)
     }
@@ -572,8 +570,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     // memory
     modInst.memoryAddrs = memImpors ++ module.mems.map {
       case MemType(Limits(min, max)) =>
-        val initSize = valToSize(intOps.intLit(min))
-        val sizeLimit = max.map(i => valToSize(intOps.intLit(i)))
+        val initSize = valToSize(intOps.integerLit(min))
+        val sizeLimit = max.map(i => valToSize(intOps.integerLit(i)))
         val memAddr = MemoryAddr(memCount)
         addEmptyMemory(memAddr, initSize, sizeLimit)
         memCount += 1

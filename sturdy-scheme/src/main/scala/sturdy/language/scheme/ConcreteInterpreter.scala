@@ -11,7 +11,6 @@
 //import sturdy.fix
 //import sturdy.values.convert.LiftedConvert
 //import sturdy.values.ints.{_, given}
-//import sturdy.values.doubles.{_, given}
 //import sturdy.values.rationals.{_, given}
 //import sturdy.values.booleans.{_, given}
 //import sturdy.values.relational.{_, given}

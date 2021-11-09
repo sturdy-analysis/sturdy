@@ -5,10 +5,8 @@ import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.values.config
 import sturdy.values.convert.*
-import sturdy.values.doubles.*
-import sturdy.values.floats.*
-import sturdy.values.ints.*
-import sturdy.values.longs.*
+import sturdy.values.floating.*
+import sturdy.values.integer.*
 import sturdy.values.relational.*
 import swam.ValType
 import swam.syntax.*
@@ -30,10 +28,10 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
 
   def evalNumeric(inst: Inst): V =
     inst match
-      case i32.Const(v) => intOps.intLit(v)
-      case i64.Const(v) => longOps.longLit(v)
-      case f32.Const(v) => floatOps.floatLit(v)
-      case f64.Const(v) => doubleOps.doubleLit(v)
+      case i32.Const(v) => intOps.integerLit(v)
+      case i64.Const(v) => longOps.integerLit(v)
+      case f32.Const(v) => floatOps.floatingLit(v)
+      case f64.Const(v) => doubleOps.floatingLit(v)
       case op: IUnop =>
         val v = stack.popOrFail()
         evalIUnop(op, v)
@@ -62,31 +60,31 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
 
 
   inline def evalTestop(op: Testop, v: V): V = op match
-    case i32.Eqz => equ(v, intOps.intLit(0))
-    case i64.Eqz => equ(v, longOps.longLit(0))
+    case i32.Eqz => equ(v, intOps.integerLit(0))
+    case i64.Eqz => equ(v, longOps.integerLit(0))
 
   inline def evalIUnop(op: IUnop, v: V): V = op match
     case i32.Clz => intOps.countLeadingZeros(v)
     case i32.Ctz => intOps.countTrailinZeros(v)
     case i32.Popcnt => intOps.nonzeroBitCount(v)
     case i32.Extend8S =>
-      val shift = intOps.intLit(24)
+      val shift = intOps.integerLit(24)
       intOps.shiftRight(intOps.shiftLeft(v, shift), shift)
     case i32.Extend16S =>
-      val shift = intOps.intLit(16)
+      val shift = intOps.integerLit(16)
       intOps.shiftRight(intOps.shiftLeft(v, shift), shift)
 
     case i64.Clz => longOps.countLeadingZeros(v)
     case i64.Ctz => longOps.countTrailinZeros(v)
     case i64.Popcnt => longOps.nonzeroBitCount(v)
     case i64.Extend8S =>
-      val shift = longOps.longLit(56)
+      val shift = longOps.integerLit(56)
       longOps.shiftRight(longOps.shiftLeft(v, shift), shift)
     case i64.Extend16S =>
-      val shift = longOps.longLit(48)
+      val shift = longOps.integerLit(48)
       longOps.shiftRight(longOps.shiftLeft(v, shift), shift)
     case i64.Extend32S =>
-      val shift = longOps.longLit(32)
+      val shift = longOps.integerLit(32)
       longOps.shiftRight(longOps.shiftLeft(v, shift), shift)
 
   inline def evalIBinop(op: IBinop, v1: V, v2: V): V = op match
@@ -94,11 +92,11 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
     case i32.Sub => intOps.sub(v1, v2)
     case i32.Mul => intOps.mul(v1, v2)
     case i32.DivS =>
-      val v1IsMinValue = eqOps.equ(v1, intOps.intLit(Int.MinValue))
-      val v2IsMinusOne = eqOps.equ(v2, intOps.intLit(-1))
+      val v1IsMinValue = eqOps.equ(v1, intOps.integerLit(Int.MinValue))
+      val v2IsMinusOne = eqOps.equ(v2, intOps.integerLit(-1))
       val isOverflow = intOps.bitAnd(v1IsMinValue, v2IsMinusOne)
       wasmOps.branchOps.boolBranch(isOverflow) {
-        Failure(IntOverflow, s"$v1 / $v2")
+        Failure(IntegerOverflow, s"$v1 / $v2")
       } {
         intOps.div(v1, v2)
       }
@@ -109,21 +107,21 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
     case i32.And => intOps.bitAnd(v1, v2)
     case i32.Or => intOps.bitOr(v1, v2)
     case i32.Xor => intOps.bitXor(v1, v2)
-    case i32.Shl => intOps.shiftLeft(v1, intOps.remainder(v2, intOps.intLit(32)))
-    case i32.ShrS => intOps.shiftRight(v1, intOps.remainder(v2, intOps.intLit(32)))
-    case i32.ShrU => intOps.shiftRightUnsigned(v1, intOps.remainder(v2, intOps.intLit(32)))
-    case i32.Rotl => intOps.rotateLeft(v1, intOps.remainder(v2, intOps.intLit(32)))
-    case i32.Rotr => intOps.rotateRight(v1, intOps.remainder(v2, intOps.intLit(32)))
+    case i32.Shl => intOps.shiftLeft(v1, intOps.remainder(v2, intOps.integerLit(32)))
+    case i32.ShrS => intOps.shiftRight(v1, intOps.remainder(v2, intOps.integerLit(32)))
+    case i32.ShrU => intOps.shiftRightUnsigned(v1, intOps.remainder(v2, intOps.integerLit(32)))
+    case i32.Rotl => intOps.rotateLeft(v1, intOps.remainder(v2, intOps.integerLit(32)))
+    case i32.Rotr => intOps.rotateRight(v1, intOps.remainder(v2, intOps.integerLit(32)))
 
     case i64.Add => longOps.add(v1, v2)
     case i64.Sub => longOps.sub(v1, v2)
     case i64.Mul => longOps.mul(v1, v2)
     case i64.DivS =>
-      val v1IsMinValue = eqOps.equ(v1, longOps.longLit(Long.MinValue))
-      val v2IsMinusOne = eqOps.equ(v2, longOps.longLit(-1))
+      val v1IsMinValue = eqOps.equ(v1, longOps.integerLit(Long.MinValue))
+      val v2IsMinusOne = eqOps.equ(v2, longOps.integerLit(-1))
       val isOverflow = intOps.bitAnd(v1IsMinValue, v2IsMinusOne)
       wasmOps.branchOps.boolBranch(isOverflow) {
-        Failure(LongOverflow, s"$v1 / $v2")
+        Failure(IntegerOverflow, s"$v1 / $v2")
       } {
         longOps.div(v1, v2)
       }
@@ -133,11 +131,11 @@ class GenericInterpreterNumerics[V, MayJoin[_]]
     case i64.And => longOps.bitAnd(v1, v2)
     case i64.Or => longOps.bitOr(v1, v2)
     case i64.Xor => longOps.bitXor(v1, v2)
-    case i64.Shl => longOps.shiftLeft(v1, longOps.remainder(v2, longOps.longLit(64)))
-    case i64.ShrS => longOps.shiftRight(v1, longOps.remainder(v2, longOps.longLit(64)))
-    case i64.ShrU => longOps.shiftRightUnsigned(v1, longOps.remainder(v2, longOps.longLit(64)))
-    case i64.Rotl => longOps.rotateLeft(v1, longOps.remainder(v2, longOps.longLit(64)))
-    case i64.Rotr => longOps.rotateRight(v1, longOps.remainder(v2, longOps.longLit(64)))
+    case i64.Shl => longOps.shiftLeft(v1, longOps.remainder(v2, longOps.integerLit(64)))
+    case i64.ShrS => longOps.shiftRight(v1, longOps.remainder(v2, longOps.integerLit(64)))
+    case i64.ShrU => longOps.shiftRightUnsigned(v1, longOps.remainder(v2, longOps.integerLit(64)))
+    case i64.Rotl => longOps.rotateLeft(v1, longOps.remainder(v2, longOps.integerLit(64)))
+    case i64.Rotr => longOps.rotateRight(v1, longOps.remainder(v2, longOps.integerLit(64)))
 
   inline def evalIRelop(op: IRelop, v1: V, v2: V): V = op match
     case i32.Eq => equ(v1, v2)

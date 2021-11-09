@@ -16,7 +16,7 @@ import sturdy.language.wasm.generic.{UnreachableInstruction, FrameData}
 import sturdy.values.Topped
 import sturdy.values.taint.Taint
 import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
-import sturdy.values.ints.IntDivisionByZero
+import sturdy.values.integer.IntegerDivisionByZero
 import sturdy.values.taint.TaintProduct
 import swam.syntax.Module
 import swam.text.*

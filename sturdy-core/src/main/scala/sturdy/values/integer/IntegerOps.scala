@@ -1,20 +1,22 @@
-package sturdy.values.ints
+package sturdy.values.integer
 
 import sturdy.effect.failure.FailureKind
 import sturdy.values.config
 import sturdy.values.convert.&&
 import sturdy.values.convert.Convert
+import sturdy.values.convert.NilCC
 import sturdy.values.convert.SomeCC
 
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-case object IntDivisionByZero extends FailureKind
-case object IntOverflow extends FailureKind
+case object IntegerDivisionByZero extends FailureKind
+case object IntegerOverflow extends FailureKind
 
-trait IntOps[V]:
-  def intLit(i: Int): V
-  def randomInt(): V
+/** Integer operations for base type B, represented as V */
+trait IntegerOps[B, V]:
+  def integerLit(i: B): V
+  def randomInteger(): V
   
   def add(v1: V, v2: V): V
   def sub(v1: V, v2: V): V
@@ -51,3 +53,9 @@ type ConvertIntFloat[VFrom, VTo] = Convert[Int, Float, VFrom, VTo, config.Bits]
 type ConvertIntDouble[VFrom, VTo] = Convert[Int, Double, VFrom, VTo, config.Bits]
 type ConvertIntBytes[VFrom, VTo] = Convert[Int, Seq[Byte], VFrom, VTo, config.BytesSize && SomeCC[ByteOrder]]
 type ConvertBytesInt[VFrom, VTo] = Convert[Seq[Byte], Int, VFrom, VTo, config.BytesSize && SomeCC[ByteOrder] && config.Bits]
+
+type ConvertLongInt[VFrom, VTo] = Convert[Long, Int, VFrom, VTo, NilCC.type]
+type ConvertLongFloat[VFrom, VTo] = Convert[Long, Float, VFrom, VTo, config.Bits]
+type ConvertLongDouble[VFrom, VTo] = Convert[Long, Double, VFrom, VTo, config.Bits]
+type ConvertLongBytes[VFrom, VTo] = Convert[Long, Seq[Byte], VFrom, VTo, config.BytesSize && SomeCC[ByteOrder]]
+type ConvertBytesLong[VFrom, VTo] = Convert[Seq[Byte], Long, VFrom, VTo, config.BytesSize && SomeCC[ByteOrder] && config.Bits]

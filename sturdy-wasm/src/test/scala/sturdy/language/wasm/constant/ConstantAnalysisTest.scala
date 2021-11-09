@@ -18,7 +18,7 @@ import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.generic.UnreachableInstruction
 import sturdy.values.Topped
-import sturdy.values.ints.IntDivisionByZero
+import sturdy.values.integer.IntegerDivisionByZero
 
 import java.nio.file.Files
 import java.nio.file.Path
@@ -73,7 +73,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
     testFunctionConstantArgs(simple, "test-global", List(Value.Int32(1)), List(Value.Int32(2)))
     testFunctionConstantArgs(simple, "test-call-indirect-parametric", List(Value.Int32(0)), List(Value.Int32(0)))
     testFailingFunction(simple, "division", List(ConstantAnalysis.Value.Int32(Topped.Actual(1)),
-      ConstantAnalysis.Value.Int32(Topped.Actual(0))), IntDivisionByZero)
+      ConstantAnalysis.Value.Int32(Topped.Actual(0))), IntegerDivisionByZero)
     testFunctionConstantArgs(simple, "effects", List(Value.Int32(1)), List(Value.Int32(-14)))
 
     testFunctionConstantArgs(fact, "fac-rec", List(Value.Int64(0)), List(Value.Int64(1)))
@@ -96,7 +96,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(simple, "test-unreachable5", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
   testFunction(simple, "test-global", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
   testFunction(simple, "test-call-indirect-parametric", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Actual(0))))
-  testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntDivisionByZero)
+  testFailingFunction(simple, "division", List(Value.Int32(Topped.Actual(1)), Value.Int32(Topped.Top)), IntegerDivisionByZero)
   testFunction(simple, "effects", List(Value.Int32(Topped.Top)), List(Value.Int32(Topped.Top)))
 
   // these two are precise due to call-site sensitivity

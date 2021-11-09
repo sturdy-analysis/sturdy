@@ -3,7 +3,7 @@ package sturdy.language.tip.abstractions
 import sturdy.effect.failure.Failure
 import sturdy.values.relational.EqOps
 import sturdy.values.Topped
-import sturdy.values.ints.{IntInterval, IntSign, given}
+import sturdy.values.integer.{IntInterval, IntSign, given}
 import sturdy.language.tip.Interpreter
 import sturdy.language.tip.GenericInterpreter.TypeError
 

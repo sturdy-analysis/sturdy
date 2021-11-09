@@ -1,4 +1,4 @@
-package sturdy.values.floats
+package sturdy.values.floating
 
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
@@ -16,8 +16,8 @@ import java.nio.ByteOrder
 
 given Structural[Float] with {}
 
-given ConcreteFloatOps: FloatOps[Float] with
-  def floatLit(f: Float): Float = f
+given ConcreteFloatOps: FloatingOps[Float, Float] with
+  def floatingLit(f: Float): Float = f
   def randomFloat(): Float = Random.nextFloat()
   def add(v1: Float, v2: Float): Float = v1 + v2
   def sub(v1: Float, v2: Float): Float = v1 - v2

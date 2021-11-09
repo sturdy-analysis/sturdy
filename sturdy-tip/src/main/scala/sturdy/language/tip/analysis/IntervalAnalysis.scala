@@ -13,7 +13,7 @@ import sturdy.fix
 import sturdy.fix.given
 import sturdy.values.{*, given}
 import sturdy.values.booleans.{*, given}
-import sturdy.values.ints.{*, given}
+import sturdy.values.integer.{*, given}
 import sturdy.values.functions.{*, given}
 import sturdy.values.records.{*, given}
 import sturdy.values.references.{*, given}
@@ -62,7 +62,7 @@ object IntervalAnalysis extends Interpreter,
 
     given Effects = effects
 
-    final def vintOps: IntOps[VInt] = implicitly
+    final def vintOps: IntegerOps[Int, VInt] = implicitly
     final def vcompareOps: CompareOps[VInt, VBool] = implicitly
     final def vintEqOps: EqOps[VInt, VBool] = implicitly
     final def vrefEqOps: EqOps[VRef, VBool] = implicitly

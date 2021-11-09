@@ -11,10 +11,8 @@ import sturdy.values.PartialOrder
 import sturdy.values.Topped
 import sturdy.values.toppedPartialOrder
 import sturdy.values.concretePO
-import sturdy.values.ints.{*, given}
-import sturdy.values.longs.{*, given}
-import sturdy.values.floats.{*, given}
-import sturdy.values.doubles.{*, given}
+import sturdy.values.integer.{*, given}
+import sturdy.values.floating.{*, given}
 import sturdy.values.taint.TaintProduct
 
 object ConstantTaintAnalysisSoundness {

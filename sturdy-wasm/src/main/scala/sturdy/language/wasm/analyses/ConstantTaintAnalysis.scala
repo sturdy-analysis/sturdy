@@ -16,18 +16,15 @@ import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
-import sturdy.values.doubles.DoubleOps
-import sturdy.values.floats.FloatOps
+import sturdy.values.floating.FloatingOps
 import swam.syntax.*
 import swam.FuncType
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.{*, given}
-import sturdy.values.doubles.{*, given}
 import sturdy.values.exceptions.{*, given}
 import sturdy.values.functions.{*, given}
-import sturdy.values.floats.{*, given}
-import sturdy.values.ints.{*, given}
-import sturdy.values.longs.{*, given}
+import sturdy.values.floating.{*, given}
+import sturdy.values.integer.{*, given}
 import sturdy.values.relational.{*, given}
 import sturdy.values.taint.{*, given}
 import sturdy.values.{*, given}
