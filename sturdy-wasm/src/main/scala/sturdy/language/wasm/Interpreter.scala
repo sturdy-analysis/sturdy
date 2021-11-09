@@ -89,8 +89,8 @@ trait Interpreter:
     (using failure: Failure
          , i32Ops: IntegerOps[Int, I32]
          , i64Ops: IntegerOps[Long, I64]
-         , f32Ops: FloatingOps[Float, F32]
-         , f64Ops: FloatingOps[Double, F64]
+         , f32Ops: FloatOps[Float, F32]
+         , f64Ops: FloatOps[Double, F64]
          , i32EqOps: EqOps[I32, Bool]
          , i64EqOps: EqOps[I64, Bool]
          , f32EqOps: EqOps[F32, Bool]
@@ -134,8 +134,8 @@ trait Interpreter:
 
     final val intOps: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
     final val longOps: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, Value.Int64.apply)
-    final val floatOps: FloatingOps[Float, Value] = new LiftedFloatingOps(_.asFloat32, Value.Float32.apply)
-    final val doubleOps: FloatingOps[Double, Value] = new LiftedFloatingOps(_.asFloat64, Value.Float64.apply)
+    final val floatOps: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, Value.Float32.apply)
+    final val doubleOps: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, Value.Float64.apply)
 
     final val eqOps: EqOps[Value, Value] = new EqOps[Value, Value]:
       import Value.*

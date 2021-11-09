@@ -8,7 +8,7 @@ import sturdy.values.convert.*
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-given ToppedFloatingOps[B, T] (using ops: FloatingOps[B, T]): FloatingOps[B, Topped[T]] with
+given ToppedFloatOps[B, T] (using ops: FloatOps[B, T]): FloatOps[B, Topped[T]] with
   def floatingLit(f: B): Topped[T] = Topped.Actual(ops.floatingLit(f))
   def randomFloat(): Topped[T] = Topped.Top
 

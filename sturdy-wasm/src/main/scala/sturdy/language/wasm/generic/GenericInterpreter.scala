@@ -9,7 +9,6 @@ import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.{Soundness, fix, IsSound}
 import sturdy.effect.operandstack.OperandStack
 import sturdy.effect.bytememory.Memory
-import sturdy.effect.except.LanguageException
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.symboltable.DecidableSymbolTable
@@ -50,7 +49,7 @@ given frameDataIsSound: Soundness[FrameData, FrameData] with
 object FrameData:
   val empty: FrameData = FrameData(0, null)
 
-enum WasmException[V] extends LanguageException:
+enum WasmException[V]:
   case Jump(labelIndex: LabelIdx, operands: List[V])
   case Return(operands: List[V])
 

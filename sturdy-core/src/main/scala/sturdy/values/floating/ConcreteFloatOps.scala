@@ -16,7 +16,7 @@ import java.nio.ByteOrder
 
 given Structural[Float] with {}
 
-given ConcreteFloatOps: FloatingOps[Float, Float] with
+given ConcreteFloatOps: FloatOps[Float, Float] with
   def floatingLit(f: Float): Float = f
   def randomFloat(): Float = Random.nextFloat()
   def add(v1: Float, v2: Float): Float = v1 + v2

@@ -5,7 +5,7 @@ import sturdy.values.convert.*
 
 import java.nio.ByteOrder
 
-trait FloatingOps[B, V]:
+trait FloatOps[B, V]:
   def floatingLit(f: B): V
   def randomFloat(): V
 

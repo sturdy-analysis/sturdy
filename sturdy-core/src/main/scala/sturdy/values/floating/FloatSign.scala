@@ -53,7 +53,7 @@ given CombineFloatSign[W <: Widening]: Combine[FloatSign, W] with
       case _ => Changed(TopSign)
 
 
-given SignFloatingOps[B] (using base: Fractional[B]): FloatingOps[B, FloatSign] with
+given SignFloatOps[B] (using base: Fractional[B]): FloatOps[B, FloatSign] with
   def floatingLit(f: B): FloatSign =
     if base.lt(f, base.zero) then Neg
     else if base.gt(f, base.zero) then Pos

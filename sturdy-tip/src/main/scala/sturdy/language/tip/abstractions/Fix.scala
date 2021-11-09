@@ -6,7 +6,6 @@ import sturdy.fix
 import sturdy.language.tip.Exp
 import sturdy.data.unit
 import sturdy.effect.ObservableJoin
-import sturdy.effect.except.LanguageException
 import sturdy.effect.except.ObservableExcept
 import sturdy.fix.context.FiniteCallString
 import sturdy.language.tip.Function
@@ -42,7 +41,7 @@ trait Fix extends Interpreter:
     case Exit(fun: Function) extends CfgNode, fix.ImportantControlNode
 
   def controlFlow(sensitive: Boolean, onlyCalls: Boolean, analysis: Instance) =
-    val cfg = fix.control[Ctx, FixIn, FixOut[Value], LanguageException, CfgNode](sensitive, CfgNode.Start) {
+    val cfg = fix.control[Ctx, FixIn, FixOut[Value], Nothing, CfgNode](sensitive, CfgNode.Start) {
       case FixIn.Run(Stm.Block(_)) => None
       case FixIn.Run(s) => if (onlyCalls) None else Some(CfgNode.Statement(s))
       case FixIn.EnterFunction(f) => Some(CfgNode.Enter(f))
