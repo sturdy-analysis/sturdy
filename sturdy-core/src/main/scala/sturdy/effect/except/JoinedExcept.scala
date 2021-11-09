@@ -17,7 +17,7 @@ case object AbstractSturdyException extends ExceptSturdyException:
   override def toString: String = s"Abstract exception"
 
 
-trait JoinedExcept[Exc <: LanguageException, E](using val exceptional: Exceptional[Exc, E, WithJoin], eJoin: Join[E]) extends Except[Exc, E, WithJoin], Effectful:
+trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin], eJoin: Join[E]) extends Except[Exc, E, WithJoin], Effectful:
 
   protected var exception: OptionA[E] = OptionA.none
 

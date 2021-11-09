@@ -3,7 +3,7 @@ package sturdy.values.taint
 import sturdy.effect.failure.Failure
 import sturdy.values.MaybeChanged
 import sturdy.values.booleans.BooleanBranching
-import sturdy.values.floating.FloatingOps
+import sturdy.values.floating.FloatOps
 import sturdy.values.integer.IntegerOps
 import sturdy.values.relational.{UnsignedCompareOps, EqOps, CompareOps}
 import sturdy.values.*
@@ -86,7 +86,7 @@ given TaintIntegerOps[B, V] (using ops: IntegerOps[B, V]): IntegerOps[B, TaintPr
   def countTrailinZeros(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.countTrailinZeros)
   def nonzeroBitCount(v: TaintProduct[V]): TaintProduct[V] = v.unary(ops.nonzeroBitCount)
 
-given TaintFloatingOps[B, V] (using ops: FloatingOps[B, V]): FloatingOps[B, TaintProduct[V]] with
+given TaintFloatOps[B, V] (using ops: FloatOps[B, V]): FloatOps[B, TaintProduct[V]] with
   def floatingLit(f: B): TaintProduct[V] =  untainted(ops.floatingLit(f))
   def randomFloat(): TaintProduct[V] = untainted(ops.randomFloat())
 

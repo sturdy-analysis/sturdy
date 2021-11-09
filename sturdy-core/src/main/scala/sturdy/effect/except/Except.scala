@@ -8,13 +8,7 @@ import sturdy.values.exceptions.Exceptional
 private[except] trait ExceptSturdyException extends SturdyException:
   override def isBottom: Boolean = false
 
-trait LanguageException
-//  val cause: Option[LanguageException]
-//  lazy val rootCause: LanguageException = cause match
-//    case None => this
-//    case Some(ex) => ex.rootCause
-
-trait Except[Exc <: LanguageException, E, MayJoin[_]] extends ObservableExcept[Exc]:
+trait Except[Exc, E, MayJoin[_]] extends ObservableExcept[Exc]:
   val exceptional: Exceptional[Exc, E, MayJoin]
 
   @throws[ExceptSturdyException]

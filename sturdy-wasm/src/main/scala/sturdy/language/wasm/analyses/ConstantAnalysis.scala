@@ -18,7 +18,7 @@ import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
-import sturdy.values.floating.FloatingOps
+import sturdy.values.floating.FloatOps
 import swam.syntax.*
 import swam.FuncType
 import sturdy.values.booleans.{*, given}

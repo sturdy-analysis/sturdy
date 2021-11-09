@@ -11,7 +11,7 @@ import sturdy.fix
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.*
 import sturdy.values.booleans.BooleanBranching
-import sturdy.values.floating.FloatingOps
+import sturdy.values.floating.FloatOps
 import swam.syntax.*
 import sturdy.values.booleans.{*, given}
 import sturdy.values.convert.*

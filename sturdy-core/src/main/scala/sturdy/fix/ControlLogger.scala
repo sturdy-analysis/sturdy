@@ -12,13 +12,12 @@ import ControlFlowGraph.*
 import sturdy.data.combineMaps
 import sturdy.effect.TrySturdy
 import sturdy.effect.except.ExceptObserver
-import sturdy.effect.except.LanguageException
 import sturdy.effect.except.ObservableExcept
 import sturdy.util.Exact
 
 import scala.runtime.BoxesRunTime
 
-def control[Ctx, Dom, Codom, Exc <: LanguageException, Node]
+def control[Ctx, Dom, Codom, Exc, Node]
   (contextSensitive: Boolean, startNode: Node & StartNode)
   (getDomNode: Dom => Option[Node])
   (getCodomNode: (Dom, Codom) => Option[Node])
@@ -98,7 +97,7 @@ trait ControlFlowGraph[Node, Ctx]:
   protected def callReturnEdgeGraphVizAttributes(from: CNode[Node, Ctx], to: CNode[Node, Ctx]): String = "color=black, style=dashed"
 
 
-class ControlLogger[Ctx, Dom, Codom, Exc <: LanguageException, Node]
+class ControlLogger[Ctx, Dom, Codom, Exc, Node]
   (contextSensitive: Boolean,
    startNode: Node & StartNode,
    getDomNode: Dom => Option[Node],
@@ -114,7 +113,7 @@ class ControlLogger[Ctx, Dom, Codom, Exc <: LanguageException, Node]
   private case class PredNode(cnode: CNode[Node, Ctx], exceptional: Boolean)
 
   type Predecessors = Map[CNode[Node, Ctx], EdgeAttrib]
-  type Exceptions = Map[LanguageException, Predecessors]
+  type Exceptions = Map[Any, Predecessors]
 
   private val startCNode: CNode[Node, Ctx] = CNode(startNode, null.asInstanceOf[Ctx])
 

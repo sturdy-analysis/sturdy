@@ -20,8 +20,8 @@ import swam.syntax.StoreNInst
 trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]]:
   val intOps: IntegerOps[Int, V]
   val longOps: IntegerOps[Long, V]
-  val floatOps: FloatingOps[Float, V]
-  val doubleOps: FloatingOps[Double, V]
+  val floatOps: FloatOps[Float, V]
+  val doubleOps: FloatOps[Double, V]
   val eqOps: EqOps[V, V]
   val compareOps: CompareOps[V, V]
   val unsignedCompareOps: UnsignedCompareOps[V, V]

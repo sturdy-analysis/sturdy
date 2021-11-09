@@ -58,7 +58,7 @@ given WidenFloatInterval: Widen[FloatInterval] with
         Float.PositiveInfinity
     MaybeChanged(FloatInterval(low, high), v1)
 
-given IntervalFloatingOps: FloatingOps[Float, FloatInterval] with
+given IntervalFloatOps: FloatOps[Float, FloatInterval] with
   def floatingLit(f: Float): FloatInterval = FloatInterval(f, f)
   def randomFloat(): FloatInterval = FloatInterval(0, 1)
   def add(v1: FloatInterval, v2: FloatInterval): FloatInterval = v1 + v2
