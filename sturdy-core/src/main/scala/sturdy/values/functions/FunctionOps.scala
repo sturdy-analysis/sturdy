@@ -7,9 +7,9 @@ import sturdy.values.Powerset
 /*
  * Function values (not closures).
  */
-trait FunctionOps[F, A, R, V] {
-  def funValue(fun: F): V
-  def invokeFun(fun: V, a: A)(invoke: (F, A) => R): R
+trait FunctionOps[Fun, A, R, FunV] {
+  def funValue(fun: Fun): FunV
+  def invokeFun(fun: FunV, a: A)(invoke: (Fun, A) => R): R
 }
 
 given ConcreteFunctionOps[F, A, R]: FunctionOps[F, A, R, F] with
