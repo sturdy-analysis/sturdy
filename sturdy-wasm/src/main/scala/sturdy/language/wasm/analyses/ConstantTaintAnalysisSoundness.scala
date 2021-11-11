@@ -34,5 +34,5 @@ object ConstantTaintAnalysisSoundness {
         a.effects.memoryIsSound(c.effects) &&
         a.effects.globalsIsSound(c.effects) &&
         a.effects.tableIsSound(c.effects) &&
-        a.effects.joinedCallFrameNumberedIsSound(c.effects)
+        a.effects.joinedDecidableCallFrameIsSound(c.effects)
 }
