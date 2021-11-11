@@ -17,25 +17,12 @@ trait JoinedDecidableCallFrame[Data, Var, V](using Join[V], ClassTag[V]) extends
       vars = snapshot
 
     override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
-      if (fRes.isSuccess)
-        vars = fVars
-      else
-        vars = snapshot
+      vars = fVars
 
-    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit =
-      if (!gRes.isSuccess)
-        vars = snapshot
+    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit = {}
 
     override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      if (gRes.isSuccess) {
-        if (fRes.isSuccess)
-          vars = joinWith(fVars)
-        // else nothing
-      } else if (fRes.isSuccess) {
-        vars = fVars
-      } else {
-        vars = snapshot
-      }
+      vars = joinWith(fVars)
   }
 
   private def joinWith(other: Array[V]): Array[V] =
