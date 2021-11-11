@@ -6,8 +6,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.{AFallible, CFailureException, CFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
-import sturdy.language.wasm.analyses.ConstantAnalysis
-import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
+import sturdy.language.wasm.analyses.TypeAnalysis
+import sturdy.language.wasm.analyses.TypeAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
 import sturdy.language.wasm.generic.{UnboundGlobal, ExternalValue, ModuleInstance, FrameData}
 import sturdy.values.Topped
@@ -26,25 +26,27 @@ import swam.text.*
 import swam.text.unresolved.{FreshId, NoId, SomeId}
 import swam.validation.Validator
 
-import java.nio.file.{Path, Paths, Files}
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import scala.collection.mutable
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 
 
-class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boolean = false):
+class TestScriptTypeAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
-  type AValue = ConstantAnalysis.Value
+  type AValue = TypeAnalysis.Value
 
   val cInterp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
-  val aInterp = ConstantAnalysis(FrameData.empty, Iterable.empty)(WasmConfig.default)
+  val aInterp = TypeAnalysis(FrameData.empty, Iterable.empty)(WasmConfig.default)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
   var aCurrent: ModuleInstance = null
   val cImports: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aImports: mutable.Map[String, ModuleInstance] = mutable.Map()
-  val convertVals: unresolved.Expr => List[ConstantAnalysis.Value] = 
+  val convertVals: unresolved.Expr => List[TypeAnalysis.Value] =
     if (useTop)
       constExprToTops
     else 
@@ -179,7 +181,7 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
     case Get(modName, name) => evalCGet(modName, name)
   }
 
-  def runAAction(a: Action, convertVals: unresolved.Expr => List[ConstantAnalysis.Value]): AResult = a match {
+  def runAAction(a: Action, convertVals: unresolved.Expr => List[TypeAnalysis.Value]): AResult = a match {
     case Invoke(modName, fun, expr) => evalAInvoke(modName, fun, convertVals(expr))
     case Get(modName, name) => evalAGet(modName, name)
   }
@@ -239,26 +241,26 @@ class TestScriptAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boo
       case unresolved.f64.Const(d) => ConcreteInterpreter.Value.Float64(d)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
-  def constExprToAVals(e: unresolved.Expr): List[ConstantAnalysis.Value] =
+  def constExprToAVals(e: unresolved.Expr): List[TypeAnalysis.Value] =
     e.map(constExprToAVal).toList
 
-  def constExprToAVal(inst: unresolved.Inst): ConstantAnalysis.Value =
+  def constExprToAVal(inst: unresolved.Inst): TypeAnalysis.Value =
     inst match
-      case unresolved.i32.Const(i) => ConstantAnalysis.Value.Int32(Topped.Actual(i))
-      case unresolved.i64.Const(l) => ConstantAnalysis.Value.Int64(Topped.Actual(l))
-      case unresolved.f32.Const(f) => ConstantAnalysis.Value.Float32(Topped.Actual(f))
-      case unresolved.f64.Const(d) => ConstantAnalysis.Value.Float64(Topped.Actual(d))
+      case unresolved.i32.Const(i) => TypeAnalysis.Value.Int32(TypeAnalysis.topI32)
+      case unresolved.i64.Const(l) => TypeAnalysis.Value.Int64(TypeAnalysis.topI64)
+      case unresolved.f32.Const(f) => TypeAnalysis.Value.Float32(TypeAnalysis.topF32)
+      case unresolved.f64.Const(d) => TypeAnalysis.Value.Float64(TypeAnalysis.topF64)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
-  def constExprToTops(e: unresolved.Expr): List[ConstantAnalysis.Value] =
+  def constExprToTops(e: unresolved.Expr): List[TypeAnalysis.Value] =
     e.map(constExprToTop).toList
 
-  def constExprToTop(inst: unresolved.Inst): ConstantAnalysis.Value =
+  def constExprToTop(inst: unresolved.Inst): TypeAnalysis.Value =
     inst match
-      case unresolved.i32.Const(_) => ConstantAnalysis.Value.Int32(Topped.Top)
-      case unresolved.i64.Const(_) => ConstantAnalysis.Value.Int64(Topped.Top)
-      case unresolved.f32.Const(_) => ConstantAnalysis.Value.Float32(Topped.Top)
-      case unresolved.f64.Const(_) => ConstantAnalysis.Value.Float64(Topped.Top)
+      case unresolved.i32.Const(_) => TypeAnalysis.Value.Int32(TypeAnalysis.topI32)
+      case unresolved.i64.Const(_) => TypeAnalysis.Value.Int64(TypeAnalysis.topI64)
+      case unresolved.f32.Const(_) => TypeAnalysis.Value.Float32(TypeAnalysis.topF32)
+      case unresolved.f64.Const(_) => TypeAnalysis.Value.Float64(TypeAnalysis.topF64)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
   def readModule(mod: unresolved.Module): Module =

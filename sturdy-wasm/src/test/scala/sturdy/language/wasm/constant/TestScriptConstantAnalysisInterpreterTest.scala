@@ -11,7 +11,7 @@ import java.nio.file.Paths
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 
-class TestScriptAnalysisInterpreterTest extends AnyFlatSpec, Matchers:
+class TestScriptConstantAnalysisInterpreterTest extends AnyFlatSpec, Matchers:
   behavior of "TestScript constant analysis"
 
   val pathSpectest = Paths.get(classOf[TestScriptParserTest].getResource("/sturdy/language/wasm/spectest.wast").toURI())
@@ -19,16 +19,16 @@ class TestScriptAnalysisInterpreterTest extends AnyFlatSpec, Matchers:
 
   val spectest = parse(pathSpectest)
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast") && !p.toString.endsWith("memory_grow.wast")).sorted.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
       println(s"Executing TestScript constant analysis on ${p.getFileName}")
       val file = Source.fromURI(p.toUri)
       val sourceCode = file.getLines().mkString("\n")
       file.close()
       val script = parseScript(sourceCode)
-      val interp = TestScriptAnalysisInterpreter(Some(spectest))
+      val interp = TestScriptConstantAnalysisInterpreter(Some(spectest))
       interp.run(script)
-      val interpTop = TestScriptAnalysisInterpreter(Some(spectest), true)
+      val interpTop = TestScriptConstantAnalysisInterpreter(Some(spectest), true)
       interpTop.run(script)
     }
   }

@@ -43,7 +43,7 @@ trait JoinedDecidableCallFrame[Data, Var, V](using Join[V], ClassTag[V]) extends
       throw IllegalStateException()
     vars.zip(other).map(Join[V](_,_).get)
 
-  def joinedCallFrameNumberedIsSound[cData, cV](c: ConcreteCallFrame[cData, Var, cV])(using vSoundness: Soundness[cV,V], dSoundness: Soundness[cData,Data]): IsSound =
+  def joinedDecidableCallFrameIsSound[cData, cV](c: ConcreteCallFrame[cData, Var, cV])(using vSoundness: Soundness[cV,V], dSoundness: Soundness[cData,Data]): IsSound =
     val dataIsSound = dSoundness.isSound(c.getFrameData, getFrameData)
     if (dataIsSound.isNotSound)
       return dataIsSound

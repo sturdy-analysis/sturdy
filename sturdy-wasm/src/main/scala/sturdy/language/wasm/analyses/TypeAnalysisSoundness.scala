@@ -3,7 +3,7 @@ package sturdy.language.wasm.analyses
 import sturdy.{*,given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.generic.{FunctionInstance, given}
-import ConstantAnalysis.*
+import TypeAnalysis.*
 import sturdy.values.given
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
@@ -13,15 +13,15 @@ import sturdy.values.concretePO
 import sturdy.values.integer.{*, given}
 import sturdy.values.floating.{*,given}
 
-object ConstantAnalysisSoundness {
+object TypeAnalysisSoundness {
 
   given valuesAbstractly: Abstractly[ConcreteInterpreter.Value, Value] with
     override def abstractly(c: ConcreteInterpreter.Value): Value = c match
       case ConcreteInterpreter.Value.TopValue => Value.TopValue
-      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(Topped.Actual(i))
-      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(Topped.Actual(l))
-      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(Topped.Actual(f))
-      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
+      case ConcreteInterpreter.Value.Int32(i) => Value.Int32(topI32)
+      case ConcreteInterpreter.Value.Int64(l) => Value.Int64(topI64)
+      case ConcreteInterpreter.Value.Float32(f) => Value.Float32(topF32)
+      case ConcreteInterpreter.Value.Float64(d) => Value.Float64(topF64)
 
   given poFloat: PartialOrder[Float] with
     override def lteq(f1: Float, f2: Float): Boolean =
@@ -34,12 +34,8 @@ object ConstantAnalysisSoundness {
   given po: PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x,y) match
       case (_, Value.TopValue) => true
-      case (Value.Int32(i1), Value.Int32(i2)) => PartialOrder[Topped[Int]].lteq(i1,i2)
-      case (Value.Int64(l1), Value.Int64(l2)) => PartialOrder[Topped[Long]].lteq(l1,l2)
-      case (Value.Float32(f1), Value.Float32(f2)) => PartialOrder[Topped[Float]].lteq(f1,f2)
-      case (Value.Float64(d1), Value.Float64(d2)) => PartialOrder[Topped[Double]].lteq(d1,d2)
-      case _ => false
-    
+      case (ty1, ty2) => ty1 == ty2
+
   given [C,A](using aValue: Abstractly[C,A]): Abstractly[List[C], List[A]] with
     override def abstractly(c: List[C]): List[A] =
       c.map(aValue.abstractly(_))
@@ -61,12 +57,10 @@ object ConstantAnalysisSoundness {
       case Topped.Top => IsSound.Sound
       case Topped.Actual(aPow) => powersetContainsOneSound.isSound(cFun, aPow)
 
-  given Soundness[ConcreteInterpreter.Instance, ConstantAnalysis.Instance] with
-    def isSound(c: ConcreteInterpreter.Instance, a: ConstantAnalysis.Instance): IsSound =
+  given Soundness[ConcreteInterpreter.Instance, TypeAnalysis.Instance] with
+    def isSound(c: ConcreteInterpreter.Instance, a: TypeAnalysis.Instance): IsSound =
       // soundness for stack, memory, symbol table, call frame
       a.effects.operandStackIsSound(c.effects) &&
-        a.effects.memoryIsSound(c.effects) &&
         a.effects.globalsIsSound(c.effects) &&
-        a.effects.tableIsSound(c.effects) &&
         a.effects.joinedDecidableCallFrameIsSound(c.effects)
 }
