@@ -20,6 +20,5 @@ trait ConcreteExcept[E](using val exceptional: Exceptional[E, E, NoJoin]) extend
       EitherC.Left(f)
     } catch {
       case ConcreteSturdyException(ex) => EitherC.Right(ex.asInstanceOf[E])
-      case ex => throw ex
-    } 
+    }
 

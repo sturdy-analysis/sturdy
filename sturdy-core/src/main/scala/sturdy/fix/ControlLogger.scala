@@ -140,8 +140,11 @@ class ControlLogger[Ctx, Dom, Codom, Exc, Node]
     predecessors = Map()
 
   override def handling(exc: Exc): Unit =
-    predecessors = catchExceptions(exc)
-    catchExceptions -= exc
+    catchExceptions.get(exc) match
+      case None => predecessors = Map()
+      case Some(preds) =>
+        predecessors = preds
+        catchExceptions -= exc
 
   override def tryStart(): Unit =
     exceptStack = exceptions :: exceptStack
