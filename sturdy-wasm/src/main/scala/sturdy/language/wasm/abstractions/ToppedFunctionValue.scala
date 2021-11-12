@@ -1,6 +1,6 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.data.{CombineUnit, MakeJoined, mapJoin}
+import sturdy.data.{CombineUnit, MakeJoined, mapJoin, joinWithFailure}
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.language.wasm.generic.IndirectCallTypeMismatch
@@ -19,8 +19,11 @@ trait ToppedFunctionValue:
       val funs = interp.module.functions.filter(_.funcType == ft)
       if (funs.isEmpty)
         Failure(IndirectCallTypeMismatch, s"Expected function of type $ft, but none found")
-      else
+      else if (funs.size == interp.module.functions.size)
         mapJoin(funs, invoke(_, ft))
+      else
+        joinWithFailure(mapJoin(funs, invoke(_, ft)))(
+          Failure(IndirectCallTypeMismatch, s"Expected function of type $ft, which fails for some potential target functions"))
     })
 
 

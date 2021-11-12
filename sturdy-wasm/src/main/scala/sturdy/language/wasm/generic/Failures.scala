@@ -7,7 +7,6 @@ case object UnboundLocal extends FailureKind
 case object UnboundGlobal extends FailureKind
 case object UnboundFunctionType extends FailureKind
 case object UnboundFunctionIndex extends FailureKind
-case object UninitializedFunction extends FailureKind
 case object IndirectCallTypeMismatch extends FailureKind
 case object MemoryAccessOutOfBounds extends FailureKind
 case object TableAccessOutOfBounds extends FailureKind

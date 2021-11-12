@@ -9,8 +9,8 @@ type WithJoin[A] = (Join[A], Effectful)
 inline def joinComputations[A](f: => A)(g: => A)(using j: WithJoin[A]): A =
   j._2.joinComputations(f)(g)(using j._1)
 
-inline def joinWithFailure[A](f: => A)(g: => Nothing)(using j: WithJoin[Nothing]): A =
-  j._2.joinWithFailure(f)(g)
+inline def joinWithFailure[A](f: => A)(g: => Nothing)(using eff: Effectful): A =
+  eff.joinWithFailure(f)(g)
 
 inline def mapJoin[A, B](as: Iterable[A], f: A => B)(using j: WithJoin[B]): B =
   j._2.mapJoin(as, f)(using j._1)

@@ -270,12 +270,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       branch(labelIndex)
     case BrIf(labelIndex) =>
       val isZero = num.evalNumeric(i32.Eqz)
-      boolBranch[Unit](isZero) {
+      val res = boolBranch[Unit](isZero) {
         // v == 0: else branch
         // do nothing
       } {
         branch(labelIndex)
       }
+      res
     case BrTable(labels, defaultLabel) =>
       val ix = stack.popOrFail()
       indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
@@ -289,8 +290,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       val ftExpected = module.functionTypes(typeIx)
       val funcIx = stack.popOrFail()
       tableGet(tableIndex, valueToFuncIx(funcIx)).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
-        if (func == null)
-          fail(UninitializedFunction, funcIx.toString)
         invokeIndirect(func, ftExpected, funcIx)
       }
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
