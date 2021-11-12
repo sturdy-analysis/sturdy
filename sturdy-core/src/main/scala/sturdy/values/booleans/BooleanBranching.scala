@@ -4,11 +4,11 @@ import sturdy.data.NoJoin
 
 import scala.annotation.targetName
 
-trait BooleanBranching[V, J[_]]:
-  def boolBranch[A](v: V, thn: => A, els: => A): J[A] ?=> A
+trait BooleanBranching[V, MayJoin[_]]:
+  def boolBranch[A](v: V, thn: => A, els: => A): MayJoin[A] ?=> A
 
   @targetName("boolBranchSplit")
-  inline final def boolBranch[A](v: V)(thn: => A)(els: => A): J[A] ?=> A =
+  inline final def boolBranch[A](v: V)(thn: => A)(els: => A): MayJoin[A] ?=> A =
     boolBranch(v, thn, els)
 
 given ConcreteBooleanBranching: BooleanBranching[Boolean, NoJoin] with
