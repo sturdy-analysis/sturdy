@@ -34,11 +34,19 @@ class BenchmarksgameNewTypeTest extends AnyFlatSpec, Matchers:
   val funcName = "_start"
   val uri = classOf[BenchmarksgameNewTypeTest].getResource("/sturdy/language/wasm/benchmarksgame/src").toURI();
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
-    it must s"execute constant analysis on benchmark ${p.getFileName}" in {
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.headOption.foreach { p =>
+    it must s"warm-up type analysis on benchmark ${p.getFileName}" in {
       run(p, binary = true)
     }
   }
+
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
+    it must s"execute type analysis on benchmark ${p.getFileName}" in {
+      run(p, binary = true)
+    }
+  }
+
+
 
   def run(p: Path, binary: Boolean = false) =
     Fixpoint.DEBUG = false

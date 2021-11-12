@@ -42,7 +42,7 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
   val report: Report = new Report
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
-    it must s"execute constant analysis on benchmark ${p.getFileName}" in {
+    it must s"execute type analysis on benchmark ${p.getFileName}" in {
       run(p)
     }
   }
