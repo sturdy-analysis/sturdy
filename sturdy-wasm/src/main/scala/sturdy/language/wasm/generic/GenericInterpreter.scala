@@ -56,12 +56,12 @@ enum WasmException[V]:
 
 type GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]] =
   DecidableOperandStack[V]
-    with Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]  
-    with Globals[V]                                      
-    with SymbolTable[TableAddr, FuncIx, FunV, MayJoin]   
-    with DecidableMutableCallFrame[FrameData, Int, V]
-    with Except[WasmException[V], ExcV, MayJoin]         
-    with Failure
+    & Memory[MemoryAddr, Addr, Bytes, Size, MayJoin]
+    & Globals[V]
+    & SymbolTable[TableAddr, FuncIx, FunV, MayJoin]
+    & DecidableMutableCallFrame[FrameData, Int, V]
+    & Except[WasmException[V], ExcV, MayJoin]
+    & Failure
 
 type Imports = mutable.Map[String, ModuleInstance]
 
@@ -135,8 +135,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 
 
   inline private def fail(k: FailureKind, what: String) = effects.fail(k, s"$what in $module")
-  //inline private def stackPop: V = stack.pop().getOrElse(throw IllegalStateException("pop on empty stack"))
-  //inline private def stackPeek: V = stack.peek().getOrElse(throw IllegalStateException("peek on empty stack"))
 
   def module: ModuleInstance = getFrameData.module
 
