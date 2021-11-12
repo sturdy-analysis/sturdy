@@ -32,11 +32,18 @@ class BenchmarksgameNewTaintTest extends AnyFlatSpec, Matchers:
   val funcName = "_start"
   val uri = classOf[BenchmarksgameNewConstantTest].getResource("/sturdy/language/wasm/benchmarksgame/src").toURI();
 
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.headOption.foreach { p =>
+    it must s"warm-up constant taint analysis on benchmark ${p.getFileName}" in {
+      run(p, binary = true)
+    }
+  }
+
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
     it must s"execute constant taint analysis on benchmark ${p.getFileName}" in {
       run(p, binary = true)
     }
   }
+
 
   def run(p: Path, binary: Boolean = false) =
     Fixpoint.DEBUG = false
