@@ -1,10 +1,13 @@
 package sturdy.values.types
 
-import sturdy.data.{joinComputations, WithJoin}
+import sturdy.data.{WithJoin, joinComputations, joinWithFailure}
+import sturdy.effect.Effectful
+import sturdy.effect.failure.Failure
 import sturdy.values.convert.Convert
 import sturdy.values.relational.{UnsignedCompareOps, EqOps, CompareOps}
 import sturdy.values.*
 import sturdy.values.booleans.BooleanBranching
+import sturdy.values.convert.ConversionFailure
 import sturdy.values.convert.ConvertConfig
 
 import scala.reflect.ClassTag
@@ -41,8 +44,9 @@ given BaseTypeUnsignedCompareOps[B: ClassTag]: UnsignedCompareOps[BaseType[B], B
   def geUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
   def gtUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
 
-given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]]: Convert[B1, B2, BaseType[B1], BaseType[B2], Config] with
-  override def apply(from: BaseType[B1], conf: Config): BaseType[B2] = BaseType[B2]
+given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](using Failure, Effectful): Convert[B1, B2, BaseType[B1], BaseType[B2], Config] with
+  override def apply(from: BaseType[B1], conf: Config): BaseType[B2] =
+    joinWithFailure(BaseType[B2])(Failure(ConversionFailure, "Potential conversion failure from $from to $to"))
 
 given BaseTypeBooleanBranching: BooleanBranching[BaseType[Boolean], WithJoin] with
   override def boolBranch[A](v: BaseType[Boolean], thn: => A, els: => A): WithJoin[A] ?=> A =

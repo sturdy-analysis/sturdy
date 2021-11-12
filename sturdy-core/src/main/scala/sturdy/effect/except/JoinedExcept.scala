@@ -47,6 +47,13 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
           case OptionA.None() => throw new IllegalStateException(s"exception cannot be None here")
           case OptionA.NoneSome(ex) => EitherA.Right(ex)
           case OptionA.Some(ex) => EitherA.Right(ex)
+      case exc =>
+        // Our exception may have been replaced by another exception, such as a Failure.
+        // We need to resurface our exception here so that it can be handled.
+        exception match
+          case OptionA.None() => throw exc
+          case OptionA.NoneSome(ex) => EitherA.Right(ex)
+          case OptionA.Some(ex) => EitherA.Right(ex)
     } finally {
       this.exception = originalException
     }
