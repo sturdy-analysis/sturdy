@@ -7,7 +7,7 @@ import sturdy.values.exceptions.Exceptional
 import scala.util.Success
 import reflect.Selectable.reflectiveSelectable
 
-case class ConcreteSturdyException[E](e: E) extends ExceptSturdyException:
+case class ConcreteSturdyException[E](e: E) extends SturdyException:
   override def toString: String = s"Exception ${e.toString}"
 
 trait ConcreteExcept[E](using val exceptional: Exceptional[E, E, NoJoin]) extends Except[E, E, NoJoin]:

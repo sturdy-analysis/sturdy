@@ -5,7 +5,6 @@ import sturdy.effect.Effectful
 import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
-import sturdy.fix.RecurrentCall
 import sturdy.fix.Stack
 import sturdy.values.Finite
 import sturdy.values.Widen
@@ -32,7 +31,7 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
   /** Runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
     def apply_(dom: Dom): Codom =
-      stack.repeatUntilStable(() => step(f, dom)).get
+      stack.repeatUntilStable(() => step(f, dom)).getOrThrow
     apply_
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior.

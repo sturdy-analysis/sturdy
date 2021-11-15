@@ -1,15 +1,12 @@
 package sturdy.effect.failure
 
-import sturdy.effect.SturdyException
-
-trait FailureException extends SturdyException:
-  override def isBottom: Boolean = true
+import sturdy.effect.SturdyFailure
 
 trait FailureKind
 object RuntimeFailure extends FailureKind
 
 trait Failure:
-  @throws[FailureException]
+  @throws[SturdyFailure]
   def fail(kind: FailureKind, msg: String): Nothing
 
 object Failure:

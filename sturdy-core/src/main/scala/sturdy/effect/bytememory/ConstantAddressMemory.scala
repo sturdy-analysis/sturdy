@@ -138,27 +138,30 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new ConstantAddressMemoryJoiner[A]
   class ConstantAddressMemoryJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
-    var gmemories = mutable.Map() ++ memories.view.mapValues(_.cloned)
+    var snapshot = mutable.Map() ++ memories.view.mapValues(_.cloned)
     var fmemories: mutable.Map[Key, Mem[B]] = null
 
     override def inbetween_(): Unit =
       fmemories = memories
-      memories = gmemories
+      memories = mutable.Map() ++ snapshot.view.mapValues(_.cloned)
 
-    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainNone_(): Unit =
+      memories = snapshot
+      fmemories = null
+
+    override def retainFirst_(fRes: TrySturdy[A]): Unit =
       memories = fmemories
-      gmemories = null
 
-    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit =
+    override def retainSecond_(gRes: TrySturdy[A]): Unit =
       fmemories = null
 
     override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      for ((key, fmem) <- fmemories) gmemories.get(key) match
+      for ((key, fmem) <- fmemories) memories.get(key) match
         case Some(gmem) => memories += key -> Join(fmem, gmem).get
         case None => memories += key -> fmem.toIndefinite
 
       val fkeys = fmemories.keySet
-      for ((key, gmemOpt) <- gmemories)
+      for ((key, gmemOpt) <- memories)
         if (!fkeys.contains(key))
           memories += key -> gmemOpt.toIndefinite
       fmemories = null

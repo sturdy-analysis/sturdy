@@ -38,5 +38,5 @@ final class Log[Dom, Codom](logger: Logger[Dom, Codom], val phi: Combinator[Dom,
     logger.enter(dom)
     val codom = TrySturdy(phi(f)(dom))
     logger.exit(dom, codom)
-    codom.get
+    codom.getOrThrow
 }

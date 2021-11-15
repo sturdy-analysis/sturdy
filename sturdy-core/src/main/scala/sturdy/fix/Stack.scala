@@ -2,8 +2,9 @@ package sturdy.fix
 
 import sturdy.effect.AnalysisState
 import sturdy.effect.Effectful
-import sturdy.effect.SturdyException
-import sturdy.effect.TrySturdy
+import sturdy.effect.RecurrentCall
+import sturdy.effect.SturdyThrowable
+import sturdy.effect.{TrySturdy, CombineTrySturdy}
 import sturdy.values.Finite
 import sturdy.values.{Widen, MaybeChanged, Changed, Unchanged}
 
@@ -11,10 +12,6 @@ import scala.collection.mutable
 import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
-
-case class RecurrentCall[Dom, Ctx](frame: Frame[Dom, Ctx]) extends SturdyException:
-  override def isBottom: Boolean = true
-  override def toString: String = s"RecurrentCall $frame"
 
 case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
 class FrameEntry[In](var inState: In, val correcurrentFrame: Int, var count: Int)
@@ -219,7 +216,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
     case None =>
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}  POP RECURRENT  $frame")
-      TrySturdy.Failure(RecurrentCall(frame))
+      TrySturdy(throw RecurrentCall(frame))
     case Some((res, previousOut)) =>
       state.setOutState(previousOut)
       if (Fixpoint.DEBUG)
@@ -235,11 +232,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
         println(s"${stackHeightIndent}POP  $frame <- ${Changed(result)}")
       result
     case Some((previousResult, previousOut)) =>
-      val newResult: MaybeChanged[TrySturdy[Codom]] = (previousResult, result) match
-        case (TrySturdy.Failure(ex1), TrySturdy.Failure(ex2)) => MaybeChanged(TrySturdy.Failure(j.joinThrowables(ex1, ex2)), previousResult)
-        case (TrySturdy.Failure(_), TrySturdy.Success(v)) => Changed(TrySturdy.Success(v))
-        case (TrySturdy.Success(v), TrySturdy.Failure(_)) => Unchanged(TrySturdy.Success(v))
-        case (TrySturdy.Success(v1), TrySturdy.Success(v2)) => widenCodom(v1, v2).map(TrySturdy.Success.apply)
+      val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
       val currentOut = state.getOutState()
       val newOut = widenOut(previousOut, currentOut)
 

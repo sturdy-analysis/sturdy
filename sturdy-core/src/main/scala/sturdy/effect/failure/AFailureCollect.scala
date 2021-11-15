@@ -1,6 +1,7 @@
 package sturdy.effect.failure
 
 import sturdy.effect.Effectful
+import sturdy.effect.SturdyFailure
 import sturdy.values.Powerset
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
@@ -8,7 +9,7 @@ import sturdy.values.PartialOrder
 import scala.collection.mutable.ListBuffer
 import scala.util.control.NonFatal
 
-case object AFailureCollectException extends FailureException
+case object AFailureCollectException extends SturdyFailure
 
 trait AFailureCollect extends Failure with Effectful:
   protected val failures: ListBuffer[(FailureKind,String)] = ListBuffer()

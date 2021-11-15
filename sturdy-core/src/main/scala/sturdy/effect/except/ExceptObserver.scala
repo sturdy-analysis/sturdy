@@ -1,6 +1,6 @@
 package sturdy.effect.except
 
-import sturdy.effect.SturdyException
+import sturdy.effect.SturdyThrowable
 
 trait ExceptObserver[Exc]:
   def throwing(exc: Exc): Unit

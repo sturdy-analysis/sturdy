@@ -16,10 +16,13 @@ trait JoinedDecidableCallFrame[Data, Var, V](using Join[V], ClassTag[V]) extends
       fVars = vars
       vars = snapshot
 
-    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainNone_(): Unit =
+      vars = snapshot
+
+    override def retainFirst_(fRes: TrySturdy[A]): Unit =
       vars = fVars
 
-    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit = {}
+    override def retainSecond_(gRes: TrySturdy[A]): Unit = {}
 
     override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       vars = joinWith(fVars)

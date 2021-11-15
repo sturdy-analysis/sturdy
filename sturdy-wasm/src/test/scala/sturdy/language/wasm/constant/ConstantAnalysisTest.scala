@@ -5,7 +5,6 @@ import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.AFallible
-import sturdy.effect.failure.FailureException
 import sturdy.effect.failure.FailureKind
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter

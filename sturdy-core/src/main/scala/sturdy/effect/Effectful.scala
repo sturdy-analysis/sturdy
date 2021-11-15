@@ -10,7 +10,7 @@ import scala.util.Try
 trait Effectful extends ObservableJoin:
   type Joined[A] = Join[A] ?=> A
 
-  final def joinThrowables(failA: SturdyException, failB: SturdyException): SturdyException =
+  final def joinThrowables(failA: SturdyThrowable, failB: SturdyThrowable): SturdyThrowable =
     if (failA == failB)
       failA
     else
@@ -22,8 +22,9 @@ trait Effectful extends ObservableJoin:
   def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoiner {
     joinStart()
     override def inbetween(): Unit = joinSwitch()
-    override def retainOnlyFirst(fRes: TrySturdy[A]): Unit = joinEnd()
-    override def retainOnlySecond(gRes: TrySturdy[A]): Unit = joinEnd()
+    override def retainNone(): Unit = joinEnd()
+    override def retainFirst(fRes: TrySturdy[A]): Unit = joinEnd()
+    override def retainSecond(gRes: TrySturdy[A]): Unit = joinEnd()
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joinEnd()
   }
 
@@ -37,24 +38,13 @@ trait Effectful extends ObservableJoin:
     joiner.inbetween()
     val triedG = TrySturdy(g)
 
-    if (triedF.isBottom) {
-      if (!triedG.isBottom) {
-        joiner.retainOnlySecond(triedG)
-        triedG.get
-      } else {
-        triedF.get
-      }
-    } else if (triedG.isBottom) {
-      joiner.retainOnlyFirst(triedF)
-      triedF.get
-    } else {
-      joiner.retainBoth(triedF, triedG)
-      (triedF, triedG) match
-        case (TrySturdy.Failure(failA), TrySturdy.Failure(failB)) => throw joinThrowables(failA, failB)
-        case (TrySturdy.Success(aF), TrySturdy.Success(aG)) => Join(aF, aG).get
-        case (TrySturdy.Success(aF), _) => aF
-        case (_, TrySturdy.Success(aG)) => aG
-    }
+    (triedF.isBottom, triedG.isBottom) match
+      case (false, false) => joiner.retainBoth(triedF, triedG)
+      case (false, true) => joiner.retainFirst(triedF)
+      case (true, false) => joiner.retainSecond(triedG)
+      case (true, true) => joiner.retainNone()
+
+    Join(triedF, triedG).get.getOrThrow
   }
 
   def joinWithFailure[A](f: => A)(g: => Nothing): A = {
@@ -62,25 +52,16 @@ trait Effectful extends ObservableJoin:
 
     val triedF = TrySturdy(f)
     joiner.inbetween()
-    val triedG = TrySturdy(g).asInstanceOf[TrySturdy[A]]
+    val triedG = TrySturdy[A](g)
 
-    if (triedF.isBottom) {
-      if (!triedG.isBottom) {
-        joiner.retainOnlySecond(triedG)
-        triedG.get
-      } else {
-        triedF.get
-      }
-    } else if (triedG.isBottom) {
-      joiner.retainOnlyFirst(triedF)
-      triedF.get
-    } else {
-      joiner.retainBoth(triedF, triedG)
-      val failB = triedG.exception
-      triedF match
-        case TrySturdy.Failure(failA) => throw joinThrowables(failA, failB)
-        case TrySturdy.Success(aF) => aF
-    }
+    (triedF.isBottom, triedG.isBottom) match
+      case (false, false) => joiner.retainBoth(triedF, triedG)
+      case (false, true) => joiner.retainFirst(triedF)
+      case (true, false) => joiner.retainSecond(triedG)
+      case (true, true) => joiner.retainNone()
+
+    implicit val joinA: Join[A] = null.asInstanceOf[Join[A]]
+    Join(triedF, triedG).get.getOrThrow
   }
 
   final def mapJoin[A, B](as: Iterable[A], f: A => B): Joined[B] = as.size match
@@ -108,9 +89,7 @@ trait Effectful extends ObservableJoin:
 
 
 object Effectful:
-  def join[A](f: => A)(g: => A)(using j: Effectful): Join[A] ?=> A =
-    j.joinComputations(f)(g)
-  case class StarvedJoin(ex1: SturdyException, ex2: SturdyException) extends Exception(s"Starved Join with $ex1 and $ex2") with SturdyException:
-    override val isBottom: Boolean = ex1.isBottom && ex2.isBottom
+  case class StarvedJoin(ex1: SturdyThrowable, ex2: SturdyThrowable) extends Exception(s"Starved Join with $ex1 and $ex2") with SturdyThrowable
+//    override val isBottom: Boolean = false // ex1.isBottom && ex2.isBottom
 
 

@@ -5,7 +5,6 @@ import sturdy.effect.Effectful
 import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
-import sturdy.fix.RecurrentCall
 import sturdy.fix.Stack
 import sturdy.values.Finite
 import sturdy.values.Widen
@@ -33,14 +32,14 @@ final class Topmost[Dom, Codom, In, Out, All, Ctx]
   override def apply(f: Dom => Codom): Dom => Codom =
     def apply_(dom: Dom): Codom =
       if (stack.height > 0) {
-        step(f, dom).get
+        step(f, dom).getOrThrow
       } else {
         // this is the topmost call
         stack.repeatUntilStable { () =>
           hasLoop = false
           val result = step(f, dom)
           (result, hasLoop)
-        }.get
+        }.getOrThrow
       }
     apply_
 

@@ -3,7 +3,7 @@ package sturdy.language.wasm.constant
 import cats.effect.{IO, Blocker}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.{AFallible, FailureException, FailureKind}
+import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
