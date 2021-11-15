@@ -33,13 +33,13 @@ trait Fixpoint[Dom, Codom]:
 
   private def fixpointAlgorithm(): Combinator[Dom, Codom] =
     val cs: Combinator[Dom, Codom] =
-    if (contextSensitiveLoggers.isEmpty)
-      withContext(contextSensitive)
-    else
-      withContext {
-        val loggers = contextSensitiveLoggers.toList.map(a => a)
-        log(manyLogger(loggers), contextSensitive)
-      }
+      if (contextSensitiveLoggers.isEmpty)
+        withContext(contextSensitive)
+      else
+        withContext {
+          val loggers = contextSensitiveLoggers.toList.map(a => a)
+          log(manyLogger(loggers), contextSensitive)
+        }
 
     val phi = contextFree(withContext(cs))
     if (contextFreeLoggers.isEmpty)

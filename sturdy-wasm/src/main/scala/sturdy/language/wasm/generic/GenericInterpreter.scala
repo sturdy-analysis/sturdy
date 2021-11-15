@@ -384,7 +384,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
   inline def enterFunction(id: FuncId, func: Func, ft: FuncType)(using rec: Fixed): FixOut[V] =
     rec(FixIn.EnterWasmFunction(id, func, ft))
 
-  private lazy val fixed: Fixed = fixpoint {
+  private def fixed: Fixed = fixpoint {
     case FixIn.Eval(inst, loc) =>
       eval_open(inst, loc)
       FixOut.Eval()
