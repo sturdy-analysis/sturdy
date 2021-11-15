@@ -2,7 +2,7 @@ package sturdy.effect.bytememory
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.data.*
+import sturdy.data.{OptionA, WithJoin}
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.Effectful
@@ -25,116 +25,31 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
   protected def setMemories(s: Memories[Key, B]): Unit =
     memories = mutable.Map() ++ s
 
-  private def joinSeq(s: Seq[B]): B =
-    var res = emptyB
-    s.foreach { b =>
-      res = jb(res, b).get
-    }
-    res
-
-  override def memRead(key: Key, addr: Topped[Int], length: Int): OptionA[Seq[B]] =
-    (memories(key), addr) match
-      case (mem: ValueMem[_], _) => OptionA.noneSome(Seq.fill[B](length)(mem.upperBound))
-      case (mem: SizeMem[_], Topped.Top) =>
-        OptionA.noneSome(Seq.fill[B](length)(mem.upperBound))
-      case (mem: SizeMem[_], Topped.Actual(a)) =>
-        if (a >=0 && a + length <= mem.size) {
-          val readBytes = Seq.fill[B](length)(mem.upperBound)
-          if (mem.definite)
-            OptionA.some(readBytes)
-          else
-            OptionA.noneSome(readBytes)
-        }
-        else
-          OptionA.none
-      case (mem: ByteMem[_], Topped.Top) =>
-        OptionA.noneSome(Seq.fill[B](length)(mem.upperBound))
-      case (mem: ByteMem[_], Topped.Actual(a)) =>
-        if (a >=0 && a + length <= mem.size) {
-          val readBytes = mem.bytes.slice(a, a + length).toSeq
-          if (mem.definite)
-            OptionA.some(readBytes)
-          else
-            OptionA.noneSome(readBytes)
-        }
-        else
-          OptionA.none
+  override def memRead(key: Key, addr: Topped[Int], length: Int): OptionA[Seq[B]] = addr match
+    case Topped.Top => OptionA.noneSome(Seq.fill[B](length)(memories(key).upperBound))
+    case Topped.Actual(a) => memories(key).read(a, length)
 
   override def memStore(key: Key, addr: Topped[Int], bytes: Seq[B]): OptionA[Unit] =
-    memories(key) match
-      case mem: ValueMem[_] =>
-        mem.upperBound = jb(mem.upperBound, joinSeq(bytes)).get
-        OptionA.noneSome(())
-      case mem: SizeMem[_] => addr match
-        case Topped.Top =>
-          mem.upperBound = jb(mem.upperBound, joinSeq(bytes)).get
-          // any byte of the memory might be affected, but this memory does not track individual bytes anyway
-          OptionA.noneSome(())
-        case Topped.Actual(a) =>
-          if (a >= 0 && a + bytes.size <= mem.size) {
-            mem.upperBound = jb(mem.upperBound, joinSeq(bytes)).get
-            OptionA.some(())
-          } else {
-            OptionA.none
-          }
-      case mem: ByteMem[_] => addr match
-        case Topped.Top =>
-          // any byte of the memory might be affected, only track the memory's size from now on
-          val newUpperBound = jb(mem.upperBound, joinSeq(bytes)).get
-          memories += key -> SizeMem(mem.size, mem.sizeLimit, newUpperBound, mem.definite)
-          OptionA.noneSome(())
-        case Topped.Actual(a) =>
-          if (a >= 0 && a + bytes.size <= mem.size) {
-            mem.upperBound = jb(mem.upperBound, joinSeq(bytes)).get
-            Array.copy(bytes.toArray, 0, mem.bytes, a, bytes.size)
-            mem.dirty.addAll(a until (a + bytes.size))
-            OptionA.some(())
-          } else {
-            OptionA.none
-          }
+    val (newMem, res) = memories(key).store(addr, bytes)
+    newMem.foreach(memories(key) = _)
+    res
 
   override def memSize(key: Key): Topped[Int] = memories(key) match
-    case _: ValueMem[_] => Topped.Top
-    case mem: SizedMem[_] => Topped.Actual(mem.size / pageSize)
+    case _: TopMem[_] => Topped.Top
+    case mem: SizeMem[_] => Topped.Actual(mem.pageNum)
+    case mem: ByteMem[_] => Topped.Actual(mem.pageNum)
 
   override def memGrow(key: Key, delta: Topped[Int]): OptionA[Topped[Int]] =
-    memories(key) match
-      case _: ValueMem[_] => OptionA.noneSome(Topped.Top)
-      case mem: SizeMem[_] => delta match
-        case Topped.Top =>
-          // cannot track size of memory anymore, set the memory to top
-          memories += key -> ValueMem(mem.upperBound, mem.definite)
-          OptionA.noneSome(Topped.Top)
-        case Topped.Actual(d) =>
-          val newPageNum = mem.pageNum + d
-          if (newPageNum <= maxPageNum && mem.sizeLimit.forall(newPageNum <= _)) {
-            val newUpperBound = jb(mem.upperBound, emptyB).get
-            memories += key -> SizeMem(mem.size + d * pageSize, mem.sizeLimit, newUpperBound, mem.definite)
-            OptionA.some(Topped.Actual(mem.pageNum))
-          } else {
-            OptionA.none
-          }
-      case mem: ByteMem[_] => delta match
-        case Topped.Top =>
-          // cannot track size of memory anymore, set the memory to top
-          memories += key -> ValueMem(mem.upperBound, mem.definite)
-          OptionA.noneSome(Topped.Top)
-        case Topped.Actual(d) =>
-          val newPageNum = mem.pageNum + d
-          if (newPageNum <= maxPageNum && mem.sizeLimit.forall(newPageNum <= _)) {
-            val newBytes = mem.bytes.appendedAll(Iterable.fill(d * pageSize)(emptyB))
-            memories += key -> ByteMem(newBytes, mem.dirty, mem.sizeLimit, mem.upperBound, mem.definite)
-            OptionA.some(Topped.Actual(mem.pageNum))
-          } else {
-            OptionA.none
-          }
+    val (newMem, res) = memories(key).grow(delta, emptyB)
+    newMem.foreach(memories(key) = _)
+    res
 
   override def addEmptyMemory(key: Key, initSize: Topped[Int], sizeLimit: scala.Option[Topped[Int]]): Unit =
     initSize match
       case Topped.Top => // unknown size
-        memories += key ->  ValueMem(emptyB)
+        memories += key ->  TopMem(isDefinite = true)(emptyB)
       case Topped.Actual(size) =>
-        memories += key -> ByteMem(Array.fill[B](size*pageSize)(emptyB), mutable.BitSet(), sizeLimit.flatMap(_.toOption), emptyB)
+        memories += key -> ByteMem(Array.fill[B](size*pageSize)(emptyB), mutable.BitSet(), sizeLimit.flatMap(_.toOption), isDefinite = true)(emptyB)
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new ConstantAddressMemoryJoiner[A]
   class ConstantAddressMemoryJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
@@ -158,12 +73,12 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
     override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       for ((key, fmem) <- fmemories) memories.get(key) match
         case Some(gmem) => memories += key -> Join(fmem, gmem).get
-        case None => memories += key -> fmem.toIndefinite
+        case None => memories += key -> fmem.asIndefinite
 
       val fkeys = fmemories.keySet
       for ((key, gmemOpt) <- memories)
         if (!fkeys.contains(key))
-          memories += key -> gmemOpt.toIndefinite
+          memories += key -> gmemOpt.asIndefinite
       fmemories = null
   }
 
@@ -186,18 +101,18 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
     IsSound.Sound
 
 
-  def memInstanceIsSound(c: ConcreteMemory.Mem, a: Mem[B])(using bytesSound: Soundness[Byte, B]): IsSound =
+  def memInstanceIsSound(c: ConcreteMemory.Mem, aMem: Mem[B])(using bytesSound: Soundness[Byte, B]): IsSound =
     // - sizes are equal
     // - all locations in concrete memory are approximated by locations in abstract memory
-    a match
-      case mem: ValueMem[B] =>
-        concreteInstanceApproximated(c, mem.upperBound)
-      case SizeMem(size, sizeLimit, upperBound , _) =>
+    aMem match
+      case _: TopMem[B] =>
+        concreteInstanceApproximated(c, aMem.upperBound)
+      case SizeMem(size, sizeLimit , _) =>
         if (c.size != size || c.sizeLimit != sizeLimit)
           IsSound.NotSound(s"Sizes of concrete and abstract memory do not coincide.")
         else
-          concreteInstanceApproximated(c, upperBound)
-      case aMem@ByteMem(bytes, dirty, sizeLimit, _, _) =>
+          concreteInstanceApproximated(c, aMem.upperBound)
+      case aMem@ByteMem(bytes, dirty, sizeLimit, _) =>
         if (c.size != aMem.size || c.sizeLimit != sizeLimit)
           return IsSound.NotSound(s"Sizes of concrete and abstract memory do not coincide.")
         c.bytes.zip(bytes).foreach { (cByte, aByte) =>
@@ -219,38 +134,41 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
 object ConstantAddressMemory:
   type Memories[Key, B] = Map[Key, Mem[B]]
 
-  given CombineMem[B, W <: Widening](using j: Combine[B, W]): Combine[Mem[B], W] with
-    def apply(old: Mem[B], now: Mem[B]): MaybeChanged[Mem[B]] = (old, now) match
-      case (oldMem@ValueMem(upperBound, definite), nowMem) =>
-        val newUpperBound = j(upperBound, nowMem.upperBound).get
-        val newDefinite = definite && nowMem.isDefinite
-        if (newUpperBound != upperBound || newDefinite != definite)
-          Changed(ValueMem(newUpperBound, newDefinite))
-        else
-          Unchanged(oldMem)
-      case (oldMem, nowMem@ValueMem(upperBound1, definite1)) =>
-        Changed(ValueMem(j(oldMem.upperBound, upperBound1).get, oldMem.isDefinite && definite1))
-      case (oldMem: SizedMem[B], nowMem: SizedMem[B]) if oldMem.size != nowMem.size =>
-        Changed(ValueMem(j(oldMem.upperBound, nowMem.upperBound).get, oldMem.isDefinite && nowMem.isDefinite))
-      case (oldMem: SizeMem[B], nowMem: SizedMem[B]) =>
-        val newUpperBound = j(oldMem.upperBound, nowMem.upperBound).get
-        val newDefinite = oldMem.isDefinite && nowMem.isDefinite
-        if (newUpperBound != oldMem.upperBound || newDefinite != oldMem.isDefinite)
-          Changed(SizeMem(oldMem.size, oldMem.sizeLimit, newUpperBound, newDefinite))
-        else
-          Unchanged(oldMem)
-      case (oldMem: ByteMem[B], nowMem: SizeMem[B]) =>
-        Changed(SizeMem(oldMem.size, oldMem.sizeLimit, j(oldMem.upperBound, nowMem.upperBound).get, oldMem.isDefinite && nowMem.isDefinite))
-      case (oldMem: ByteMem[B], nowMem: ByteMem[B]) =>
-        if (oldMem.dirty.size >= nowMem.dirty.size)
-          joinByteMemSameSized(oldMem, nowMem)
-        else
-          joinByteMemSameSized(nowMem, oldMem)
+  given CombineMem[B: ClassTag, W <: Widening](using j: Combine[B, W]): Combine[Mem[B], W] with
+    def apply(old: Mem[B], now: Mem[B]): MaybeChanged[Mem[B]] =
+      val newUpperBoundChanged = Combine(old.upperBound, now.upperBound)
+      val newUpperBound = newUpperBoundChanged.get
+      val newDefinite = old.isDefinite && now.isDefinite
+      val boundDefChanged = old.isDefinite && !now.isDefinite || newUpperBoundChanged.hasChanged
+      (old, now) match
+        case (_: TopMem[B], _) =>
+          MaybeChanged(TopMem(newDefinite)(newUpperBound), boundDefChanged)
+        case (_, _: TopMem[B]) =>
+          Changed(TopMem(newDefinite)(newUpperBound))
+        case (old: SizeMem[B], now: SizeMem[B]) =>
+          if (old.size == now.size)
+            MaybeChanged(SizeMem(old.size, old.sizeLimit, newDefinite)(newUpperBound), boundDefChanged)
+          else
+            Changed(TopMem(newDefinite)(newUpperBound))
+        case (old: SizeMem[B], now: ByteMem[B]) =>
+          if (old.size == now.size)
+            MaybeChanged(SizeMem(old.size, old.sizeLimit, newDefinite)(newUpperBound), boundDefChanged)
+          else
+            Changed(TopMem(newDefinite)(newUpperBound))
+        case (old: ByteMem[B], now: SizeMem[B]) =>
+          if (old.size == now.size)
+            Changed(SizeMem(old.size, old.sizeLimit, newDefinite)(newUpperBound))
+          else
+            Changed(TopMem(newDefinite)(newUpperBound))
+        case (oldMem: ByteMem[B], nowMem: ByteMem[B]) =>
+          if (oldMem.dirty.size >= nowMem.dirty.size)
+            joinByteMemSameSized(oldMem, nowMem, newDefinite, newUpperBound, boundDefChanged)
+          else
+            joinByteMemSameSized(nowMem, oldMem, newDefinite, newUpperBound, boundDefChanged)
 
-    private def joinByteMemSameSized(mem1: ByteMem[B], mem2: ByteMem[B]): MaybeChanged[Mem[B]] =
-      // TODO join definite?
-      val result = mem1.cloned
-      var changed = false
+    private def joinByteMemSameSized(mem1: ByteMem[B], mem2: ByteMem[B], newDefinite: Boolean, newUpperBound: B, boundDefChanged: Boolean): MaybeChanged[Mem[B]] =
+      val result = ByteMem(mem1.bytes.clone(), mem1.dirty.clone(), mem1.sizeLimit, newDefinite)(newUpperBound)
+      var changed = boundDefChanged
       for (ix <- mem2.dirty) {
         val b = Combine[B, W](result.bytes(ix), mem2.bytes(ix))
         if (b.hasChanged) {
@@ -261,36 +179,121 @@ object ConstantAddressMemory:
       result.dirty |= mem2.dirty
       MaybeChanged(result, changed)
 
-  sealed trait Mem[B]:
+  sealed trait Mem[B: ClassTag](bound: B):
     def cloned: Mem[B]
-    //def size: Int
-    def upperBound: B
-    def toIndefinite: Mem[B]
+
+    protected var _upperBound: B = bound
+    def upperBound: B = _upperBound
+    inline protected def updateBound(bs: Iterable[B])(using Join[B]) =
+      for (b <- bs)
+        _upperBound = Join(_upperBound, b).get
+
     def isDefinite: Boolean
+    def asIndefinite: Mem[B] = this match
+      case TopMem(_) => TopMem(isDefinite = false)(_upperBound)
+      case SizeMem(size, sizeLimit, _) => SizeMem(size, sizeLimit, isDefinite = false)(_upperBound)
+      case ByteMem(bytes, dirty, sizeLimit, _) => ByteMem(bytes, dirty, sizeLimit, isDefinite = false)(_upperBound)
 
-  sealed trait SizedMem[B] extends Mem[B]:
-    def size: Int
+    def read(a: Int, length: Int): OptionA[Seq[B]]
+    def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], OptionA[Unit])
+    def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], OptionA[Topped[Int]])
 
-  case class ValueMem[B](var upperBound: B, definite: Boolean = true) extends Mem[B]:
-    override def cloned: ValueMem[B] = this
-    override def toIndefinite: ValueMem[B] = ValueMem(upperBound, false)
-    override def isDefinite: Boolean = definite
+  case class TopMem[B: ClassTag](isDefinite: Boolean)(bound: B) extends Mem[B](bound):
+    override def cloned: TopMem[B] = this
+    override def read(a: Int, length: Int): OptionA[Seq[B]] = OptionA.noneSome(Seq.fill[B](length)(upperBound))
+    override def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], OptionA[Unit]) =
+      updateBound(bytes)
+      (None, OptionA.noneSome(()))
+    override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], OptionA[Topped[Int]]) = (None, OptionA.noneSome(Topped.Top))
 
 
-  case class SizeMem[B](size: Int, sizeLimit: scala.Option[Int], var upperBound: B, definite: Boolean = true) extends SizedMem[B]:
-    override def cloned = this
-    inline def pageNum: Int = (size / pageSize).toInt
-    override def toIndefinite: SizeMem[B] = SizeMem(size, sizeLimit, upperBound, false)
-    override def isDefinite: Boolean = definite
+  case class SizeMem[B: ClassTag](size: Int, sizeLimit: scala.Option[Int], isDefinite: Boolean)(bound: B) extends Mem[B](bound):
+    override def cloned: Mem[B] = this
+    inline def pageNum: Int = size / pageSize
+    override def read(a: Int, length: Int): OptionA[Seq[B]] =
+      if (a >=0 && a + length <= size) {
+        val readBytes = Seq.fill[B](length)(upperBound)
+        if (isDefinite)
+          OptionA.some(readBytes)
+        else
+          OptionA.noneSome(readBytes)
+      } else {
+        OptionA.none
+      }
+    override def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], OptionA[Unit]) = addr match
+      case Topped.Top =>
+        // any byte of the memory might be affected, but this memory does not track individual bytes anyway
+        updateBound(bytes)
+        (None, OptionA.noneSome(()))
+      case Topped.Actual(a) =>
+        if (a >= 0 && a + bytes.size <= size) {
+          updateBound(bytes)
+          (None, OptionA.some(()))
+        } else {
+          (None, OptionA.none)
+        }
+    override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], OptionA[Topped[Int]]) = delta match
+      case Topped.Top =>
+        // cannot track size of memory anymore, set the memory to top
+        (Some(TopMem(isDefinite)(upperBound)), OptionA.noneSome(Topped.Top))
+      case Topped.Actual(d) =>
+        val newPageNum = pageNum + d
+        if (newPageNum <= maxPageNum && sizeLimit.forall(newPageNum <= _)) {
+          updateBound(Iterable.single(emptyB))
+          val newMem = SizeMem(size + d * pageSize, sizeLimit, isDefinite)(upperBound)
+          (Some(newMem), OptionA.some(Topped.Actual(pageNum)))
+        } else {
+          (None, OptionA.none)
+        }
 
-  case class ByteMem[B](bytes: Array[B], dirty: mutable.BitSet, sizeLimit: scala.Option[Int], var upperBound: B, definite: Boolean = true) extends SizedMem[B]:
-    override def cloned: ByteMem[B] = ByteMem(bytes.clone(), dirty.clone(), sizeLimit, upperBound, definite)
-    inline def size = bytes.length
-    inline def pageNum: Int = (size / pageSize).toInt
-    override def toIndefinite: ByteMem[B] = ByteMem(bytes, dirty, sizeLimit, upperBound, false)
-    override def isDefinite: Boolean = definite
 
-    override def toString: String = s"Mem(${bytes.size} bytes, ${dirty.size} dirty addresses, definite=$definite)"
+  case class ByteMem[B: ClassTag](bytes: Array[B], dirty: mutable.BitSet, sizeLimit: scala.Option[Int], isDefinite: Boolean)(bound: B) extends Mem[B](bound):
+    override def cloned: ByteMem[B] = ByteMem(bytes.clone(), dirty.clone(), sizeLimit, isDefinite)(upperBound)
+    inline def size: Int = bytes.length
+    inline def pageNum: Int = size / pageSize
+
+    override def read(a: Int, length: Int): OptionA[Seq[B]] =
+      if (a >=0 && a + length <= bytes.length) {
+        val readBytes = bytes.slice(a, a + length).toSeq
+        if (isDefinite)
+          OptionA.some(readBytes)
+        else
+          OptionA.noneSome(readBytes)
+      }
+      else
+        OptionA.none
+
+    override def store(addr: Topped[Int], newBytes: Seq[B])(using Join[B]): (Option[Mem[B]], OptionA[Unit]) = addr match
+      case Topped.Top =>
+        // any byte of the memory might be affected, only track the memory's size from now on
+        updateBound(newBytes)
+        val newMem = SizeMem(size, sizeLimit, isDefinite)(upperBound)
+        (Some(newMem), OptionA.noneSome(()))
+      case Topped.Actual(a) =>
+        if (a >= 0 && a + newBytes.size <= size) {
+          updateBound(newBytes)
+          Array.copy(newBytes.toArray, 0, bytes, a, newBytes.size)
+          dirty.addAll(a until (a + newBytes.size))
+          (None, OptionA.some(()))
+        } else {
+          (None, OptionA.none)
+        }
+
+    override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], OptionA[Topped[Int]]) = delta match
+      case Topped.Top =>
+        // cannot track size of memory anymore, set the memory to top
+        (Some(TopMem(isDefinite)(upperBound)), OptionA.noneSome(Topped.Top))
+      case Topped.Actual(d) =>
+        val newPageNum = pageNum + d
+        if (newPageNum <= maxPageNum && sizeLimit.forall(newPageNum <= _)) {
+          val newBytes = bytes.appendedAll(Iterable.fill(d * pageSize)(emptyB))
+          val newMem = ByteMem(newBytes, dirty, sizeLimit, isDefinite)(upperBound)
+          (Some(newMem), OptionA.some(Topped.Actual(pageNum)))
+        } else {
+          (None, OptionA.none)
+        }
+
+    override def toString: String = s"Mem(${bytes.length} bytes, ${dirty.size} dirty addresses, definite=$isDefinite)"
 
     override def equals(obj: Any): Boolean = obj match
       case that: ByteMem[_] =>
@@ -298,10 +301,10 @@ object ConstantAddressMemory:
           this.dirty == that.dirty &&
           this.sizeLimit == that.sizeLimit &&
           this.upperBound == that.upperBound &&
-          this.definite == that.definite
+          this.isDefinite == that.isDefinite
       case _ => false
 
-    override def hashCode(): Int = this.bytes.toSeq.hashCode * 31 + this.dirty.hashCode * 17 + sizeLimit.hashCode + definite.hashCode
+    override def hashCode(): Int = this.bytes.toSeq.hashCode * 31 + this.dirty.hashCode * 17 + sizeLimit.hashCode + isDefinite.hashCode
 
   val pageSize: Int = 65536
   val maxPageNum: Int = 65536
