@@ -1,8 +1,10 @@
 package sturdy.effect.failure
 
+import sturdy.effect.SturdyFailure
+
 import scala.util.control.NonFatal
 
-case class CFailureException(kind: FailureKind, msg: String) extends FailureException:
+case class CFailureException(kind: FailureKind, msg: String) extends SturdyFailure:
   override def toString: String = s"Failure $kind: $msg"
 
 trait CFailure extends Failure:

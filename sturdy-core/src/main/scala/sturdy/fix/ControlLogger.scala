@@ -211,26 +211,24 @@ class ControlLogger[Ctx, Dom, Codom, Exc, Node]
       else
         null.asInstanceOf[Ctx]
 
-    override def enter(dom: Dom): Unit =
-      getDomNode(dom) match
+    override def enter(dom: Dom): Unit = getDomNode(dom) match
+      case Some(node) =>
+        val cnode = CNode(node, getContext)
+        nodes += cnode
+        addEdgeFromPredecessors(cnode)
+        predecessors = Map(cnode -> EdgeAttrib.default)
+      case None => // nothing
+
+    override def exit(dom: Dom, codom: TrySturdy[Codom]): Unit = codom.get match
+      case Some(cod) => getCodomNode(dom, cod) match
         case Some(node) =>
           val cnode = CNode(node, getContext)
           nodes += cnode
           addEdgeFromPredecessors(cnode)
           predecessors = Map(cnode -> EdgeAttrib.default)
         case None => // nothing
-
-    override def exit(dom: Dom, codom: TrySturdy[Codom]): Unit =
-      codom match
-        case TrySturdy.Success(cod) => getCodomNode(dom, cod) match
-          case Some(node) =>
-            val cnode = CNode(node, getContext)
-            nodes += cnode
-            addEdgeFromPredecessors(cnode)
-            predecessors = Map(cnode -> EdgeAttrib.default)
-          case None => // nothing
-        case TrySturdy.Failure(ex) =>
-          predecessors = Map()
+      case None =>
+        predecessors = Map()
   }
 
 

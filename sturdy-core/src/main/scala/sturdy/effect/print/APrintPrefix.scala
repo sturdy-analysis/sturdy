@@ -138,17 +138,20 @@ trait APrintPrefix[P] extends Print[P], Effectful:
     printed = printed :+ a
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
-    val snapshot = printed
-    var printedF: PrintResult[P] = null
+    private val snapshot = printed
+    private var printedF: PrintResult[P] = _
 
     override def inbetween_(): Unit =
       printedF = printed
       printed = snapshot
 
-    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainNone_(): Unit =
+      printed = snapshot
+
+    override def retainFirst_(fRes: TrySturdy[A]): Unit =
       printed = printedF
 
-    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit = {}
+    override def retainSecond_(gRes: TrySturdy[A]): Unit = {}
 
     override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       printed = printedF.join(printed)

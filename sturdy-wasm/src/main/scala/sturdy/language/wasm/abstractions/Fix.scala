@@ -13,17 +13,17 @@ import swam.FuncIdx
 import swam.syntax.{Loop, CallIndirect, If, Inst, Block, Call}
 
 object Fix:
-  final def isFunOrWhile(dom: FixIn): Boolean = dom match
+  final def isFunOrLoop(dom: FixIn): Boolean = dom match
     case _: FixIn.EnterWasmFunction => true
     case FixIn.Eval(_: Loop, _) => true
     case _ => false
 
-  final def casesFunOrWhile(dom: FixIn): Int = dom match
+  final def casesFunOrLoop(dom: FixIn): Int = dom match
     case _: FixIn.EnterWasmFunction => 0
     case FixIn.Eval(_: Loop, _) => 1
     case _ => -1
 
-  final def surroundingCallSitesLogger() = fix.context.callSites[FixIn, Call | CallIndirect] {
+  final def callSitesLogger() = fix.context.callSites[FixIn, Call | CallIndirect] {
     case FixIn.Eval(c: Call, _) => Some(c)
     case FixIn.Eval(c: CallIndirect, _) => Some(c)
     case _ => None

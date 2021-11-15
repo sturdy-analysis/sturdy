@@ -1,7 +1,7 @@
 package sturdy.effect.except
 
 import sturdy.data.{*, given}
-import sturdy.effect.Effectful
+import sturdy.effect.{Effectful, SturdyException}
 import sturdy.values.Join
 import sturdy.values.exceptions.Exceptional
 
@@ -10,10 +10,10 @@ import scala.util.Success
 import JoinedExcept.*
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.ComputationJoinerWithSuper
-import sturdy.effect.SturdyException
+import sturdy.effect.SturdyThrowable
 import sturdy.effect.TrySturdy
 
-case object AbstractSturdyException extends ExceptSturdyException:
+case object AbstractSturdyException extends SturdyException:
   override def toString: String = s"Abstract exception"
 
 
@@ -66,10 +66,13 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
       fExcept = exception
       exception = snapshot
 
-    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainNone_(): Unit =
+      exception = snapshot
+
+    override def retainFirst_(fRes: TrySturdy[A]): Unit =
       exception = fExcept
 
-    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit = {}
+    override def retainSecond_(gRes: TrySturdy[A]): Unit = {}
 
     override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       exception = fExcept.joinDeep(exception)

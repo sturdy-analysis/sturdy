@@ -47,9 +47,9 @@ case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost, loo
     : Contextual[Ctx, FixIn, FixOut[V]] ?=> Combinator[FixIn, FixOut[V]] =
 
     if (loopUnwinding <= 0)
-      fix.filter(isFunOrWhile, iter.get)
+      fix.filter(isFunOrLoop, iter.get)
     else
-      fix.dispatch(casesFunOrWhile, Seq(
+      fix.dispatch(casesFunOrLoop, Seq(
         // enter Wasm function
         iter.get,
         // loop
@@ -81,7 +81,7 @@ case class CallSites(k: Int) extends ContextConfig:
   type Ctx = CallString
   override val finiteCtx = implicitly
   override def make[V] = {
-    val callSites = surroundingCallSitesLogger()
+    val callSites = callSitesLogger()
     (fix.log(callSites, _), callSites.callString(k))
   }
   override def toString: String = s"calls($k)"

@@ -31,11 +31,11 @@ trait AStoreGenericThreadded[Addr, V](using j: Join[V])
       case Some(old) => j(old, v).ifChanged(store += x -> _)
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
-    val snapshot = store
-    val snapshotDirtyAddrs = dirtyAddrs
+    private val snapshot = store
+    private val snapshotDirtyAddrs = dirtyAddrs
     dirtyAddrs = Set()
-    var fStore: Map[Addr, V] = null
-    var fDirtyAddrs: Set[Addr] = null
+    private var fStore: Map[Addr, V] = _
+    private var fDirtyAddrs: Set[Addr] = _
 
     override def inbetween_(): Unit =
       fStore = store
@@ -43,11 +43,14 @@ trait AStoreGenericThreadded[Addr, V](using j: Join[V])
       store = snapshot
       dirtyAddrs = Set()
 
-    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainNone_(): Unit =
+      store = snapshot
+
+    override def retainFirst_(fRes: TrySturdy[A]): Unit =
       store = fStore
       dirtyAddrs = snapshotDirtyAddrs ++ fDirtyAddrs
 
-    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit =
+    override def retainSecond_(gRes: TrySturdy[A]): Unit =
       dirtyAddrs ++= snapshotDirtyAddrs
 
     override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =

@@ -49,11 +49,11 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new ToppedSymbolTableJoiner[A] 
   class ToppedSymbolTableJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
-    val snapshot = tables
-    val snapDirtyTables = dirtyTables
+    private val snapshot = tables
+    private val snapDirtyTables = dirtyTables
     dirtyTables = Set()
-    var fTables: Map[Key, Topped[Table[Symbol, Entry]]] = null
-    var fDirty: Set[Key] = null
+    private var fTables: Map[Key, Topped[Table[Symbol, Entry]]] = _
+    private var fDirty: Set[Key] = _
 
     override def inbetween_(): Unit =
       fTables = tables
@@ -61,11 +61,14 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
       tables = snapshot
       dirtyTables = Set()
 
-    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainNone_(): Unit =
+      tables = snapshot
+
+    override def retainFirst_(fRes: TrySturdy[A]): Unit =
       tables = fTables
       dirtyTables = snapDirtyTables ++ fDirty
 
-    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit =
+    override def retainSecond_(gRes: TrySturdy[A]): Unit =
       dirtyTables ++= snapDirtyTables
 
     override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =

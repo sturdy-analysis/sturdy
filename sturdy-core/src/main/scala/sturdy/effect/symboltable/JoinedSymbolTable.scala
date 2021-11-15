@@ -9,17 +9,20 @@ import sturdy.values.Join
 trait JoinedSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends ConcreteSymbolTable[Key, Symbol, Entry]:
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new SymbolTableJoiner[A] 
   class SymbolTableJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
-    val snapshot = tables
-    var fTables: Map[Key, Map[Symbol, Entry]] = null
+    private val snapshot = tables
+    private var fTables: Map[Key, Map[Symbol, Entry]] = null
 
     override def inbetween_(): Unit =
       fTables = tables
       tables = snapshot
 
-    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainNone_(): Unit =
+      tables = snapshot
+
+    override def retainFirst_(fRes: TrySturdy[A]): Unit =
       tables = fTables
 
-    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit = {}
+    override def retainSecond_(gRes: TrySturdy[A]): Unit = {}
       // nothing
 
     override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =

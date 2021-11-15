@@ -12,20 +12,23 @@ trait JoinedDecidableOperandStack[V](using Join[V]) extends ConcreteOperandStack
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new OperandStackJoiner[A]
   class OperandStackJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
-    val snapshot = stack
-    var fStack: List[V] = null
+    private val snapshot = stack
+    private var fStack: List[V] = _
 
     override def inbetween_(): Unit =
       fStack = stack
       stack = snapshot
 
-    override def retainOnlyFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainNone_(): Unit =
+      stack = snapshot
+
+    override def retainFirst_(fRes: TrySturdy[A]): Unit =
       if (fRes.isSuccess)
         stack = fStack
       else
         stack = snapshot
 
-    override def retainOnlySecond_(gRes: TrySturdy[A]): Unit =
+    override def retainSecond_(gRes: TrySturdy[A]): Unit =
       if (!gRes.isSuccess)
         stack = snapshot
 
