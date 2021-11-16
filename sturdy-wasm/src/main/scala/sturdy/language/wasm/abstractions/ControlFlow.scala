@@ -8,8 +8,10 @@ import swam.syntax.Block
 import sturdy.language.wasm.generic.FuncId
 import swam.syntax.Inst
 import sturdy.fix
-import sturdy.fix.ControlFlowGraph
-import sturdy.fix.EndNode
+import sturdy.fix.cfg.ControlFlowGraph
+import sturdy.fix.cfg.EndNode
+import sturdy.fix.cfg.ImportantControlNode
+import sturdy.fix.cfg.StartNode
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.FixIn
 import sturdy.language.wasm.generic.FixOut
@@ -21,14 +23,14 @@ import swam.syntax.CallIndirect
 import collection.mutable
 
 enum CfgNode:
-  case Start extends CfgNode, fix.StartNode
+  case Start extends CfgNode, StartNode
   case Instruction(inst: Inst, loc: InstLoc)
   case Labeled(inst: Block | Loop | If, loc: InstLoc)
-  case LabeledEnd(startNode: Labeled) extends CfgNode, fix.EndNode[Labeled]
+  case LabeledEnd(startNode: Labeled) extends CfgNode, EndNode[Labeled]
   case Call(inst: swam.syntax.Call | CallIndirect, loc: InstLoc)
-  case CallReturn(startNode: Call) extends CfgNode, fix.EndNode[Call]
-  case Enter(funId: FuncId) extends CfgNode, fix.ImportantControlNode
-  case Exit(funId: FuncId) extends CfgNode, fix.ImportantControlNode
+  case CallReturn(startNode: Call) extends CfgNode, EndNode[Call]
+  case Enter(funId: FuncId) extends CfgNode, ImportantControlNode
+  case Exit(funId: FuncId) extends CfgNode, ImportantControlNode
 
   def isInstruction: Boolean = this match
     case _: (Instruction | Call | Labeled) => true
@@ -47,11 +49,11 @@ enum CfgNode:
     case Enter(funId) => s"enter $funId"
     case Exit(funId) => s"exit $funId"
 
-case class CfgConfig(contextSensitive: Boolean, granularity: CfgGranularity)
+case class CfgConfig(contextSensitive: Boolean, granularity: CfgGranularity, endNodes: Boolean)
 object CfgConfig:
-  val CallGraph: CfgConfig = CfgConfig(contextSensitive = true, CfgGranularity.OnlyCalls)
-  def ControlGraph(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.OnlyControl)
-  def AllNodes(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.AllNodes)
+  val CallGraph: CfgConfig = CfgConfig(contextSensitive = true, CfgGranularity.OnlyCalls, endNodes = false)
+  def ControlGraph(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.OnlyControl, endNodes = true)
+  def AllNodes(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.AllNodes, endNodes = false)
 enum CfgGranularity:
   case AllNodes
   case OnlyControl
@@ -76,8 +78,8 @@ trait ControlFlow extends Interpreter:
       case FixIn.EnterWasmFunction(id, _, _) => Some(CfgNode.Enter(id))
     } {
       case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
-      case (FixIn.Eval(c: (Call | CallIndirect), loc), _) => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
-      case (FixIn.Eval(c: (Block | Loop | If), loc), _) => Some(CfgNode.LabeledEnd(CfgNode.Labeled(c, loc)))
+      case (FixIn.Eval(c: (Call | CallIndirect), loc), _) if config.endNodes => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
+      case (FixIn.Eval(c: (Block | Loop | If), loc), _) if config.endNodes => Some(CfgNode.LabeledEnd(CfgNode.Labeled(c, loc)))
       case _ => None
     }(using analysis.effects, analysis.effects)
     analysis.addContextSensitiveLogger(cfg.logger)

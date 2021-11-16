@@ -6,8 +6,8 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFallible
 import sturdy.*
-import sturdy.fix.EndNode
 import sturdy.fix.Fixpoint
+import sturdy.fix.cfg.EndNode
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
