@@ -7,6 +7,9 @@ import sturdy.language.tip.Exp
 import sturdy.data.unit
 import sturdy.effect.ObservableJoin
 import sturdy.effect.except.ObservableExcept
+import sturdy.fix.cfg.EndNode
+import sturdy.fix.cfg.ImportantControlNode
+import sturdy.fix.cfg.StartNode
 import sturdy.fix.context.FiniteCallString
 import sturdy.language.tip.Function
 import sturdy.language.tip.Interpreter
@@ -33,12 +36,12 @@ trait Fix extends Interpreter:
   type Parameters = Map[Addr, Value]
 
   enum CfgNode:
-    case Start extends CfgNode, fix.StartNode
+    case Start extends CfgNode, StartNode
     case Statement(s: Stm)
     case Call(call: Exp.Call)
-    case CallReturn(startNode: Call) extends CfgNode, fix.EndNode[Call]
-    case Enter(fun: Function) extends CfgNode, fix.ImportantControlNode
-    case Exit(fun: Function) extends CfgNode, fix.ImportantControlNode
+    case CallReturn(startNode: Call) extends CfgNode, EndNode[Call]
+    case Enter(fun: Function) extends CfgNode, ImportantControlNode
+    case Exit(fun: Function) extends CfgNode, ImportantControlNode
 
   def controlFlow(sensitive: Boolean, onlyCalls: Boolean, analysis: Instance) =
     val cfg = fix.control[Ctx, FixIn, FixOut[Value], Nothing, CfgNode](sensitive, CfgNode.Start) {

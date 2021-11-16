@@ -1,6 +1,10 @@
 package sturdy.fix
 
+import sturdy.effect.ObservableJoin
 import sturdy.effect.TrySturdy
+import sturdy.effect.except.ObservableExcept
+import sturdy.fix.cfg.ControlLogger
+import sturdy.fix.cfg.StartNode
 
 import scala.reflect.ClassTag
 
@@ -49,3 +53,11 @@ final class Dispatch[Dom, Codom](choose: Dom => Int, val phis: Array[Combinator[
     else
       f(dom)
 }
+
+def control[Ctx, Dom, Codom, Exc, Node]
+  (contextSensitive: Boolean, startNode: Node & StartNode)
+  (getDomNode: Dom => Option[Node])
+  (getCodomNode: (Dom, Codom) => Option[Node])
+  (using obsJoin: ObservableJoin, obsExcept: ObservableExcept[Exc])
+  : ControlLogger[Ctx, Dom, Codom, Exc, Node] =
+  new ControlLogger(contextSensitive, startNode, getDomNode, getCodomNode, obsJoin, obsExcept)

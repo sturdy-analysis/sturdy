@@ -160,4 +160,5 @@ def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallib
   println(s"Found ${deadInstructions.size} dead instructions")
   println(s"Found ${deadLabels.size} dead labels")
   println(s"Found ${constantInstructions.size} constant instructions")
+  println(cfg.withBlocks(shortLabels = false).toGraphViz)
   result

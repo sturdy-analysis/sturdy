@@ -5,8 +5,8 @@ import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFallible
-import sturdy.fix.EndNode
 import sturdy.fix.Fixpoint
+import sturdy.fix.cfg.EndNode
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
@@ -88,7 +88,8 @@ class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
 
     // write CFG to .dot file
     val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
-    Files.writeString(dotPath, cfg.toGraphViz)
+    val blockCfg = cfg.withBlocks(shortLabels = true)
+    Files.writeString(dotPath, blockCfg.toGraphViz)
 
   def readBinaryModule(path: Path): Module =
     implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
