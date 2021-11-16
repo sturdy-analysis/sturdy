@@ -83,7 +83,7 @@ class BenchmarksgameNewTypeTest extends AnyFlatSpec, Matchers:
     println(s"This analysis can eliminate $eliminatable nodes, $eliminatablePercent% of the ${allInstructions.size} nodes in $name")
 
     // write CFG to .dot file
-    val dotPath = p.getParent.resolve(p.getFileName.toString + ".dot")
+    val dotPath = p.getParent.resolve(p.getFileName.toString + ".types.dot")
     Files.writeString(dotPath, cfg.toGraphViz)
 
   def readBinaryModule(path: Path): Module =
