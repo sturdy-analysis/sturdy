@@ -287,7 +287,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     case CallIndirect(typeIx) =>
       val ftExpected = module.functionTypes(typeIx)
       val funcIx = stack.popOrFail()
-      tableGet(tableIndex, valueToFuncIx(funcIx)).orElseAndThen(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
+      tableGet(tableIndex, valueToFuncIx(funcIx)).option(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
         invokeIndirect(func, ftExpected, funcIx)
       }
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
