@@ -6,7 +6,7 @@ case class IntLabel(i: Int) extends Label:
 case class SynLabel(from: Label) extends Label:
   override def toString: String = s"$from$$"
 
-object Labeled:
+object Labled:
   private var _next = 0
   def next(): Int =
     val n = _next
@@ -15,8 +15,8 @@ object Labeled:
   def reset(): Unit = 
     _next = 0
 
-trait Labeled:
-  private var _label: Label = IntLabel(Labeled.next())
+trait Labled:
+  private var _label: Label = IntLabel(Labled.next())
   def label: Label = _label
   def @:(l: Label): this.type =
     _label = SynLabel(l)
@@ -24,6 +24,6 @@ trait Labeled:
 
   override def hashCode(): Int = this.label.hashCode()
   override def equals(obj: Any): Boolean = obj match
-    case other: Labeled => this.label == other.label
+    case other: Labled => this.label == other.label
     case _ => false
 

@@ -9,9 +9,6 @@ import sturdy.language.wasm.generic.FuncId
 import swam.syntax.Inst
 import sturdy.fix
 import sturdy.fix.cfg.ControlFlowGraph
-import sturdy.fix.cfg.EndNode
-import sturdy.fix.cfg.ImportantControlNode
-import sturdy.fix.cfg.StartNode
 import sturdy.language.wasm.Interpreter
 import sturdy.language.wasm.generic.FixIn
 import sturdy.language.wasm.generic.FixOut
@@ -22,28 +19,39 @@ import swam.syntax.CallIndirect
 
 import collection.mutable
 
-enum CfgNode:
-  case Start extends CfgNode, StartNode
+enum CfgNode extends ControlFlowGraph.Node:
+  case Start
   case Instruction(inst: Inst, loc: InstLoc)
-  case Labeled(inst: Block | Loop | If, loc: InstLoc)
-  case LabeledEnd(startNode: Labeled) extends CfgNode, EndNode[Labeled]
+  case Labled(inst: Block | Loop | If, loc: InstLoc)
+  case LabledEnd(startNode: Labled)
   case Call(inst: swam.syntax.Call | CallIndirect, loc: InstLoc)
-  case CallReturn(startNode: Call) extends CfgNode, EndNode[Call]
-  case Enter(funId: FuncId) extends CfgNode, ImportantControlNode
-  case Exit(funId: FuncId) extends CfgNode, ImportantControlNode
+  case CallReturn(startNode: Call)
+  case Enter(funId: FuncId)
+  case Exit(funId: FuncId)
+
+  override def isStartNode: Boolean = this == Start
+
+  override def isImportantControlNode: Boolean = this match
+    case _: (Enter | Exit) => true
+    case _ => false
+
+  override def getBeginNode: Option[CfgNode] = this match
+    case LabledEnd(begin) => Some(begin)
+    case CallReturn(call) => Some(call)
+    case _ => None
 
   def isInstruction: Boolean = this match
-    case _: (Instruction | Call | Labeled) => true
+    case _: (Instruction | Call | Labled) => true
     case _ => false
 
   override def toString: String = this match
     case Start => "Start"
     case Instruction(inst, loc) => s"$inst @$loc"
-    case Labeled(inst, loc) => inst match
+    case Labled(inst, loc) => inst match
       case Block(_, _) => s"Block @$loc"
       case Loop(_, _) => s"Loop @$loc"
       case If(_, _, _) => s"If @$loc"
-    case LabeledEnd(labeled) => s"End $labeled"
+    case LabledEnd(labeled) => s"End $labeled"
     case Call(inst, loc) => s"$inst @$loc"
     case CallReturn(call) => s"End $call"
     case Enter(funId) => s"enter $funId"
@@ -51,9 +59,9 @@ enum CfgNode:
 
 case class CfgConfig(contextSensitive: Boolean, granularity: CfgGranularity, endNodes: Boolean)
 object CfgConfig:
-  val CallGraph: CfgConfig = CfgConfig(contextSensitive = true, CfgGranularity.OnlyCalls, endNodes = false)
+  val CallGraph: CfgConfig = CfgConfig(contextSensitive = true, CfgGranularity.OnlyCalls, endNodes = true)
   def ControlGraph(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.OnlyControl, endNodes = true)
-  def AllNodes(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.AllNodes, endNodes = false)
+  def AllNodes(sensitive: Boolean): CfgConfig = CfgConfig(sensitive, CfgGranularity.AllNodes, endNodes = true)
 enum CfgGranularity:
   case AllNodes
   case OnlyControl
@@ -65,7 +73,7 @@ trait ControlFlow extends Interpreter:
   def controlFlow(config: CfgConfig, analysis: Instance) =
     val cfg = fix.control[analysis.Ctx, FixIn, FixOut[Value], WasmException[Value], CfgNode](config.contextSensitive, CfgNode.Start) {
       case FixIn.Eval(c: (Call | CallIndirect), loc) => Some(CfgNode.Call(c, loc))
-      case FixIn.Eval(c: (Block | Loop | If), loc) => Some(CfgNode.Labeled(c, loc))
+      case FixIn.Eval(c: (Block | Loop | If), loc) => Some(CfgNode.Labled(c, loc))
       case FixIn.Eval(inst, loc) =>
         val includeNode = config.granularity match
           case CfgGranularity.AllNodes => true
@@ -79,7 +87,7 @@ trait ControlFlow extends Interpreter:
     } {
       case (FixIn.EnterWasmFunction(id, _, _), FixOut.ExitWasmFunction(_)) => Some(CfgNode.Exit(id))
       case (FixIn.Eval(c: (Call | CallIndirect), loc), _) if config.endNodes => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
-      case (FixIn.Eval(c: (Block | Loop | If), loc), _) if config.endNodes => Some(CfgNode.LabeledEnd(CfgNode.Labeled(c, loc)))
+      case (FixIn.Eval(c: (Block | Loop | If), loc), _) if config.endNodes => Some(CfgNode.LabledEnd(CfgNode.Labled(c, loc)))
       case _ => None
     }(using analysis.effects, analysis.effects)
     analysis.addContextSensitiveLogger(cfg.logger)
@@ -96,17 +104,17 @@ object ControlFlow:
     cfg.filterDeadNodes(allNodes).filter(_.isInstruction)
 
   /** The labels of a Block, Loop, or If instruction are dead if no jump reaches them according to the `cfg`. */
-  def deadLabels[Ctx](cfg: ControlFlowGraph[CfgNode, Ctx]): Set[CfgNode.Labeled] =
+  def deadLabels[Ctx](cfg: ControlFlowGraph[CfgNode, Ctx]): Set[CfgNode.Labled] =
     val revEdges = cfg.getReverseEdges
     cfg.getNodes.flatMap { endCNode => endCNode.node match
-      case endNode: CfgNode.LabeledEnd => endNode.startNode match
-        case lab@CfgNode.Labeled(_: (Block | If), _) =>
+      case endNode: CfgNode.LabledEnd => endNode.startNode match
+        case lab@CfgNode.Labled(_: (Block | If), _) =>
           val preds = revEdges.getOrElse(endCNode, Set())
           if (!preds.exists(_._2.exceptional))
             Some(lab)
           else
             None
-        case lab@CfgNode.Labeled(_: Loop, _) =>
+        case lab@CfgNode.Labled(_: Loop, _) =>
           val preds = revEdges.getOrElse(CNode(lab, endCNode.ctx), Set())
           if (!preds.exists(_._2.exceptional))
             Some(lab)
@@ -154,7 +162,7 @@ object ControlFlow:
   def instToCfgNode(inst: (Inst, InstLoc)): Set[CfgNode] = inst match
     case (inst: swam.syntax.Call, loc) => Set(CfgNode.Call(inst, loc), CfgNode.CallReturn(CfgNode.Call(inst, loc)))
     case (inst: swam.syntax.CallIndirect, loc) => Set(CfgNode.Call(inst, loc), CfgNode.CallReturn(CfgNode.Call(inst, loc)))
-    case (inst: swam.syntax.Block, loc) => Set(CfgNode.Labeled(inst, loc), CfgNode.LabeledEnd(CfgNode.Labeled(inst, loc)))
-    case (inst: swam.syntax.Loop, loc) => Set(CfgNode.Labeled(inst, loc), CfgNode.LabeledEnd(CfgNode.Labeled(inst, loc)))
-    case (inst: swam.syntax.If, loc) => Set(CfgNode.Labeled(inst, loc), CfgNode.LabeledEnd(CfgNode.Labeled(inst, loc)))
+    case (inst: swam.syntax.Block, loc) => Set(CfgNode.Labled(inst, loc), CfgNode.LabledEnd(CfgNode.Labled(inst, loc)))
+    case (inst: swam.syntax.Loop, loc) => Set(CfgNode.Labled(inst, loc), CfgNode.LabledEnd(CfgNode.Labled(inst, loc)))
+    case (inst: swam.syntax.If, loc) => Set(CfgNode.Labled(inst, loc), CfgNode.LabledEnd(CfgNode.Labled(inst, loc)))
     case (inst, loc) => Set(CfgNode.Instruction(inst, loc))

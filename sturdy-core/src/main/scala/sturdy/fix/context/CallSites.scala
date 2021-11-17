@@ -46,5 +46,6 @@ class PreviousCallSiteLogger[Dom, Call](k: Int, getCall: Dom => Option[Call]) ex
   }
 
 
-case class CallString[Call](calls: Seq[Call])
+case class CallString[Call](calls: Seq[Call]):
+  override def toString: String = calls.mkString("[", ", ", "]")
 given FiniteCallString[Call]: Finite[CallString[Call]] with {}

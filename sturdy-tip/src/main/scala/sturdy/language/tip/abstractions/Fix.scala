@@ -7,9 +7,7 @@ import sturdy.language.tip.Exp
 import sturdy.data.unit
 import sturdy.effect.ObservableJoin
 import sturdy.effect.except.ObservableExcept
-import sturdy.fix.cfg.EndNode
-import sturdy.fix.cfg.ImportantControlNode
-import sturdy.fix.cfg.StartNode
+import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.fix.context.FiniteCallString
 import sturdy.language.tip.Function
 import sturdy.language.tip.Interpreter
@@ -35,13 +33,21 @@ trait Fix extends Interpreter:
     }
   type Parameters = Map[Addr, Value]
 
-  enum CfgNode:
-    case Start extends CfgNode, StartNode
+  enum CfgNode extends ControlFlowGraph.Node:
+    case Start
     case Statement(s: Stm)
     case Call(call: Exp.Call)
-    case CallReturn(startNode: Call) extends CfgNode, EndNode[Call]
-    case Enter(fun: Function) extends CfgNode, ImportantControlNode
-    case Exit(fun: Function) extends CfgNode, ImportantControlNode
+    case CallReturn(startNode: Call)
+    case Enter(fun: Function)
+    case Exit(fun: Function)
+
+    override def isStartNode: Boolean = this == Start
+    override def isImportantControlNode: Boolean = this match
+      case _: (Enter | Exit) => true
+      case _ => false
+    override def getBeginNode: Option[ControlFlowGraph.Node] = this match
+      case CallReturn(call) => Some(call)
+      case _ => None
 
   def controlFlow(sensitive: Boolean, onlyCalls: Boolean, analysis: Instance) =
     val cfg = fix.control[Ctx, FixIn, FixOut[Value], Nothing, CfgNode](sensitive, CfgNode.Start) {

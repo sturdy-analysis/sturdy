@@ -20,25 +20,25 @@ import sturdy.util.Exact
 import scala.runtime.BoxesRunTime
 
 
-class ControlLogger[Ctx, Dom, Codom, Exc, Node]
+class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
   (contextSensitive: Boolean,
-   startNode: Node & StartNode,
-   getDomNode: Dom => Option[Node],
-   getCodomNode: (Dom, Codom) => Option[Node],
+   startNode: N,
+   getDomNode: Dom => Option[N],
+   getCodomNode: (Dom, Codom) => Option[N],
    obsJoin: ObservableJoin,
    obsExcept: ObservableExcept[Exc]
   )
-  extends JoinObserver, ExceptObserver[Exc], ControlFlowGraph[Node, Ctx]:
+  extends JoinObserver, ExceptObserver[Exc], ControlFlowGraph[N, Ctx]:
 
   obsJoin.addJoinObserver(this)
   obsExcept.addExceptObserver(this)
 
-  private case class PredNode(cnode: CNode[Node, Ctx], exceptional: Boolean)
+  private case class PredNode(cnode: CNode[N, Ctx], exceptional: Boolean)
 
-  type Predecessors = Map[CNode[Node, Ctx], EdgeAttrib]
+  type Predecessors = Map[CNode[N, Ctx], EdgeAttrib]
   type Exceptions = Map[Any, Predecessors]
 
-  private val startCNode: CNode[Node, Ctx] = CNode(startNode, null.asInstanceOf[Ctx])
+  private val startCNode: CNode[N, Ctx] = CNode(startNode, null.asInstanceOf[Ctx])
 
   private var predecessors: Predecessors = Map(startCNode -> EdgeAttrib.default)
   private var joinStack: List[Predecessors] = List()
@@ -49,8 +49,8 @@ class ControlLogger[Ctx, Dom, Codom, Exc, Node]
   /** Exceptions currently handled in a catch block. Uncaught exceptions are propagated outwards. */
   private var catchExceptions: Exceptions = Map()
 
-  private val nodes: mutable.Set[CNode[Node, Ctx]] = mutable.Set(startCNode)
-  private val edges: mutable.Map[CNode[Node, Ctx], Map[CNode[Node, Ctx], EdgeAttrib]] = mutable.Map()
+  private val nodes: mutable.Set[CNode[N, Ctx]] = mutable.Set(startCNode)
+  private val edges: mutable.Map[CNode[N, Ctx], Map[CNode[N, Ctx], EdgeAttrib]] = mutable.Map()
 
   override def throwing(exc: Exc): Unit =
     val exceptionalPredecessors = predecessors.map(_.copy(_2 = EdgeAttrib(true)))
@@ -116,16 +116,18 @@ class ControlLogger[Ctx, Dom, Codom, Exc, Node]
     nodes += startCNode
     edges.clear()
 
-  inline private def addEdgeFromPredecessors(to: CNode[Node, Ctx]): Unit =
+  inline private def addEdgeFromPredecessors(to: CNode[N, Ctx]): Unit =
     predecessors.foreach((from, attrib) => addEdge(from, to, attrib))
 
-  private def addEdge(from: CNode[Node, Ctx], to: CNode[Node, Ctx], attrib: EdgeAttrib): Unit =
+  private def addEdge(from: CNode[N, Ctx], to: CNode[N, Ctx], attrib: EdgeAttrib): Unit =
+    if (from == to)
+      println()
     edges.get(from) match
       case None => edges += from -> Map(to -> attrib)
       case Some(map) => edges += from -> (map + (to -> attrib))
 
-  def getNodes: List[CNode[Node, Ctx]] = nodes.toList.sortBy(_.toString)
-  def getEdges: Map[CNode[Node, Ctx], Map[CNode[Node, Ctx], EdgeAttrib]] = edges.toMap
+  def getNodes: List[CNode[N, Ctx]] = nodes.toList.sortBy(_.toString)
+  def getEdges: Map[CNode[N, Ctx], Map[CNode[N, Ctx], EdgeAttrib]] = edges.toMap
 
   def logger(using contextual: Contextual[Ctx, Dom, Codom]): Logger[Dom, Codom] = new Logger {
     private def getContext: Ctx =
