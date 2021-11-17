@@ -6,7 +6,6 @@ import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFallible
 import sturdy.fix.Fixpoint
-import sturdy.fix.cfg.EndNode
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
@@ -68,7 +67,7 @@ class BenchmarksgameNewTypeTest extends AnyFlatSpec, Matchers:
     val deadInstructionPercent = (10000.0 * deadInstructions.size / allInstructions.size.toDouble).round / 100.0
     println(s"Found ${deadInstructions.size} dead instructions, $deadInstructionPercent% of the ${allInstructions.size} instructions in $name")
 
-    val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labeled])
+    val allLabels = allNodes.filter(_.isInstanceOf[CfgNode.Labled])
     val deadLabels = ControlFlow.deadLabels(cfg)
     val deadLabelsPercent = (10000.0 * deadLabels.size / allLabels.size.toDouble).round / 100.0
     val deadLabelsGrouped = deadLabels.groupBy(_.inst.getClass.getSimpleName)

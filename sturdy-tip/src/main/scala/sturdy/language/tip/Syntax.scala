@@ -1,11 +1,11 @@
 package sturdy.language.tip
 
-import sturdy.util.Labeled
+import sturdy.util.Labled
 import sturdy.values.{Structural, Finite}
 
 import cats.Monoid
 
-enum Exp extends Labeled:
+enum Exp extends Labled:
   case NumLit(n: Int)
   case Input()
   case Var(name: String)
@@ -61,7 +61,7 @@ enum Exp extends Labeled:
     case FieldAccess(rec: Exp, field: String) => s"FieldAccess@${this.label}"
 
 
-enum Stm extends Labeled:
+enum Stm extends Labled:
   case Assign(lhs: Assignable, e: Exp)
   case If(cond: Exp, thn: Stm, els: Option[Stm])
   case While(cond: Exp, body: Stm)
