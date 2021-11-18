@@ -57,9 +57,8 @@ object ConstantAnalysisSoundness {
       case Topped.Actual(b) => bs.isSound(cByte,b)
       
   given Soundness[ConcreteInterpreter.FunV, FunV] with
-    override def isSound(cFun: ConcreteInterpreter.FunV, aFun: FunV): IsSound = aFun match
-      case Topped.Top => IsSound.Sound
-      case Topped.Actual(aPow) => powersetContainsOneSound.isSound(cFun, aPow)
+    override def isSound(cFun: ConcreteInterpreter.FunV, aFun: FunV): IsSound =
+      powersetContainsOneSound.isSound(cFun, aFun)
 
   given Soundness[ConcreteInterpreter.Instance, ConstantAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: ConstantAnalysis.Instance): IsSound =

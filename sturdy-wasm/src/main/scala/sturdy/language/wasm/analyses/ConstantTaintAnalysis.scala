@@ -33,7 +33,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFunctionValue, ControlFlow:
+object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFlow:
   type MayJoin[A] = WithJoin[A]
   type Addr = Topped[Int]
   type AByte = TaintProduct[Topped[Byte]]
@@ -41,7 +41,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
   type Size = Topped[Int]
   type ExcV = Powerset[WasmException[Value]]
   type FuncIx = Topped[Int]
-  type FunV = Topped[Powerset[FunctionInstance]]
+  type FunV = Powerset[FunctionInstance]
 
   given ConstantSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32.value

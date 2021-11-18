@@ -34,14 +34,14 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object ConstantAnalysis extends Interpreter, ConstantValues, ToppedFunctionValue, ControlFlow:
+object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
   type MayJoin[A] = WithJoin[A]
   type Addr = I32
   type Bytes = Seq[Topped[Byte]]
   type Size = I32
   type ExcV = Powerset[WasmException[Value]]
   type FuncIx = I32
-  type FunV = Topped[Powerset[FunctionInstance]]
+  type FunV = Powerset[FunctionInstance]
 
   given ConstantSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
