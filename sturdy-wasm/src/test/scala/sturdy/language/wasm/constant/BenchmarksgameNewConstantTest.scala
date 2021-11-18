@@ -32,7 +32,7 @@ class BenchmarksgameNewConstantTest extends AnyFlatSpec, Matchers:
   val funcName = "_start"
   val uri = classOf[BenchmarksgameNewConstantTest].getResource("/sturdy/language/wasm/benchmarksgame/src").toURI();
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("nbody.wasm")).sorted.headOption.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.headOption.foreach { p =>
     it must s"warm-up constant analysis on benchmark ${p.getFileName}" in {
       run(p, binary = true)
     }

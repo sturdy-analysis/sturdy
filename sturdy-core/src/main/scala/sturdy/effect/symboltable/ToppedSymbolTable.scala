@@ -25,8 +25,12 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry], Top[Entry]) exten
       case Topped.Top => OptionA.NoneSome(Top.top)
       case Topped.Actual(tab) => symbol match
         case Topped.Top =>
-          val vals = tab.underlying.values.map(_.get)
-          OptionA.NoneSome(vals.reduce(Join(_, _).get))
+          if (tab.underlying.isEmpty)
+            OptionA.none
+          else {
+            val vals = tab.underlying.values.map(_.get)
+            OptionA.NoneSome(vals.reduce(Join(_, _).get))
+          }
         case Topped.Actual(sym) => tab.underlying.get(sym) match
           case None => OptionA.None()
           case Some(MayMust.Must(entry)) => OptionA.some(entry)

@@ -41,11 +41,11 @@ trait WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_]]:
   val encode: Convert[V, Seq[Byte], V, Bytes, SomeCC[StoreInst | StoreNInst]]
   val decode: Convert[Seq[Byte], V, Bytes, V, SomeCC[LoadInst | LoadNInst]]
   val exceptOps: Exceptional[WasmException[V], ExcV, MayJoin]
-  val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, MayJoin]
+  val specialOps: SpecialWasmOperations[V, Addr, Size, FuncIx, MayJoin]
   val branchOps: BooleanBranching[V, MayJoin]
 
 /** Operations specific to Wasm */
-trait SpecialWasmOperations[V, Addr, Size, FuncIx, FunV, MayJoin[_]]:
+trait SpecialWasmOperations[V, Addr, Size, FuncIx, MayJoin[_]]:
   def valueToAddr(v: V): Addr
   def valueToFuncIx(v: V): FuncIx
   

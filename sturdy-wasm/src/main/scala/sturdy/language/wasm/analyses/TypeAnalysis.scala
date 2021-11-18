@@ -40,9 +40,9 @@ object TypeAnalysis extends Interpreter, TypeValues, ToppedFunctionValue, Contro
   type Size = I32
   type ExcV = Powerset[WasmException[Value]]
   type FuncIx = I32
-  type FunV = Topped[Powerset[FunctionInstance]]
+  type FunV = Unit
 
-  given TypeSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+  given TypeSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32

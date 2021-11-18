@@ -9,7 +9,7 @@ import scala.collection.mutable.ListBuffer
 
 object BlockControlFlowGraph:
   enum BlockNode[N <: ControlFlowGraph.Node] extends ControlFlowGraph.Node:
-    case Block(id: Int, nodes: Vector[N])
+    case Block(id: Int, nodes: Vector[N])(val blockNodes: N => Option[BlockNode[N]])
     case Simple(node: N)(val blockNodes: N => Option[BlockNode[N]])
 
     override def isStartNode: Boolean = this match
@@ -19,12 +19,16 @@ object BlockControlFlowGraph:
       case Simple(n) => n.isImportantControlNode
       case _ => false
     override def getBeginNode: Option[BlockNode[N]] = this match
+      case bl@Block(_, nodes) =>
+        for (b <- nodes.head.getBeginNode)
+          yield bl.blockNodes(b.asInstanceOf[N]) match
+            case Some(block) => block
+            case None => Simple(b.asInstanceOf[N])(_ => None)
       case simp@Simple(node) =>
         for (b <- node.getBeginNode)
           yield simp.blockNodes(b.asInstanceOf[N]) match
             case Some(block) => block
             case None => Simple(b.asInstanceOf[N])(_ => None)
-      case _ => None
 
     override def toString: String = this match
       case Block(id, _) => id.toString
@@ -37,11 +41,11 @@ class BlockControlFlowGraph[N <: ControlFlowGraph.Node, Ctx](g: ControlFlowGraph
     val revEdges = g.getReverseEdges
 
     def blockCandidate(cnode: CNode[N, Ctx], atStart: Boolean, atEnd: Boolean): Boolean = cnode.node match
-      case node if node.isStartNode || node.isImportantControlNode || node.isEndNode => false
-      case _ =>
+      case node if node.isStartNode || node.isImportantControlNode => false
+      case node =>
         if (!atStart) {
           val preds = revEdges(cnode)
-          if (preds.size != 1 || preds.head._1.ctx != cnode.ctx)
+          if (node.isEndNode || preds.size != 1 || preds.head._1.ctx != cnode.ctx)
             return false
         }
         if (!atEnd) {
@@ -62,12 +66,13 @@ class BlockControlFlowGraph[N <: ControlFlowGraph.Node, Ctx](g: ControlFlowGraph
         yield CNode(closedBlocks.getOrElse(pred, mkSimple(pred.node, pred.ctx)), pred.ctx) -> attrib
     def addEdges(oldTo: N, ctx: Ctx, to: CNode[BlockNode[N], Ctx]): Unit =
       getPredecessors(oldTo, ctx).foreach { case (from, attrib) => myEdges += ((from, to, attrib)) }
+    def mkBlockNodes(ctx: Ctx)(n: N): Option[BlockNode[N]] = closedBlocks.get(CNode(n, ctx))
     def mkSimple(node: N, ctx: Ctx): Simple[N] =
-      Simple(node)(n => closedBlocks.get(CNode(n, ctx)))
+      Simple(node)(mkBlockNodes(ctx))
 
     var blockCount = 0
     def closeBlock(block: ListBuffer[N], ctx: Ctx): Unit =
-      val blockNode = CNode(Block(blockCount, block.toVector), ctx)
+      val blockNode = CNode(Block(blockCount, block.toVector)(mkBlockNodes(ctx)), ctx)
       blockCount += 1
       myNodes += blockNode
       addEdges(block.head, ctx, blockNode)
@@ -153,7 +158,13 @@ class BlockControlFlowGraph[N <: ControlFlowGraph.Node, Ctx](g: ControlFlowGraph
           else
             s"${from.ctx}:\n" + l
       s"shape=box, fillcolor=white, style=filled, fontcolor=black, label=\"$label\""
-    case _ => super.nodeGraphVizAttributes(from)
+    case Simple(node) =>
+      if (node.isStartNode)
+        s"fillcolor=red, style=filled, fontcolor=black, label=\"${from.toString}\""
+      else if (node.isImportantControlNode)
+        s"fillcolor=black, style=filled, fontcolor=white, label=\"${from.toString}\""
+      else
+        s"shape=box, fillcolor=white, style=filled, fontcolor=black, label=\"${from.toString}\""
 
   override def edgeGraphVizAttributes(from: CNode[BlockNode[N], Ctx], to: CNode[BlockNode[N], Ctx], attrib: EdgeAttrib): String =
     var s = ", "
