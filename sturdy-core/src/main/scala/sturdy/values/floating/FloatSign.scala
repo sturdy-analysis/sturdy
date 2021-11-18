@@ -141,7 +141,7 @@ given SignFloatOps[B] (using base: Fractional[B]): FloatOps[B, FloatSign] with
   def nearest(v: FloatSign): FloatSign = ???
   def copysign(v: FloatSign, sign: FloatSign): FloatSign = ???
 
-given SignCompareOps: CompareOps[FloatSign, Topped[Boolean]] with
+given SignOrderingOps: OrderingOps[FloatSign, Topped[Boolean]] with
   def lt(v1: FloatSign, v2: FloatSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Topped.Actual(true)
     case (Neg, ZeroOrPos) => Topped.Actual(true)

@@ -63,7 +63,7 @@ object SignAnalysis extends Interpreter,
     given Effects = effects
 
     final def vintOps: IntegerOps[Int, VInt] = implicitly
-    final def vcompareOps: CompareOps[VInt, VBool] = implicitly
+    final def vcompareOps: OrderingOps[VInt, VBool] = implicitly
     final def vintEqOps: EqOps[VInt, VBool] = implicitly
     final def vrefEqOps: EqOps[VRef, VBool] = implicitly
     final def vfunEqOps: EqOps[VFun, VBool] = implicitly
@@ -71,7 +71,7 @@ object SignAnalysis extends Interpreter,
     final def vfunOps: FunctionOps[Function, Seq[Value], Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
-    final def vbranchOps: BooleanBranching[Topped[Boolean], MayJoin] = implicitly
+    final def vbranchOps: BooleanBranching[Topped[Boolean], Unit] = implicitly
 
     given Lazy[Widen[Value]] = lazily(CombineValue)
 

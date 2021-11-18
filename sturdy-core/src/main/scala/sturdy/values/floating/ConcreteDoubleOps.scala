@@ -5,7 +5,7 @@ import sturdy.values.config
 import sturdy.effect.failure.Failure
 import sturdy.values.Structural
 import sturdy.values.config.UnsupportedConfiguration
-import sturdy.values.relational.CompareOps
+import sturdy.values.relational.OrderingOps
 import sturdy.values.relational.EqOps
 
 import scala.util.Random
@@ -47,7 +47,7 @@ given EqOps[Double, Boolean] with
   override def equ(v1: Double, v2: Double): Boolean = v1 == v2
   override def neq(v1: Double, v2: Double): Boolean = v1 != v2
 
-given CompareOps[Double, Boolean] with
+given OrderingOps[Double, Boolean] with
   def lt(v1: Double, v2: Double): Boolean = v1 < v2
   def le(v1: Double, v2: Double): Boolean = v1 <= v2
   def ge(v1: Double, v2: Double): Boolean = v1 >= v2

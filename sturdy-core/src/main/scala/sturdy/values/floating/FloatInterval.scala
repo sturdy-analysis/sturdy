@@ -78,7 +78,7 @@ given IntervalFloatOps: FloatOps[Float, FloatInterval] with
   def nearest(v: FloatInterval): FloatInterval = ???
   def copysign(v: FloatInterval, sign: FloatInterval): FloatInterval = ???
 
-given FloatIntervalCompareOps: CompareOps[FloatInterval, Topped[Boolean]] with
+given FloatIntervalOrderingOps: OrderingOps[FloatInterval, Topped[Boolean]] with
   def lt(iv1: FloatInterval, iv2: FloatInterval): Topped[Boolean] =
     if iv1.h < iv2.l then Topped.Actual(true)
     else if iv2.h <= iv1.l then Topped.Actual(false)

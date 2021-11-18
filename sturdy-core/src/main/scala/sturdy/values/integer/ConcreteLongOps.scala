@@ -7,7 +7,7 @@ import sturdy.values.config
 import sturdy.values.config.Bits
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
-import sturdy.values.relational.CompareOps
+import sturdy.values.relational.OrderingOps
 import sturdy.values.relational.EqOps
 
 import java.lang.Float as JFloat
@@ -79,7 +79,7 @@ given EqOps[Long, Boolean] with
   override def equ(v1: Long, v2: Long): Boolean = v1 == v2
   override def neq(v1: Long, v2: Long): Boolean = v1 != v2
 
-given CompareOps[Long, Boolean] with
+given OrderingOps[Long, Boolean] with
   def lt(v1: Long, v2: Long): Boolean = v1 < v2
   def le(v1: Long, v2: Long): Boolean = v1 <= v2
   def ge(v1: Long, v2: Long): Boolean = v1 >= v2

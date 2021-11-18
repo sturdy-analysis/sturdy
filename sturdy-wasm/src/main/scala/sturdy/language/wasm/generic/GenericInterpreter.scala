@@ -117,7 +117,6 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 
   val wasmOps: WasmOps[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin]
   import wasmOps.*
-  import branchOps.*
   import specialOps.*
   import exceptOps.*
 
@@ -179,8 +178,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
 
   def load(inst: LoadInst | LoadNInst): Unit =
     // add offset to base address (which is already on the stack)
-    stack.push(intOps.integerLit(inst.offset))
-    addWithOverflowCheck
+    stack.push(i32ops.integerLit(inst.offset))
+    addWithOverflowCheck()
     val effectiveAddr = stack.popOrFail()
     val addr = valueToAddr(effectiveAddr)
 
@@ -197,7 +196,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     val bytes = encode(v, SomeCC(inst, false))
 
     // add offset to base address (which is already on the stack)
-    stack.push(intOps.integerLit(inst.offset))
+    stack.push(i32ops.integerLit(inst.offset))
     val addr = valueToAddr(num.evalNumeric(i32.Add))
 
     val memIdx = memoryIndex
@@ -238,7 +237,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       case Drop => stack.popOrFail()
       case Select =>
         val isZero = num.evalNumeric(i32.Eqz)
-        boolBranch[Unit](isZero) {
+        branchOpsUnit.boolBranch(isZero) {
           // v == 0: else branch
           val (_, v2) = stack.pop2OrFail()
           stack.push(v2)
@@ -258,7 +257,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     case ifInst@If(bt, thnInsts, elsInsts) =>
       val isZero = num.evalNumeric(i32.Eqz)
       val rt = returnArity(bt)
-      boolBranch[Unit](isZero) {
+      branchOpsUnit.boolBranch(isZero) {
         // v == 0: else branch
         label(BlockId(ifInst -> false), paramsArity(bt), rt, elsInsts, None)
       } {
@@ -268,13 +267,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       branch(labelIndex)
     case BrIf(labelIndex) =>
       val isZero = num.evalNumeric(i32.Eqz)
-      val res = boolBranch[Unit](isZero) {
+      branchOpsUnit.boolBranch(isZero) {
         // v == 0: else branch
         // do nothing
       } {
         branch(labelIndex)
       }
-      res
     case BrTable(labels, defaultLabel) =>
       val ix = stack.popOrFail()
       indexLookup(ix, labels).orElseAndThen(defaultLabel)(branch)
@@ -449,17 +447,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       stack.popOrFail()
     }))
 
-  def addWithOverflowCheck =
+  def addWithOverflowCheck(): Unit =
     val v1 = stack.popOrFail()
     val v2 = stack.popOrFail()
-    val res = intOps.add(v1,v2)
+    val res = i32ops.add(v1,v2)
     val cmp = unsignedCompareOps.ltUnsigned(res,v1)
-    boolBranch[Unit](cmp) {
-      fail(IntegerOverflow, s"$v1 + $v2")
-    } {
-      stack.push(res)
-    }
-  
+    branchOpsUnit.boolBranch(cmp, fail(IntegerOverflow, s"$v1 + $v2"), stack.push(res))
+
   def resolveImports(module: Module, imports: Imports):
     (Vector[FunctionInstance], Vector[GlobalAddr], Vector[TableAddr], Vector[MemoryAddr]) =
     val funcs: VectorBuilder[FunctionInstance] = VectorBuilder()
@@ -566,8 +560,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     // memory
     modInst.memoryAddrs = memImpors ++ module.mems.map {
       case MemType(Limits(min, max)) =>
-        val initSize = valToSize(intOps.integerLit(min))
-        val sizeLimit = max.map(i => valToSize(intOps.integerLit(i)))
+        val initSize = valToSize(i32ops.integerLit(min))
+        val sizeLimit = max.map(i => valToSize(i32ops.integerLit(i)))
         val memAddr = MemoryAddr(memCount)
         addEmptyMemory(memAddr, initSize, sizeLimit)
         memCount += 1
