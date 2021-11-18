@@ -1,6 +1,6 @@
 package sturdy.values.types
 
-import sturdy.data.{WithJoin, joinComputations, joinWithFailure}
+import sturdy.data.{WithJoin, joinComputations, joinWithFailure, MakeJoined}
 import sturdy.effect.Effectful
 import sturdy.effect.failure.Failure
 import sturdy.values.convert.Convert
@@ -48,6 +48,6 @@ given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](us
   override def apply(from: BaseType[B1], conf: Config): BaseType[B2] =
     joinWithFailure(BaseType[B2])(Failure(ConversionFailure, "Potential conversion failure from $from to $to"))
 
-given BaseTypeBooleanBranching[R](using WithJoin[R]): BooleanBranching[BaseType[Boolean], R] with
+given BaseTypeBooleanBranching[R](using Effectful, Join[R]): BooleanBranching[BaseType[Boolean], R] with
   override def boolBranch(v: BaseType[Boolean], thn: => R, els: => R): R =
     joinComputations(thn)(els)
