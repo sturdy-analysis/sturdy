@@ -33,7 +33,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
-object TypeAnalysis extends Interpreter, TypeValues, ToppedFunctionValue, ControlFlow:
+object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
   type MayJoin[A] = WithJoin[A]
   type Addr = I32
   type Bytes = BaseType[Seq[Byte]]
