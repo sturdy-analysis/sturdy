@@ -9,8 +9,8 @@ import sturdy.effect.callframe.JoinedDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinedDecidableOperandStack
-import sturdy.effect.symboltable.{ToppedSymbolTable, JoinedSymbolTable}
-import sturdy.effect.symboltable.ToppedSymbolTable.CombineTable
+import sturdy.effect.symboltable.{ConstantSymbolTable, JoinedSymbolTable}
+import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
@@ -87,7 +87,7 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
     extends JoinedDecidableOperandStack[Value]
       with ConstantAddressMemory[MemoryAddr, Topped[Byte]](Topped.Actual(0))
       with Globals[Value]
-      with ToppedSymbolTable[TableAddr, Int, FunV]
+      with ConstantSymbolTable[TableAddr, Int, FunV]
       with JoinedDecidableCallFrame[FrameData, Int, Value]
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect

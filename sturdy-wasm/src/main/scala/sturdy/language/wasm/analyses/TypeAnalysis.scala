@@ -8,7 +8,7 @@ import sturdy.effect.callframe.JoinedDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinedDecidableOperandStack
-import sturdy.effect.symboltable.{TopSymbolTable, JoinedSymbolTable}
+import sturdy.effect.symboltable.{UpperBoundSymbolTable, JoinedSymbolTable}
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
@@ -40,7 +40,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ToppedFunctionValue, Contro
   type Size = I32
   type ExcV = Powerset[WasmException[Value]]
   type FuncIx = I32
-  type FunV = Unit
+  type FunV = Powerset[FunctionInstance]
 
   given TypeSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
@@ -77,7 +77,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ToppedFunctionValue, Contro
     extends JoinedDecidableOperandStack[Value]
       with TopMemory[MemoryAddr, Addr, Bytes, Size]
       with Globals[Value]
-      with TopSymbolTable[TableAddr, FuncIx, FunV]
+      with UpperBoundSymbolTable[TableAddr, FuncIx, FunV](Powerset())
       with JoinedDecidableCallFrame[FrameData, Int, Value]
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect

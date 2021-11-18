@@ -9,8 +9,8 @@ import sturdy.effect.callframe.JoinedDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinedDecidableOperandStack
-import sturdy.effect.symboltable.{JoinedSymbolTable, ToppedSymbolTable}
-import sturdy.effect.symboltable.ToppedSymbolTable.CombineTable
+import sturdy.effect.symboltable.{JoinedSymbolTable, ConstantSymbolTable}
+import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
 import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
 import sturdy.language.wasm.abstractions.*
@@ -88,7 +88,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFl
     extends JoinedDecidableOperandStack[Value]
       with ConstantAddressMemory[MemoryAddr, AByte](untainted(Topped.Actual(0)))
       with Globals[Value]
-      with ToppedSymbolTable[TableAddr, Int, FunV]
+      with ConstantSymbolTable[TableAddr, Int, FunV]
       with JoinedDecidableCallFrame[FrameData, Int, Value]
       with JoinedExcept[WasmException[Value], ExcV]
       with AFailureCollect

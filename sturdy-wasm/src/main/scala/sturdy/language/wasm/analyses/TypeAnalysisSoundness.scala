@@ -47,20 +47,11 @@ object TypeAnalysisSoundness {
       else
         x.zip(y).forall((a,b) => poValue.lteq(a,b))
 
-  given (using bs: Soundness[Byte,Byte]): Soundness[Byte, Topped[Byte]] with
-    def isSound(cByte: Byte, aByte: Topped[Byte]): IsSound = aByte match
-      case Topped.Top => IsSound.Sound
-      case Topped.Actual(b) => bs.isSound(cByte,b)
-      
-  given Soundness[ConcreteInterpreter.FunV, FunV] with
-    override def isSound(cFun: ConcreteInterpreter.FunV, aFun: FunV): IsSound = aFun match
-      case Topped.Top => IsSound.Sound
-      case Topped.Actual(aPow) => powersetContainsOneSound.isSound(cFun, aPow)
-
   given Soundness[ConcreteInterpreter.Instance, TypeAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: TypeAnalysis.Instance): IsSound =
       // soundness for stack, memory, symbol table, call frame
       a.effects.operandStackIsSound(c.effects) &&
         a.effects.globalsIsSound(c.effects) &&
+        a.effects.tableIsSound(c.effects) &&
         a.effects.joinedDecidableCallFrameIsSound(c.effects)
 }
