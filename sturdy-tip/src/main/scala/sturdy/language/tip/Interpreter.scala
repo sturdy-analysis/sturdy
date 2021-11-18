@@ -9,7 +9,7 @@ import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
 import sturdy.values.integer.{IntegerOps, LiftedIntegerOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
 import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
-import sturdy.values.relational.{EqOps, CompareOps, LiftedCompareOps}
+import sturdy.values.relational.{EqOps, OrderingOps, LiftedOrderingOps}
 
 trait Interpreter:
   type MayJoin[A]
@@ -82,7 +82,7 @@ trait Interpreter:
     given Failure = this.effects
 
     def vintOps: IntegerOps[Int, VInt]
-    def vcompareOps: CompareOps[VInt, VBool]
+    def vcompareOps: OrderingOps[VInt, VBool]
     def vintEqOps: EqOps[VInt, VBool]
     def vrefEqOps: EqOps[VRef, VBool]
     def vfunEqOps: EqOps[VFun, VBool]
@@ -90,11 +90,11 @@ trait Interpreter:
     def vfunOps: FunctionOps[Function, Seq[Value], Value, VFun]
     def vrefOps: ReferenceOps[Addr, VRef]
     def vrecOps: RecordOps[Field, Value, VRecord]
-    def vbranchOps: BooleanBranching[VBool, MayJoin]
+    def vbranchOps: BooleanBranching[VBool, Unit]
 
     import Value.*
     final val intOps = new LiftedIntegerOps[Int, Value, VInt](_.asInt, IntValue.apply)(using vintOps)
-    final val compareOps = new LiftedCompareOps[Value, Value, VInt, VBool](_.asInt, boolean)(using vcompareOps)
+    final val compareOps = new LiftedOrderingOps[Value, Value, VInt, VBool](_.asInt, boolean)(using vcompareOps)
     final val eqOps = new EqOps[Value, Value]:
       def equ(v1: Value, v2: Value): Value = (v1, v2) match
         case (IntValue(i1), IntValue(i2)) => boolean(vintEqOps.equ(i1, i2))
@@ -111,4 +111,4 @@ trait Interpreter:
     final val functionOps = new LiftedFunctionOps[Function, Seq[Value], Value, Value, VFun](_.asFunction, FunValue.apply)(using vfunOps)
     final val refOps = new LiftedReferenceOps[Value, Addr, VRef](_.asReference, RefValue.apply)(using vrefOps)
     final val recOps = new LiftedRecordOps[Field, Value, Value, Value, VRecord](_.asRecord, identity, RecValue.apply, identity)(using vrecOps)
-    final val branchOps = new LiftedBooleanBranching[Value, VBool, MayJoin](v => v.asBoolean(using effects))(using vbranchOps)
+    final val branchOps = new LiftedBooleanBranching[Value, VBool, Unit](v => v.asBoolean(using effects))(using vbranchOps)

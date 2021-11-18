@@ -13,7 +13,7 @@ import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.records.RecordOps
-import sturdy.values.relational.{EqOps, CompareOps}
+import sturdy.values.relational.{EqOps, OrderingOps}
 import sturdy.fix
 import sturdy.data.unit
 import sturdy.values.references.ReferenceOps
@@ -78,12 +78,12 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
   import effects.*
 
   val intOps: IntegerOps[Int, V]; import intOps.*
-  val compareOps: CompareOps[V, V]; import compareOps.*
+  val compareOps: OrderingOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
   val functionOps: FunctionOps[Function, Seq[V], V, V]; import functionOps.*
   val refOps: ReferenceOps[Addr, V]; import refOps.*
   val recOps: RecordOps[Field, V, V]; import recOps.*
-  val branchOps: BooleanBranching[V, MayJoin]; import branchOps.*
+  val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values

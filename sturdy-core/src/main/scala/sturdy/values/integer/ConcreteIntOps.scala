@@ -6,7 +6,7 @@ import sturdy.values.convert.*
 import sturdy.values.relational.EqOps
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
-import sturdy.values.relational.CompareOps
+import sturdy.values.relational.OrderingOps
 
 import scala.util.Random
 import java.lang.Float as JFloat
@@ -75,7 +75,7 @@ given EqOps[Int, Boolean] with
   override def equ(v1: Int, v2: Int): Boolean = v1 == v2
   override def neq(v1: Int, v2: Int): Boolean = v1 != v2
 
-given CompareOps[Int, Boolean] with
+given OrderingOps[Int, Boolean] with
   def lt(v1: Int, v2: Int): Boolean = v1 < v2
   def le(v1: Int, v2: Int): Boolean = v1 <= v2
   def ge(v1: Int, v2: Int): Boolean = v1 >= v2

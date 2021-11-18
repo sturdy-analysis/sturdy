@@ -88,55 +88,57 @@ trait Interpreter:
 
   given ValueWasmOps
     (using failure: Failure
-         , i32Ops: IntegerOps[Int, I32]
-         , i64Ops: IntegerOps[Long, I64]
-         , f32Ops: FloatOps[Float, F32]
-         , f64Ops: FloatOps[Double, F64]
-         , i32EqOps: EqOps[I32, Bool]
-         , i64EqOps: EqOps[I64, Bool]
-         , f32EqOps: EqOps[F32, Bool]
-         , f64EqOps: EqOps[F64, Bool]
-         , i32CompareOps: CompareOps[I32, Bool]
-         , i64CompareOps: CompareOps[I64, Bool]
-         , f32CompareOps: CompareOps[F32, Bool]
-         , f64CompareOps: CompareOps[F64, Bool]
-         , i32UnsignedCompareOps: UnsignedCompareOps[I32, Bool]
-         , i64UnsignedCompareOps: UnsignedCompareOps[I64, Bool]
-         , convertI32I64: ConvertIntLong[I32, I64]
-         , convertI32F32: ConvertIntFloat[I32, F32]
-         , convertI32F64: ConvertIntDouble[I32, F64]
-         , convertI64I32: ConvertLongInt[I64, I32]
-         , convertI64F32: ConvertLongFloat[I64, F32]
-         , convertI64F64: ConvertLongDouble[I64, F64]
-         , convertF32I32: ConvertFloatInt[F32, I32]
-         , convertF32I64: ConvertFloatLong[F32, I64]
-         , convertF32F64: ConvertFloatDouble[F32, F64]
-         , convertF64I32: ConvertDoubleInt[F64, I32]
-         , convertF64I64: ConvertDoubleLong[F64, I64]
-         , convertF64F32: ConvertDoubleFloat[F64, F32]
-         , encodeI32: ConvertIntBytes[I32, Bytes]
-         , encodeI64: ConvertLongBytes[I64, Bytes]
-         , encodeF32: ConvertFloatBytes[F32, Bytes]
-         , encodeF64: ConvertDoubleBytes[F64, Bytes]
-         , decodeI32: ConvertBytesInt[Bytes, I32]
-         , decodeI64: ConvertBytesLong[Bytes, I64]
-         , decodeF32: ConvertBytesFloat[Bytes, F32]
-         , decodeF64: ConvertBytesDouble[Bytes, F64]
-         , boolBranchOps: BooleanBranching[Bool, MayJoin]
-         , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-         , excOps: Exceptional[WasmException[Value], ExcV, MayJoin]
-         , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, MayJoin]
+     , i32Ops: IntegerOps[Int, I32]
+     , i64Ops: IntegerOps[Long, I64]
+     , f32Ops: FloatOps[Float, F32]
+     , f64Ops: FloatOps[Double, F64]
+     , i32EqOps: EqOps[I32, Bool]
+     , i64EqOps: EqOps[I64, Bool]
+     , f32EqOps: EqOps[F32, Bool]
+     , f64EqOps: EqOps[F64, Bool]
+     , i32CompareOps: OrderingOps[I32, Bool]
+     , i64CompareOps: OrderingOps[I64, Bool]
+     , f32CompareOps: OrderingOps[F32, Bool]
+     , f64CompareOps: OrderingOps[F64, Bool]
+     , i32UnsignedCompareOps: UnsignedCompareOps[I32, Bool]
+     , i64UnsignedCompareOps: UnsignedCompareOps[I64, Bool]
+     , convertI32I64: ConvertIntLong[I32, I64]
+     , convertI32F32: ConvertIntFloat[I32, F32]
+     , convertI32F64: ConvertIntDouble[I32, F64]
+     , convertI64I32: ConvertLongInt[I64, I32]
+     , convertI64F32: ConvertLongFloat[I64, F32]
+     , convertI64F64: ConvertLongDouble[I64, F64]
+     , convertF32I32: ConvertFloatInt[F32, I32]
+     , convertF32I64: ConvertFloatLong[F32, I64]
+     , convertF32F64: ConvertFloatDouble[F32, F64]
+     , convertF64I32: ConvertDoubleInt[F64, I32]
+     , convertF64I64: ConvertDoubleLong[F64, I64]
+     , convertF64F32: ConvertDoubleFloat[F64, F32]
+     , encodeI32: ConvertIntBytes[I32, Bytes]
+     , encodeI64: ConvertLongBytes[I64, Bytes]
+     , encodeF32: ConvertFloatBytes[F32, Bytes]
+     , encodeF64: ConvertDoubleBytes[F64, Bytes]
+     , decodeI32: ConvertBytesInt[Bytes, I32]
+     , decodeI64: ConvertBytesLong[Bytes, I64]
+     , decodeF32: ConvertBytesFloat[Bytes, F32]
+     , decodeF64: ConvertBytesDouble[Bytes, F64]
+     , boolBranchOpsV: BooleanBranching[Bool, Value]
+     , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
+     , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
+     , excOps: Exceptional[WasmException[Value], ExcV, MayJoin]
+     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, MayJoin]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, MayJoin] = excOps
     val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, MayJoin] = specOps
-    val branchOps: BooleanBranching[Value, MayJoin] = new LiftedBooleanBranching[Value, Bool, MayJoin](v => v.asBoolean)(using boolBranchOps)
+    val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
+    val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
-    final val intOps: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
-    final val longOps: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, Value.Int64.apply)
-    final val floatOps: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, Value.Float32.apply)
-    final val doubleOps: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, Value.Float64.apply)
+    final val i32ops: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)
+    final val i64ops: IntegerOps[Long, Value] = new LiftedIntegerOps(_.asInt64, Value.Int64.apply)
+    final val f32ops: FloatOps[Float, Value] = new LiftedFloatOps(_.asFloat32, Value.Float32.apply)
+    final val f64ops: FloatOps[Double, Value] = new LiftedFloatOps(_.asFloat64, Value.Float64.apply)
 
     final val eqOps: EqOps[Value, Value] = new EqOps[Value, Value]:
       import Value.*
@@ -153,31 +155,31 @@ trait Interpreter:
         case (Float64(d1), Float64(d2)) => boolean(EqOps.neq(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
-    final val compareOps: CompareOps[Value, Value] = new CompareOps[Value, Value]:
+    final val compareOps: OrderingOps[Value, Value] = new OrderingOps[Value, Value]:
       import Value.*
       override def lt(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(CompareOps.lt(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(CompareOps.lt(l1, l2))
-        case (Float32(f1), Float32(f2)) => boolean(CompareOps.lt(f1, f2))
-        case (Float64(d1), Float64(d2)) => boolean(CompareOps.lt(d1, d2))
+        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.lt(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.lt(l1, l2))
+        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.lt(f1, f2))
+        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.lt(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def le(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(CompareOps.le(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(CompareOps.le(l1, l2))
-        case (Float32(f1), Float32(f2)) => boolean(CompareOps.le(f1, f2))
-        case (Float64(d1), Float64(d2)) => boolean(CompareOps.le(d1, d2))
+        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.le(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.le(l1, l2))
+        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.le(f1, f2))
+        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.le(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def ge(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(CompareOps.ge(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(CompareOps.ge(l1, l2))
-        case (Float32(f1), Float32(f2)) => boolean(CompareOps.ge(f1, f2))
-        case (Float64(d1), Float64(d2)) => boolean(CompareOps.ge(d1, d2))
+        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.ge(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.ge(l1, l2))
+        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.ge(f1, f2))
+        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.ge(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
       override def gt(v1: Value, v2: Value): Value = (v1, v2) match
-        case (Int32(i1), Int32(i2)) => boolean(CompareOps.gt(i1, i2))
-        case (Int64(l1), Int64(l2)) => boolean(CompareOps.gt(l1, l2))
-        case (Float32(f1), Float32(f2)) => boolean(CompareOps.gt(f1, f2))
-        case (Float64(d1), Float64(d2)) => boolean(CompareOps.gt(d1, d2))
+        case (Int32(i1), Int32(i2)) => boolean(OrderingOps.gt(i1, i2))
+        case (Int64(l1), Int64(l2)) => boolean(OrderingOps.gt(l1, l2))
+        case (Float32(f1), Float32(f2)) => boolean(OrderingOps.gt(f1, f2))
+        case (Float64(d1), Float64(d2)) => boolean(OrderingOps.gt(d1, d2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal type but got $v1 and $v2")
 
     final val unsignedCompareOps: UnsignedCompareOps[Value, Value] = new UnsignedCompareOps[Value, Value]:
@@ -199,18 +201,18 @@ trait Interpreter:
         case (Int64(l1), Int64(l2)) => boolean(UnsignedCompareOps.gtUnsigned(l1, l2))
         case _ => throw new IllegalArgumentException(s"Expected values of equal integer type but got $v1 and $v2")
 
-    final val convertIntLong: ConvertIntLong[Value, Value] = new LiftedConvert(_.asInt32, Value.Int64.apply)
-    final val convertIntFloat: ConvertIntFloat[Value, Value] = new LiftedConvert(_.asInt32, Value.Float32.apply)
-    final val convertIntDouble: ConvertIntDouble[Value, Value] = new LiftedConvert(_.asInt32, Value.Float64.apply)
-    final val convertLongInt: ConvertLongInt[Value, Value] = new LiftedConvert(_.asInt64, Value.Int32.apply)
-    final val convertLongFloat: ConvertLongFloat[Value, Value] = new LiftedConvert(_.asInt64, Value.Float32.apply)
-    final val convertLongDouble: ConvertLongDouble[Value, Value] = new LiftedConvert(_.asInt64, Value.Float64.apply)
-    final val convertFloatInt: ConvertFloatInt[Value, Value] = new LiftedConvert(_.asFloat32, Value.Int32.apply)
-    final val convertFloatLong: ConvertFloatLong[Value, Value] = new LiftedConvert(_.asFloat32, Value.Int64.apply)
-    final val convertFloatDouble: ConvertFloatDouble[Value, Value] = new LiftedConvert(_.asFloat32, Value.Float64.apply)
-    final val convertDoubleInt: ConvertDoubleInt[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int32.apply)
-    final val convertDoubleLong: ConvertDoubleLong[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int64.apply)
-    final val convertDoubleFloat: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, Value.Float32.apply)
+    final val convert_i32_i64: ConvertIntLong[Value, Value] = new LiftedConvert(_.asInt32, Value.Int64.apply)
+    final val convert_i32_f32: ConvertIntFloat[Value, Value] = new LiftedConvert(_.asInt32, Value.Float32.apply)
+    final val convert_i32_f64: ConvertIntDouble[Value, Value] = new LiftedConvert(_.asInt32, Value.Float64.apply)
+    final val convert_i64_i32: ConvertLongInt[Value, Value] = new LiftedConvert(_.asInt64, Value.Int32.apply)
+    final val convert_i64_f32: ConvertLongFloat[Value, Value] = new LiftedConvert(_.asInt64, Value.Float32.apply)
+    final val convert_i64_f64: ConvertLongDouble[Value, Value] = new LiftedConvert(_.asInt64, Value.Float64.apply)
+    final val convert_f32_i32: ConvertFloatInt[Value, Value] = new LiftedConvert(_.asFloat32, Value.Int32.apply)
+    final val convert_f32_i64: ConvertFloatLong[Value, Value] = new LiftedConvert(_.asFloat32, Value.Int64.apply)
+    final val convert_f32_f64: ConvertFloatDouble[Value, Value] = new LiftedConvert(_.asFloat32, Value.Float64.apply)
+    final val convert_f64_i32: ConvertDoubleInt[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int32.apply)
+    final val convert_f64_i64: ConvertDoubleLong[Value, Value] = new LiftedConvert(_.asFloat64, Value.Int64.apply)
+    final val convert_f64_f32: ConvertDoubleFloat[Value, Value] = new LiftedConvert(_.asFloat64, Value.Float32.apply)
 
     val LITTLE_ENDIAN = SomeCC(ByteOrder.LITTLE_ENDIAN, false)
     override final val encode = new Convert[Value, Seq[Byte], Value, Bytes, SomeCC[StoreInst | StoreNInst]]:

@@ -57,7 +57,7 @@ object ConcreteInterpreter extends Interpreter:
 
   class Instance(effects: Effects) extends GenericInstance(effects) with fix.Concrete[FixIn, FixOut[Value]]:
     final def vintOps: IntegerOps[Int, VInt] = implicitly
-    final def vcompareOps: CompareOps[VInt, VBool] = implicitly
+    final def vcompareOps: OrderingOps[VInt, VBool] = implicitly
     final def vintEqOps: EqOps[VInt, VBool] = implicitly
     final def vrefEqOps: EqOps[VRef, VBool] = implicitly
     final def vfunEqOps: EqOps[VFun, VBool] = implicitly
@@ -65,7 +65,7 @@ object ConcreteInterpreter extends Interpreter:
     final def vfunOps: FunctionOps[Function, Seq[Value], Value, VFun] = implicitly
     final def vrefOps: ReferenceOps[Addr, VRef] = implicitly
     final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
-    final def vbranchOps: BooleanBranching[Boolean, MayJoin] = implicitly
+    final def vbranchOps: BooleanBranching[Boolean, Unit] = implicitly
 
   def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): Instance =
     val effects = new Effects(initEnvironment, initStore, nextInput)

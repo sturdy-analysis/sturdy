@@ -150,7 +150,7 @@ given SignIntegerOps[B](using f: Failure, j: Effectful, base: Integral[B]): Inte
   def countTrailinZeros(v: IntSign): IntSign = ???
   def nonzeroBitCount(v: IntSign): IntSign = ???
 
-given SignCompareOps: CompareOps[IntSign, Topped[Boolean]] with
+given SignOrderingOps: OrderingOps[IntSign, Topped[Boolean]] with
   def lt(v1: IntSign, v2: IntSign): Topped[Boolean] = (v1, v2) match
     case (Neg, Zero) => Topped.Actual(true)
     case (Neg, ZeroOrPos) => Topped.Actual(true)

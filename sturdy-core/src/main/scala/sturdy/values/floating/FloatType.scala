@@ -5,7 +5,7 @@ import sturdy.values.Structural
 import sturdy.values.config
 import sturdy.values.config.UnsupportedConfiguration
 import sturdy.values.convert.*
-import sturdy.values.relational.CompareOps
+import sturdy.values.relational.OrderingOps
 import sturdy.values.relational.EqOps
 import sturdy.values.types.BaseType
 

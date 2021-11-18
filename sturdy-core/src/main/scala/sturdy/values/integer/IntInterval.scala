@@ -102,7 +102,7 @@ given IntervalIntegerOps(using f: Failure, j: Effectful): IntegerOps[Int, IntInt
   def countTrailinZeros(v: IntInterval): IntInterval = ???
   def nonzeroBitCount(v: IntInterval): IntInterval = ???
 
-given IntIntervalCompareOps: CompareOps[IntInterval, Topped[Boolean]] with
+given IntIntervalOrderingOps: OrderingOps[IntInterval, Topped[Boolean]] with
   def lt(iv1: IntInterval, iv2: IntInterval): Topped[Boolean] =
     if iv1.h < iv2.l then Topped.Actual(true)
     else if iv2.h <= iv1.l then Topped.Actual(false)

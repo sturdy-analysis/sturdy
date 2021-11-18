@@ -5,7 +5,7 @@ import sturdy.values.MaybeChanged
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.floating.FloatOps
 import sturdy.values.integer.IntegerOps
-import sturdy.values.relational.{UnsignedCompareOps, EqOps, CompareOps}
+import sturdy.values.relational.{UnsignedCompareOps, EqOps, OrderingOps}
 import sturdy.values.*
 import sturdy.values.convert.*
 
@@ -110,7 +110,7 @@ given TaintEqOps[A,B](using ops: EqOps[A,B]): EqOps[TaintProduct[A],TaintProduct
   override def equ(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.equ, v2)
   override def neq(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.neq, v2)
 
-given TaintCompareOps[A,B](using ops: CompareOps[A,B]): CompareOps[TaintProduct[A],TaintProduct[B]] with
+given TaintOrderingOps[A,B] (using ops: OrderingOps[A,B]): OrderingOps[TaintProduct[A],TaintProduct[B]] with
   override def lt(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.lt, v2)
   override def le(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.le, v2)
   override def ge(v1: TaintProduct[A], v2: TaintProduct[A]): TaintProduct[B] = v1.binary(ops.ge, v2)
@@ -144,5 +144,5 @@ given TaintCoPointwiseConvert[From, To, VFromElem, VTo, Config <: ConvertConfig[
     val converted = conv(fromValue, conf)
     TaintProduct(taint, converted)
 
-given TaintBooleanBranching[V, J[_]](using ops: BooleanBranching[V, J]): BooleanBranching[TaintProduct[V], J] with
-  def boolBranch[A](v: TaintProduct[V], thn: => A, els: => A): J[A] ?=> A = ops.boolBranch(v.value, thn, els)
+given TaintBooleanBranching[V, R](using ops: BooleanBranching[V, R]): BooleanBranching[TaintProduct[V], R] with
+  def boolBranch(v: TaintProduct[V], thn: => R, els: => R): R = ops.boolBranch(v.value, thn, els)
