@@ -6,14 +6,14 @@ import sturdy.values.{*, given}
 
 import scala.Either as Eith
 
-import ToppedSymbolTable.*
+import ConstantSymbolTable.*
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.TrySturdy
 
-trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effectful:
+trait ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effectful:
 
   protected var tables: Map[Key, Eith[Table[Symbol, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
@@ -139,7 +139,7 @@ trait ToppedSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolTab
         }
         IsSound.Sound
 
-object ToppedSymbolTable:
+object ConstantSymbolTable:
   type Tables[Key, Symbol, Entry] = Map[Key, Eith[Table[Symbol, Entry], Entry]]
 
   given CombineTable[Symbol, Entry, W <: Widening](using Combine[Entry, W]): Combine[Table[Symbol, Entry], W] with
