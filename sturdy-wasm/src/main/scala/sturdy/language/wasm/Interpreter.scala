@@ -125,12 +125,12 @@ trait Interpreter:
          , boolBranchOps: BooleanBranching[Bool, MayJoin]
          , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
          , excOps: Exceptional[WasmException[Value], ExcV, MayJoin]
-         , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, MayJoin]
+         , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, MayJoin]
          ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
     final val exceptOps: Exceptional[WasmException[Value], ExcV, MayJoin] = excOps
-    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, MayJoin] = specOps
+    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, MayJoin] = specOps
     val branchOps: BooleanBranching[Value, MayJoin] = new LiftedBooleanBranching[Value, Bool, MayJoin](v => v.asBoolean)(using boolBranchOps)
 
     final val intOps: IntegerOps[Int, Value] = new LiftedIntegerOps(_.asInt32, Value.Int32.apply)

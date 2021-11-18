@@ -10,12 +10,12 @@ import sturdy.values.functions.{ToppedFunctionOps, FunctionOps}
 import swam.FuncType
 
 trait ToppedFunctionValue:
-  given WasmToppedFunctionOps[V,FunV]
-    (using ops: FunctionOps[FunctionInstance, FuncType, Unit, FunV])
+  given WasmTopFunctionOps[V]
     (using interp: GenericInterpreter[V,_,_,_,_,_,_,_,_])
-    (using Effectful, Failure): FunctionOps[FunctionInstance, FuncType, Unit, Topped[FunV]] =
-    // (A, (F, A) => R) => R
-    ToppedFunctionOps(using (ft, invoke) => {
+    (using Effectful, Failure)
+    : FunctionOps[FunctionInstance, FuncType, Unit, Unit] with
+    override def funValue(fun: FunctionInstance): Unit = ()
+    override def invokeFun(fun: Unit, ft: FuncType)(invoke: (FunctionInstance, FuncType) => Unit): Unit =
       val funs = interp.module.functions.filter(_.funcType == ft)
       if (funs.isEmpty)
         Failure(IndirectCallTypeMismatch, s"Expected function of type $ft, but none found")
@@ -24,6 +24,5 @@ trait ToppedFunctionValue:
       else
         joinWithFailure(mapJoin(funs, invoke(_, ft)))(
           Failure(IndirectCallTypeMismatch, s"Expected function of type $ft, which fails for some potential target functions"))
-    })
 
 

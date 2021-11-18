@@ -43,7 +43,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ToppedFun
   type FuncIx = Topped[Int]
   type FunV = Topped[Powerset[FunctionInstance]]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, FunV, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32.value
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32.value
     override def valToSize(v: Value): Size = v.asInt32.value

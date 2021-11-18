@@ -61,6 +61,7 @@ class TypeAnalysisTest extends AnyFlatSpec, Matchers:
   testFunction(fact, "fac-rec-named", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
   testFunction(fact, "fac-iter-named", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
   testFunction(fact, "fac-opt", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
+  testFunction(fact, "fib", List(Value.Int64(topI64)), List(Value.Int64(topI64)))
 
 
 
@@ -86,7 +87,7 @@ class TypeAnalysisTest extends AnyFlatSpec, Matchers:
 def runTypeAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.parse(path)
 
-  val interp = TypeAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = CallSites(0)))
+  val interp = TypeAnalysis(FrameData.empty, Iterable.empty)(WasmConfig())
   val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
 
   val modInst = interp.initializeModule(module)
@@ -99,4 +100,5 @@ def runTypeAnalysis(path: Path, funName: String, args: List[Value]): AFallible[L
   val deadLabels = ControlFlow.deadLabels(cfg)
   println(s"Found ${deadInstructions.size} dead instructions")
   println(s"Found ${deadLabels.size} dead labels")
+  println(cfg.withBlocks(shortLabels = false).toGraphViz)
   result

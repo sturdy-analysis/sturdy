@@ -120,8 +120,6 @@ class ControlLogger[Ctx, Dom, Codom, Exc, N <: ControlFlowGraph.Node]
     predecessors.foreach((from, attrib) => addEdge(from, to, attrib))
 
   private def addEdge(from: CNode[N, Ctx], to: CNode[N, Ctx], attrib: EdgeAttrib): Unit =
-    if (from == to)
-      println()
     edges.get(from) match
       case None => edges += from -> Map(to -> attrib)
       case Some(map) => edges += from -> (map + (to -> attrib))

@@ -5,6 +5,9 @@ trait Top[T]:
 object Top:
   def top[T](using t: Top[T]): T = t.top
 
+given Top[Unit] with
+  def top: Unit = ()
+
 trait PartialOrder[T] extends PartialOrdering[T]:
   def tryCompare(x: T, y: T): Option[Int] =
     val lte = lteq(x, y)

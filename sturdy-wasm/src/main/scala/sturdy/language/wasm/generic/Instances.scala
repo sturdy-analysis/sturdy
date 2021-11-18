@@ -19,9 +19,11 @@ case class GlobalAddr(addr: Int) extends AnyVal
 given Finite[TableAddr] with {}
 given Finite[MemoryAddr] with {}
 given Finite[GlobalAddr] with {}
+given Finite[FunctionInstance] with {}
 given Structural[TableAddr] with {}
 given Structural[MemoryAddr] with {}
 given Structural[GlobalAddr] with {}
+given Structural[FunctionInstance] with {}
 
 class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Elem):
   override def equals(obj: Any): Boolean = obj match

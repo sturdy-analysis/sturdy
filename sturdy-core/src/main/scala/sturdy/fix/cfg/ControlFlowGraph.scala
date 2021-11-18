@@ -70,12 +70,11 @@ trait ControlFlowGraph[N <: ControlFlowGraph.Node, Ctx]:
     n.toString.replaceAll("[^a-zA-Z0-9]", "_")
   def nodeGraphVizAttributes(from: CNode[N, Ctx]): String =
     if (from.node.isStartNode)
-      s"fillcolor=red, style=filled, fontcolor=black"
+      s"fillcolor=red, style=filled, fontcolor=black, label=\"${from.toString}\""
+    else if (from.node.isImportantControlNode)
+      s"fillcolor=black, style=filled, fontcolor=white, label=\"${from.toString}\""
     else
-      (from.node match
-        case node if node.isImportantControlNode => s"fillcolor=black, style=filled, fontcolor=white"
-        case _ => s"fillcolor=white, style=filled, fontcolor=black"
-        ) + s", label=\"${from.toString}\""
+      s"fillcolor=white, style=filled, fontcolor=black, label=\"${from.toString}\""
 
   def edgeGraphVizAttributes(from: CNode[N, Ctx], to: CNode[N, Ctx], attrib: EdgeAttrib): String =
     if (attrib.exceptional)
