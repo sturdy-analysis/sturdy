@@ -15,10 +15,10 @@ trait ConcreteExcept[E](using val exceptional: Exceptional[E, E, NoJoin]) extend
     throwing(ex)  
     throw ConcreteSturdyException(ex)
 
-  override protected def tries[A](f: => A): EitherC[A, E] =
+  override protected def tries[A](f: => A): JEitherC[A, E] =
     try {
-      EitherC.Left(f)
+      JEitherC.Left(f)
     } catch {
-      case ConcreteSturdyException(ex) => EitherC.Right(ex.asInstanceOf[E])
+      case ConcreteSturdyException(ex) => JEitherC.Right(ex.asInstanceOf[E])
     }
 

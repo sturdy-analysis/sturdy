@@ -49,18 +49,18 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFl
     override def valToSize(v: Value): Size = v.asInt32.value
     override def sizeToVal(sz: Size): Value = Value.Int32(untainted(sz))
 
-    override def indexLookup[A](ix: Value, vec: Vector[A]): OptionPowerset[A] =
+    override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       ix.asInt32.value match
         case Topped.Actual(i) =>
           if (i >= 0 && i < vec.size)
-            OptionPowerset.Some(Powerset(vec(i)))
+            JOptionPowerset.Some(Powerset(vec(i)))
           else
-            OptionPowerset.None()
+            JOptionPowerset.None()
         case Topped.Top =>
           if (vec.isEmpty)
-            OptionPowerset.None()
+            JOptionPowerset.None()
           else
-            OptionPowerset.NoneSome(Powerset(vec.toSet))
+            JOptionPowerset.NoneSome(Powerset(vec.toSet))
 
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[ConstantTaintAnalysis.Value]): List[ConstantTaintAnalysis.Value] = hostFunc match

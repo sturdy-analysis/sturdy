@@ -22,19 +22,19 @@ trait ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolT
   def setSymbolTables(s: Tables[Key, Symbol, Entry]): Unit =
     tables = s
   
-  override def tableGet(key: Key, symbol: Topped[Symbol]): OptionA[Entry] =
+  override def tableGet(key: Key, symbol: Topped[Symbol]): JOptionA[Entry] =
     tables(key) match
-      case Right(entry) => OptionA.NoneSome(entry)
+      case Right(entry) => JOptionA.NoneSome(entry)
       case Left(tab) => symbol match
         case Topped.Top =>
           if (tab.underlying.isEmpty)
-            OptionA.none
+            JOptionA.none
           else
-            OptionA.NoneSome(tab.entries.reduce(Join(_, _).get))
+            JOptionA.NoneSome(tab.entries.reduce(Join(_, _).get))
         case Topped.Actual(sym) => tab.underlying.get(sym) match
-          case None => OptionA.None()
-          case Some(MayMust.Must(entry)) => OptionA.some(entry)
-          case Some(MayMust.May(entry)) => OptionA.noneSome(entry)
+          case None => JOptionA.None()
+          case Some(MayMust.Must(entry)) => JOptionA.some(entry)
+          case Some(MayMust.May(entry)) => JOptionA.noneSome(entry)
 
   override def tableSet(key: Key, symbol: Topped[Symbol], newEntry: Entry): Unit =
     dirtyTables += key

@@ -14,8 +14,8 @@ trait UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
 
   protected var tables: Map[Key, Entry] = Map()
 
-  override def tableGet(key: Key, symbol: Symbol): OptionA[Entry] =
-    OptionA.noneSome(tables(key))
+  override def tableGet(key: Key, symbol: Symbol): JOptionA[Entry] =
+    JOptionA.noneSome(tables(key))
 
   override def tableSet(key: Key, symbol: Symbol, newEntry: Entry): Unit =
     Join(tables(key), newEntry).ifChanged(tables += key -> _)

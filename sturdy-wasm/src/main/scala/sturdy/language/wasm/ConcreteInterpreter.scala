@@ -57,12 +57,12 @@ object ConcreteInterpreter extends Interpreter:
     override def valToSize(v: Value): Int = v.asInt32
     override def sizeToVal(sz: Int): Value = Value.Int32(sz)
 
-    override def indexLookup[A](ix: Value, vec: Vector[A]): OptionC[A] =
+    override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionC[A] =
       val i = ix.asInt32
       if (i >= 0 && i < vec.size)
-        OptionC.Some(vec(i))
+        JOptionC.Some(vec(i))
       else
-        OptionC.none
+        JOptionC.none
 
 
     val runtime: Map[HostFunction, List[Value] => List[Value]] = Map(

@@ -11,8 +11,8 @@ trait CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V, NoJoin
   protected var store: Map[Addr, V] = _init
   def getStore: Map[Addr, V] = store
 
-  override def read(x: Addr): OptionC[V] =
-    OptionC(store.get(x))
+  override def read(x: Addr): JOptionC[V] =
+    JOptionC(store.get(x))
 
   override def write(x: Addr, v: V): Unit = 
     store += (x -> v)

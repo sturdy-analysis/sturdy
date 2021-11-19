@@ -1,6 +1,6 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.Option
+import sturdy.data.JOption
 import sturdy.values.booleans.BooleanBranching
 import swam.{FuncType, GlobalIdx}
 import sturdy.values.convert.*
@@ -53,6 +53,6 @@ trait SpecialWasmOperations[V, Addr, Size, FuncIx, MayJoin[_]]:
   def valToSize(v: V): Size
   def sizeToVal(sz: Size): V
 
-  def indexLookup[A](ix: V, vec: Vector[A]): Option[MayJoin, A]
+  def indexLookup[A](ix: V, vec: Vector[A]): JOption[MayJoin, A]
 
   def invokeHostFunction(hostFunc: HostFunction, args: List[V]): List[V]
