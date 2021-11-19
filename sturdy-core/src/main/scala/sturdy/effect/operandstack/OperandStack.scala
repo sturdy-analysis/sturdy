@@ -2,17 +2,17 @@ package sturdy.effect.operandstack
 
 import sturdy.effect.Effectful
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.data.Option
+import sturdy.data.JOption
 import sturdy.data.NoJoin
-import sturdy.data.SomeOption
+import sturdy.data.SomeJOption
 
 object StackUnderflow extends FailureKind
 
 trait OperandStack[V, MayJoin[_]] extends Effectful:
   def push(v: V): Unit
-  def pop(): Option[MayJoin, V]
-  def peek(): Option[MayJoin, V]
-  def peekN(n: Int): Option[MayJoin, List[V]]
+  def pop(): JOption[MayJoin, V]
+  def peek(): JOption[MayJoin, V]
+  def peekN(n: Int): JOption[MayJoin, List[V]]
 
   /** Computes `f` in a new operand frame, discarding all remaining operands. */
   def withFreshOperandStack[A](f: => A): A
@@ -24,18 +24,18 @@ trait OperandStack[V, MayJoin[_]] extends Effectful:
 
   def clearCurrentOperandFrame(): Unit
   
-  final def pop2(): Option[MayJoin, (V, V)] =
+  final def pop2(): JOption[MayJoin, (V, V)] =
     val v2 = pop()
     val v1 = pop()
     v1.flatMap(a => v2.map(b => (a, b)))
 
-  final def popN(n: Int): Option[MayJoin,List[V]] =
+  final def popN(n: Int): JOption[MayJoin,List[V]] =
     if (n < 0)
       throw new IllegalArgumentException
     if (n == 0)
-      return SomeOption(Nil)
+      return SomeJOption(Nil)
     val v = pop()
-    var vs: Option[MayJoin, List[V]] = v.map(_::Nil)
+    var vs: JOption[MayJoin, List[V]] = v.map(_::Nil)
     for (_ <- 2 to n)
       val popped = pop()
       vs = popped.flatMap(v => vs.map(v::_))

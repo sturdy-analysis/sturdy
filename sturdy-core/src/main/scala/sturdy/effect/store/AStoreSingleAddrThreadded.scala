@@ -19,14 +19,14 @@ trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])
 
   this.store = _init
   
-  override def read(x: Addr): OptionA[V] =
+  override def read(x: Addr): JOptionA[V] =
     store.get(x) match
-      case scala.None => OptionA.none
+      case scala.None => JOptionA.none
       case scala.Some(v) =>
         if (x.isManaged)
-          OptionA.some(v)
+          JOptionA.some(v)
         else
-          OptionA.noneSome(v)
+          JOptionA.noneSome(v)
 
   override def write(x: Addr, v: V): Unit =
     weakUpdate(x, v)

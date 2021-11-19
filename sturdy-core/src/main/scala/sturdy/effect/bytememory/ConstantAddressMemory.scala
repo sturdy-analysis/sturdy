@@ -2,7 +2,7 @@ package sturdy.effect.bytememory
 
 import sturdy.IsSound
 import sturdy.Soundness
-import sturdy.data.{WithJoin, OptionA, JoinIntMap}
+import sturdy.data.{WithJoin, JOptionA, JoinIntMap}
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.Effectful
@@ -27,11 +27,11 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
   protected def setMemories(s: Memories[Key, B]): Unit =
     memories = s
 
-  override def memRead(key: Key, addr: Topped[Int], length: Int): OptionA[Seq[B]] = addr match
-    case Topped.Top => OptionA.noneSome(Seq.fill[B](length)(memories(key).upperBound))
+  override def memRead(key: Key, addr: Topped[Int], length: Int): JOptionA[Seq[B]] = addr match
+    case Topped.Top => JOptionA.noneSome(Seq.fill[B](length)(memories(key).upperBound))
     case Topped.Actual(a) => memories(key).read(a, length)
 
-  override def memStore(key: Key, addr: Topped[Int], bytes: Seq[B]): OptionA[Unit] =
+  override def memStore(key: Key, addr: Topped[Int], bytes: Seq[B]): JOptionA[Unit] =
     val (newMem, res) = memories(key).store(addr, bytes)
     newMem.foreach(memories += key -> _)
     res
@@ -41,7 +41,7 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
     case mem: SizeMem[_] => Topped.Actual(mem.pageNum)
     case mem: ImmutableByteMem[_] => Topped.Actual(mem.pageNum)
 
-  override def memGrow(key: Key, delta: Topped[Int]): OptionA[Topped[Int]] =
+  override def memGrow(key: Key, delta: Topped[Int]): JOptionA[Topped[Int]] =
     val (newMem, res) = memories(key).grow(delta, emptyB)
     newMem.foreach(memories += key -> _)
     res
@@ -183,54 +183,54 @@ object ConstantAddressMemory:
     def isDefinite: Boolean
     def asIndefinite: Mem[B]
 
-    def read(a: Int, length: Int): OptionA[Seq[B]]
-    def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], OptionA[Unit])
-    def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], OptionA[Topped[Int]])
+    def read(a: Int, length: Int): JOptionA[Seq[B]]
+    def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], JOptionA[Unit])
+    def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], JOptionA[Topped[Int]])
 
   case class TopMem[B: ClassTag](isDefinite: Boolean, upperBound: B) extends Mem[B]:
     override def asIndefinite: Mem[B] = this.copy(isDefinite = false)
-    override def read(a: Int, length: Int): OptionA[Seq[B]] = OptionA.noneSome(Seq.fill[B](length)(upperBound))
-    override def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], OptionA[Unit]) =
+    override def read(a: Int, length: Int): JOptionA[Seq[B]] = JOptionA.noneSome(Seq.fill[B](length)(upperBound))
+    override def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], JOptionA[Unit]) =
       val newMem = newBound(bytes) match
         case MaybeChanged.Changed(bound) => Some(TopMem(isDefinite, bound))
         case _ => None
-      (newMem, OptionA.noneSome(()))
-    override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], OptionA[Topped[Int]]) = (None, OptionA.noneSome(Topped.Top))
+      (newMem, JOptionA.noneSome(()))
+    override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], JOptionA[Topped[Int]]) = (None, JOptionA.noneSome(Topped.Top))
 
 
   case class SizeMem[B: ClassTag](size: Int, sizeLimit: Option[Int], isDefinite: Boolean, upperBound: B) extends Mem[B]:
     override def asIndefinite: Mem[B] = this.copy(isDefinite = false)
     inline def pageNum: Int = size / pageSize
-    override def read(a: Int, length: Int): OptionA[Seq[B]] =
+    override def read(a: Int, length: Int): JOptionA[Seq[B]] =
       if (a >=0 && a + length <= size) {
         val readBytes = Seq.fill[B](length)(upperBound)
         if (isDefinite)
-          OptionA.some(readBytes)
+          JOptionA.some(readBytes)
         else
-          OptionA.noneSome(readBytes)
+          JOptionA.noneSome(readBytes)
       } else {
-        OptionA.none
+        JOptionA.none
       }
-    override def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], OptionA[Unit]) = addr match
+    override def store(addr: Topped[Int], bytes: Seq[B])(using Join[B]): (Option[Mem[B]], JOptionA[Unit]) = addr match
       case Topped.Top =>
         // any byte of the memory might be affected, but this memory does not track individual bytes anyway
         val newMem = newBound(bytes) match
           case MaybeChanged.Changed(bound) => Some(SizeMem(size, sizeLimit, isDefinite, bound))
           case _ => None
-        (newMem, OptionA.noneSome(()))
+        (newMem, JOptionA.noneSome(()))
       case Topped.Actual(a) =>
         if (a >= 0 && a + bytes.size <= size) {
           val newMem = newBound(bytes) match
             case MaybeChanged.Changed(bound) => Some(SizeMem(size, sizeLimit, isDefinite, bound))
             case _ => None
-          (newMem, OptionA.some(()))
+          (newMem, JOptionA.some(()))
         } else {
-          (None, OptionA.none)
+          (None, JOptionA.none)
         }
-    override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], OptionA[Topped[Int]]) = delta match
+    override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], JOptionA[Topped[Int]]) = delta match
       case Topped.Top =>
         // cannot track size of memory anymore, set the memory to top
-        (Some(TopMem(isDefinite, upperBound)), OptionA.noneSome(Topped.Top))
+        (Some(TopMem(isDefinite, upperBound)), JOptionA.noneSome(Topped.Top))
       case Topped.Actual(d) =>
         val newPageNum = pageNum + d
         if (newPageNum <= maxPageNum && sizeLimit.forall(newPageNum <= _)) {
@@ -239,9 +239,9 @@ object ConstantAddressMemory:
               SizeMem(size + d * pageSize, sizeLimit, isDefinite, bound)
             case _ =>
               SizeMem(size + d * pageSize, sizeLimit, isDefinite, upperBound)
-          (Some(newMem), OptionA.some(Topped.Actual(pageNum)))
+          (Some(newMem), JOptionA.some(Topped.Actual(pageNum)))
         } else {
-          (None, OptionA.none)
+          (None, JOptionA.none)
         }
 
 
@@ -280,9 +280,9 @@ object ConstantAddressMemory:
       val emptyWord = Word(emptyB, emptyB, emptyB, emptyB)
       for (wordAddr <- 0 until (size / 4); b <- words.getOrElse(wordAddr, emptyWord).toIterable)
         yield b
-    override def read(a: Int, length: Int): OptionA[Seq[B]] =
+    override def read(a: Int, length: Int): JOptionA[Seq[B]] =
       if (a < 0 || a + length > size)
-        return OptionA.none
+        return JOptionA.none
 
       val buf = ListBuffer[B]()
 
@@ -332,13 +332,13 @@ object ConstantAddressMemory:
         throw new IllegalStateException(s"Implementation bug, count should be $length but was $count (a=$a)")
 
       if (isDefinite)
-        OptionA.some(buf.toSeq)
+        JOptionA.some(buf.toSeq)
       else
-        OptionA.noneSome(buf.toSeq)
+        JOptionA.noneSome(buf.toSeq)
 
 
 
-    override def store(addr: Topped[Int], newBytes: Seq[B])(using Join[B]): (Option[Mem[B]], OptionA[Unit]) = addr match
+    override def store(addr: Topped[Int], newBytes: Seq[B])(using Join[B]): (Option[Mem[B]], JOptionA[Unit]) = addr match
       case Topped.Top =>
         // any byte of the memory might be affected, only track the memory's size from now on
         val newMem = newBound(newBytes) match
@@ -346,10 +346,10 @@ object ConstantAddressMemory:
             SizeMem(size, sizeLimit, isDefinite, bound)
           case _ =>
             SizeMem(size, sizeLimit, isDefinite, upperBound)
-        (Some(newMem), OptionA.noneSome(()))
+        (Some(newMem), JOptionA.noneSome(()))
       case Topped.Actual(a) =>
         if (a < 0 || a + newBytes.size > size)
-          return (None, OptionA.none)
+          return (None, JOptionA.none)
 
         val bound = newBound(newBytes).get
         val byteIter = newBytes.iterator
@@ -392,19 +392,19 @@ object ConstantAddressMemory:
         if (byteIter.hasNext)
           throw new IllegalStateException(s"Implementation bug, byteIter should be empty but was ${byteIter.toList}")
 
-        (Some(ImmutableByteMem(size, emptyB, newWords, sizeLimit, isDefinite, bound)), OptionA.some(()))
+        (Some(ImmutableByteMem(size, emptyB, newWords, sizeLimit, isDefinite, bound)), JOptionA.some(()))
 
-    override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], OptionA[Topped[Int]]) = delta match
+    override def grow(delta: Topped[Int], emptyB: B)(using Join[B]): (Option[Mem[B]], JOptionA[Topped[Int]]) = delta match
       case Topped.Top =>
         // cannot track size of memory anymore, set the memory to top
-        (Some(TopMem(isDefinite, upperBound)), OptionA.noneSome(Topped.Top))
+        (Some(TopMem(isDefinite, upperBound)), JOptionA.noneSome(Topped.Top))
       case Topped.Actual(d) =>
         val newPageNum = pageNum + d
         if (newPageNum <= maxPageNum && sizeLimit.forall(newPageNum <= _)) {
           val newMem = ImmutableByteMem(newPageNum * pageSize, emptyB, words, sizeLimit, isDefinite, upperBound)
-          (Some(newMem), OptionA.some(Topped.Actual(pageNum)))
+          (Some(newMem), JOptionA.some(Topped.Actual(pageNum)))
         } else {
-          (None, OptionA.none)
+          (None, JOptionA.none)
         }
 
 

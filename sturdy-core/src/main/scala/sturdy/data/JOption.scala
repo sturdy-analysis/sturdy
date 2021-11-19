@@ -4,7 +4,7 @@ import sturdy.effect.Effectful
 import sturdy.values.Join
 import sturdy.values.Powerset
 
-trait Option[J[_], A]:
+trait JOption[J[_], A]:
   def option[B](default: => B)(f: A => B): J[B] ?=> B
   inline final def getOrElse(default: => A): J[A] ?=> A =
     option(default)(identity)
@@ -12,15 +12,15 @@ trait Option[J[_], A]:
     option(f(default))(f)
   final def get: J[A] ?=> A = option(throw new MatchError(this))(identity)
 
-  def map[B](f: A => B): Option[J, B]
-  def flatMap[B](f: A => Option[J, B]): Option[J, B]
+  def map[B](f: A => B): JOption[J, B]
+  def flatMap[B](f: A => JOption[J, B]): JOption[J, B]
 
-case class SomeOption[J[_], A](a: A) extends Option[J, A]:
+case class SomeJOption[J[_], A](a: A) extends JOption[J, A]:
   override def option[B](default: => B)(f: A => B): J[B] ?=> B = f(a)
-  override def map[B](f: A => B): Option[J, B] = SomeOption(f(a))
-  override def flatMap[B](f: A => Option[J, B]): Option[J, B] = f(a)
+  override def map[B](f: A => B): JOption[J, B] = SomeJOption(f(a))
+  override def flatMap[B](f: A => JOption[J, B]): JOption[J, B] = f(a)
 
-enum OptionC[A] extends Option[NoJoin, A]:
+enum JOptionC[A] extends JOption[NoJoin, A]:
   case None()
   case Some(a: A)
 
@@ -28,22 +28,22 @@ enum OptionC[A] extends Option[NoJoin, A]:
     case None() => default
     case Some(a) => f(a)
 
-  override def map[B](f: A => B): OptionC[B] = this match
+  override def map[B](f: A => B): JOptionC[B] = this match
     case None() => None()
     case Some(a) => Some(f(a))
 
-  override def flatMap[B](f: A => Option[NoJoin, B]): Option[NoJoin, B] = this match
+  override def flatMap[B](f: A => JOption[NoJoin, B]): JOption[NoJoin, B] = this match
     case None() => None()
     case Some(a) => f(a)
 
-object OptionC:
-  inline def none[A]: OptionC[A] = OptionC.None()
-  inline def some[A](a: A): OptionC[A] = OptionC.Some(a)
-  def apply[A](opt: scala.Option[A]): OptionC[A] = opt match
-    case scala.Some(a) => OptionC.Some(a)
-    case scala.None => OptionC.None()
+object JOptionC:
+  inline def none[A]: JOptionC[A] = JOptionC.None()
+  inline def some[A](a: A): JOptionC[A] = JOptionC.Some(a)
+  def apply[A](opt: scala.Option[A]): JOptionC[A] = opt match
+    case scala.Some(a) => JOptionC.Some(a)
+    case scala.None => JOptionC.None()
 
-enum OptionA[A] extends Option[WithJoin, A]:
+enum JOptionA[A] extends JOption[WithJoin, A]:
   case None()
   case NoneSome(a: A)
   case Some(a: A)
@@ -53,12 +53,12 @@ enum OptionA[A] extends Option[WithJoin, A]:
     case NoneSome(a) => joinComputations(f(a))(default)
     case None() => default
 
-  override def map[B](f: A => B): OptionA[B] = this match
+  override def map[B](f: A => B): JOptionA[B] = this match
     case None() => None()
     case NoneSome(a) => NoneSome(f(a))
     case Some(a) => Some(f(a))
 
-  override def flatMap[B](f: A => Option[WithJoin, B]): Option[WithJoin, B] = this match
+  override def flatMap[B](f: A => JOption[WithJoin, B]): JOption[WithJoin, B] = this match
     case None() => None()
     case NoneSome(a) => f(a) match
       case None() => None()
@@ -67,7 +67,7 @@ enum OptionA[A] extends Option[WithJoin, A]:
       case other => throw new IllegalArgumentException(s"Cannot flatMap OptionA to different type $other")
     case Some(a) => f(a)
 
-  def joinDeep[AA <: A](that: OptionA[AA])(using Join[A]): OptionA[A] = (this, that) match
+  def joinDeep[AA <: A](that: JOptionA[AA])(using Join[A]): JOptionA[A] = (this, that) match
     case (None(), None()) => None()
     case (None(), NoneSome(a2)) => NoneSome(a2)
     case (None(), Some(a2)) => NoneSome(a2)
@@ -79,15 +79,25 @@ enum OptionA[A] extends Option[WithJoin, A]:
     case (Some(a1), Some(a2)) => Some(Join(a1,a2).get)
     case _ => throw new IllegalStateException()
 
-object OptionA:
-  inline def none[A]: OptionA[A] = OptionA.None()
-  inline def noneSome[A](a: A): OptionA[A] = OptionA.NoneSome(a)
-  inline def some[A](a: A): OptionA[A] = OptionA.Some(a)
-  def apply[A](opt: scala.Option[A]): OptionA[A] = opt match
-    case scala.Some(a) => OptionA.Some(a)
-    case scala.None => OptionA.None()
+//object JOptionA:
+//  inline def none[A]: JOptionA[A] = JOptionA.None()
+//  inline def noneSome[A](a: A): JOptionA[A] = JOptionA.NoneSome(a)
+//  inline def some[A](a: A): JOptionA[A] = JOptionA.Some(a)
+//  def apply[A](opt: scala.Option[A]): JOptionA[A] = opt match
+//    case scala.Some(a) => JOptionA.Some(a)
+//    case scala.None => JOptionA.None()
+//
+//case class JOptionPower[A](opt: JOption[WithJoin, Powerset[A]]) extends JOption[WithJoin, A]:
+//  override def option[B](default: => B)(f: A => B): WithJoin[B] ?=> B =
+//    opt.option(default)(p => mapJoin(p.set, f))
+//
+//  override def map[B](f: A => B): JOptionPower[B] =
+//    JOptionPower(opt.map(_.map(f)))
+//
+//  override def flatMap[B](f: A => JOption[WithJoin, B]): JOptionPower[B] =
+//    JOptionPower(opt.flatMap())
 
-enum OptionPowerset[A] extends Option[WithJoin, A]:
+enum JOptionPowerset[A] extends JOption[WithJoin, A]:
   case None()
   case NoneSome(as: Powerset[A])
   case Some(as: Powerset[A])
@@ -97,17 +107,17 @@ enum OptionPowerset[A] extends Option[WithJoin, A]:
     case NoneSome(as) => joinComputations(mapJoin(as.set, f))(default)
     case None() => default
 
-  override def map[B](f: A => B): OptionPowerset[B] = this match
+  override def map[B](f: A => B): JOptionPowerset[B] = this match
     case None() => None()
     case NoneSome(as) => NoneSome(as.map(f))
     case Some(as) => Some(as.map(f))
 
-  override def flatMap[B](f: A => Option[WithJoin, B]): Option[WithJoin, B] = this match
+  override def flatMap[B](f: A => JOption[WithJoin, B]): JOption[WithJoin, B] = this match
     case None() => None()
     case NoneSome(as) => flat(as, f, mustNone = true)
     case Some(as) => flat(as, f, mustNone = false)
 
-  private def flat[B](as: Powerset[A], f: A => Option[WithJoin, B], mustNone: Boolean) =
+  private def flat[B](as: Powerset[A], f: A => JOption[WithJoin, B], mustNone: Boolean): JOptionPowerset[B] =
     var bs = Set[B]()
     var none = mustNone
     as.foreach { a => f(a) match
@@ -129,7 +139,7 @@ enum OptionPowerset[A] extends Option[WithJoin, A]:
       Some(Powerset(bs))
 
   import sturdy.values.JoinPowerset
-  def joinDeep(that: OptionPowerset[A]): OptionPowerset[A] = (this, that) match
+  def joinDeep(that: JOptionPowerset[A]): JOptionPowerset[A] = (this, that) match
     case (None(), None()) => None()
     case (None(), NoneSome(a2)) => NoneSome(a2)
     case (None(), Some(a2)) => NoneSome(a2)

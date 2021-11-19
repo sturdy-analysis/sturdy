@@ -2,12 +2,12 @@ package sturdy.data
 
 import sturdy.effect.Effectful
 
-trait Either[J[_], A, B]:
+trait JEither[J[_], A, B]:
   def either[C](f: A => C)(g: B => C): J[C] ?=> C
   def left: J[A] ?=> A = either(identity)(throw new MatchError(this))
   def right: J[B] ?=> B = either(throw new MatchError(this))(identity)
 
-enum EitherC[A, B] extends Either[NoJoin, A, B]:
+enum JEitherC[A, B] extends JEither[NoJoin, A, B]:
   case Left(a: A)
   case Right(b: B)
 
@@ -16,7 +16,7 @@ enum EitherC[A, B] extends Either[NoJoin, A, B]:
     case Right(b) => g(b)
 
 
-enum EitherA[A, B] extends Either[WithJoin, A, B]:
+enum JEitherA[A, B] extends JEither[WithJoin, A, B]:
   case Left(as: A)
   case Right(bs: B)
   case LeftRight(as: A, bs: B)

@@ -10,17 +10,17 @@ trait ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin]:
   
   protected val memories: mutable.Map[Key, Mem] = mutable.Map()
 
-  override def memRead(key: Key, addr: Int, length: Int): OptionC[Seq[Byte]] =
+  override def memRead(key: Key, addr: Int, length: Int): JOptionC[Seq[Byte]] =
     val mem = memories(key)
     // since collections are indexed by signed integers, we have to check here for addr >= 0
     // this means our maximum memory size is half of the allowed size in wasm
     val end = addr + length
     if (addr >= 0 && end <= mem.size)
-      OptionC.Some(mem.bytes.slice(addr, end).toSeq)
+      JOptionC.Some(mem.bytes.slice(addr, end).toSeq)
     else
-      OptionC.none
+      JOptionC.none
 
-  override def memStore(key: Key, addr: Int, bytes: Seq[Byte]): OptionC[Unit] =
+  override def memStore(key: Key, addr: Int, bytes: Seq[Byte]): JOptionC[Unit] =
     val mem = memories(key)
     if (addr >= 0 && addr + bytes.size <= mem.size) {
       var i = addr
@@ -28,24 +28,24 @@ trait ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin]:
         mem.bytes(i) = b
         i += 1
       }
-      OptionC.Some(())
+      JOptionC.Some(())
     } else {
-      OptionC.none
+      JOptionC.none
     }
 
   override def memSize(key: Key): Int =
     memories(key).size / pageSize
 
-  override def memGrow(key: Key, delta: Int): OptionC[Int] =
+  override def memGrow(key: Key, delta: Int): JOptionC[Int] =
     val mem = memories(key)
     val newPageNum = mem.pageNum + delta
     if (newPageNum <= maxPageNum && mem.sizeLimit.forall(newPageNum <= _)) {
       val newBytes = Array.ofDim[Byte](mem.size + delta * pageSize)
       Array.copy(mem.bytes, 0, newBytes, 0, mem.size)
       memories(key) = Mem(newBytes, mem.sizeLimit)
-      OptionC.Some(mem.pageNum)
+      JOptionC.Some(mem.pageNum)
     } else {
-      OptionC.none
+      JOptionC.none
     }
 
 

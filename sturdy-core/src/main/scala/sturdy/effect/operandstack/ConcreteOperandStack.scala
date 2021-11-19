@@ -1,6 +1,6 @@
 package sturdy.effect.operandstack
 
-import sturdy.data.{CombineEquiList, NoJoin, OptionC}
+import sturdy.data.{CombineEquiList, NoJoin, JOptionC}
 import sturdy.values.*
 import sturdy.data.unit
 
@@ -17,25 +17,25 @@ trait ConcreteOperandStack[V] extends DecidableOperandStack[V]:
   def push(v: V): Unit =
     stack = v :: stack
 
-  def pop(): OptionC[V] =
+  def pop(): JOptionC[V] =
     if (stack.isEmpty)
-      OptionC.none
+      JOptionC.none
     else
       val v = stack.head
       stack = stack.tail
-      OptionC.some(v)
+      JOptionC.some(v)
   
-  def peek(): OptionC[V] =
+  def peek(): JOptionC[V] =
     if (stack.isEmpty)
-      OptionC.none
+      JOptionC.none
     else
-      OptionC.some(stack.head)
+      JOptionC.some(stack.head)
 
-  override def peekN(n: Int): OptionC[List[V]] =
+  override def peekN(n: Int): JOptionC[List[V]] =
     if (n > stack.size)
-      OptionC.none
+      JOptionC.none
     else
-      OptionC.some(stack.take(n))
+      JOptionC.some(stack.take(n))
 
   override def size: Int = stack.size
   

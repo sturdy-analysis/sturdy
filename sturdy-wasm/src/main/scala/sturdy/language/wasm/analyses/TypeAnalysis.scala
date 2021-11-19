@@ -48,11 +48,11 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
     override def valToSize(v: Value): Size = v.asInt32
     override def sizeToVal(sz: Size): Value = Value.Int32(sz)
 
-    override def indexLookup[A](ix: Value, vec: Vector[A]): OptionPowerset[A] =
+    override def indexLookup[A](ix: Value, vec: Vector[A]): JOptionPowerset[A] =
       if (vec.isEmpty)
-        OptionPowerset.None()
+        JOptionPowerset.None()
       else
-        OptionPowerset.NoneSome(Powerset(vec.toSet))
+        JOptionPowerset.NoneSome(Powerset(vec.toSet))
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[TypeAnalysis.Value]): List[TypeAnalysis.Value] = hostFunc match
       case HostFunction.proc_exit =>

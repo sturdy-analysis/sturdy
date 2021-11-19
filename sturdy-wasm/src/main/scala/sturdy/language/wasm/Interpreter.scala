@@ -249,5 +249,5 @@ trait Interpreter:
 
   abstract class GenericInstance
     (_effects: Effects)
-    (using MayJoin[Unit], MayJoin[Value])
+    (using MayJoin[Unit], MayJoin[Value], MayJoin[FunV])
     extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin, Effects](_effects)

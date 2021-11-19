@@ -108,7 +108,7 @@ given finiteFixIn: Finite[FixIn] with {}
 
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], Effects <: GenericEffects[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin]]
   (val effects: Effects)
-  (using MayJoin[Unit], MayJoin[V])
+  (using MayJoin[Unit], MayJoin[V], MayJoin[FunV])
   extends fix.Fixpoint[FixIn, FixOut[V]]:
 
   import effects.*
@@ -285,9 +285,8 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     case CallIndirect(typeIx) =>
       val ftExpected = module.functionTypes(typeIx)
       val funcIx = stack.popOrFail()
-      tableGet(tableIndex, valueToFuncIx(funcIx)).option(fail(UnboundFunctionIndex, funcIx.toString)) { func =>
-        invokeIndirect(func, ftExpected, funcIx)
-      }
+      val func = tableGet(tableIndex, valueToFuncIx(funcIx)).getOrElse(fail(UnboundFunctionIndex, funcIx.toString))
+      invokeIndirect(func, ftExpected, funcIx)
     case _ => throw new IllegalArgumentException(s"Expected control instruction, but got $inst")
 
   def branch(labelIndex: LabelIdx): Unit =

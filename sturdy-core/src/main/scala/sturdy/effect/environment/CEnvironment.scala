@@ -9,8 +9,8 @@ trait CEnvironment[Var, V](_init: Map[Var, V] = Map()) extends Environment[Var, 
   protected var env: Map[Var, V] = _init
   def getEnv: Map[Var, V] = env
   
-  override def lookup(x: Var): OptionC[V] =
-    OptionC(env.get(x))
+  override def lookup(x: Var): JOptionC[V] =
+    JOptionC(env.get(x))
 
   override def bind(x: Var, v: V): Unit = env = env + (x -> v)
 

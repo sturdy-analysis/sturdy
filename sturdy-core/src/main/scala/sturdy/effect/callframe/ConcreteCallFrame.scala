@@ -44,27 +44,27 @@ trait ConcreteCallFrame[Data, Var, V](using ClassTag[V]) extends DecidableMutabl
     data = s._1
     setFrameVars(s._2)
 
-  def getLocal(ix: Int): OptionC[V] =
+  def getLocal(ix: Int): JOptionC[V] =
     if (ix >= 0 && ix < vars.length)
-      OptionC.Some(vars(ix))
+      JOptionC.Some(vars(ix))
     else
-      OptionC.none
+      JOptionC.none
 
-  def getLocalByName(x: Var): OptionC[V] = names.get(x) match
+  def getLocalByName(x: Var): JOptionC[V] = names.get(x) match
     case Some(ix) => getLocal(ix)
-    case None => OptionC.none
+    case None => JOptionC.none
 
-  def setLocal(ix: Int, v: V): OptionC[Unit] =
+  def setLocal(ix: Int, v: V): JOptionC[Unit] =
     if (ix >= 0 && ix < vars.length) {
       vars = vars.updated(ix, v)
-      OptionC.Some(())
+      JOptionC.Some(())
     } else {
-      OptionC.none
+      JOptionC.none
     }
 
-  def setLocalByName(x: Var, v: V): Option[NoJoin, Unit] = names.get(x) match
+  def setLocalByName(x: Var, v: V): JOption[NoJoin, Unit] = names.get(x) match
     case Some(ix) => setLocal(ix, v)
-    case None => OptionC.none
+    case None => JOptionC.none
 
   def inNewFrame[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A = {
     val snapData = this.data

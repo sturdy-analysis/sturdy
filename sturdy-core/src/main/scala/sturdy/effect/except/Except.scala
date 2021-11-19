@@ -1,6 +1,6 @@
 package sturdy.effect.except
 
-import sturdy.data.Either
+import sturdy.data.JEither
 import sturdy.effect.SturdyException
 import sturdy.values.exceptions.Exceptional
 
@@ -11,7 +11,7 @@ trait Except[Exc, E, MayJoin[_]] extends ObservableExcept[Exc]:
   @throws[SturdyException]
   def throws(ex: Exc): Nothing
 
-  protected def tries[A](f: => A): Either[MayJoin, A, E]
+  protected def tries[A](f: => A): JEither[MayJoin, A, E]
 
   final def tryCatch[A](f: => A)(handle: Exc => A): MayJoin[A] ?=> A =
     tryStart()

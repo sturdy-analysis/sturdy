@@ -20,9 +20,9 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
 
   this.store = _init
 
-  override def read(xs: Powerset[Addr]): OptionA[V] = {
+  override def read(xs: Powerset[Addr]): JOptionA[V] = {
     var needsNotFound = false
-    var vs = ListBuffer[V]()
+    val vs = ListBuffer[V]()
     for (x <- xs.set)
       if (!x.isManaged)
         needsNotFound = true
@@ -31,11 +31,11 @@ trait AStoreMultiAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(u
           needsNotFound = true
         case Some(v) => vs += v
     if (vs.isEmpty)
-      OptionA.None()
+      JOptionA.None()
     else if (needsNotFound)
-      OptionA.NoneSome(vs.reduce(Join(_, _).get))
+      JOptionA.NoneSome(vs.reduce(Join(_, _).get))
     else
-      OptionA.Some(vs.reduce(Join(_, _).get))
+      JOptionA.Some(vs.reduce(Join(_, _).get))
   }
 
   override def write(xs: Powerset[Addr], v: V): Unit =
