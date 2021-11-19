@@ -20,7 +20,7 @@ trait ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin]:
     else
       JOptionC.none
 
-  override def memStore(key: Key, addr: Int, bytes: Seq[Byte]): JOptionC[Unit] =
+  override def memWrite(key: Key, addr: Int, bytes: Seq[Byte]): JOptionC[Unit] =
     val mem = memories(key)
     if (addr >= 0 && addr + bytes.size <= mem.size) {
       var i = addr
