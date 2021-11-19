@@ -31,7 +31,7 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
     case Topped.Top => JOptionA.noneSome(Seq.fill[B](length)(memories(key).upperBound))
     case Topped.Actual(a) => memories(key).read(a, length)
 
-  override def memStore(key: Key, addr: Topped[Int], bytes: Seq[B]): JOptionA[Unit] =
+  override def memWrite(key: Key, addr: Topped[Int], bytes: Seq[B]): JOptionA[Unit] =
     val (newMem, res) = memories(key).store(addr, bytes)
     newMem.foreach(memories += key -> _)
     res

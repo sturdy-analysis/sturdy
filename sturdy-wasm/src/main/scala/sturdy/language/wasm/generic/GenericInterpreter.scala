@@ -177,16 +177,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     case _ => throw new IllegalArgumentException(s"Expected memory instruction, but got $inst")
 
   def load(inst: LoadInst | LoadNInst): Unit =
-    // add offset to base address (which is already on the stack)
-    stack.push(i32ops.integerLit(inst.offset))
-    addWithOverflowCheck()
-    val effectiveAddr = stack.popOrFail()
-    val addr = valueToAddr(effectiveAddr)
-
+    val addr = effectiveAddr(inst.offset)
     val memIdx = memoryIndex
-    val byteSize = getBytesToRead(inst)
-    memRead(memIdx,addr,byteSize).option
-      (fail(MemoryAccessOutOfBounds, s"Cannot read $byteSize bytes at address $addr in current memory."))
+    val length = getBytesToRead(inst)
+    memRead(memIdx,addr,length).option
+      (fail(MemoryAccessOutOfBounds, s"Cannot read $length bytes at address $addr in current memory."))
       {(b: Bytes) =>
         val v = decode(b, SomeCC(inst, false))
         stack.push(v)}
@@ -200,7 +195,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
     val addr = valueToAddr(num.evalNumeric(i32.Add))
 
     val memIdx = memoryIndex
-    memStore(memIdx, addr, bytes).getOrElse(
+    memWrite(memIdx, addr, bytes).getOrElse(
       fail(MemoryAccessOutOfBounds, s"Cannot write $bytes at address $addr in current memory.")
     )
 
@@ -446,12 +441,14 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin[_], E
       stack.popOrFail()
     }))
 
-  def addWithOverflowCheck(): Unit =
-    val v1 = stack.popOrFail()
+  /** add offset to base address (which is already on the stack) */
+  def effectiveAddr(offset: Int): Addr =
+    val v1 = i32ops.integerLit(offset)
     val v2 = stack.popOrFail()
     val res = i32ops.add(v1,v2)
     val cmp = unsignedCompareOps.ltUnsigned(res,v1)
-    branchOpsUnit.boolBranch(cmp, fail(IntegerOverflow, s"$v1 + $v2"), stack.push(res))
+    val v = branchOpsV.boolBranch(cmp, fail(IntegerOverflow, s"$v1 + $v2"), res)
+    valueToAddr(v)
 
   def resolveImports(module: Module, imports: Imports):
     (Vector[FunctionInstance], Vector[GlobalAddr], Vector[TableAddr], Vector[MemoryAddr]) =

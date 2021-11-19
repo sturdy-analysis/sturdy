@@ -7,7 +7,7 @@ trait TopMemory[Key, Addr, Bytes, Size](using Top[Size], Top[Bytes]) extends Mem
   override def memRead(key: Key, addr: Addr, length: Int): JOptionA[Bytes] =
     JOptionA.noneSome(Top.top[Bytes])
 
-  override def memStore(key: Key, addr: Addr, bytes: Bytes): JOptionA[Unit] =
+  override def memWrite(key: Key, addr: Addr, bytes: Bytes): JOptionA[Unit] =
     JOptionA.noneSome(())
 
   override def memGrow(key: Key, delta: Size): JOptionA[Size] =
