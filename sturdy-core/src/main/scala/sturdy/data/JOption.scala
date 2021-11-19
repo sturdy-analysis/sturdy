@@ -79,14 +79,14 @@ enum JOptionA[A] extends JOption[WithJoin, A]:
     case (Some(a1), Some(a2)) => Some(Join(a1,a2).get)
     case _ => throw new IllegalStateException()
 
-//object JOptionA:
-//  inline def none[A]: JOptionA[A] = JOptionA.None()
-//  inline def noneSome[A](a: A): JOptionA[A] = JOptionA.NoneSome(a)
-//  inline def some[A](a: A): JOptionA[A] = JOptionA.Some(a)
-//  def apply[A](opt: scala.Option[A]): JOptionA[A] = opt match
-//    case scala.Some(a) => JOptionA.Some(a)
-//    case scala.None => JOptionA.None()
-//
+object JOptionA:
+  inline def none[A]: JOptionA[A] = JOptionA.None()
+  inline def noneSome[A](a: A): JOptionA[A] = JOptionA.NoneSome(a)
+  inline def some[A](a: A): JOptionA[A] = JOptionA.Some(a)
+  def apply[A](opt: scala.Option[A]): JOptionA[A] = opt match
+    case scala.Some(a) => JOptionA.Some(a)
+    case scala.None => JOptionA.None()
+
 //case class JOptionPower[A](opt: JOption[WithJoin, Powerset[A]]) extends JOption[WithJoin, A]:
 //  override def option[B](default: => B)(f: A => B): WithJoin[B] ?=> B =
 //    opt.option(default)(p => mapJoin(p.set, f))
