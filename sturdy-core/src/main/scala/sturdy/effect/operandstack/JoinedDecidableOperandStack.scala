@@ -2,37 +2,36 @@ package sturdy.effect.operandstack
 
 import sturdy.seqIsSound
 import sturdy.effect.ComputationJoiner
-import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.TrySturdy
 import sturdy.{Soundness, IsSound}
 import sturdy.values.Join
 
 /** Stacks of different execution branches are joined. */
-trait JoinedDecidableOperandStack[V](using Join[V]) extends ConcreteOperandStack[V]:
+class JoinedDecidableOperandStack[V](using Join[V]) extends ConcreteOperandStack[V]:
 
-  override def makeComputationJoiner[A]: ComputationJoiner[A] = new OperandStackJoiner[A]
-  class OperandStackJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new OperandStackJoiner[A])
+  private class OperandStackJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = stack
     private var fStack: List[V] = _
 
-    override def inbetween_(): Unit =
+    override def inbetween(): Unit =
       fStack = stack
       stack = snapshot
 
-    override def retainNone_(): Unit =
+    override def retainNone(): Unit =
       stack = snapshot
 
-    override def retainFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
       if (fRes.isSuccess)
         stack = fStack
       else
         stack = snapshot
 
-    override def retainSecond_(gRes: TrySturdy[A]): Unit =
+    override def retainSecond(gRes: TrySturdy[A]): Unit =
       if (!gRes.isSuccess)
         stack = snapshot
 
-    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       if (gRes.isSuccess) {
         if (fRes.isSuccess)
           stack = joinWith(fStack)
@@ -54,8 +53,12 @@ trait JoinedDecidableOperandStack[V](using Join[V]) extends ConcreteOperandStack
 
 
   def operandStackIsSound[cV](c: ConcreteOperandStack[cV])(using vSoundndess: Soundness[cV, V]): IsSound =
-    val cStack = c.getState
-    seqIsSound.isSound(cStack, stack)
+    val cStack = c.getState._1
+    val s = seqIsSound.isSound(cStack, stack)
+    if (s.isNotSound)
+      IsSound.NotSound(s"Unsound operand stack c=$cStack, a=$stack")
+    else
+      IsSound.Sound
 
 object JoinedDecidableOperandStack:
   type Operands[V] = List[V]

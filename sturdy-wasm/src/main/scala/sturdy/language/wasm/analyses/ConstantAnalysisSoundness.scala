@@ -63,9 +63,9 @@ object ConstantAnalysisSoundness {
   given Soundness[ConcreteInterpreter.Instance, ConstantAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: ConstantAnalysis.Instance): IsSound =
       // soundness for stack, memory, symbol table, call frame
-      a.effects.operandStackIsSound(c.effects) &&
-        a.effects.memoryIsSound(c.effects) &&
-        a.effects.globalsIsSound(c.effects) &&
-        a.effects.tableIsSound(c.effects) &&
-        a.effects.joinedDecidableCallFrameIsSound(c.effects)
+      a.stack.operandStackIsSound(c.stack) &&
+        a.memory.memoryIsSound(c.memory) &&
+        a.globals.tableIsSound(c.globals) &&
+        a.funTables.tableIsSound(c.funTables) &&
+        a.callFrame.joinedDecidableCallFrameIsSound(c.callFrame)
 }

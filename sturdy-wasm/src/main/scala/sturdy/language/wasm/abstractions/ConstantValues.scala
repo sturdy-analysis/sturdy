@@ -51,7 +51,7 @@ trait ConstantValues extends Interpreter:
     case ConcreteInterpreter.Value.Float64(d) => Value.Float64(Topped.Actual(d))
 
   def constantInstructions(analysis: Instance): ConstantInstructionsLogger =
-    val constants = new ConstantInstructionsLogger(analysis.stack)(using analysis.effects)
+    val constants = new ConstantInstructionsLogger(analysis.stack)(using analysis.failure)
     analysis.addContextFreeLogger(constants)
     constants
 

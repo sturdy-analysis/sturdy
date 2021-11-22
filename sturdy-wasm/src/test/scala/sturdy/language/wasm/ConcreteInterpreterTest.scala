@@ -4,9 +4,10 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.{CFallible, FailureKind}
+import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.language.wasm.generic.FrameData
 import ConcreteInterpreter.Value
+import sturdy.effect.failure.AFallible
 import sturdy.language.wasm.generic.UnreachableInstruction
 
 import java.nio.file.Files
@@ -69,21 +70,22 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   def testFunction(path: Path, funcName: String, args: List[Value], expectedResult: List[Value]) =
     it must s"execute $funcName withs args $args with result $expectedResult" in {
       val res = runWasmFunction(path, funcName, args)
-      assertResult(CFallible.Unfailing(expectedResult))(res)
+      assertResult(AFallible.Unfailing(expectedResult))(res)
     }
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind) =
     it must s"execute $funcName with args $args throwing exception $failureKind" in {
       val res = runWasmFunction(path, funcName, args)
       assert(res.isFailing)
-      assertResult(failureKind)(res.asInstanceOf[CFallible.Failing[_]].kind)
+      val msgs = res.asInstanceOf[AFallible.Failing[_]].msgs
+      assert(msgs.set.exists(_._1 == failureKind))
     }
 
 
-def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[Iterable[Value]] =
+def runWasmFunction(path: Path, funName: String, args: List[Value]): AFallible[Iterable[Value]] =
   val module = parse(path)
-  val interp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
+  val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   val modInst = interp.initializeModule(module)
-  interp.effects.fallible(
+  interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )

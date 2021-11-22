@@ -3,7 +3,7 @@ package sturdy.language.wasm
 import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.{CFailureException, CFallible}
+import sturdy.effect.failure.AFallible
 import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
 import sturdy.language.wasm.generic.ExternalValue.Global
 import ConcreteInterpreter.Value
@@ -26,7 +26,7 @@ import scala.collection.mutable
 
 
 class TestScriptInterpreter(spectest: Option[Module] = None):
-  val interp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
+  val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   val modules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var current: ModuleInstance = null
   val imports: mutable.Map[String, ModuleInstance] = mutable.Map()
@@ -37,7 +37,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
     imports += "spectest" -> modInst
   }
 
-  type Result = CFallible[List[Value]]
+  type Result = AFallible[List[Value]]
 
   def eqVals(vs1: List[Value], vs2: List[Value]): Boolean =
     vs1.size == vs2.size && vs1.zip(vs2).forall {
@@ -72,7 +72,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
         ???
       case AssertReturn(action, expectedRes) =>
         val res = runAction(action)
-        assert(!res.isFailing, s"$action failed")
+        assert(!res.isFailing, s"$action failed $res")
         val expected = constExprToVals(expectedRes)
         assert(eqVals(expected, res.get), c.toString + s" but $expected != ${res.get}")
       case AssertReturnCanonicalNaN(action) =>
@@ -101,11 +101,11 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
       case Some(name) => modules += name -> modInst
     current = modInst
 
-  def instantiate(t: TestModule): CFallible[ModuleInstance] =
+  def instantiate(t: TestModule): AFallible[ModuleInstance] =
     t match
       case ValidModule(m) =>
         val mod = readModule(m)
-        interp.effects.fallible {
+        interp.failure.fallible {
           interp.initializeModule(mod, imports)
         }
       case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
@@ -118,7 +118,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
 
   def evalInvoke(module: Option[String], fun: String, vals: List[Value]): Result =
     val modInst = getModule(module)
-    interp.effects.fallible {
+    interp.failure.fallible {
       interp.invokeExported(modInst, fun, vals)
     }
 
@@ -130,7 +130,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
       case Global(addr) =>
         val globalIdx = modInst.globalAddrs.lift(addr).getOrElse(throw new Error(s"Unbound global $addr"))
         val value = interp.getGlobalValue(globalIdx)
-        CFallible.Unfailing(List(value))
+        AFallible.Unfailing(List(value))
       case ext =>
         throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")
 

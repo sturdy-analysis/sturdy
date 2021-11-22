@@ -1,14 +1,15 @@
 package sturdy.language.wasm.analyses
 
 import sturdy.data.{*, given}
-import sturdy.effect.{AnalysisState, Effectful}
+import sturdy.effect.EffectStack
+import sturdy.effect.{Effectful, AnalysisState}
 import sturdy.effect.bytememory.TopMemory
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.callframe.JoinedDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
 import sturdy.effect.operandstack.JoinedDecidableOperandStack
-import sturdy.effect.symboltable.{UpperBoundSymbolTable, JoinedSymbolTable}
+import sturdy.effect.symboltable.{JoinedSymbolTable, UpperBoundSymbolTable}
 import sturdy.fix
 import sturdy.fix.Combinator
 import sturdy.fix.context.Sensitivity
@@ -34,7 +35,7 @@ import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
 object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
-  type MayJoin[A] = WithJoin[A]
+  type J[A] = WithJoin[A]
   type Addr = I32
   type Bytes = BaseType[Seq[Byte]]
   type Size = I32
@@ -42,7 +43,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
   type FuncIx = I32
   type FunV = Powerset[FunctionInstance]
 
-  given TypeSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
+  given TypeSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32
     override def valToSize(v: Value): Size = v.asInt32
@@ -64,50 +65,22 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
       case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
       case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(topI32)))(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  type InState =
-    (ConcreteCallFrame.Vars[Value],
-      Globals.Values[Value],
-      JoinedDecidableOperandStack.Operands[Value])
-  type OutState =
-    (Globals.Values[Value],
-      JoinedDecidableOperandStack.Operands[Value])
-  type AllState = InState
-
-  class Effects(rootFrameData: FrameData, rootFrameValues: Iterable[Value])
-    extends JoinedDecidableOperandStack[Value]
-      with TopMemory[MemoryAddr, Addr, Bytes, Size]
-      with Globals[Value]
-      with UpperBoundSymbolTable[TableAddr, FuncIx, FunV](Powerset())
-      with JoinedDecidableCallFrame[FrameData, Int, Value]
-      with JoinedExcept[WasmException[Value], ExcV]
-      with AFailureCollect
-      with AnalysisState[InState, OutState, AllState] {
-
-    override def initialCallFrameData = rootFrameData
-    override def initialCallFrameVars = rootFrameValues.view.zipWithIndex.map(_.swap)
-    override protected def makeGlobalsTable = new JoinedSymbolTable[Unit, GlobalAddr, Value] {}
-
-    override def getInState() = (getFrameVars, getGlobalValues, getOperandFrame)
-    override def getOutState() = (getGlobalValues, getOperandFrame)
-    override def getAllState() = getInState()
-    def setInState(in: InState) =
-      setFrameVars(in._1)
-      setGlobalValues(in._2)
-      setOperandFrame(in._3)
-    def setOutState(out: OutState) =
-      setGlobalValues(out._1)
-      setOperandFrame(out._2)
-    def setAllState(all: AllState) = setInState(all)
-  }
-
-  class Instance(conf: WasmConfig)(using effects: Effects) extends
-      GenericInstance(effects),
-      WasmFixpoint[Value, InState, OutState, AllState](conf):
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], conf: WasmConfig) extends
+    GenericInstance, WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf):
     private given Instance = this
+
+    override def jvUnit: WithJoin[Unit] = implicitly
+    override def jvV: WithJoin[Value] = implicitly
+    override def jvFunV: WithJoin[FunV] = implicitly
+    override def widenState: Widen[State] = implicitly
+
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
-    override def toString: String = s"constant $config"
+    val stack: JoinedDecidableOperandStack[Value] = new JoinedDecidableOperandStack
+    val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
+    val globals: JoinedSymbolTable[Unit, GlobalAddr, Value] = new JoinedSymbolTable
+    val funTables: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
+    val callFrame: JoinedDecidableCallFrame[FrameData, Int, Value] = new JoinedDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val except: JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]] = new JoinedExcept
 
-  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value]): WasmConfig => Instance =
-    val effects = new Effects(rootFrameData, rootFrameValues)
-    new Instance(_)(using effects)
+    override def toString: String = s"type $conf"

@@ -3,7 +3,6 @@ package sturdy.language.wasm
 import cats.effect.{Blocker, IO}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.CFailureException
 
 import java.nio.file.{Files, Path, Paths}
 import scala.io.Source

@@ -1,8 +1,9 @@
 
 ThisBuild / organization := "de.uni-mainz.informatik.pl"
-ThisBuild / version := "0.1"
-ThisBuild / scalaVersion := "3.0.2"
 ThisBuild / licenses += ("MIT", url("https://opensource.org/licenses/MIT"))
+ThisBuild / version := "0.1"
+
+ThisBuild / scalaVersion := "3.1.0"
 
 ThisBuild / Test / fork := false
 ThisBuild / Test / parallelExecution := false
@@ -79,11 +80,11 @@ lazy val sturdy_wasm = (project in file("sturdy-wasm"))
     )
   )
 
-lazy val sturdy_wasm_benchmarks = (project in file("sturdy-wasm-benchmarks"))
-  .dependsOn(sturdy_wasm % "compile->compile")
-  .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile")
-  .dependsOn(ProjectRef(swam, "swam_text") % "compile->compile")
-  .settings(
-    name := "sturdy-wasm-benchmarks"
-  )
-  .enablePlugins(JmhPlugin)
+//lazy val sturdy_wasm_benchmarks = (project in file("sturdy-wasm-benchmarks"))
+//  .dependsOn(sturdy_wasm % "compile->compile")
+//  .dependsOn(ProjectRef(swam, "swam_core") % "compile->compile")
+//  .dependsOn(ProjectRef(swam, "swam_text") % "compile->compile")
+//  .settings(
+//    name := "sturdy-wasm-benchmarks"
+//  )
+//  .enablePlugins(JmhPlugin)

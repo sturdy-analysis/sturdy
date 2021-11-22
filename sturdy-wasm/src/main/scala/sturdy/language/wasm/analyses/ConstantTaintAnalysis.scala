@@ -1,7 +1,8 @@
 package sturdy.language.wasm.analyses
 
 import sturdy.data.{*, given}
-import sturdy.effect.{AnalysisState, Effectful}
+import sturdy.effect.EffectStack
+import sturdy.effect.{Effectful, AnalysisState}
 import sturdy.effect.bytememory.ConstantAddressMemory
 import sturdy.effect.bytememory.ConstantAddressMemory.CombineMem
 import sturdy.effect.callframe.ConcreteCallFrame
@@ -12,7 +13,7 @@ import sturdy.effect.operandstack.JoinedDecidableOperandStack
 import sturdy.effect.symboltable.{JoinedSymbolTable, ConstantSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix
-import sturdy.language.wasm.{ConcreteInterpreter, Interpreter}
+import sturdy.language.wasm.{Interpreter, ConcreteInterpreter}
 import sturdy.language.wasm.abstractions.*
 import sturdy.language.wasm.abstractions.Fix.{*, given}
 import sturdy.language.wasm.generic.{*, given}
@@ -34,7 +35,7 @@ import java.nio.ByteOrder
 import scala.collection.IndexedSeqView
 
 object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFlow:
-  type MayJoin[A] = WithJoin[A]
+  type J[A] = WithJoin[A]
   type Addr = Topped[Int]
   type AByte = TaintProduct[Topped[Byte]]
   type Bytes = Seq[AByte]
@@ -43,7 +44,7 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFl
   type FuncIx = Topped[Int]
   type FunV = Powerset[FunctionInstance]
 
-  given ConstantSpecialWasmOperations(using f: Failure, eff: Effectful): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
+  given ConstantSpecialWasmOperations(using f: Failure, eff: EffectStack): SpecialWasmOperations[Value, Addr, Size, FuncIx, WithJoin] with
     override def valueToAddr(v: Value): Addr = v.asInt32.value
     override def valueToFuncIx(v: Value): FuncIx = v.asInt32.value
     override def valToSize(v: Value): Size = v.asInt32.value
@@ -73,54 +74,32 @@ object ConstantTaintAnalysis extends Interpreter, ConstantTaintValues, ControlFl
       case HostFunction.fd_write => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
       case HostFunction.fd_fdstat_get => eff.joinWithFailure(List(Value.Int32(tainted(Topped.Top))))(f.fail(FileError, s"in ${hostFunc.name}"))
 
-  type InState =
-    (ConcreteCallFrame.Vars[Value],
-      ConstantAddressMemory.Memories[MemoryAddr, AByte],
-      Globals.Values[Value],
-      JoinedDecidableOperandStack.Operands[Value])
-  type OutState =
-    (ConstantAddressMemory.Memories[MemoryAddr, AByte],
-      Globals.Values[Value],
-      JoinedDecidableOperandStack.Operands[Value])
-  type AllState = InState
 
-  class Effects(rootFrameData: FrameData, rootFrameValues: Iterable[Value])
-    extends JoinedDecidableOperandStack[Value]
-      with ConstantAddressMemory[MemoryAddr, AByte](untainted(Topped.Actual(0)))
-      with Globals[Value]
-      with ConstantSymbolTable[TableAddr, Int, FunV]
-      with JoinedDecidableCallFrame[FrameData, Int, Value]
-      with JoinedExcept[WasmException[Value], ExcV]
-      with AFailureCollect
-      with AnalysisState[InState, OutState, AllState] {
-
-    override def initialCallFrameData = rootFrameData
-    override def initialCallFrameVars = rootFrameValues.view.zipWithIndex.map(_.swap)
-    override protected def makeGlobalsTable = new JoinedSymbolTable[Unit, GlobalAddr, Value] {}
-
-    override def getInState() = (getFrameVars, getMemories, getGlobalValues, getOperandFrame)
-    override def getOutState() = (getMemories, getGlobalValues, getOperandFrame)
-    override def getAllState() = getInState()
-    def setInState(in: InState) =
-      setFrameVars(in._1)
-      setMemories(in._2)
-      setGlobalValues(in._3)
-      setOperandFrame(in._4)
-    def setOutState(out: OutState) =
-      setMemories(out._1)
-      setGlobalValues(out._2)
-      setOperandFrame(out._3)
-    def setAllState(all: AllState) = setInState(all)
-  }
-
-  class Instance(conf: WasmConfig)(using effects: Effects) extends
-    GenericInstance(effects),
-    WasmFixpoint[Value, InState, OutState, AllState](conf):
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value], val config: WasmConfig) extends
+    GenericInstance
+//    , WasmFixpoint[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J](conf)
+      :
     private given Instance = this
+
+    override type Ctx = config.ctx.Ctx
+    val (contextPreparation, sensitivity) = config.ctx.make[Value]
+    import config.ctx.finiteCtx
+    override protected def contextFree = contextPreparation
+    override protected def context: fix.context.Sensitivity[FixIn, Ctx] = sensitivity
+    override protected def contextSensitive = config.fix.get(using analysisState, effectStack)
+
+    override def jvUnit: WithJoin[Unit] = implicitly
+    override def jvV: WithJoin[Value] = implicitly
+    override def jvFunV: WithJoin[FunV] = implicitly
+//    override def widenState: Widen[State] = implicitly
+
     override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
-    override def toString: String = s"constant-taint $conf"
-
-  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value]): WasmConfig => Instance =
-    val effects = new Effects(rootFrameData, rootFrameValues)
-    new Instance(_)(using effects)
+    val stack: JoinedDecidableOperandStack[Value] = new JoinedDecidableOperandStack
+    val memory: ConstantAddressMemory[MemoryAddr, TaintProduct[Topped[Byte]]] = new ConstantAddressMemory(untainted(Topped.Actual(0)))
+    val globals: JoinedSymbolTable[Unit, GlobalAddr, Value] = new JoinedSymbolTable
+    val funTables: ConstantSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new ConstantSymbolTable
+    val callFrame: JoinedDecidableCallFrame[FrameData, Int, Value] = new JoinedDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val except: JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]] = new JoinedExcept
+    
+    override def toString: String = s"constant-taint $config"

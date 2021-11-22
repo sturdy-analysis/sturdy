@@ -8,7 +8,6 @@ import sturdy.values.exceptions.Exceptional
 import scala.collection.mutable.ListBuffer
 import scala.util.Success
 import sturdy.effect.ComputationJoiner
-import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.SturdyThrowable
 import sturdy.effect.TrySturdy
 
@@ -16,7 +15,7 @@ case object AbstractSturdyException extends SturdyException:
   override def toString: String = s"Abstract exception"
 
 
-trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin], eJoin: Join[E]) extends Except[Exc, E, WithJoin], Effectful:
+class JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin], eJoin: Join[E]) extends Except[Exc, E, WithJoin]:
 
   protected var exception: JOptionA[E] = JOptionA.none
 
@@ -55,22 +54,27 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
       this.exception = originalException
     }
 
-  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ExceptJoiner)
+  private class ExceptJoiner[A] extends ComputationJoiner[A] {
     val snapshot = exception
     var fExcept: JOptionA[E] = null
     
-    override def inbetween_(): Unit =
+    override def inbetween(): Unit =
       fExcept = exception
       exception = snapshot
 
-    override def retainNone_(): Unit =
+    override def retainNone(): Unit =
       exception = snapshot
 
-    override def retainFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
       exception = fExcept
 
-    override def retainSecond_(gRes: TrySturdy[A]): Unit = {}
+    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
-    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       exception = fExcept.joinDeep(exception)
   }
+
+  override type State = JOptionA[E]
+  override def getState: JOptionA[E] = exception
+  override def setState(s: JOptionA[E]): Unit = exception = s

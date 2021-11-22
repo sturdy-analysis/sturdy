@@ -19,6 +19,8 @@ class BaseType[B](using val tag: ClassTag[B]):
 
   override def hashCode(): Int = tag.hashCode()
 
+  override def toString: String = tag.runtimeClass.getSimpleName
+
 object BaseType:
   def apply[B: ClassTag] = new BaseType[B]
 

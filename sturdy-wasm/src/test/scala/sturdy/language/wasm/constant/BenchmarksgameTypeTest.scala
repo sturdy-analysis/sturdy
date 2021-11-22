@@ -4,7 +4,7 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.CFallible
+import sturdy.effect.failure.AFallible
 import sturdy.*
 import sturdy.fix.Fixpoint
 import sturdy.language.wasm
@@ -55,12 +55,12 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName.toString
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
     
-    val analysis = TypeAnalysis(FrameData.empty, Iterable.empty)(WasmConfig())
+    val analysis = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig())
     val analysisID = analysis.toString
     val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(false), analysis)
 
     val modInst = analysis.initializeModule(module)
-    analysis.effects.fallible(
+    analysis.failure.fallible(
       analysis.invokeExported(modInst, funcName, List.empty)
     )
 

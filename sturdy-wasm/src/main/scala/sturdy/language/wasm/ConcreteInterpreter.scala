@@ -1,10 +1,11 @@
 package sturdy.language.wasm
 
 import sturdy.data.{*, given}
+import sturdy.effect.EffectStack
 import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.ConcreteExcept
-import sturdy.effect.failure.{CFailure, Failure}
+import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix
@@ -25,7 +26,7 @@ import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
 object ConcreteInterpreter extends Interpreter:
-  override type MayJoin[A] = NoJoin[A]
+  override type J[A] = NoJoin[A]
   override type I32 = Int
   override type I64 = Long
   override type F32 = Float
@@ -75,25 +76,19 @@ object ConcreteInterpreter extends Interpreter:
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =
       runtime(hostFunc)(args)
 
-  class Effects(rootFrameData: FrameData, rootFrameValues: Iterable[Value])
-    extends ConcreteOperandStack[Value]
-      with ConcreteMemory[MemoryAddr]
-      with Globals[Value]
-      with ConcreteSymbolTable[TableAddr, FuncIx, FunV]
-      with ConcreteCallFrame[FrameData, Int, Value]
-      with ConcreteExcept[WasmException[Value]]
-      with CFailure:
+  class Instance(rootFrameData: FrameData, rootFrameValues: Iterable[Value])
+    extends GenericInstance with fix.Concrete[FixIn, FixOut[Value]]:
 
-    override def initialCallFrameData = rootFrameData
-    override def initialCallFrameVars = rootFrameValues.view.zipWithIndex.map(_.swap)
-    override protected def makeGlobalsTable = new ConcreteSymbolTable[Unit, GlobalAddr, Value] {}
+    override def jvUnit: NoJoin[Unit] = implicitly
+    override def jvV: NoJoin[Value] = implicitly
+    override def jvFunV: NoJoin[FunV] = implicitly
 
-  class Instance(_effects: Effects)(using Failure)
-    extends GenericInstance(_effects) with fix.Concrete[FixIn, FixOut[Value]]:
-
+    val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
+    val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
+    val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
+    val funTables: ConcreteSymbolTable[TableAddr, FuncIx, FunV] = new ConcreteSymbolTable[TableAddr, FuncIx, FunV]
+    val callFrame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
+    val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
+    
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
 
-  def apply(rootFrameData: FrameData, rootFrameValues: Iterable[Value]): Instance =
-    val effects = new Effects(rootFrameData, rootFrameValues)
-    given Failure = effects
-    new Instance(effects)

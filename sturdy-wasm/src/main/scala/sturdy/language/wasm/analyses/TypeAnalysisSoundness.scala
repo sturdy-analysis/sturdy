@@ -26,11 +26,11 @@ object TypeAnalysisSoundness {
   given poFloat: PartialOrder[Float] with
     override def lteq(f1: Float, f2: Float): Boolean =
       f1.isNaN && f2.isNaN || f1 == f2
-      
+
   given poDouble: PartialOrder[Double] with
     override def lteq(d1: Double, d2: Double): Boolean =
       d1.isNaN && d2.isNaN || d1 == d2
-  
+
   given po: PartialOrder[Value] with
     override def lteq(x: Value, y: Value): Boolean = (x,y) match
       case (_, Value.TopValue) => true
@@ -50,8 +50,9 @@ object TypeAnalysisSoundness {
   given Soundness[ConcreteInterpreter.Instance, TypeAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: TypeAnalysis.Instance): IsSound =
       // soundness for stack, memory, symbol table, call frame
-      a.effects.operandStackIsSound(c.effects) &&
-        a.effects.globalsIsSound(c.effects) &&
-        a.effects.tableIsSound(c.effects) &&
-        a.effects.joinedDecidableCallFrameIsSound(c.effects)
+      a.stack.operandStackIsSound(c.stack) &&
+//        a.memory.memoryIsSound(c.memory) &&
+        a.globals.tableIsSound(c.globals) &&
+        a.funTables.tableIsSound(c.funTables) &&
+        a.callFrame.joinedDecidableCallFrameIsSound(c.callFrame)
 }

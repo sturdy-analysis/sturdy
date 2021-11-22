@@ -4,7 +4,7 @@ import sturdy.data.{CombineEquiList, NoJoin, JOptionC}
 import sturdy.values.*
 import sturdy.data.unit
 
-trait ConcreteOperandStack[V] extends DecidableOperandStack[V]:
+class ConcreteOperandStack[V] extends DecidableOperandStack[V]:
   protected var stack: List[V] = Nil
   protected var framePointer: Int = 0
 
@@ -35,9 +35,13 @@ trait ConcreteOperandStack[V] extends DecidableOperandStack[V]:
   
   def withFreshOperandStack[A](f: => A): A =
     val snapshot = stack
+    val snapshotFramePointer = framePointer
     stack = Nil
-    try f finally
+    framePointer = 0
+    try f finally {
       stack = snapshot
+      framePointer = snapshotFramePointer
+    }
 
   override def withFreshOperandFrame[A](f: => A): A =
     val snapshotframePointer = framePointer
@@ -48,12 +52,16 @@ trait ConcreteOperandStack[V] extends DecidableOperandStack[V]:
   override def clearCurrentOperandFrame(): Unit =
     stack = stack.drop(stack.size - framePointer)
 
-  override type State = List[V]
-  override def getState: List[V] = stack
-  override def setState(s: List[V]): Unit = stack = s
+  override type State = (List[V], Int)
+  override def getState: (List[V], Int) = (stack, framePointer)
+  override def setState(s: (List[V], Int)): Unit =
+    stack = s._1
+    framePointer = s._2
 
   override type OperandFrame = List[V]
-  override def getOperandFrame: List[V] = stack.take(stack.size - framePointer)
+  override def getOperandFrame: List[V] =
+    val f = stack.take(stack.size - framePointer)
+    f
   override def setOperandFrame(s: List[V]): Unit =
     this.stack = s ++ stack.drop(stack.size - framePointer)
 

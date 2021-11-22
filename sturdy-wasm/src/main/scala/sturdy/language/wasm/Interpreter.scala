@@ -1,5 +1,6 @@
 package sturdy.language.wasm
 
+import sturdy.data.MayJoin
 import sturdy.effect.failure.{Failure, FailureKind}
 import sturdy.language.wasm.generic.*
 import sturdy.values.*
@@ -23,7 +24,7 @@ import swam.FuncType
 import java.nio.ByteOrder
 
 trait Interpreter:
-  type MayJoin[A]
+  type J[A] <: MayJoin[A]
   type I32
   type I64
   type F32
@@ -84,7 +85,6 @@ trait Interpreter:
   type ExcV
   type FuncIx
   type FunV
-  type Effects <: GenericEffects[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin]
 
   given ValueWasmOps
     (using failure: Failure
@@ -125,13 +125,13 @@ trait Interpreter:
      , boolBranchOpsV: BooleanBranching[Bool, Value]
      , boolBranchOpsUnit: BooleanBranching[Bool, Unit]
      , funOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV]
-     , excOps: Exceptional[WasmException[Value], ExcV, MayJoin]
-     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, MayJoin]
-         ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin] with
+     , excOps: Exceptional[WasmException[Value], ExcV, J]
+     , specOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, J]
+         ): WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J] with
 
     final val functionOps: FunctionOps[FunctionInstance, FuncType, Unit, FunV] = funOps
-    final val exceptOps: Exceptional[WasmException[Value], ExcV, MayJoin] = excOps
-    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, MayJoin] = specOps
+    final val exceptOps: Exceptional[WasmException[Value], ExcV, J] = excOps
+    val specialOps: SpecialWasmOperations[Value, Addr, Size, FuncIx, J] = specOps
     val branchOpsV: BooleanBranching[Value, Value] = new LiftedBooleanBranching[Value, Bool, Value](v => v.asBoolean)(using boolBranchOpsV)
     val branchOpsUnit: BooleanBranching[Value, Unit] = new LiftedBooleanBranching[Value, Bool, Unit](v => v.asBoolean)(using boolBranchOpsUnit)
 
@@ -248,6 +248,4 @@ trait Interpreter:
   type Instance <: GenericInstance
 
   abstract class GenericInstance
-    (_effects: Effects)
-    (using MayJoin[Unit], MayJoin[Value], MayJoin[FunV])
-    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, MayJoin, Effects](_effects)
+    extends GenericInterpreter[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, J]

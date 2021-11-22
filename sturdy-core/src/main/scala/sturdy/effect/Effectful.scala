@@ -16,15 +16,6 @@ trait Effectful extends ObservableJoin:
   protected def fRes: TrySturdy[_] = _fRes
 
   def getComputationJoiner[A]: Option[ComputationJoiner[A]] = None
-  
-  def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoiner {
-    joinStart()
-    override def inbetween(): Unit = joinSwitch()
-    override def retainNone(): Unit = joinEnd()
-    override def retainFirst(fRes: TrySturdy[A]): Unit = joinEnd()
-    override def retainSecond(gRes: TrySturdy[A]): Unit = joinEnd()
-    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit = joinEnd()
-  }
 
 trait Stateless extends Effectful:
   type State = Unit

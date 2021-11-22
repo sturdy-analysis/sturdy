@@ -4,7 +4,6 @@ import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.data.{WithJoin, JOptionA, JoinIntMap}
 import sturdy.effect.ComputationJoiner
-import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.Effectful
 import sturdy.effect.TrySturdy
 import sturdy.fix.*
@@ -18,14 +17,10 @@ import scala.reflect.ClassTag
 
 /** A memory that tracks byte properties `B` for memory accesses via possibly constant addresses `Topped[Int]`.
  */
-trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: Join[B]) extends Memory[Key, Topped[Int], Seq[B], Topped[Int], WithJoin], Effectful:
+class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: Join[B]) extends Memory[Key, Topped[Int], Seq[B], Topped[Int], WithJoin], Effectful:
   import ConstantAddressMemory.{*, given}
 
   protected var memories: Map[Key, Mem[B]] = Map()
-
-  def getMemories: Memories[Key, B] = memories
-  protected def setMemories(s: Memories[Key, B]): Unit =
-    memories = s
 
   override def memRead(key: Key, addr: Topped[Int], length: Int): JOptionA[Seq[B]] = addr match
     case Topped.Top => JOptionA.noneSome(Seq.fill[B](length)(memories(key).upperBound))
@@ -53,25 +48,25 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
       case Topped.Actual(size) =>
         memories += key -> ImmutableByteMem.ofSize(size * pageSize, sizeLimit.flatMap(_.toOption), emptyB)
 
-  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ConstantAddressMemoryJoiner[A]
-  class ConstantAddressMemoryJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ConstantAddressMemoryJoiner[A])
+  private class ConstantAddressMemoryJoiner[A] extends ComputationJoiner[A] {
     val snapshot = memories
     var fmemories: Map[Key, Mem[B]] = _
 
-    override def inbetween_(): Unit =
+    override def inbetween(): Unit =
       fmemories = memories
       memories = snapshot
 
-    override def retainNone_(): Unit =
+    override def retainNone(): Unit =
       memories = snapshot
       fmemories = null
 
-    override def retainFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
       memories = fmemories
 
-    override def retainSecond_(gRes: TrySturdy[A]): Unit = {}
+    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
-    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       for ((key, fmem) <- fmemories) memories.get(key) match
         case Some(gmem) => memories += key -> Join(fmem, gmem).get
         case None => memories += key -> fmem.asIndefinite
@@ -82,12 +77,16 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
           memories += key -> gmemOpt.asIndefinite
   }
 
+  override type State = Map[Key, Mem[B]]
+  override def getState: Map[Key, Mem[B]] = memories
+  override def setState(s: Map[Key, Mem[B]]): Unit = memories = s
+
   def memoryIsSound(c: ConcreteMemory[Key])(using Soundness[Byte, B]): IsSound =
     // soundess for memory:
     //  - all concrete memories are present in abstract memories
     //  - all definite abstract memores have a concrete counterpart
     //  - for each key in concrete memories: mems(key) is sound
-    val cMemories = c.getMemories
+    val cMemories = c.getState
     memories.filterNot{ (key, _) => cMemories.isDefinedAt(key)}.foreachEntry { (k, aMem) =>
       if (aMem.isDefinite)
         return IsSound.NotSound(s"Definite memory with key $k not present in concrete memory.")
@@ -132,8 +131,6 @@ trait ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
     IsSound.Sound
 
 object ConstantAddressMemory:
-  type Memories[Key, B] = Map[Key, Mem[B]]
-
   given CombineMem[B: ClassTag, W <: Widening](using j: Combine[B, W]): Combine[Mem[B], W] with
     def apply(old: Mem[B], now: Mem[B]): MaybeChanged[Mem[B]] =
       val newUpperBoundChanged = Combine(old.upperBound, now.upperBound)

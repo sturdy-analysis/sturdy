@@ -3,7 +3,7 @@ package sturdy.language.tip
 import sturdy.data.{NoJoin, unit, noJoin}
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
-import sturdy.effect.failure.{CFailure, Failure}
+import sturdy.effect.failure.Failure
 import sturdy.effect.print.CPrint
 import sturdy.effect.store.CStore
 import sturdy.effect.userinput.CUserInput

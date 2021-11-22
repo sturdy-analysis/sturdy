@@ -9,10 +9,19 @@ enum AFallible[T]:
   case Failing(msgs: Powerset[(FailureKind,String)])
   case MaybeFailing(t: T, msgs: Powerset[(FailureKind,String)])
 
-given cfallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[CFallible[C], AFallible[A]] with
-  override def abstractly(c: CFallible[C]): AFallible[A] = c match
-    case CFallible.Unfailing(c) => AFallible.Unfailing(abs.abstractly(c))
-    case CFallible.Failing(kind, msg) => AFallible.Failing(Powerset(kind -> msg))
+  def isFailing: Boolean = this match
+    case Failing(_) => true
+    case _ => false
+
+  def get: T = this match
+    case Unfailing(t) => t
+    case MaybeFailing(t, _) => t
+    case _ => throw new MatchError(this)
+
+//given cfallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[CFallible[C], AFallible[A]] with
+//  override def abstractly(c: AFallible[C]): AFallible[A] = c match
+//    case AFallible.Unfailing(c) => AFallible.Unfailing(abs.abstractly(c))
+//    case AFallible.Failing(kind, msg) => AFallible.Failing(Powerset(kind -> msg))
 
 given afallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[AFallible[C], AFallible[A]] with
   override def abstractly(a: AFallible[C]): AFallible[A] = a match

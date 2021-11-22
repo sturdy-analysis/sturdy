@@ -1,9 +1,10 @@
 package sturdy.effect.bytememory
 
 import sturdy.data.*
+import sturdy.effect.Stateless
 import sturdy.values.Top
 
-trait TopMemory[Key, Addr, Bytes, Size](using Top[Size], Top[Bytes]) extends Memory[Key, Addr, Bytes, Size, WithJoin]:
+class TopMemory[Key, Addr, Bytes, Size](using Top[Size], Top[Bytes]) extends Memory[Key, Addr, Bytes, Size, WithJoin], Stateless:
   override def memRead(key: Key, addr: Addr, length: Int): JOptionA[Bytes] =
     JOptionA.noneSome(Top.top[Bytes])
 

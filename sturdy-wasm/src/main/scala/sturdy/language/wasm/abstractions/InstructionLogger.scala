@@ -1,6 +1,6 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.data.{unit, CombineEquiList}
+import sturdy.data.{noJoin, CombineEquiList}
 import sturdy.effect.TrySturdy
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack

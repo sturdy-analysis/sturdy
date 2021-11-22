@@ -1,6 +1,6 @@
 package sturdy.language.wasm.abstractions
 
-import sturdy.data.{CombineEquiList, unit}
+import sturdy.data.{CombineEquiList, noJoin}
 import sturdy.effect.TrySturdy
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
@@ -77,7 +77,7 @@ trait ConstantTaintValues extends Interpreter:
     case Value.Float64(TaintProduct(_, v1)) => ConstantAnalysis.Value.Float64(v1)
 
   def constantInstructions(analysis: Instance): ConstantInstructionsLogger =
-    val constants = new ConstantInstructionsLogger(analysis.stack)(using analysis.effects)
+    val constants = new ConstantInstructionsLogger(analysis.stack)(using analysis.failure)
     analysis.addContextFreeLogger(constants)
     constants
 
@@ -102,7 +102,7 @@ trait ConstantTaintValues extends Interpreter:
 
 
   def taintedMemoryAccessLogger(analysis: Instance): TaintedMemoryAccessLogger = {
-    val logger = new TaintedMemoryAccessLogger(analysis.stack)(using analysis.effects)
+    val logger = new TaintedMemoryAccessLogger(analysis.stack)(using analysis.failure)
     analysis.addContextFreeLogger(logger)
     logger
   }
