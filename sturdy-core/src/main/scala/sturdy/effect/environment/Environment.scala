@@ -1,12 +1,13 @@
 package sturdy.effect.environment
 
 import sturdy.data.JOption
+import sturdy.data.MayJoin
 
 /*
  * The environment interface.
  */
-trait Environment[Var, V, MayJoin[_]]:
-  def lookup(x: Var): JOption[MayJoin, V]
+trait Environment[Var, V, J[_] <: MayJoin[_]]:
+  def lookup(x: Var): JOption[J, V]
   def bind(x: Var, v: V): Unit
   def scoped[A](f: => A): A
   def clear(): Unit

@@ -1,4 +1,6 @@
 package sturdy.effect.userinput
 
-trait CUserInput[A](nextInput: () => A) extends UserInput[A]:
-  override def readInput() = nextInput()
+import sturdy.effect.Stateless
+
+class CUserInput[A](nextInput: () => A) extends UserInput[A], Stateless:
+  override def read(): A = nextInput()

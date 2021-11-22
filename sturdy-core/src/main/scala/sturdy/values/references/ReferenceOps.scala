@@ -1,6 +1,6 @@
 package sturdy.values.references
 
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.effect.failure.FailureKind
 import sturdy.values.Powerset
@@ -20,7 +20,7 @@ given ConcreteReferenceOps[Addr](using f: Failure): ReferenceOps[Addr, Option[Ad
   def unmanagedRefValue(addr: Addr): Option[Addr] = Some(addr)
   def refAddr(v: Option[Addr]): Addr = v.getOrElse(f.fail(NullDereference, ""))
 
-given PowersetReferenceOps[Addr, V](using ops: ReferenceOps[Addr, V], j: Effectful): ReferenceOps[Powerset[Addr], Powerset[V]] with
+given PowersetReferenceOps[Addr, V](using ops: ReferenceOps[Addr, V], j: EffectStack): ReferenceOps[Powerset[Addr], Powerset[V]] with
   override def nullValue: Powerset[V] = Powerset(ops.nullValue)
   override def refValue(addr: Powerset[Addr]): Powerset[V] = addr.mapJoin(ops.refValue)
   override def unmanagedRefValue(addr: Powerset[Addr]): Powerset[V] = addr.mapJoin(ops.unmanagedRefValue)

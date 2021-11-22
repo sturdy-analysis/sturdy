@@ -6,7 +6,7 @@ import sturdy.values.Join
 
 import scala.reflect.ClassTag
 
-trait JoinedDecidableCallFrame[Data, Var, V](using Join[V], ClassTag[V]) extends ConcreteCallFrame[Data, Var, V]:
+class JoinedDecidableCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using Join[V], ClassTag[V]) extends ConcreteCallFrame[Data, Var, V](initData, initVars):
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new CallFrameJoiner[A] 
   class CallFrameJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
     private val snapshot = vars
@@ -39,6 +39,6 @@ trait JoinedDecidableCallFrame[Data, Var, V](using Join[V], ClassTag[V]) extends
       return dataIsSound
     if (getFrameNames != c.getFrameNames)
       return IsSound.NotSound(s"Variable names in call frame differ: concrete=${c.getFrameNames}, abstract=$getFrameNames")
-    val aVals = getFrameVars
-    val cVals = c.getFrameVars
+    val aVals = getLocals
+    val cVals = c.getLocals
     seqIsSound.isSound(cVals, aVals)

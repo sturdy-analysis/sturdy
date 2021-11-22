@@ -4,7 +4,7 @@ import sturdy.effect.Effectful
 import sturdy.values.Join
 import sturdy.values.Powerset
 
-trait JOption[J[_], A]:
+trait JOption[J[_] <: MayJoin[_], A]:
   def option[B](default: => B)(f: A => B): J[B] ?=> B
   inline final def getOrElse(default: => A): J[A] ?=> A =
     option(default)(identity)
@@ -15,10 +15,14 @@ trait JOption[J[_], A]:
   def map[B](f: A => B): JOption[J, B]
   def flatMap[B](f: A => JOption[J, B]): JOption[J, B]
 
-case class SomeJOption[J[_], A](a: A) extends JOption[J, A]:
+
+
+case class SomeJOption[J[_] <: MayJoin[_], A](a: A) extends JOption[J, A]:
   override def option[B](default: => B)(f: A => B): J[B] ?=> B = f(a)
   override def map[B](f: A => B): JOption[J, B] = SomeJOption(f(a))
   override def flatMap[B](f: A => JOption[J, B]): JOption[J, B] = f(a)
+
+
 
 enum JOptionC[A] extends JOption[NoJoin, A]:
   case None()
@@ -42,6 +46,8 @@ object JOptionC:
   def apply[A](opt: scala.Option[A]): JOptionC[A] = opt match
     case scala.Some(a) => JOptionC.Some(a)
     case scala.None => JOptionC.None()
+
+
 
 enum JOptionA[A] extends JOption[WithJoin, A]:
   case None()

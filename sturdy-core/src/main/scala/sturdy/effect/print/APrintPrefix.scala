@@ -125,16 +125,12 @@ given JoinPrintResult[A]: Join[APrintPrefix.PrintResult[A]] with
     MaybeChanged(joined, v1)
 
 
-trait APrintPrefix[P] extends Print[P], Effectful:
+class APrintPrefix[P] extends Print[P]:
   import APrintPrefix.*
 
   private var printed: PrintResult[P] = PrintResult.Definite(Vector.empty)
 
-  def getPrinted: PrintResult[P] = printed
-  protected def setPrinted(p: PrintResult[P]): Unit =
-    this.printed = p
-
-  override def print(a: P): Unit =
+  override def apply(a: P): Unit =
     printed = printed :+ a
 
   override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
@@ -163,4 +159,10 @@ trait APrintPrefix[P] extends Print[P], Effectful:
 //    printed.matchAll(c.getPrinted) match
 //      case MatchResult.PrefixMatched() | MatchResult.Partial(_) => IsSound.Sound
 //      case MatchResult.Mismatch(as, p) => IsSound.NotSound(s"Abstract print $p does not describe a prefix of concrete print $as")
+
+
+  override type State = PrintResult[P]
+  override def getState: PrintResult[P] = printed
+  override def setState(p: PrintResult[P]): Unit =
+    this.printed = p
 

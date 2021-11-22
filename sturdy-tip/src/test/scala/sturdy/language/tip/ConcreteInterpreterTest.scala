@@ -6,7 +6,6 @@ import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.CFailureException
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
-import sturdy.language.tip.analysis.SignAnalysisTest
 
 import java.nio.file.Path
 import java.nio.file.{Paths, Files}
@@ -34,7 +33,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
     if (program.funs.exists(_.name == "main")) {
 //      print(s"${p.getFileName}")
       val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
-      interp.effects.fallible(interp.execute(program))
+      interp.failure.fallible(interp.execute(program))
 //      Try(interp.execute(program)) match
 //        case Success(_) => println(" prints: " + interp.effectOps.getPrinted)
 //        case Failure(e) => println(" errors: " + e)
@@ -49,10 +48,10 @@ object RunConcreteInterpreter extends App:
     file.close()
     val program = Parser.parse(sourceCode)
     val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
-    (interp.effects.fallible(interp.execute(program)), interp.effects)
+    (interp.failure.fallible(interp.execute(program)), interp)
 
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/interpreter_test.tip").toURI();
-  val (res, effects) = runFile(Paths.get(uri))
+  val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tip/interpreter_test.tip").toURI();
+  val (res, interp) = runFile(Paths.get(uri))
   println(res)
-  println(effects.getCallFrame)
-  println(effects.getStore)
+  println(interp.callFrame.getState)
+  println(interp.store.getState)

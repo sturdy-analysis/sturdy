@@ -1,6 +1,6 @@
 package sturdy.values.floating
 
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
 import sturdy.values.convert.*
@@ -28,14 +28,14 @@ given ToppedFloatOps[B, T] (using ops: FloatOps[B, T]): FloatOps[B, Topped[T]] w
   def nearest(v: Topped[T]): Topped[T] = v.unary(ops.nearest)
   def copysign(v: Topped[T], sign: Topped[T]): Topped[T] = v.binary(ops.copysign, sign)
 
-given ToppedConvertFloatBytes[T, B](using c: ConvertFloatBytes[T, Seq[B]])(using Effectful, Failure): ConvertFloatBytes[Topped[T], Seq[Topped[B]]] with
+given ToppedConvertFloatBytes[T, B](using c: ConvertFloatBytes[T, Seq[B]])(using EffectStack, Failure): ConvertFloatBytes[Topped[T], Seq[Topped[B]]] with
   override def apply(from: Topped[T], conf: SomeCC[ByteOrder]): Seq[Topped[B]] = from match
     case Topped.Top =>
       val bytes = Seq.fill(4)(Topped.Top)
       safeTopConversion(conf, bytes)
     case Topped.Actual(v) => c(v, conf).map(Topped.Actual.apply)
 
-given ToppedConvertDoubleBytes[T, B](using c: ConvertDoubleBytes[T, Seq[B]])(using Effectful, Failure): ConvertDoubleBytes[Topped[T], Seq[Topped[B]]] with
+given ToppedConvertDoubleBytes[T, B](using c: ConvertDoubleBytes[T, Seq[B]])(using EffectStack, Failure): ConvertDoubleBytes[Topped[T], Seq[Topped[B]]] with
   override def apply(from: Topped[T], conf: SomeCC[ByteOrder]): Seq[Topped[B]] = from match
     case Topped.Top =>
       val bytes = Seq.fill(8)(Topped.Top)

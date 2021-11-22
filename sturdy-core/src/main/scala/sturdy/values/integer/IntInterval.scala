@@ -1,6 +1,6 @@
 package sturdy.values.integer
 
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
 import sturdy.values.relational.*
@@ -64,7 +64,7 @@ class IntIntervalWiden(bounds: => Set[Int]) extends Widen[IntInterval]:
         treeSet.minAfter(v2.h).getOrElse(Int.MaxValue)
     MaybeChanged(IntInterval(low, high), v1)
 
-given IntervalIntegerOps(using f: Failure, j: Effectful): IntegerOps[Int, IntInterval] with
+given IntervalIntegerOps(using f: Failure, j: EffectStack): IntegerOps[Int, IntInterval] with
   def integerLit(i: Int): IntInterval = IntInterval(i, i)
   def randomInteger(): IntInterval = IntInterval.Top
   def add(v1: IntInterval, v2: IntInterval): IntInterval = v1 + v2

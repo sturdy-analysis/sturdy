@@ -26,7 +26,7 @@ import sturdy.language.tip.abstractions.*
 object SignAnalysis extends Interpreter,
   Ints.Sign, Functions.Powerset, Records.PreciseFieldsOrTop, References.AllocationSites, Fix:
 
-  override type MayJoin[A] = WithJoin[A]
+  override type J[A] = WithJoin[A]
   override type Ctx = Parameters
 
   given Lazy[Join[Value]] = lazily(CombineValue)
@@ -35,32 +35,8 @@ object SignAnalysis extends Interpreter,
   type OutState = (Store, APrintPrefix.PrintResult[Value])
   type AllState = OutState
 
-  class Effects(initEnvironment: Environment, initStore: Store)
-    extends JoinedDecidableCallFrame[Unit, String, Addr]
-      with AStoreMultiAddrThreadded[AllocationSiteAddr, Value](initStore)
-      with AAllocationFromContext[AllocationSite, Addr](fromAllocationSite)
-      with APrintPrefix[Value]
-      with AUserInput[Value](Value.IntValue(IntSign.TopSign))
-      with AFailureCollect
-      with AnalysisState[InState, OutState, AllState]:
-    override def initialCallFrameData: Unit = ()
-    override def initialCallFrameVars: Map[String, Addr] = initEnvironment
-    override def getInState() = getStore
-    override def setInState(in: InState) = setStore(in)
-    override def getOutState() = (getStore, getPrinted)
-    override def setOutState(out: OutState) = { setStore(out._1); setPrinted(out._2) }
-    override def getAllState() = getOutState()
-    override def setAllState(all: AllState) = setOutState(all)
-
-  def apply(initEnvironment: Environment, initStore: Store, steps: Int): Instance =
-    val effects = new Effects(initEnvironment, initStore)
-    given Effects = effects
-    new Instance(effects, steps)
-
-  class Instance(effects: Effects, steps: Int)(using Failure, Effectful)
-    extends GenericInstance(effects):
-
-    given Effects = effects
+  class Instance(initEnvironment: Environment, initStore: Store, steps: Int) extends GenericInstance:
+    override def jv: WithJoin[Value] = implicitly
 
     final def vintOps: IntegerOps[Int, VInt] = implicitly
     final def vcompareOps: OrderingOps[VInt, VBool] = implicitly
@@ -73,11 +49,16 @@ object SignAnalysis extends Interpreter,
     final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
     final def vbranchOps: BooleanBranching[Topped[Boolean], Unit] = implicitly
 
-    given Lazy[Widen[Value]] = lazily(CombineValue)
+    override val callFrame: JoinedDecidableCallFrame[Unit, String, Addr] = new JoinedDecidableCallFrame((), initEnvironment)
+    override val store: AStoreMultiAddrThreadded[AllocationSiteAddr, Value] = new AStoreMultiAddrThreadded(initStore)
+    override val alloc: AAllocationFromContext[AllocationSite, Addr] = new AAllocationFromContext(fromAllocationSite)
+    override val print: APrintPrefix[Value] = new APrintPrefix
+    override val input: AUserInput[Value] = new AUserInput(Value.IntValue(IntSign.TopSign))
 
+    given Lazy[Widen[Value]] = lazily(CombineValue)
     given Finite[Parameters] with {}
 
-    protected override def context = parameters
+    protected override def context = parameters(callFrame, store)
     protected override def contextFree = identity
     override def contextSensitive = fix.dispatch(isFunOrWhile, Seq(
       // call

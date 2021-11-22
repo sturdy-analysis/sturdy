@@ -1,10 +1,10 @@
 package sturdy.fix
 
 import sturdy.effect.AnalysisState
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.RecurrentCall
 import sturdy.effect.SturdyThrowable
-import sturdy.effect.{TrySturdy, CombineTrySturdy}
+import sturdy.effect.{CombineTrySturdy, TrySturdy}
 import sturdy.values.Finite
 import sturdy.values.{Widen, MaybeChanged, Changed, Unchanged}
 
@@ -29,7 +29,7 @@ class FrameEntry[In](var inState: In, val correcurrentFrame: Int, var count: Int
  *  finitely many calls. This property holds in particular if the set of contexts is finite.
  */
 final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, All], contextual: Contextual[Ctx, Dom, Codom])
-  (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], j: Effectful)
+  (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], effectStack: EffectStack)
   (using Finite[Dom], Finite[Ctx]):
 
   /** Set of active calls identified by their context and their stack position.
@@ -62,7 +62,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
 
   /** Iterates `f` until the outCache is stable. */
   def repeatUntilStable[A](f: () => (A, Boolean)): A = {
-    val originalState = state.getAllState()
+    val originalState = state.getAllState
     var iterationCount = 0
 
     var previousInCache = inCache
@@ -102,7 +102,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
         previousInCache = inCache
         previousOutCache = outCache
         state.setAllState(originalState)
-        state.repeating()
+        effectStack.repeating()
       }
     }
     throw new IllegalStateException()
@@ -225,7 +225,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
 
   @inline private def storeCorecurrentOutput(frame: Frame[Dom, Ctx], result: TrySturdy[Codom]): TrySturdy[Codom] = outCache.get(frame) match
     case None =>
-      val out = state.getOutState()
+      val out = state.getOutState
       outCache += frame -> (result, out)
       outCacheDirty = true
       if (Fixpoint.DEBUG)
@@ -233,7 +233,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
       result
     case Some((previousResult, previousOut)) =>
       val newResult: MaybeChanged[TrySturdy[Codom]] = Widen(previousResult, result)
-      val currentOut = state.getOutState()
+      val currentOut = state.getOutState
       val newOut = widenOut(previousOut, currentOut)
 
       if (newResult.hasChanged || newOut.hasChanged) {

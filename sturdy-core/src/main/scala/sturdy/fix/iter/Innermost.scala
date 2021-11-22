@@ -1,7 +1,7 @@
 package sturdy.fix.iter
 
 import sturdy.effect.AnalysisState
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.TrySturdy
 import sturdy.fix.Combinator
 import sturdy.fix.Contextual
@@ -16,13 +16,13 @@ import scala.util.Try
 def innermost[Dom, Codom, In, Out, All, Ctx]
   (using context: Contextual[Ctx, Dom, Codom])
   (using state: AnalysisState[In, Out, All])
-  (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], j: Effectful)
+  (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   : Innermost[Dom, Codom, In, Out, All, Ctx] = new Innermost(state, context)
 
 final class Innermost[Dom, Codom, In, Out, All, Ctx]
   (state: AnalysisState[In, Out, All], context: Contextual[Ctx, Dom, Codom])
-  (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], j: Effectful)
+  (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   extends Combinator[Dom, Codom]:
 
@@ -39,7 +39,7 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
    *  @return the result of running `f` and a flag that indicates if `f` is looping and needs iterating.
    */
   private def step(f: Dom => Codom, dom: Dom): (TrySturdy[Codom], Boolean) =
-    val inState = state.getInState()
+    val inState = state.getInState
     stack.push(dom, inState) match
       case Some(result) =>
         (result, false)

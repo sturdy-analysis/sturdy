@@ -4,45 +4,27 @@ import sturdy.data.*
 
 import scala.reflect.ClassTag
 
-import ConcreteCallFrame.*
+class ConcreteCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V]:
 
-trait ConcreteCallFrame[Data, Var, V](using ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V]:
-
-  def initialCallFrameData: Data
-  def initialCallFrameVars: Iterable[(Var, V)]
-
-  protected var data: Data = initialCallFrameData
+  protected var data: Data = initData
   protected var vars: Array[V] = _
   protected var names: Map[Var, Int] = _
 
-  private def setVars(newvars: Iterable[(Var, V)]) = {
+  def setVars(newVars: Iterable[(Var, V)]): Unit = {
     val builder = Map.newBuilder[Var, Int]
-    vars = Array.ofDim(newvars.size)
+    vars = Array.ofDim(newVars.size)
     var i = 0
-    for ((name, v) <- newvars) {
+    for ((name, v) <- newVars) {
       builder += name -> i
       vars(i) = v
       i += 1
     }
     names = builder.result()
   }
-  setVars(initialCallFrameVars)
+  setVars(initVars)
 
   def getFrameData: Data = data
   def getFrameNames: Map[Var, Int] = names
-  def getFrameVars: Vars[V] = vars.toSeq
-
-  protected def setFrameVars(vs: Vars[V]): Unit =
-    var ix = 0
-    for (v <- vs) {
-      vars(ix) = v
-      ix += 1
-    }
-
-  def getCallFrame: (Data, Seq[V]) = (data, getFrameVars)
-  protected def setCallFrame(s: (Data, Seq[V])): Unit =
-    data = s._1
-    setFrameVars(s._2)
 
   def getLocal(ix: Int): JOptionC[V] =
     if (ix >= 0 && ix < vars.length)
@@ -79,7 +61,15 @@ trait ConcreteCallFrame[Data, Var, V](using ClassTag[V]) extends DecidableMutabl
     }
   }
 
+  override type State = (Data, List[V])
+  override def getState: (Data, List[V]) = (data, vars.toList)
+  override def setState(s: (Data, List[V])): Unit =
+    data = s._1
+    setLocals(s._2)
 
-object ConcreteCallFrame:
-  type Vars[V] = Seq[V]
+  override type Locals = List[V]
+  override def getLocals: List[V] = vars.toList
+  override def setLocals(ls: List[V]): Unit =
+    ls.zipWithIndex.foreach { case (v, ix) => vars(ix) = v }
+
 

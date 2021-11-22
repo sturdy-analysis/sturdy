@@ -1,19 +1,21 @@
 package sturdy.effect.except
 
 import sturdy.data.JEither
+import sturdy.data.MayJoin
+import sturdy.effect.Effectful
 import sturdy.effect.SturdyException
 import sturdy.values.exceptions.Exceptional
 
 
-trait Except[Exc, E, MayJoin[_]] extends ObservableExcept[Exc]:
-  val exceptional: Exceptional[Exc, E, MayJoin]
+trait Except[Exc, E, J[_] <: MayJoin[_]] extends Effectful, ObservableExcept[Exc]:
+  val exceptional: Exceptional[Exc, E, J]
 
   @throws[SturdyException]
   def throws(ex: Exc): Nothing
 
-  protected def tries[A](f: => A): JEither[MayJoin, A, E]
+  protected def tries[A](f: => A): JEither[J, A, E]
 
-  final def tryCatch[A](f: => A)(handle: Exc => A): MayJoin[A] ?=> A =
+  final def tryCatch[A](f: => A)(handle: Exc => A): J[A] ?=> A =
     tryStart()
     try tries(f).either(identity){ e =>
       catchStart()
@@ -23,7 +25,7 @@ trait Except[Exc, E, MayJoin[_]] extends ObservableExcept[Exc]:
       tryEnd()
     }
 
-  final def tryFinally[A](f: => A)(g: => Unit): MayJoin[A] ?=> A =
+  final def tryFinally[A](f: => A)(g: => Unit): J[A] ?=> A =
     tryStart()
     try tries(f).either(a => {g; a}){ e =>
       catchStart()

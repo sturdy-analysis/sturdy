@@ -3,6 +3,7 @@ package sturdy.effect.store
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.data.*
+import sturdy.values.Join
 import sturdy.effect.Effectful
 import sturdy.values.Abstractly
 
@@ -14,7 +15,7 @@ import scala.collection.mutable.ListBuffer
  * Internally, the store tracks dirty addresses that have been (re)written to
  * optimize the join computation, since only values of dirty addresses need joining.
  */
-trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])
+class AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])(using Join[V])
   extends Store[Addr, V, WithJoin], AStoreGenericThreadded[Addr, V]:
 
   this.store = _init
@@ -35,9 +36,9 @@ trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])
     () // nothing
 
   def storeIsSound[cAddr, cV](c: CStore[cAddr, cV])(using varAbstractly: Abstractly[cAddr, Addr], vSoundness: Soundness[cV, V]): IsSound = {
-    val abstractedKeys = c.getStore.keySet.map(varAbstractly.abstractly)
+    val abstractedKeys = c.getState.keySet.map(varAbstractly.abstractly)
     if (!abstractedKeys.subsetOf(store.keySet)) {
-      val missing = c.getStore.keySet.flatMap{ k =>
+      val missing = c.getState.keySet.flatMap{ k =>
         val ak = varAbstractly.abstractly(k)
         if (store.keySet.contains(ak))
           None
@@ -46,7 +47,7 @@ trait AStoreSingleAddrThreadded[Addr <: ManageableAddr, V](_init: Map[Addr, V])
       }
       IsSound.NotSound(s"${classOf[AStoreSingleAddrThreadded[_, _]].getName}: Expected all concrete keys to be contained, but $missing are missing in $store")
     } else {
-      c.getStore.foreachEntry { case (x, v) =>
+      c.getState.foreachEntry { case (x, v) =>
         val subSound = vSoundness.isSound(v, store(varAbstractly.abstractly(x)))
         if (subSound.isNotSound)
           return subSound

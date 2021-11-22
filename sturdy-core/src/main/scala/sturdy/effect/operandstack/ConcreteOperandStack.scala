@@ -8,12 +8,6 @@ trait ConcreteOperandStack[V] extends DecidableOperandStack[V]:
   protected var stack: List[V] = Nil
   protected var framePointer: Int = 0
 
-  def getStack: List[V] = stack
-  
-  def getOperandFrame: List[V] = stack.take(stack.size - framePointer)
-  protected def setOperandFrame(s: List[V]): Unit =
-    this.stack = s ++ stack.drop(stack.size - framePointer)
-
   def push(v: V): Unit =
     stack = v :: stack
 
@@ -53,4 +47,13 @@ trait ConcreteOperandStack[V] extends DecidableOperandStack[V]:
 
   override def clearCurrentOperandFrame(): Unit =
     stack = stack.drop(stack.size - framePointer)
-  
+
+  override type State = List[V]
+  override def getState: List[V] = stack
+  override def setState(s: List[V]): Unit = stack = s
+
+  override type OperandFrame = List[V]
+  override def getOperandFrame: List[V] = stack.take(stack.size - framePointer)
+  override def setOperandFrame(s: List[V]): Unit =
+    this.stack = s ++ stack.drop(stack.size - framePointer)
+

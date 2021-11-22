@@ -1,6 +1,6 @@
 package sturdy.values.records
 
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.util.*
 import sturdy.values.*
@@ -12,7 +12,7 @@ enum ARecord[F, V]:
   case Top()
   case Map(m: Predef.Map[F, V])
 
-given ARecordOps[F, V](using Failure, Join[V], Top[V])(using j: Effectful): RecordOps[F, V, ARecord[F, V]] with
+given ARecordOps[F, V](using Failure, Join[V], Top[V])(using j: EffectStack): RecordOps[F, V, ARecord[F, V]] with
   override def makeRecord(fields: Seq[(F, V)]): ARecord[F, V] =
     ARecord.Map(fields.toMap)
   override def lookupRecordField(rec: ARecord[F, V], field: F): V = rec match

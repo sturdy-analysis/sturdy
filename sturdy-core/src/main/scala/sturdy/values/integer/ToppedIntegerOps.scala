@@ -1,7 +1,7 @@
 package sturdy.values.integer
 
 import sturdy.data.{*, given}
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.{Join, Topped}
 import sturdy.values.config
@@ -12,7 +12,7 @@ import sturdy.values.config.UnsupportedConfiguration
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
-given ToppedIntegerOps[B, T] (using ops: IntegerOps[B, T], f: Failure, eff: Effectful): IntegerOps[B, Topped[T]] with
+given ToppedIntegerOps[B, T] (using ops: IntegerOps[B, T], f: Failure, eff: EffectStack): IntegerOps[B, Topped[T]] with
 
   def integerLit(i: B): Topped[T] = Topped.Actual(ops.integerLit(i))
   def randomInteger(): Topped[T] = Topped.Top
