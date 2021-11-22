@@ -1,7 +1,7 @@
 package sturdy.values.types
 
 import sturdy.data.{WithJoin, joinComputations, joinWithFailure, MakeJoined}
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.convert.Convert
 import sturdy.values.relational.{UnsignedCompareOps, EqOps, OrderingOps}
@@ -44,10 +44,10 @@ given BaseTypeUnsignedCompareOps[B: ClassTag]: UnsignedCompareOps[BaseType[B], B
   def geUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
   def gtUnsigned(v1: BaseType[B], v2: BaseType[B]): BaseType[Boolean] = BaseType[Boolean]
 
-given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](using Failure, Effectful): Convert[B1, B2, BaseType[B1], BaseType[B2], Config] with
+given BaseTypeConvert[B1: ClassTag, B2: ClassTag, Config <: ConvertConfig[_]](using Failure, EffectStack): Convert[B1, B2, BaseType[B1], BaseType[B2], Config] with
   override def apply(from: BaseType[B1], conf: Config): BaseType[B2] =
     joinWithFailure(BaseType[B2])(Failure(ConversionFailure, "Potential conversion failure from $from to $to"))
 
-given BaseTypeBooleanBranching[R](using Effectful, Join[R]): BooleanBranching[BaseType[Boolean], R] with
+given BaseTypeBooleanBranching[R](using EffectStack, Join[R]): BooleanBranching[BaseType[Boolean], R] with
   override def boolBranch(v: BaseType[Boolean], thn: => R, els: => R): R =
     joinComputations(thn)(els)

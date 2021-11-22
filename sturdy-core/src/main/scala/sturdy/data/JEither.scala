@@ -2,7 +2,7 @@ package sturdy.data
 
 import sturdy.effect.Effectful
 
-trait JEither[J[_], A, B]:
+trait JEither[J[_] <: MayJoin[_], A, B]:
   def either[C](f: A => C)(g: B => C): J[C] ?=> C
   def left: J[A] ?=> A = either(identity)(throw new MatchError(this))
   def right: J[B] ?=> B = either(throw new MatchError(this))(identity)

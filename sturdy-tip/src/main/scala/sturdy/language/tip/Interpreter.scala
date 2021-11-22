@@ -1,18 +1,19 @@
 package sturdy.language.tip
 
+import sturdy.data.MayJoin
 import sturdy.effect.failure.{Failure, FailureKind}
-import sturdy.language.tip.GenericInterpreter.{FixOut, TypeError, AllocationSite, GenericEffects, FixIn, Field}
+import sturdy.language.tip.GenericInterpreter.{FixIn, FixOut, Field, TypeError, AllocationSite}
 import sturdy.values.MaybeChanged
 import sturdy.values.booleans.*
-import sturdy.values.{Top, Combine, Widening, Finite}
+import sturdy.values.{Finite, Top, Combine, Widening}
 import sturdy.values.functions.{LiftedFunctionOps, FunctionOps}
 import sturdy.values.integer.{IntegerOps, LiftedIntegerOps}
 import sturdy.values.records.{LiftedRecordOps, RecordOps}
 import sturdy.values.references.{ReferenceOps, LiftedReferenceOps}
-import sturdy.values.relational.{EqOps, OrderingOps, LiftedOrderingOps}
+import sturdy.values.relational.{OrderingOps, EqOps, LiftedOrderingOps}
 
 trait Interpreter:
-  type MayJoin[A]
+  type J[A] <: MayJoin[A]
   type Ctx
   type VBool
   type VInt
@@ -31,19 +32,19 @@ trait Interpreter:
     def asInt(using inst: Instance): VInt = this match
       case IntValue(i) => i
       case TopValue => topInt
-      case _ => inst.effects.fail(TypeError, s"Expected Int but got $this")
+      case _ => inst.failure(TypeError, s"Expected Int but got $this")
     def asFunction(using inst: Instance): VFun = this match
       case FunValue(f) => f
       case TopValue => topFun
-      case _ => inst.effects.fail(TypeError, s"Expected Function but got $this")
+      case _ => inst.failure(TypeError, s"Expected Function but got $this")
     def asReference(using inst: Instance): VRef = this match
       case RefValue(a) => a
       case TopValue => topReference
-      case _ => inst.effects.fail(TypeError, s"Expected Reference but got $this")
+      case _ => inst.failure(TypeError, s"Expected Reference but got $this")
     def asRecord(using inst: Instance): VRecord = this match
       case RecValue(rec) => rec
       case TopValue => topRecord
-      case _ => inst.effects.fail(TypeError, s"Expected Record but got $this")
+      case _ => inst.failure(TypeError, s"Expected Record but got $this")
 
   def topInt(using Instance): VInt
   def topFun(using Instance): VFun
@@ -57,7 +58,6 @@ trait Interpreter:
     def top = Value.TopValue
 
   type Addr
-  type Effects <: GenericEffects[Value, Addr, MayJoin]
 
   given CombineValue[W <: Widening](using Combine[VInt, W], Combine[VFun, W], Combine[VRef, W], Combine[VRecord, W]): Combine[Value, W] with
     import Value.*
@@ -72,14 +72,11 @@ trait Interpreter:
 
   type Instance <: GenericInstance
   abstract class GenericInstance
-    (_effects: Effects)
-    (using MayJoin[Unit], MayJoin[Value])
-    extends GenericInterpreter[Value, Addr, MayJoin, Effects](_effects):
+    extends GenericInterpreter[Value, Addr, J]:
 
     override type Ctx = Interpreter.this.Ctx
 
     given Instance = this.asInstanceOf[Instance]
-    given Failure = this.effects
 
     def vintOps: IntegerOps[Int, VInt]
     def vcompareOps: OrderingOps[VInt, VBool]
@@ -111,4 +108,4 @@ trait Interpreter:
     final val functionOps = new LiftedFunctionOps[Function, Seq[Value], Value, Value, VFun](_.asFunction, FunValue.apply)(using vfunOps)
     final val refOps = new LiftedReferenceOps[Value, Addr, VRef](_.asReference, RefValue.apply)(using vrefOps)
     final val recOps = new LiftedRecordOps[Field, Value, Value, Value, VRecord](_.asRecord, identity, RecValue.apply, identity)(using vrecOps)
-    final val branchOps = new LiftedBooleanBranching[Value, VBool, Unit](v => v.asBoolean(using effects))(using vbranchOps)
+    final val branchOps = new LiftedBooleanBranching[Value, VBool, Unit](v => v.asBoolean)(using vbranchOps)

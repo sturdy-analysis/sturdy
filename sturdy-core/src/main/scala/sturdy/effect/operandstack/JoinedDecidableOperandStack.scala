@@ -54,7 +54,7 @@ trait JoinedDecidableOperandStack[V](using Join[V]) extends ConcreteOperandStack
 
 
   def operandStackIsSound[cV](c: ConcreteOperandStack[cV])(using vSoundndess: Soundness[cV, V]): IsSound =
-    val cStack = c.getStack
+    val cStack = c.getState
     seqIsSound.isSound(cStack, stack)
 
 object JoinedDecidableOperandStack:

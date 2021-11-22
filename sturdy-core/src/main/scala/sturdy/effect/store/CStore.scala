@@ -7,9 +7,8 @@ import scala.collection.mutable.ListBuffer
 /*
  * A concrete store.
  */
-trait CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V, NoJoin]:
+class CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V, NoJoin]:
   protected var store: Map[Addr, V] = _init
-  def getStore: Map[Addr, V] = store
 
   override def read(x: Addr): JOptionC[V] =
     JOptionC(store.get(x))
@@ -20,3 +19,6 @@ trait CStore[Addr, V](_init: Map[Addr, V] = Map()) extends Store[Addr, V, NoJoin
   override def free(x: Addr): Unit =
     store -= x
 
+  override type State = Map[Addr, V]
+  override def getState: Map[Addr, V] = store
+  override def setState(s: Map[Addr, V]): Unit = store = s

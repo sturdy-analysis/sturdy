@@ -1,5 +1,6 @@
 package sturdy.language.tip
 
+import sturdy.data.{MayJoin, noJoin}
 import sturdy.effect.allocation.Allocation
 import sturdy.effect.callframe.DecidableCallFrame
 import sturdy.effect.environment.Environment
@@ -13,22 +14,17 @@ import sturdy.values.booleans.{BooleanBranching, BooleanOps}
 import sturdy.values.integer.IntegerOps
 import sturdy.values.functions.FunctionOps
 import sturdy.values.records.RecordOps
-import sturdy.values.relational.{EqOps, OrderingOps}
+import sturdy.values.relational.{OrderingOps, EqOps}
 import sturdy.fix
 import sturdy.data.unit
+import sturdy.effect.AnalysisState
+import sturdy.effect.EffectStack
+import sturdy.effect.failure.AFailureCollect
 import sturdy.values.references.ReferenceOps
 
 import scala.collection.mutable.ListBuffer
 
 object GenericInterpreter:
-  type GenericEffects[V, Addr, MayJoin[_]] =
-    DecidableCallFrame[Unit, String, Addr] with
-    Store[Addr, V, MayJoin] with
-    Allocation[Addr, AllocationSite] with
-    Print[V] with
-    UserInput[V] with
-    Failure
-
   enum AllocationSite:
     case Alloc(e: Exp.Alloc)
     case ParamBinding(fun: Function, name: String)
@@ -70,13 +66,13 @@ object GenericInterpreter:
 
 import GenericInterpreter.*
 
-trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr, MayJoin]]
-  (val effects: Effects)
-  (using MayJoin[Unit], MayJoin[V])
+trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
   extends fix.Fixpoint[FixIn, FixOut[V]]:
 
-  import effects.*
+  // joins
+  implicit def jv: J[V]
 
+  // value components
   val intOps: IntegerOps[Int, V]; import intOps.*
   val compareOps: OrderingOps[V, V]; import compareOps.*
   val eqOps: EqOps[V, V]; import eqOps.*
@@ -85,17 +81,45 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
   val recOps: RecordOps[Field, V, V]; import recOps.*
   val branchOps: BooleanBranching[V, Unit]; import branchOps.*
 
+  // effect components
+  val callFrame: DecidableCallFrame[Unit, String, Addr]
+  val store: Store[Addr, V, J]
+  val alloc: Allocation[Addr, AllocationSite]
+  val print: Print[V]
+  val input: UserInput[V]
+
+  // effect stack
+  implicit def effectStack: EffectStack = EffectStack(List(callFrame, store, alloc, print, input))
+
+  final val failure: AFailureCollect = new AFailureCollect {}
+  given Failure = failure
+
+  // analysis state
+  type InState = store.State
+  type OutState = (store.State, print.State)
+  implicit def analysisState: AnalysisState[InState, OutState, OutState] = new AnalysisState[InState, OutState, OutState] {
+    override def getInState: InState = store.getState
+    override def setInState(in: InState): Unit = store.setState(in)
+    override def getOutState: OutState = (store.getState, print.getState)
+    override def setOutState(out: OutState): Unit =
+      val (st, pr) = out
+      store.setState(st)
+      print.setState(pr)
+    override def getAllState: OutState = getOutState
+    override def setAllState(out: OutState): Unit = setOutState(out)
+  }
+
   protected var functions: Map[String, Function] = Map()
   def getFunctions: Iterable[Function] = functions.values
 
   def eval_open(e: Exp)(using Fixed): V = e match {
     case Exp.NumLit(n) => integerLit(n)
-    case Exp.Input() => readInput()
+    case Exp.Input() => input.read()
     case Exp.Var(x) => functions.get(x) match
       case Some(fun) => funValue(fun)
       case None =>
-        val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
-        read(addr).getOrElse(fail(UnboundAddr, s"$addr for variable $x"))
+        val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
+        store.read(addr).getOrElse(failure(UnboundAddr, s"$addr for variable $x"))
     case Exp.Add(e1, e2) => add(eval(e1), eval(e2))
     case Exp.Sub(e1, e2) => sub(eval(e1), eval(e2))
     case Exp.Mul(e1, e2) => mul(eval(e1), eval(e2))
@@ -109,14 +133,14 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
       invokeFun(eval(fun), args.map(eval(_)))(call)
     case a@Exp.Alloc(e) =>
       val addr = alloc(AllocationSite.Alloc(a))
-      write(addr, eval(e))
+      store.write(addr, eval(e))
       refValue(addr)
     case Exp.VarRef(x) =>
-      val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
+      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
       unmanagedRefValue(addr)
     case Exp.Deref(e) =>
       val addr = refAddr(eval(e))
-      read(addr).getOrElse(fail(UnboundAddr, addr.toString))
+      store.read(addr).getOrElse(failure(UnboundAddr, addr.toString))
     case Exp.NullRef() =>
       nullValue
     case r@Exp.Record(fields) =>
@@ -124,7 +148,7 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
       val fieldVals = fields.map(fe => Field(fe._1) -> eval(fe._2))
       val rec = makeRecord(fieldVals)
       val addr = alloc(AllocationSite.Record(r))
-      write(addr, rec)
+      store.write(addr, rec)
       refValue(addr)
     case Exp.FieldAccess(rec, field) =>
       val recVal = eval(Exp.Deref(rec))
@@ -144,27 +168,27 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
     case Stm.Output(e) =>
       print(eval(e))
     case Stm.Error(e) =>
-      fail(UserError, eval(e).toString)
+      failure(UserError, eval(e).toString)
 
   def assign(lhs: Assignable, v: V)(using Fixed): Unit = lhs match
     case Assignable.AVar(x) =>
-      val addr = getLocalByName(x).getOrElse(fail(UnboundVariable, x))
-      write(addr, v)
+      val addr = callFrame.getLocalByName(x).getOrElse(failure(UnboundVariable, x))
+      store.write(addr, v)
     case Assignable.ADeref(e) =>
       val addr = refAddr(eval(e))
-      write(addr, v)
+      store.write(addr, v)
     case Assignable.AField(recVar, field) =>
       val recRef = eval(Exp.Var(recVar))
       val recAddr = refAddr(recRef)
-      val recVal = read(recAddr).getOrElse(fail(UnboundAddr, recAddr.toString))
+      val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
       val updated = updateRecordField(recVal, Field(field), v)
-      write(recAddr, updated)
+      store.write(recAddr, updated)
     case Assignable.ADerefField(rec, field) =>
       val recRef = eval(rec)
       val recAddr = refAddr(recRef)
-      val recVal = read(recAddr).getOrElse(fail(UnboundAddr, recAddr.toString))
+      val recVal = store.read(recAddr).getOrElse(failure(UnboundAddr, recAddr.toString))
       val updated = updateRecordField(recVal, Field(field), v)
-      write(recAddr, updated)
+      store.write(recAddr, updated)
 
   def call(fun: Function, args: Seq[V])(using Fixed): V =
     var locals: Map[String, Addr] = Map()
@@ -178,12 +202,12 @@ trait GenericInterpreter[V, Addr, MayJoin[_], Effects <: GenericEffects[V, Addr,
       locals += name -> addr
       addr
     }
-    inNewFrame((), locals) {
-      paramAddrs.zip(args).map(write)
+    callFrame.inNewFrame((), locals) {
+      paramAddrs.zip(args).map(store.write)
       try enterFunction(fun)
       finally {
-        paramAddrs.foreach(free)
-        localsAddrs.foreach(free)
+        paramAddrs.foreach(store.free)
+        localsAddrs.foreach(store.free)
       }
     }
 

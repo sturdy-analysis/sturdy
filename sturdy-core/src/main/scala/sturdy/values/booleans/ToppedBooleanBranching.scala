@@ -3,9 +3,9 @@ package sturdy.values.booleans
 import sturdy.data.{joinComputations, WithJoin, NoJoin, unit, MakeJoined}
 import sturdy.values.{Topped, Join}
 import sturdy.effect.failure.Failure
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 
-given ToppedBooleanBranching[B, R](using ops: BooleanBranching[B, R])(using Effectful, Join[R]): BooleanBranching[Topped[B], R] with
+given ToppedBooleanBranching[B, R](using ops: BooleanBranching[B, R])(using EffectStack, Join[R]): BooleanBranching[Topped[B], R] with
   override def boolBranch(v: Topped[B], thn: => R, els: => R): R =
     v match
       case Topped.Top => joinComputations(thn)(els)

@@ -1,6 +1,8 @@
 package sturdy.values.exceptions
 
-trait Exceptional[Exc, ExcV, MayJoin[_]]:
+import sturdy.data.MayJoin
+
+trait Exceptional[Exc, ExcV, J[_] <: MayJoin[_]]:
   type ExceptionalJoin[A]
   def exception(exc: Exc): ExcV
-  def handle[A](e: ExcV)(f: Exc => A): MayJoin[A] ?=> A
+  def handle[A](e: ExcV)(f: Exc => A): J[A] ?=> A

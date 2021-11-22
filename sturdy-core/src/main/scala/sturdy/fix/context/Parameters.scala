@@ -1,17 +1,18 @@
 package sturdy.fix.context
 
+import sturdy.data.MayJoin
 import sturdy.effect.environment.Environment
 import sturdy.effect.store.Store
 
 
 
-def parametersFromEnv[Dom, Var, V, MayJoin[_]](getParams: Dom => Option[Iterable[Var]])(using env: Environment[Var, V, MayJoin])(using MayJoin[V]) =
+def parametersFromEnv[Dom, Var, V, J[_] <: MayJoin[_]](getParams: Dom => Option[Iterable[Var]])(using env: Environment[Var, V, J])(using J[V]) =
   new ParametersFromLookup[Dom, Var, V](
     getParams,
     p => env.lookup(p).get
   )
 
-def parametersFromStore[Dom, Addr, V, MayJoin[_]](getAddrs: Dom => Option[Iterable[Addr]])(using store: Store[Addr, V, MayJoin])(using MayJoin[V]) =
+def parametersFromStore[Dom, Addr, V, J[_] <: MayJoin[_]](getAddrs: Dom => Option[Iterable[Addr]])(using store: Store[Addr, V, J])(using J[V]) =
   new ParametersFromLookup[Dom, Addr, V](
     getAddrs,
     addr => store.read(addr).get

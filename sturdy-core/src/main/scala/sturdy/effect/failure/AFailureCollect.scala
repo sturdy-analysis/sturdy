@@ -14,8 +14,6 @@ case object AFailureCollectException extends SturdyFailure
 trait AFailureCollect extends Failure with Effectful:
   protected val failures: ListBuffer[(FailureKind,String)] = ListBuffer()
 
-  def getFailures: List[(FailureKind,String)] = failures.toList
-
   override def fail(kind: FailureKind, msg: String): Nothing =
     failures += kind -> msg
     throw AFailureCollectException
@@ -31,3 +29,10 @@ trait AFailureCollect extends Failure with Effectful:
       case AFailureCollectException => AFallible.Failing(Powerset(failures.toSet))
       case ex => throw ex
     }
+
+  override type State = List[(FailureKind,String)]
+  override def getState: List[(FailureKind,String)] = failures.toList
+  override def setState(s: List[(FailureKind, String)]): Unit =
+    failures.clear()
+    failures ++= s
+

@@ -1,21 +1,37 @@
 package sturdy.data
 
+import sturdy.effect.EffectStack
 import sturdy.values.Join
-import sturdy.effect.Effectful
 
-type NoJoin[A] = Unit
-type WithJoin[A] = (Join[A], Effectful)
+//sealed trait Joining[A]:
+//  type Val
+//  type Eff
+//case class NoJoin[A]() extends Joining[A]:
+//  override type Val = Unit
+//  override type Eff = Unit
+//case class WithJoin[A]() extends Joining[A]:
+//  override type Val = Join[A]
+//  override type Eff = EffectStack
 
-inline def joinComputations[A](f: => A)(g: => A)(using j: WithJoin[A]): A =
-  j._2.joinComputations(f)(g)(using j._1)
+enum MayJoin[A]:
+  case NoJoin()
+  case WithJoin(j: Join[A], eff: EffectStack)
 
-inline def joinWithFailure[A](f: => A)(g: => Nothing)(using eff: Effectful): A =
+type NoJoin[A] = MayJoin.NoJoin[A]
+type WithJoin[A] = MayJoin.WithJoin[A]
+
+given noJoin[A]: NoJoin[A] = MayJoin.NoJoin()
+
+inline def joinComputations[A](f: => A)(g: => A)(using w: WithJoin[A]): A =
+  w.eff.joinComputations(f)(g)(using w.j)
+
+inline def joinWithFailure[A](f: => A)(g: => Nothing)(using eff: EffectStack): A =
   eff.joinWithFailure(f)(g)
 
-inline def mapJoin[A, B](as: Iterable[A], f: A => B)(using j: WithJoin[B]): B =
-  j._2.mapJoin(as, f)(using j._1)
+inline def mapJoin[A, B](as: Iterable[A], f: A => B)(using w: WithJoin[B]): B =
+  w.eff.mapJoin(as, f)(using w.j)
 
 //given JoinedJoin[A](using j: WithJoin[A]): Join[A] = j._1
 //given JoinedJoinEffects[A](using j: WithJoin[A]): Effectful = j._2
-given MakeJoined[A](using jv: Join[A], je: Effectful): WithJoin[A] = (jv, je)
+given MakeJoined[A](using jv: Join[A], je: EffectStack): WithJoin[A] = MayJoin.WithJoin(jv, je)
 

@@ -9,10 +9,16 @@ enum AFallible[T]:
   case Failing(msgs: Powerset[(FailureKind,String)])
   case MaybeFailing(t: T, msgs: Powerset[(FailureKind,String)])
 
-given fallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[CFallible[C], AFallible[A]] with
+given cfallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[CFallible[C], AFallible[A]] with
   override def abstractly(c: CFallible[C]): AFallible[A] = c match
     case CFallible.Unfailing(c) => AFallible.Unfailing(abs.abstractly(c))
     case CFallible.Failing(kind, msg) => AFallible.Failing(Powerset(kind -> msg))
+
+given afallibleAbstractly[C, A](using abs: Abstractly[C, A]): Abstractly[AFallible[C], AFallible[A]] with
+  override def abstractly(a: AFallible[C]): AFallible[A] = a match
+    case AFallible.Unfailing(t) => AFallible.Unfailing(abs.abstractly(t))
+    case AFallible.MaybeFailing(t, msgs) => AFallible.MaybeFailing(abs.abstractly(t), msgs)
+    case AFallible.Failing(msgs) => AFallible.Failing(msgs)
 
 given falliblePO[T](using po: PartialOrder[T]): PartialOrder[AFallible[T]] with
   override def lteq(x: AFallible[T], y: AFallible[T]): Boolean = (x, y) match

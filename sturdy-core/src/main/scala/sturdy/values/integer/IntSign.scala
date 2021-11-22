@@ -1,6 +1,6 @@
 package sturdy.values.integer
 
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.*
 import sturdy.values.relational.*
@@ -51,7 +51,7 @@ given CombineIntSign[W <: Widening]: Combine[IntSign, W] with
       case (Pos, Zero) => Changed(ZeroOrPos)
       case _ => Changed(TopSign)
 
-given SignIntegerOps[B](using f: Failure, j: Effectful, base: Integral[B]): IntegerOps[B, IntSign] with
+given SignIntegerOps[B](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, IntSign] with
   def integerLit(i: B): IntSign =
     if base.lt(i, base.zero) then Neg
     else if base.gt(i, base.zero) then Pos

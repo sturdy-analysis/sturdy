@@ -7,7 +7,6 @@ import sturdy.values.exceptions.Exceptional
 
 import scala.collection.mutable.ListBuffer
 import scala.util.Success
-import JoinedExcept.*
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.SturdyThrowable
@@ -20,8 +19,6 @@ case object AbstractSturdyException extends SturdyException:
 trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin], eJoin: Join[E]) extends Except[Exc, E, WithJoin], Effectful:
 
   protected var exception: JOptionA[E] = JOptionA.none
-
-  def getException: State[Exc, E] = exception
 
   override def throws(ex: Exc): Nothing =
     throwing(ex)
@@ -77,6 +74,3 @@ trait JoinedExcept[Exc, E](using val exceptional: Exceptional[Exc, E, WithJoin],
     override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       exception = fExcept.joinDeep(exception)
   }
-  
-object JoinedExcept:
-  type State[Exc, E] = JOptionA[E]

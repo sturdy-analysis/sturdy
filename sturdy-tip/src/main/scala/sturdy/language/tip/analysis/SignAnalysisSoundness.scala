@@ -43,10 +43,10 @@ object SignAnalysisSoundness:
 
   given Soundness[ConcreteInterpreter.Instance, SignAnalysis.Instance] with
     def isSound(c: ConcreteInterpreter.Instance, a: SignAnalysis.Instance): IsSound = {
-      given CAllocationIntIncrement[AllocationSite] = c.effects
+      given CAllocationIntIncrement[AllocationSite] = c.alloc
 
       // concrete environment is sound by construction
-      a.effects.storeIsSound(c.effects) &&
-      a.effects.printIsSound(c.effects)
+      a.store.storeIsSound(c.store) &&
+      a.print.printIsSound(c.print)
     }
 

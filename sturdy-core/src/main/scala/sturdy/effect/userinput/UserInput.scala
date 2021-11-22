@@ -1,4 +1,6 @@
 package sturdy.effect.userinput
 
-trait UserInput[A]:
-  def readInput(): A
+import sturdy.effect.Effectful
+
+trait UserInput[A] extends Effectful:
+  def read(): A

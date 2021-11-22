@@ -1,13 +1,13 @@
 package sturdy.values.convert
 
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.Topped
 import sturdy.values.config
 
 import java.nio.ByteOrder
 
-inline def safeTopConversion[A, Config <: ConvertConfig[_]](conf: Config, res: A)(using eff: Effectful, f: Failure): A =
+inline def safeTopConversion[A, Config <: ConvertConfig[_]](conf: Config, res: A)(using eff: EffectStack, f: Failure): A =
   if (conf.canFail)
     eff.joinWithFailure(res)(f.fail(ConversionFailure, s"Conversion can fail"))
   else
@@ -15,7 +15,7 @@ inline def safeTopConversion[A, Config <: ConvertConfig[_]](conf: Config, res: A
 
 given ToppedConvert[From, To, VFrom, VTo, Config <: ConvertConfig[_]]
   (using c: Convert[From, To, VFrom, VTo, Config])
-  (using Effectful, Failure)
+  (using EffectStack, Failure)
   : Convert[From, To, Topped[VFrom], Topped[VTo], Config] with
 
   def apply(from: Topped[VFrom], conf: Config): Topped[VTo] =
@@ -25,7 +25,7 @@ given ToppedConvert[From, To, VFrom, VTo, Config <: ConvertConfig[_]]
 
 given ToppedConvertSeq[From, To, VFromElem, VTo, Conf <: ConvertConfig[_]]
   (using c: Convert[From, To, Seq[VFromElem], VTo, Conf])
-  (using Effectful, Failure)
+  (using EffectStack, Failure)
   : Convert[From, To, Seq[Topped[VFromElem]], Topped[VTo], Conf] with
 
   override def apply(from: Seq[Topped[VFromElem]], conf: Conf): Topped[VTo] =
@@ -38,7 +38,7 @@ given ToppedConvertSeq[From, To, VFromElem, VTo, Conf <: ConvertConfig[_]]
 
 given ToppedConvertToBytes[From, To, VFrom, B, Conf <: ConvertConfig[_]]
   (using c: Convert[From, To, VFrom, Seq[B], config.BytesSize && Conf])
-  (using Effectful, Failure)
+  (using EffectStack, Failure)
   : Convert[From, To, Topped[VFrom], Seq[Topped[B]], config.BytesSize && Conf] with
 
   override def apply(from: Topped[VFrom], conf: config.BytesSize && Conf): Seq[Topped[B]] = from match

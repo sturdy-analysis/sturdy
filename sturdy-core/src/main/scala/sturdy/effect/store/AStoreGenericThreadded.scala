@@ -19,11 +19,6 @@ trait AStoreGenericThreadded[Addr, V](using j: Join[V])
   protected var store: Map[Addr, V] = Map()
   protected var dirtyAddrs: Set[Addr] = Set()
 
-  def getStore: Map[Addr, V] = store
-  protected def setStore(s: Map[Addr, V]): Unit =
-    this.store = s
-    this.dirtyAddrs = s.keySet
-
   protected def weakUpdate(x: Addr, v: V): Unit =
     dirtyAddrs += x
     store.get(x) match
@@ -59,3 +54,10 @@ trait AStoreGenericThreadded[Addr, V](using j: Join[V])
       dirtyAddrs ++= snapshotDirtyAddrs
       dirtyAddrs ++= fDirtyAddrs
   }
+
+  override type State = Map[Addr, V]
+  override def getState: Map[Addr, V] = store
+  override def setState(s: Map[Addr, V]): Unit =
+    this.store = s
+    this.dirtyAddrs = s.keySet
+

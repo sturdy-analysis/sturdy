@@ -1,12 +1,15 @@
 package sturdy.language.tip.abstractions
 
+import sturdy.data.MayJoin
+import sturdy.data.noJoin
 import sturdy.language.tip.{Program, Stm}
-import sturdy.language.tip.GenericInterpreter.{FixIn, FixOut, GenericEffects}
+import sturdy.language.tip.GenericInterpreter.{FixIn, FixOut}
 import sturdy.fix
 import sturdy.language.tip.Exp
-import sturdy.data.unit
 import sturdy.effect.ObservableJoin
+import sturdy.effect.callframe.DecidableCallFrame
 import sturdy.effect.except.ObservableExcept
+import sturdy.effect.store.Store
 import sturdy.fix.cfg.ControlFlowGraph
 import sturdy.fix.context.FiniteCallString
 import sturdy.language.tip.Function
@@ -26,11 +29,11 @@ trait Fix extends Interpreter:
   type CallString = fix.context.CallString[Exp.Call]
   given Finite[CallString] = fix.context.FiniteCallString
 
-  final def parameters[MayJoin[_]](using effects: GenericEffects[Value, Addr, MayJoin])(using MayJoin[Value]): fix.context.Sensitivity[FixIn, Parameters] =
-    fix.context.parametersFromStore {
-      case FixIn.EnterFunction(f) => Some(f.params.map(p => effects.getLocalByName(p).get))
+  final def parameters[J[_] <: MayJoin[_]](callFrame: DecidableCallFrame[Unit, String, Addr], store: Store[Addr, Value, J])(using J[Value]): fix.context.Sensitivity[FixIn, Parameters] =
+    fix.context.parametersFromStore[FixIn, Addr, Value, J] {
+      case FixIn.EnterFunction(f) => Some(f.params.map(p => callFrame.getLocalByName(p).get))
       case _ => None
-    }
+    }(using store)
   type Parameters = Map[Addr, Value]
 
   enum CfgNode extends ControlFlowGraph.Node:
@@ -60,7 +63,7 @@ trait Fix extends Interpreter:
       case (FixIn.EnterFunction(f), FixOut.ExitFunction(_)) => Some(CfgNode.Exit(f))
       case (FixIn.Eval(c: Exp.Call), _) => Some(CfgNode.CallReturn(CfgNode.Call(c)))
       case _ => None
-    } (using analysis.effects, ObservableExcept.None)
+    } (using analysis.effectStack, ObservableExcept.None)
     analysis.addContextSensitiveLogger(cfg.logger)
     cfg
 

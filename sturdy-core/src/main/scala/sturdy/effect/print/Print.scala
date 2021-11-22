@@ -1,4 +1,6 @@
 package sturdy.effect.print
 
-trait Print[A]:
-  def print(a: A): Unit
+import sturdy.effect.Effectful
+
+trait Print[A] extends Effectful:
+  def apply(a: A): Unit

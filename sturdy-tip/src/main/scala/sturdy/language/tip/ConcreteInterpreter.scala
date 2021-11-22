@@ -1,9 +1,9 @@
 package sturdy.language.tip
 
-import sturdy.data.{unit, NoJoin}
+import sturdy.data.{NoJoin, unit, noJoin}
 import sturdy.effect.allocation.CAllocationIntIncrement
 import sturdy.effect.callframe.ConcreteCallFrame
-import sturdy.effect.failure.{Failure, CFailure}
+import sturdy.effect.failure.{CFailure, Failure}
 import sturdy.effect.print.CPrint
 import sturdy.effect.store.CStore
 import sturdy.effect.userinput.CUserInput
@@ -11,16 +11,16 @@ import sturdy.fix
 import sturdy.language.tip.Interpreter
 import sturdy.language.tip.Function
 import sturdy.language.tip.GenericInterpreter.*
-import sturdy.values.booleans.{_, given}
-import sturdy.values.integer.{_, given}
-import sturdy.values.functions.{_, given}
-import sturdy.values.records.{_, given}
-import sturdy.values.references.{_, given}
-import sturdy.values.relational.{_, given}
-import sturdy.values.{_, given}
+import sturdy.values.booleans.{*, given}
+import sturdy.values.integer.{*, given}
+import sturdy.values.functions.{*, given}
+import sturdy.values.records.{*, given}
+import sturdy.values.references.{*, given}
+import sturdy.values.relational.{*, given}
+import sturdy.values.{*, given}
 
 object ConcreteInterpreter extends Interpreter:
-  override type MayJoin[A] = NoJoin[A]
+  override type J[A] = NoJoin[A]
   override type Ctx = Unit
   
   override type VBool = Boolean
@@ -45,17 +45,9 @@ object ConcreteInterpreter extends Interpreter:
   type Environment = Map[String, Int]
   type Store = Map[Int, Value]
 
-  class Effects(initEnvironment: Environment, initStore: Store, nextInput: () => Value)
-    extends ConcreteCallFrame[Unit, String, Int]
-      with CStore[Int, Value](initStore)
-      with CAllocationIntIncrement[AllocationSite]
-      with CPrint[Value]
-      with CUserInput[Value](nextInput)
-      with CFailure:
-    override def initialCallFrameData: Unit = ()
-    override def initialCallFrameVars: Map[String, Int] = initEnvironment
+  class Instance(initEnvironment: Environment, initStore: Store, nextInput: () => Value) extends GenericInstance with fix.Concrete[FixIn, FixOut[Value]]:
+    override def jv: NoJoin[Value] = implicitly
 
-  class Instance(effects: Effects) extends GenericInstance(effects) with fix.Concrete[FixIn, FixOut[Value]]:
     final def vintOps: IntegerOps[Int, VInt] = implicitly
     final def vcompareOps: OrderingOps[VInt, VBool] = implicitly
     final def vintEqOps: EqOps[VInt, VBool] = implicitly
@@ -67,6 +59,11 @@ object ConcreteInterpreter extends Interpreter:
     final def vrecOps: RecordOps[Field, Value, VRecord] = implicitly
     final def vbranchOps: BooleanBranching[Boolean, Unit] = implicitly
 
+    override val callFrame: ConcreteCallFrame[Unit, String, Addr] = new ConcreteCallFrame((), initEnvironment)
+    override val store: CStore[Addr, Value] = new CStore(initStore)
+    override val alloc: CAllocationIntIncrement[AllocationSite] = new CAllocationIntIncrement
+    override val print: CPrint[Value] = new CPrint
+    override val input: CUserInput[Value] = new CUserInput(nextInput)
+
   def apply(initEnvironment: Environment, initStore: Store, nextInput: () => Value): Instance =
-    val effects = new Effects(initEnvironment, initStore, nextInput)
-    new Instance(effects)
+    new Instance(initEnvironment, initStore, nextInput)

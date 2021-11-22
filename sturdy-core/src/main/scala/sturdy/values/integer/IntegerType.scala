@@ -1,11 +1,11 @@
 package sturdy.values.integer
 
-import sturdy.effect.Effectful
+import sturdy.effect.EffectStack
 import sturdy.effect.failure.Failure
 import sturdy.values.types.BaseType
 import scala.reflect.ClassTag
 
-given TypeIntegerOps[B: ClassTag](using f: Failure, j: Effectful, base: Integral[B]): IntegerOps[B, BaseType[B]] with
+given TypeIntegerOps[B: ClassTag](using f: Failure, j: EffectStack, base: Integral[B]): IntegerOps[B, BaseType[B]] with
   def integerLit(i: B): BaseType[B] = BaseType[B]
   def randomInteger(): BaseType[B] = BaseType[B]
 

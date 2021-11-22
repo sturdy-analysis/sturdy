@@ -1,5 +1,7 @@
 package sturdy.effect.symboltable
 
+import sturdy.IsSound
+import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.Effectful
@@ -42,3 +44,14 @@ trait JoinedSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends ConcreteS
       }
       tables = joined
   }
+
+  def tableIsSound[cEntry](c: ConcreteSymbolTable[Key, Symbol, cEntry])(using Soundness[cEntry, Entry]): IsSound =
+    c.getTables.foreachEntry { (key, cTab) =>
+      val aTab = tables.getOrElse(key, return IsSound.NotSound(s"Key $key not present in topped symbol table."))
+      for ((sym, cEntry) <- cTab)
+        val aEntry = aTab.getOrElse(sym, return IsSound.NotSound(s"Table $key misses symbol $sym, bound to $cEntry in the concrete table."))
+        val eSound = Soundness.isSound(cEntry, aEntry)
+        if (!eSound.isSound)
+          return eSound
+    }
+    IsSound.Sound
