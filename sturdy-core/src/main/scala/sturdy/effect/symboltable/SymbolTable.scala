@@ -11,5 +11,4 @@ trait SymbolTable[Key, Symbol, Entry, J[_] <: MayJoin[_]] extends Effectful:
   def addEmptyTable(key: Key): Unit
 
 trait DecidableSymbolTable[Key, Symbol, Entry] extends SymbolTable[Key, Symbol, Entry, NoJoin]:
-  def getTables: Map[Key, Map[Symbol, Entry]]
-  def setTables(tables: Map[Key, Map[Symbol, Entry]]): Unit
+  override type State = Map[Key, Map[Symbol, Entry]]

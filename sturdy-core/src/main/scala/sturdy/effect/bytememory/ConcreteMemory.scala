@@ -5,7 +5,7 @@ import sturdy.data.*
 import scala.collection.mutable
 
 
-trait ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin]:
+class ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin]:
   import ConcreteMemory.*
   
   protected val memories: mutable.Map[Key, Mem] = mutable.Map()
@@ -52,7 +52,11 @@ trait ConcreteMemory[Key] extends Memory[Key, Int, Seq[Byte], Int, NoJoin]:
   override def addEmptyMemory(key: Key, initSize: Int, sizeLimit: scala.Option[Int]): Unit =
     memories(key) = Mem(Array.ofDim[Byte](initSize*pageSize), sizeLimit)
 
-  def getMemories: mutable.Map[Key, Mem] = memories
+  override type State = Map[Key, Mem]
+  override def getState: Map[Key, Mem] = memories.view.mapValues(m => m.copy(bytes = m.bytes.clone())).toMap
+  override def setState(s: Map[Key, Mem]): Unit =
+    memories.clear()
+    memories ++= s
 
 object ConcreteMemory:
   case class Mem(bytes: Array[Byte], sizeLimit: scala.Option[Int]):

@@ -3,14 +3,12 @@ package sturdy.effect.symboltable
 import sturdy.data.*
 import sturdy.effect.Effectful
 import sturdy.values.*
-import ConstantSymbolTable.*
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
-import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.TrySturdy
 
-trait UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry]) extends SymbolTable[Key, Symbol, Entry, WithJoin], Effectful:
+class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[Entry]) extends SymbolTable[Key, Symbol, Entry, WithJoin], Effectful:
 
   protected var tables: Map[Key, Entry] = Map()
 
@@ -23,24 +21,25 @@ trait UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
   override def addEmptyTable(key: Key): Unit =
     tables += key -> emptyEntry
 
-  class ToppedSymbolTableJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new UpperBoundSymbolTableJoiner[A])
+  private class UpperBoundSymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private var fTables: Map[Key, Entry] = _
     private var fDirty: Set[Key] = _
 
-    override def inbetween_(): Unit =
+    override def inbetween(): Unit =
       fTables = tables
       tables = snapshot
 
-    override def retainNone_(): Unit =
+    override def retainNone(): Unit =
       tables = snapshot
 
-    override def retainFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
       tables = fTables
 
-    override def retainSecond_(gRes: TrySturdy[A]): Unit = {}
+    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
-    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       for ((fKey, fEntry) <- fTables)
         tables.get(fKey) match
           case None => tables += fKey -> fEntry
@@ -48,7 +47,7 @@ trait UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
   }
 
   def tableIsSound[cSymbol, cEntry](c: ConcreteSymbolTable[Key, cSymbol, cEntry])(using Soundness[cEntry, Entry]): IsSound =
-    c.getTables.foreachEntry { (key, cTab) =>
+    c.getState.foreachEntry { (key, cTab) =>
       val aEntry = tables.getOrElse(key, { return IsSound.NotSound(s"Key $key not present in topped symbol table.") })
       for (cEntry <- cTab.values)
         val eSound = Soundness.isSound(cEntry, aEntry)
@@ -56,3 +55,7 @@ trait UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
           return eSound
     }
     IsSound.Sound
+
+  type State = Map[Key, Entry]
+  override def getState: Map[Key, Entry] = tables
+  override def setState(s: Map[Key, Entry]): Unit = tables = s

@@ -4,7 +4,7 @@ import cats.effect.{IO, Blocker}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.{AFallible, CFailureException, CFallible, fallibleAbstractly, given}
+import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.abstractions.CfgConfig
 import sturdy.language.wasm.analyses.{ConstantTaintAnalysis, ConstantAnalysis, ConstantTaintAnalysisSoundness}
@@ -34,8 +34,8 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
   type CValue = ConcreteInterpreter.Value
   type AValue = ConstantTaintAnalysis.Value
 
-  val cInterp = ConcreteInterpreter(FrameData.empty, Iterable.empty)
-  val aInterp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)(WasmConfig.default)
+  val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
+  val aInterp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
@@ -58,7 +58,7 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
     aImports += "spectest" -> amodInst
   }
 
-  type CResult = CFallible[List[CValue]]
+  type CResult = AFallible[List[CValue]]
   type AResult = AFallible[List[AValue]]
 
   def eqVals(vs1: List[CValue], vs2: List[CValue]): Boolean =
@@ -154,11 +154,11 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
     // check for soundness of the interpreter states after initialization
     assertResult(IsSound.Sound, s"after initializing module $mod")(Soundness.isSound(cInterp, aInterp))
 
-  def instantiate(t: TestModule): CFallible[ModuleInstance] =
+  def instantiate(t: TestModule): AFallible[ModuleInstance] =
     t match
       case ValidModule(m) =>
         val mod = readModule(m)
-        cInterp.effects.fallible {
+        cInterp.failure.fallible {
           cInterp.initializeModule(mod, cImports)
         }
       case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
@@ -168,7 +168,7 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
     t match
       case ValidModule(m) =>
         val mod = readModule(m)
-        aInterp.effects.fallible {
+        aInterp.failure.fallible {
           aInterp.initializeModule(mod, aImports)
         }
       case BinaryModule(id,s) => throw new Error("instantiation of binary modules not yet implemented.")
@@ -186,13 +186,13 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
 
   def evalCInvoke(module: Option[String], fun: String, vals: List[CValue]): CResult =
     val modInst = getCModule(module)
-    cInterp.effects.fallible {
+    cInterp.failure.fallible {
       cInterp.invokeExported(modInst, fun, vals)
     }
 
   def evalAInvoke(module: Option[String], fun: String, vals: List[AValue]): AResult =
     val modInst = getAModule(module)
-    aInterp.effects.fallible {
+    aInterp.failure.fallible {
       aInterp.invokeExported(modInst, fun, vals)
     }
 
@@ -204,7 +204,7 @@ class TestScriptConstantTaintAnalysisInterpreter(spectest: Option[Module] = None
       case Global(addr) =>
         val globalIdx = modInst.globalAddrs.lift(addr).getOrElse(throw new Error(s"Unbound global $addr"))
         val value = cInterp.getGlobalValue(globalIdx)
-        CFallible.Unfailing(List(value))
+        AFallible.Unfailing(List(value))
       case ext =>
         throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")
 

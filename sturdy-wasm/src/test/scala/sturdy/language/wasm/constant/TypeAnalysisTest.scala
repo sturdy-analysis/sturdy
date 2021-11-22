@@ -87,11 +87,11 @@ class TypeAnalysisTest extends AnyFlatSpec, Matchers:
 def runTypeAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.parse(path)
 
-  val interp = TypeAnalysis(FrameData.empty, Iterable.empty)(WasmConfig())
+  val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig())
   val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
 
   val modInst = interp.initializeModule(module)
-  val result = interp.effects.fallible(
+  val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )
 //  println(cfg.toGraphViz)

@@ -3,7 +3,6 @@ package sturdy.language.tip
 import cats.parse.{Numbers, Parser0 as P0, Parser as P}
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.CFailureException
 import sturdy.language.tip.Parser.*
 import sturdy.language.tip.Parser.LanguageKeywords.KRETURN
 

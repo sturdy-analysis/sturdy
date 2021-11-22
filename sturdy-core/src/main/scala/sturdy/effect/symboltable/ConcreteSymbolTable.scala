@@ -2,7 +2,7 @@ package sturdy.effect.symboltable
 
 import sturdy.data.*
 
-trait ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, Symbol, Entry]:
+class ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, Symbol, Entry]:
 
   protected var tables: Map[Key, Map[Symbol, Entry]] = Map()
 
@@ -15,5 +15,5 @@ trait ConcreteSymbolTable[Key, Symbol, Entry] extends DecidableSymbolTable[Key, 
   override def addEmptyTable(key: Key): Unit =
     tables += key -> Map()
     
-  override def getTables: Map[Key, Map[Symbol, Entry]] = tables
-  override def setTables(tables: Map[Key, Map[Symbol, Entry]]) = this.tables = tables
+  override def getState: Map[Key, Map[Symbol, Entry]] = tables
+  override def setState(tables: Map[Key, Map[Symbol, Entry]]): Unit = this.tables = tables

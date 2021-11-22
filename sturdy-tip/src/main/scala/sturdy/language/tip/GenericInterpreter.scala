@@ -89,7 +89,8 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
   val input: UserInput[V]
 
   // effect stack
-  implicit def effectStack: EffectStack = EffectStack(List(callFrame, store, alloc, print, input))
+  final val effectStack: EffectStack = new EffectStack(List(callFrame, store, alloc, print, input))
+  given EffectStack = effectStack
 
   final val failure: AFailureCollect = new AFailureCollect {}
   given Failure = failure

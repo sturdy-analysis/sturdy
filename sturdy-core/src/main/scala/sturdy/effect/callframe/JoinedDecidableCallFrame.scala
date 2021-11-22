@@ -1,30 +1,30 @@
 package sturdy.effect.callframe
 import sturdy.{IsSound, Soundness, seqIsSound}
 import sturdy.effect.operandstack.DecidableOperandStack
-import sturdy.effect.{ComputationJoiner, ComputationJoinerWithSuper, TrySturdy}
+import sturdy.effect.{ComputationJoiner, TrySturdy}
 import sturdy.values.Join
 
 import scala.reflect.ClassTag
 
 class JoinedDecidableCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using Join[V], ClassTag[V]) extends ConcreteCallFrame[Data, Var, V](initData, initVars):
-  override def makeComputationJoiner[A]: ComputationJoiner[A] = new CallFrameJoiner[A] 
-  class CallFrameJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new CallFrameJoiner[A])
+  private class CallFrameJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = vars
     private var fVars: Array[V] = _
 
-    override def inbetween_(): Unit =
+    override def inbetween(): Unit =
       fVars = vars
       vars = snapshot
 
-    override def retainNone_(): Unit =
+    override def retainNone(): Unit =
       vars = snapshot
 
-    override def retainFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
       vars = fVars
 
-    override def retainSecond_(gRes: TrySturdy[A]): Unit = {}
+    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
-    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       vars = joinWith(fVars)
   }
 

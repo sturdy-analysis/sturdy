@@ -21,7 +21,7 @@ given CombineEquiSeq[V, W <: Widening](using j: Combine[V, W]): Combine[Seq[V], 
 given CombineEquiList[V, W <: Widening](using j: Combine[V, W]): Combine[List[V], W] with
   override def apply(vs1: List[V], vs2: List[V]): MaybeChanged[List[V]] =
     if (vs1.size != vs2.size)
-      throw new IllegalStateException()
+      throw new IllegalStateException(s"Cannot combine $vs1 with $vs2")
     var changed = false
     val vs = vs1.zip(vs2).map {
       case (v1, v2) =>

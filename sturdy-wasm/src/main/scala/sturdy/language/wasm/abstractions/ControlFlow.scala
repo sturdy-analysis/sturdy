@@ -89,7 +89,7 @@ trait ControlFlow extends Interpreter:
       case (FixIn.Eval(c: (Call | CallIndirect), loc), _) if config.endNodes => Some(CfgNode.CallReturn(CfgNode.Call(c, loc)))
       case (FixIn.Eval(c: (Block | Loop | If), loc), _) if config.endNodes => Some(CfgNode.LabledEnd(CfgNode.Labled(c, loc)))
       case _ => None
-    }(using analysis.effects, analysis.effects)
+    }(using analysis.effectStack, analysis.except)
     analysis.addContextSensitiveLogger(cfg.logger)
     cfg
 

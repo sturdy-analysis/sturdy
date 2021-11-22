@@ -1,6 +1,7 @@
 package sturdy.language.wasm.generic
 
-import sturdy.data.unit
+import sturdy.data.MayJoin
+import sturdy.data.noJoin
 import sturdy.effect.failure.Failure
 import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.values.config
@@ -11,8 +12,8 @@ import sturdy.values.relational.*
 import swam.ValType
 import swam.syntax.*
 
-class GenericInterpreterNumerics[V, MayJoin[_]]
-  (stack: DecidableOperandStack[V], wasmOps: WasmOps[V, _, _, _, _, _, _, MayJoin])
+class GenericInterpreterNumerics[V, J[_] <: MayJoin[_]]
+  (stack: DecidableOperandStack[V], wasmOps: WasmOps[V, _, _, _, _, _, _, J])
   (using Failure):
 
   import wasmOps.*

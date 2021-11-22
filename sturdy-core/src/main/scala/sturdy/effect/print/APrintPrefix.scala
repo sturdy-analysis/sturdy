@@ -3,7 +3,6 @@ package sturdy.effect.print
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
-import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.Effectful
 import sturdy.effect.TrySturdy
 import sturdy.values.Finite
@@ -133,23 +132,24 @@ class APrintPrefix[P] extends Print[P]:
   override def apply(a: P): Unit =
     printed = printed :+ a
 
-  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new APrintPrefixJoiner)
+  private class APrintPrefixJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = printed
     private var printedF: PrintResult[P] = _
 
-    override def inbetween_(): Unit =
+    override def inbetween(): Unit =
       printedF = printed
       printed = snapshot
 
-    override def retainNone_(): Unit =
+    override def retainNone(): Unit =
       printed = snapshot
 
-    override def retainFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
       printed = printedF
 
-    override def retainSecond_(gRes: TrySturdy[A]): Unit = {}
+    override def retainSecond(gRes: TrySturdy[A]): Unit = {}
 
-    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       printed = printedF.join(printed)
   }
 

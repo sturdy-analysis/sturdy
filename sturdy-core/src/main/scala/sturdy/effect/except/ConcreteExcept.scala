@@ -1,6 +1,7 @@
 package sturdy.effect.except
 
 import sturdy.data.*
+import sturdy.effect.Stateless
 import sturdy.effect.SturdyException
 import sturdy.values.exceptions.Exceptional
 
@@ -10,7 +11,7 @@ import reflect.Selectable.reflectiveSelectable
 case class ConcreteSturdyException[E](e: E) extends SturdyException:
   override def toString: String = s"Exception ${e.toString}"
 
-trait ConcreteExcept[E](using val exceptional: Exceptional[E, E, NoJoin]) extends Except[E, E, NoJoin]:
+class ConcreteExcept[E](using val exceptional: Exceptional[E, E, NoJoin]) extends Except[E, E, NoJoin], Stateless:
   override def throws(ex: E): Nothing =
     throwing(ex)  
     throw ConcreteSturdyException(ex)

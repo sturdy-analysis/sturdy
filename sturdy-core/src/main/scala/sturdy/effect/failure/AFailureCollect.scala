@@ -11,7 +11,7 @@ import scala.util.control.NonFatal
 
 case object AFailureCollectException extends SturdyFailure
 
-trait AFailureCollect extends Failure with Effectful:
+class AFailureCollect extends Failure with Effectful:
   protected val failures: ListBuffer[(FailureKind,String)] = ListBuffer()
 
   override def fail(kind: FailureKind, msg: String): Nothing =

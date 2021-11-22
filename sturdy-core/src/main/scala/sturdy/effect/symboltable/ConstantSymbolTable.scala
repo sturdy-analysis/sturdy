@@ -10,18 +10,13 @@ import ConstantSymbolTable.*
 import sturdy.IsSound
 import sturdy.Soundness
 import sturdy.effect.ComputationJoiner
-import sturdy.effect.ComputationJoinerWithSuper
 import sturdy.effect.TrySturdy
 
-trait ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effectful:
+class ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolTable[Key, Topped[Symbol], Entry, WithJoin], Effectful:
 
   protected var tables: Map[Key, Eith[Table[Symbol, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
 
-  def getSymbolTables: Tables[Key, Symbol, Entry] = tables
-  def setSymbolTables(s: Tables[Key, Symbol, Entry]): Unit =
-    tables = s
-  
   override def tableGet(key: Key, symbol: Topped[Symbol]): JOptionA[Entry] =
     tables(key) match
       case Right(entry) => JOptionA.NoneSome(entry)
@@ -51,31 +46,36 @@ trait ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolT
     tables += key -> Left(Table(Map(), Set()))
     dirtyTables += key
 
-  override def makeComputationJoiner[A]: ComputationJoiner[A] = new ToppedSymbolTableJoiner[A] 
-  class ToppedSymbolTableJoiner[A] extends ComputationJoinerWithSuper[A](super.makeComputationJoiner) {
+  override type State = Tables[Key, Symbol, Entry]
+  def getState: Tables[Key, Symbol, Entry] = tables
+  def setState(s: Tables[Key, Symbol, Entry]): Unit = tables = s
+
+
+  override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new ToppedSymbolTableJoiner[A])
+  class ToppedSymbolTableJoiner[A] extends ComputationJoiner[A] {
     private val snapshot = tables
     private val snapDirtyTables = dirtyTables
     dirtyTables = Set()
     private var fTables: Tables[Key, Symbol, Entry] = _
     private var fDirty: Set[Key] = _
 
-    override def inbetween_(): Unit =
+    override def inbetween(): Unit =
       fTables = tables
       fDirty = dirtyTables
       tables = snapshot
       dirtyTables = Set()
 
-    override def retainNone_(): Unit =
+    override def retainNone(): Unit =
       tables = snapshot
 
-    override def retainFirst_(fRes: TrySturdy[A]): Unit =
+    override def retainFirst(fRes: TrySturdy[A]): Unit =
       tables = fTables
       dirtyTables = snapDirtyTables ++ fDirty
 
-    override def retainSecond_(gRes: TrySturdy[A]): Unit =
+    override def retainSecond(gRes: TrySturdy[A]): Unit =
       dirtyTables ++= snapDirtyTables
 
-    override def retainBoth_(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
+    override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       for (fkey <- fDirty) fTables(fkey) match
         case Right(fEntry) => tables.get(fkey) match
           case None => tables += fkey -> Right(fEntry)
@@ -99,7 +99,7 @@ trait ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolT
     // - all tables in c are present in the abstract
     // - all abstract tables with at least one 'must' entry have a concrete counterpart
     // - for each key in c, tabs(key) is sound
-    val cTables = c.getTables
+    val cTables = c.getState
     tables.filterNot { (key,_) => cTables.isDefinedAt(key) }.foreachEntry { (k, aTab) => aTab match
       case Left(tab) =>
         if (!tab.isAllMay)

@@ -38,6 +38,6 @@
 //  @Benchmark
 //  def runBinarytrees(analysis: ConstantAnalysisState, binarytrees: Binarytrees) =
 //    val funcName = "_start"
-//    analysis.interp.effects.fallible(
+//    analysis.interp.failure.fallible(
 //      analysis.interp.invokeExported(binarytrees.modInst, funcName, List.empty)
 //    )

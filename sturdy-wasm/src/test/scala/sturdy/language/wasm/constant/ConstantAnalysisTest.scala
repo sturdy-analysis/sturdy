@@ -144,12 +144,12 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
   val module = wasm.parse(path)
 
-  val interp = ConstantAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = CallSites(3)))
+  val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(ctx = CallSites(3)))
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)
   val constants = ConstantAnalysis.constantInstructions(interp)
 
   val modInst = interp.initializeModule(module)
-  val result = interp.effects.fallible(
+  val result = interp.failure.fallible(
     interp.invokeExported(modInst, funName, args)
   )
 //  println(cfg.toGraphViz)

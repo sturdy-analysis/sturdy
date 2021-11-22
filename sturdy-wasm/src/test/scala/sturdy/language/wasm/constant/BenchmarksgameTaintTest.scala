@@ -4,7 +4,7 @@ import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.CFallible
+import sturdy.effect.failure.AFallible
 import sturdy.fix.Fixpoint
 import sturdy.language.wasm
 import sturdy.language.wasm.ConcreteInterpreter
@@ -47,13 +47,13 @@ class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:
     val name = p.getFileName
     val module = if (binary) readBinaryModule(p) else wasm.parse(p)
 
-    val interp = ConstantTaintAnalysis(FrameData.empty, Iterable.empty)(WasmConfig(ctx = CallSites(3)))
+    val interp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(ctx = CallSites(3)))
     val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantTaintAnalysis.constantInstructions(interp)
     val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
 
     val modInst = interp.initializeModule(module)
-    interp.effects.fallible(
+    interp.failure.fallible(
       interp.invokeExported(modInst, funcName, List.empty)
     )
 

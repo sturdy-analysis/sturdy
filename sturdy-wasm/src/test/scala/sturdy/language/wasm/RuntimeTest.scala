@@ -2,7 +2,7 @@ package sturdy.language.wasm
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.{AFallible, CFallible}
+import sturdy.effect.failure.AFallible
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.generic.ProcExit
 import sturdy.values.Topped
@@ -33,7 +33,8 @@ class RuntimeTest extends AnyFlatSpec, Matchers:
       val res = runWasmFunction(path, funcName, args)
       //println(res)
       assert(res.isFailing)
-      assertResult(ProcExit(ConcreteInterpreter.Value.Int32(exitCode)))(res.asInstanceOf[CFallible.Failing[_]].kind)
+      val msgs = res.asInstanceOf[AFallible.Failing[_]].msgs
+      assert(msgs.set.exists(_._1 == ProcExit(ConcreteInterpreter.Value.Int32(exitCode))))
     }
 
   def testExitCodeConstant(path: Path, funcName: String, args: List[ConstantAnalysis.Value], exitCode: Topped[Int]) =
