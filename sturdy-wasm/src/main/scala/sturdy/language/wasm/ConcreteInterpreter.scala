@@ -6,6 +6,7 @@ import sturdy.effect.bytememory.ConcreteMemory
 import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.except.ConcreteExcept
 import sturdy.effect.failure.Failure
+import sturdy.effect.failure.CFailure
 import sturdy.effect.operandstack.ConcreteOperandStack
 import sturdy.effect.symboltable.ConcreteSymbolTable
 import sturdy.fix
@@ -89,6 +90,8 @@ object ConcreteInterpreter extends Interpreter:
     val funTable: ConcreteSymbolTable[TableAddr, FuncIx, FunV] = new ConcreteSymbolTable[TableAddr, FuncIx, FunV]
     val callFrame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
+    val failure: CFailure = new CFailure
+    private given Failure = failure
     
     val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, NoJoin] = implicitly
 

@@ -9,7 +9,7 @@ import sturdy.effect.failure.FailureKind
 import sturdy.language.wasm.generic.FrameData
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.ConcreteInterpreter.Value
-import sturdy.effect.failure.AFallible
+import sturdy.effect.failure.CFallible
 import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.generic.UnreachableInstruction
 
@@ -73,19 +73,19 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   def testFunction(path: Path, funcName: String, args: List[Value], expectedResult: List[Value]) =
     it must s"execute $funcName withs args $args with result $expectedResult" in {
       val res = runWasmFunction(path, funcName, args)
-      assertResult(AFallible.Unfailing(expectedResult))(res)
+      assertResult(CFallible.Unfailing(expectedResult))(res)
     }
 
   def testFailingFunction(path: Path, funcName: String, args: List[Value], failureKind: FailureKind) =
     it must s"execute $funcName with args $args throwing exception $failureKind" in {
       val res = runWasmFunction(path, funcName, args)
       assert(res.isFailing)
-      val msgs = res.asInstanceOf[AFallible.Failing[_]].msgs
-      assert(msgs.set.exists(_._1 == failureKind))
+      val kind = res.asInstanceOf[CFallible.Failing[_]].kind
+      assert(kind == failureKind)
     }
 
 
-def runWasmFunction(path: Path, funName: String, args: List[Value]): AFallible[Iterable[Value]] =
+def runWasmFunction(path: Path, funName: String, args: List[Value]): CFallible[Iterable[Value]] =
   val module = Parsing.fromText(path)
   val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   val modInst = interp.initializeModule(module)

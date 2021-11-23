@@ -12,9 +12,6 @@ trait Effectful extends ObservableJoin:
   def getState: State
   def setState(s: State): Unit
   
-  private var _fRes: TrySturdy[_] = _
-  protected def fRes: TrySturdy[_] = _fRes
-
   def getComputationJoiner[A]: Option[ComputationJoiner[A]] = None
 
 trait Stateless extends Effectful:

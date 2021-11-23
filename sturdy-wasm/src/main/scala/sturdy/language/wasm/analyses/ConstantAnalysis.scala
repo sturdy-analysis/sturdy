@@ -92,13 +92,16 @@ object ConstantAnalysis extends Interpreter, ConstantValues, ControlFlow:
     override def jvFunV: WithJoin[FunV] = implicitly
 //    override def widenState: Widen[State] = implicitly
 
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
-
+    
     val stack: JoinedDecidableOperandStack[Value] = new JoinedDecidableOperandStack
     val memory: ConstantAddressMemory[MemoryAddr, Topped[Byte]] = new ConstantAddressMemory(Topped.Actual(0))
     val globals: JoinedSymbolTable[Unit, GlobalAddr, Value] = new JoinedSymbolTable
     val funTable: ConstantSymbolTable[TableAddr, Int, Powerset[FunctionInstance]] = new ConstantSymbolTable
     val callFrame: JoinedDecidableCallFrame[FrameData, Int, Value] = new JoinedDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]] = new JoinedExcept
-    
+    val failure: AFailureCollect = new AFailureCollect
+    private given Failure = failure
+
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
+
     override def toString: String = s"constant $config"

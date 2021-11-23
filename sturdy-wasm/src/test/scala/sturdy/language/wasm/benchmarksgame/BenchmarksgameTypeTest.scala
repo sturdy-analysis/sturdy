@@ -49,7 +49,7 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
 
 
   def run(p: Path, binary: Boolean = false) =
-    Fixpoint.DEBUG = false
+//    Fixpoint.DEBUG = false
     
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
@@ -58,11 +58,11 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
     val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
 
     val modInst = interp.initializeModule(module)
-    assert(
-      interp.failure.fallible(
-        interp.invokeExported(modInst, funcName, List.empty)
-      ).isSucceeding
+    val res = interp.failure.fallible(
+      interp.invokeExported(modInst, funcName, List.empty)
     )
+    println(res)
+    assert(res.isSucceeding)
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
     val allInstructions = allNodes.filter(_.isInstruction)

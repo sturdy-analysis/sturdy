@@ -20,6 +20,7 @@ import swam.syntax.Module
 import swam.text.*
 import org.scalatest.Assertions.*
 import org.scalatest.compatible
+import sturdy.effect.failure.CFallible
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.ConcreteInterpreter.Value
 import sturdy.language.wasm.Parsing
@@ -63,7 +64,7 @@ class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
     imports += "spectest" -> modInst
   }
 
-  type Result = AFallible[List[Value]]
+  type Result = CFallible[List[Value]]
 
   def eqVals(vs1: List[Value], vs2: List[Value]): Boolean =
     vs1.size == vs2.size && vs1.zip(vs2).forall {
@@ -127,7 +128,7 @@ class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
       case Some(name) => modules += name -> modInst
     current = modInst
 
-  def instantiate(t: TestModule): AFallible[ModuleInstance] =
+  def instantiate(t: TestModule): CFallible[ModuleInstance] =
     t match
       case ValidModule(m) =>
         val mod = Parsing.fromUnresolved(m)
@@ -156,7 +157,7 @@ class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
       case Global(addr) =>
         val globalIdx = modInst.globalAddrs.lift(addr).getOrElse(throw new Error(s"Unbound global $addr"))
         val value = interp.getGlobalValue(globalIdx)
-        AFallible.Unfailing(List(value))
+        CFallible.Unfailing(List(value))
       case ext =>
         throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")
 
