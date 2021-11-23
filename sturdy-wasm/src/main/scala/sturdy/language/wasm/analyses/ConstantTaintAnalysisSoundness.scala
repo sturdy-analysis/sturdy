@@ -33,6 +33,6 @@ object ConstantTaintAnalysisSoundness {
       a.stack.operandStackIsSound(c.stack) &&
         a.memory.memoryIsSound(c.memory) &&
         a.globals.tableIsSound(c.globals) &&
-        a.funTables.tableIsSound(c.funTables) &&
+        a.funTable.tableIsSound(c.funTable) &&
         a.callFrame.joinedDecidableCallFrameIsSound(c.callFrame)
 }

@@ -86,7 +86,7 @@ object ConcreteInterpreter extends Interpreter:
     val stack: ConcreteOperandStack[Value] = new ConcreteOperandStack[Value]
     val memory: ConcreteMemory[MemoryAddr] = new ConcreteMemory[MemoryAddr]
     val globals: ConcreteSymbolTable[Unit, GlobalAddr, Value] = new ConcreteSymbolTable[Unit, GlobalAddr, Value]
-    val funTables: ConcreteSymbolTable[TableAddr, FuncIx, FunV] = new ConcreteSymbolTable[TableAddr, FuncIx, FunV]
+    val funTable: ConcreteSymbolTable[TableAddr, FuncIx, FunV] = new ConcreteSymbolTable[TableAddr, FuncIx, FunV]
     val callFrame: ConcreteCallFrame[FrameData, Int, Value] = new ConcreteCallFrame[FrameData, Int, Value](rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: ConcreteExcept[WasmException[Value]] = new ConcreteExcept[WasmException[Value]]
     

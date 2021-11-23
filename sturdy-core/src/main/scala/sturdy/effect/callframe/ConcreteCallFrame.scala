@@ -6,7 +6,7 @@ import scala.reflect.ClassTag
 
 class ConcreteCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V)])(using ClassTag[V]) extends DecidableMutableCallFrame[Data, Var, V]:
 
-  protected var data: Data = initData
+  protected var _data: Data = initData
   protected var vars: Array[V] = _
   protected var names: Map[Var, Int] = _
 
@@ -23,7 +23,7 @@ class ConcreteCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V
   }
   setVars(initVars)
 
-  def getFrameData: Data = data
+  def data: Data = _data
   def getFrameNames: Map[Var, Int] = names
 
   def getLocal(ix: Int): JOptionC[V] =
@@ -48,23 +48,23 @@ class ConcreteCallFrame[Data, Var, V](initData: Data, initVars: Iterable[(Var, V
     case Some(ix) => setLocal(ix, v)
     case None => JOptionC.none
 
-  def inNewFrame[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A = {
-    val snapData = this.data
+  def withNew[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A = {
+    val snapData = this._data
     val snapNames = this.names
     val snapVars = this.vars
-    this.data = d
+    this._data = d
     setVars(vars)
     try f finally {
-      this.data = snapData
+      this._data = snapData
       this.names = snapNames
       this.vars = snapVars
     }
   }
 
   override type State = (Data, List[V])
-  override def getState: (Data, List[V]) = (data, vars.toList)
+  override def getState: (Data, List[V]) = (_data, vars.toList)
   override def setState(s: (Data, List[V])): Unit =
-    data = s._1
+    _data = s._1
     setLocals(s._2)
 
   override type Locals = List[V]

@@ -79,7 +79,7 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
     val stack: JoinedDecidableOperandStack[Value] = new JoinedDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinedSymbolTable[Unit, GlobalAddr, Value] = new JoinedSymbolTable
-    val funTables: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
+    val funTable: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
     val callFrame: JoinedDecidableCallFrame[FrameData, Int, Value] = new JoinedDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]] = new JoinedExcept
 

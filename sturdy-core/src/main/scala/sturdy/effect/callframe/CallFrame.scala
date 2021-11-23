@@ -5,12 +5,10 @@ import sturdy.data.{NoJoin, JOption}
 import sturdy.effect.Effectful
 
 trait CallFrame[Data, Var, V, J[_] <: MayJoin[_]] extends CallFrame.Effectful:
-  def getFrameData: Data
-
+  def data: Data
   def getLocal(x: Int): JOption[J, V]
   def getLocalByName(x: Var): JOption[J, V]
-  
-  def inNewFrame[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A
+  def withNew[A](d: Data, vars: Iterable[(Var, V)])(f: => A): A
 
 trait MutableCallFrame[Data, Var, V, J[_] <: MayJoin[_]] extends CallFrame[Data, Var, V, J]:
   def setLocal(x: Int, v: V): JOption[J, Unit]

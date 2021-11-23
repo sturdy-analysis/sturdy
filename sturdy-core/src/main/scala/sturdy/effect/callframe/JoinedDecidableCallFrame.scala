@@ -34,7 +34,7 @@ class JoinedDecidableCallFrame[Data, Var, V](initData: Data, initVars: Iterable[
     vars.zip(other).map(Join[V](_,_).get)
 
   def joinedDecidableCallFrameIsSound[cData, cV](c: ConcreteCallFrame[cData, Var, cV])(using vSoundness: Soundness[cV,V], dSoundness: Soundness[cData,Data]): IsSound =
-    val dataIsSound = dSoundness.isSound(c.getFrameData, getFrameData)
+    val dataIsSound = dSoundness.isSound(c.data, data)
     if (dataIsSound.isNotSound)
       return dataIsSound
     if (getFrameNames != c.getFrameNames)

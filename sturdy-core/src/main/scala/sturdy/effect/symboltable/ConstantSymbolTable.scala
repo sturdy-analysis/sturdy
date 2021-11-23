@@ -17,7 +17,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolT
   protected var tables: Map[Key, Eith[Table[Symbol, Entry], Entry]] = Map()
   private var dirtyTables = Set[Key]()
 
-  override def tableGet(key: Key, symbol: Topped[Symbol]): JOptionA[Entry] =
+  override def get(key: Key, symbol: Topped[Symbol]): JOptionA[Entry] =
     tables(key) match
       case Right(entry) => JOptionA.NoneSome(entry)
       case Left(tab) => symbol match
@@ -31,7 +31,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolT
           case Some(MayMust.Must(entry)) => JOptionA.some(entry)
           case Some(MayMust.May(entry)) => JOptionA.noneSome(entry)
 
-  override def tableSet(key: Key, symbol: Topped[Symbol], newEntry: Entry): Unit =
+  override def set(key: Key, symbol: Topped[Symbol], newEntry: Entry): Unit =
     dirtyTables += key
     tables(key) match
       case Right(entry) =>
@@ -42,7 +42,7 @@ class ConstantSymbolTable[Key, Symbol, Entry](using Join[Entry]) extends SymbolT
         case Topped.Actual(sym) =>
           tables += key -> Left(tab.updated(sym, newEntry))
 
-  override def addEmptyTable(key: Key): Unit =
+  override def putNew(key: Key): Unit =
     tables += key -> Left(Table(Map(), Set()))
     dirtyTables += key
 
