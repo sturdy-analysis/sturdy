@@ -33,7 +33,7 @@ class ConcreteOperandStack[V] extends DecidableOperandStack[V]:
 
   override def size: Int = stack.size
   
-  def withFreshOperandStack[A](f: => A): A =
+  def withNewStack[A](f: => A): A =
     val snapshot = stack
     val snapshotFramePointer = framePointer
     stack = Nil
@@ -43,7 +43,7 @@ class ConcreteOperandStack[V] extends DecidableOperandStack[V]:
       framePointer = snapshotFramePointer
     }
 
-  override def withFreshOperandFrame[A](f: => A): A =
+  override def withNewFrame[A](f: => A): A =
     val snapshotframePointer = framePointer
     framePointer = stack.size
     try f finally

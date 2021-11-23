@@ -22,26 +22,26 @@ class ConstantAddressMemory[Key, B: ClassTag](emptyB: B)(using tb: Top[B], jb: J
 
   protected var memories: Map[Key, Mem[B]] = Map()
 
-  override def memRead(key: Key, addr: Topped[Int], length: Int): JOptionA[Seq[B]] = addr match
+  override def read(key: Key, addr: Topped[Int], length: Int): JOptionA[Seq[B]] = addr match
     case Topped.Top => JOptionA.noneSome(Seq.fill[B](length)(memories(key).upperBound))
     case Topped.Actual(a) => memories(key).read(a, length)
 
-  override def memWrite(key: Key, addr: Topped[Int], bytes: Seq[B]): JOptionA[Unit] =
+  override def write(key: Key, addr: Topped[Int], bytes: Seq[B]): JOptionA[Unit] =
     val (newMem, res) = memories(key).store(addr, bytes)
     newMem.foreach(memories += key -> _)
     res
 
-  override def memSize(key: Key): Topped[Int] = memories(key) match
+  override def size(key: Key): Topped[Int] = memories(key) match
     case _: TopMem[_] => Topped.Top
     case mem: SizeMem[_] => Topped.Actual(mem.pageNum)
     case mem: ImmutableByteMem[_] => Topped.Actual(mem.pageNum)
 
-  override def memGrow(key: Key, delta: Topped[Int]): JOptionA[Topped[Int]] =
+  override def grow(key: Key, delta: Topped[Int]): JOptionA[Topped[Int]] =
     val (newMem, res) = memories(key).grow(delta, emptyB)
     newMem.foreach(memories += key -> _)
     res
 
-  override def addEmptyMemory(key: Key, initSize: Topped[Int], sizeLimit: Option[Topped[Int]]): Unit =
+  override def putNew(key: Key, initSize: Topped[Int], sizeLimit: Option[Topped[Int]]): Unit =
     initSize match
       case Topped.Top => // unknown size
         memories += key ->  TopMem(isDefinite = true, emptyB)

@@ -203,7 +203,7 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
       locals += name -> addr
       addr
     }
-    callFrame.inNewFrame((), locals) {
+    callFrame.withNew((), locals) {
       paramAddrs.zip(args).map(store.write)
       try enterFunction(fun)
       finally {

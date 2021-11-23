@@ -12,13 +12,13 @@ class UpperBoundSymbolTable[Key, Symbol, Entry](emptyEntry: Entry)(using Join[En
 
   protected var tables: Map[Key, Entry] = Map()
 
-  override def tableGet(key: Key, symbol: Symbol): JOptionA[Entry] =
+  override def get(key: Key, symbol: Symbol): JOptionA[Entry] =
     JOptionA.noneSome(tables(key))
 
-  override def tableSet(key: Key, symbol: Symbol, newEntry: Entry): Unit =
+  override def set(key: Key, symbol: Symbol, newEntry: Entry): Unit =
     Join(tables(key), newEntry).ifChanged(tables += key -> _)
 
-  override def addEmptyTable(key: Key): Unit =
+  override def putNew(key: Key): Unit =
     tables += key -> emptyEntry
 
   override def getComputationJoiner[A]: Option[ComputationJoiner[A]] = Some(new UpperBoundSymbolTableJoiner[A])

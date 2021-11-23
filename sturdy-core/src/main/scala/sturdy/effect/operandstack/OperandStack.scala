@@ -16,10 +16,10 @@ trait OperandStack[V, J[_] <: MayJoin[_]] extends OperandStack.Effectful:
   def peekN(n: Int): JOption[J, List[V]]
 
   /** Computes `f` in a new operand frame, discarding all remaining operands. */
-  def withFreshOperandStack[A](f: => A): A
+  def withNewStack[A](f: => A): A
 
   /** Computes `f` in a new operand frame, but all remaining operands are moved to the surrounding frame upon exit of `f`. */
-  def withFreshOperandFrame[A](f: => A): A
+  def withNewFrame[A](f: => A): A
 
   def clearCurrentOperandFrame(): Unit
   
