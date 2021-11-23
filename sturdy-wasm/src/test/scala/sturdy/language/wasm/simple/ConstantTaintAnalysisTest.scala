@@ -1,4 +1,4 @@
-package sturdy.language.wasm.constant
+package sturdy.language.wasm.simple
 
 import cats.effect.{IO, Blocker}
 import org.scalatest.flatspec.AnyFlatSpec
@@ -30,9 +30,9 @@ import scala.reflect.{TypeTest, ClassTag}
 class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm constant taint analysis"
 
-  val uriSimple = classOf[ConstantTaintAnalysisTest].getResource("/sturdy/language/wasm/simple.wast").toURI();
-  val uriFact = classOf[ConstantTaintAnalysisTest].getResource("/sturdy/language/wasm/fact.wast").toURI();
-  val uriTaintTest = classOf[ConstantTaintAnalysisTest].getResource("/sturdy/language/wasm/taint_test.wast").toURI();
+  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI();
+  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI();
+  val uriTaintTest = this.getClass.getResource("/sturdy/language/wasm/taint_test.wast").toURI();
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
   val taintTest = Paths.get(uriTaintTest)
@@ -86,7 +86,7 @@ class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
 
 
 def runConstantTaintAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
-  val module = wasm.parse(path)
+  val module = wasm.Parsing.fromText(path)
 
   val interp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(ctx = CallSites(3)))
 //  val cfg = ConstantTaintAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)

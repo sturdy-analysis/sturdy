@@ -1,28 +1,36 @@
-package sturdy.language.wasm.constant
+package sturdy.language.wasm.testscript
 
-import cats.effect.{IO, Blocker}
+import cats.effect.Blocker
+import cats.effect.IO
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
-import sturdy.language.wasm.analyses.TypeAnalysis
-import sturdy.language.wasm.analyses.TypeAnalysisSoundness.given
+import sturdy.language.wasm.Parsing
+import sturdy.language.wasm.abstractions.CfgConfig
+import sturdy.language.wasm.analyses.{ConstantTaintAnalysis, ConstantAnalysis, ConstantTaintAnalysisSoundness}
+import sturdy.language.wasm.analyses.ConstantTaintAnalysisSoundness.given
+import sturdy.language.wasm.analyses.ConstantAnalysisSoundness.given
 import sturdy.language.wasm.generic.ExternalValue.Global
-import sturdy.language.wasm.generic.{UnboundGlobal, ExternalValue, ModuleInstance, FrameData}
-import sturdy.values.Topped
-import sturdy.values.relational.EqOps
+import sturdy.language.wasm.generic.ExternalValue
+import sturdy.language.wasm.generic.FrameData
+import sturdy.language.wasm.generic.ModuleInstance
+import sturdy.language.wasm.generic.UnboundGlobal
 import sturdy.values.Abstractly
 import sturdy.values.PartialOrder
-import sturdy.{IsSound, Soundness}
-import sturdy.{*,given}
-import sturdy.language.wasm.abstractions.CfgConfig
+import sturdy.values.Topped
+import sturdy.values.relational.EqOps
+import sturdy.values.taint.Taint.{Untainted, Tainted, TopTaint}
+import sturdy.{*, given}
 import sturdy.language.wasm.analyses.WasmConfig
 import swam.ModuleLoader
 import swam.binary.ModuleParser
 import swam.syntax.Module
 import swam.text.*
-import swam.text.unresolved.{FreshId, NoId, SomeId}
+import swam.text.unresolved.FreshId
+import swam.text.unresolved.NoId
+import swam.text.unresolved.SomeId
 import swam.validation.Validator
 
 import java.nio.file.Files
@@ -32,20 +40,38 @@ import scala.collection.mutable
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 
+class ConstantTaintAnalysisTestScript extends AnyFlatSpec, Matchers:
+  behavior of "TestScript constant taint analysis"
 
-class TestScriptTypeAnalysisInterpreter(spectest: Option[Module] = None, useTop: Boolean = false):
+  val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI())
+  val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI();
+
+  val spectest = Parsing.fromText(pathSpectest)
+
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+    it must s"execute ${p.getFileName}" in {
+      println(s"Executing TestScript constant taint analysis on ${p.getFileName}")
+      val script = Parsing.testscript(p)
+      val interp = ConstantTaintAnalysisTestScriptInterpreter(Some(spectest))
+      interp.run(script)
+      val interpTop = ConstantTaintAnalysisTestScriptInterpreter(Some(spectest), true)
+      interpTop.run(script)
+    }
+  }
+
+class ConstantTaintAnalysisTestScriptInterpreter(spectest: Option[Module] = None, useTop: Boolean = false):
   type CValue = ConcreteInterpreter.Value
-  type AValue = TypeAnalysis.Value
+  type AValue = ConstantTaintAnalysis.Value
 
   val cInterp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
-  val aInterp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
+  val aInterp = new ConstantTaintAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
   val cModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aModules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var cCurrent: ModuleInstance = null
   var aCurrent: ModuleInstance = null
   val cImports: mutable.Map[String, ModuleInstance] = mutable.Map()
   val aImports: mutable.Map[String, ModuleInstance] = mutable.Map()
-  val convertVals: unresolved.Expr => List[TypeAnalysis.Value] =
+  val convertVals: unresolved.Expr => List[ConstantTaintAnalysis.Value] =
     if (useTop)
       constExprToTops
     else 
@@ -75,6 +101,8 @@ class TestScriptTypeAnalysisInterpreter(spectest: Option[Module] = None, useTop:
 
   def run(commands: Seq[Command]): Unit =
     commands.map(eval)
+    //println(aInterp.taintedMemoryAccesses.taintedMemoryAccesses)
+    //println(aInterp.taintedMemoryAccesses.taintedMemoryAddresses)
 
   def getCModule(module: Option[String]): ModuleInstance = module match
     case None => cCurrent
@@ -87,7 +115,7 @@ class TestScriptTypeAnalysisInterpreter(spectest: Option[Module] = None, useTop:
   def eval(c: Command): Unit = c match
       case ValidModule(m) =>
         // validate and compile module
-        val mod = readModule(m)
+        val mod = Parsing.fromUnresolved(m)
         val id = m.id match
           case SomeId(name) => Some(name)
           case _ => None
@@ -96,7 +124,7 @@ class TestScriptTypeAnalysisInterpreter(spectest: Option[Module] = None, useTop:
         cImports += s -> getCModule(id)
         aImports += s -> getAModule(id)
       case BinaryModule(id, bytes) =>
-        val mod = readBinaryModule(bytes)
+        val mod = Parsing.fromBytes(bytes)
         loadModule(id, mod)
       case QuotedModule(id, text) =>
         ???
@@ -106,25 +134,25 @@ class TestScriptTypeAnalysisInterpreter(spectest: Option[Module] = None, useTop:
         assert(!res.isFailing)
         val expected = constExprToVals(expectedRes)
         assert(eqVals(expected, res.get), c.toString + s" but $expected != ${res.get}")
-        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, untaintAFallible(aRes)))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertReturnCanonicalNaN(action) =>
         val aRes = runAAction(action, convertVals)
         val res = runCAction(action)
         checkNaN(res, c.toString)
-        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, untaintAFallible(aRes)))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertReturnArithmeticNaN(action) =>
         val aRes = runAAction(action, convertVals)
         val res = runCAction(action)
         checkNaN(res, c.toString)
-        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, untaintAFallible(aRes)))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertTrap(action: Action, message: String) =>
         val aRes = runAAction(action, convertVals)
         val res = runCAction(action)
         assert(res.isFailing, c.toString)
-        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, aRes))
+        assertResult(IsSound.Sound, s"result after running action $action")(Soundness.isSound(res, untaintAFallible(aRes)))
         assertResult(IsSound.Sound, s"interpreter states after running action $action")(Soundness.isSound(cInterp, aInterp))
       case AssertModuleTrap(mod,_) =>
         val aRes = aInstantiate(mod)
@@ -158,7 +186,7 @@ class TestScriptTypeAnalysisInterpreter(spectest: Option[Module] = None, useTop:
   def instantiate(t: TestModule): AFallible[ModuleInstance] =
     t match
       case ValidModule(m) =>
-        val mod = readModule(m)
+        val mod = Parsing.fromUnresolved(m)
         cInterp.failure.fallible {
           cInterp.initializeModule(mod, cImports)
         }
@@ -168,7 +196,7 @@ class TestScriptTypeAnalysisInterpreter(spectest: Option[Module] = None, useTop:
   def aInstantiate(t: TestModule): AFallible[ModuleInstance] =
     t match
       case ValidModule(m) =>
-        val mod = readModule(m)
+        val mod = Parsing.fromUnresolved(m)
         aInterp.failure.fallible {
           aInterp.initializeModule(mod, aImports)
         }
@@ -180,7 +208,7 @@ class TestScriptTypeAnalysisInterpreter(spectest: Option[Module] = None, useTop:
     case Get(modName, name) => evalCGet(modName, name)
   }
 
-  def runAAction(a: Action, convertVals: unresolved.Expr => List[TypeAnalysis.Value]): AResult = a match {
+  def runAAction(a: Action, convertVals: unresolved.Expr => List[ConstantTaintAnalysis.Value]): AResult = a match {
     case Invoke(modName, fun, expr) => evalAInvoke(modName, fun, convertVals(expr))
     case Get(modName, name) => evalAGet(modName, name)
   }
@@ -240,50 +268,35 @@ class TestScriptTypeAnalysisInterpreter(spectest: Option[Module] = None, useTop:
       case unresolved.f64.Const(d) => ConcreteInterpreter.Value.Float64(d)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
-  def constExprToAVals(e: unresolved.Expr): List[TypeAnalysis.Value] =
+  def constExprToAVals(e: unresolved.Expr): List[ConstantTaintAnalysis.Value] =
     e.map(constExprToAVal).toList
 
-  def constExprToAVal(inst: unresolved.Inst): TypeAnalysis.Value =
+  def constExprToAVal(inst: unresolved.Inst): ConstantTaintAnalysis.Value =
     inst match
-      case unresolved.i32.Const(i) => TypeAnalysis.Value.Int32(TypeAnalysis.topI32)
-      case unresolved.i64.Const(l) => TypeAnalysis.Value.Int64(TypeAnalysis.topI64)
-      case unresolved.f32.Const(f) => TypeAnalysis.Value.Float32(TypeAnalysis.topF32)
-      case unresolved.f64.Const(d) => TypeAnalysis.Value.Float64(TypeAnalysis.topF64)
+      case unresolved.i32.Const(i) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Int32(i), Tainted)
+      case unresolved.i64.Const(l) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Int64(l), Tainted)
+      case unresolved.f32.Const(f) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Float32(f), Tainted)
+      case unresolved.f64.Const(d) => ConstantTaintAnalysis.liftConcreteValue(ConcreteInterpreter.Value.Float64(d), Tainted)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
 
-  def constExprToTops(e: unresolved.Expr): List[TypeAnalysis.Value] =
+  def constExprToTops(e: unresolved.Expr): List[ConstantTaintAnalysis.Value] =
     e.map(constExprToTop).toList
 
-  def constExprToTop(inst: unresolved.Inst): TypeAnalysis.Value =
+  def constExprToTop(inst: unresolved.Inst): ConstantTaintAnalysis.Value =
     inst match
-      case unresolved.i32.Const(_) => TypeAnalysis.Value.Int32(TypeAnalysis.topI32)
-      case unresolved.i64.Const(_) => TypeAnalysis.Value.Int64(TypeAnalysis.topI64)
-      case unresolved.f32.Const(_) => TypeAnalysis.Value.Float32(TypeAnalysis.topF32)
-      case unresolved.f64.Const(_) => TypeAnalysis.Value.Float64(TypeAnalysis.topF64)
+      case unresolved.i32.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Int32(Topped.Top), Tainted)
+      case unresolved.i64.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Int64(Topped.Top), Tainted)
+      case unresolved.f32.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Float32(Topped.Top), Tainted)
+      case unresolved.f64.Const(_) => ConstantTaintAnalysis.liftConstantValue(ConstantAnalysis.Value.Float64(Topped.Top), Tainted)
       case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
-
-  def readModule(mod: unresolved.Module): Module =
-    implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
-    Blocker[IO].use { blocker =>
-      for {
-        compiler <- Compiler[IO](blocker)
-        mod <- compiler.compile(mod)
-      } yield mod
-    }.unsafeRunSync()
-
-  def readBinaryModule(bytes: Array[Byte]): Module =
-    implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
-    Blocker[IO].use { blocker =>
-      for {
-        validator <- Validator[IO](blocker)
-        loader = new ModuleLoader[IO]()
-        binaryParser = new ModuleParser[IO](validator)
-        mod <- binaryParser.parse(loader.sections(bytes))
-      } yield mod
-    }.unsafeRunSync()
 
   def isNaN(value: ConcreteInterpreter.Value): Boolean =
     value match
       case ConcreteInterpreter.Value.Float32(f) => f.isNaN
       case ConcreteInterpreter.Value.Float64(d) => d.isNaN
       case _ => false
+
+  def untaintAFallible(res: AResult): AFallible[List[ConstantAnalysis.Value]] = res match
+    case AFallible.Unfailing(t) => AFallible.Unfailing(t.map(ConstantTaintAnalysis.untaint(_)))
+    case AFallible.Failing(msgs) => AFallible.Failing(msgs)
+    case AFallible.MaybeFailing(t, msgs) => AFallible.MaybeFailing(t.map(ConstantTaintAnalysis.untaint(_)), msgs)

@@ -1,13 +1,16 @@
-package sturdy.language.wasm
+package sturdy.language.wasm.simple
 
 import cats.effect.Blocker
 import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
-import sturdy.effect.failure.{AFallible, FailureKind}
-import sturdy.language.wasm.generic.FrameData
-import ConcreteInterpreter.Value
 import sturdy.effect.failure.AFallible
+import sturdy.effect.failure.FailureKind
+import sturdy.language.wasm.generic.FrameData
+import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.ConcreteInterpreter.Value
+import sturdy.effect.failure.AFallible
+import sturdy.language.wasm.Parsing
 import sturdy.language.wasm.generic.UnreachableInstruction
 
 import java.nio.file.Files
@@ -22,8 +25,8 @@ import swam.text.*
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm concrete interpreter"
 
-  val uriSimple = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/wasm/simple.wast").toURI();
-  val uriFact = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/wasm/fact.wast").toURI();
+  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI();
+  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI();
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
@@ -83,7 +86,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 
 
 def runWasmFunction(path: Path, funName: String, args: List[Value]): AFallible[Iterable[Value]] =
-  val module = parse(path)
+  val module = Parsing.fromText(path)
   val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   val modInst = interp.initializeModule(module)
   interp.failure.fallible(

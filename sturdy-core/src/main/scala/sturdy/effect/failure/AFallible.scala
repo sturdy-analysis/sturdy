@@ -13,6 +13,10 @@ enum AFallible[T]:
     case Failing(_) => true
     case _ => false
 
+  def isSucceeding: Boolean = this match
+    case Failing(_) => false
+    case _ => true
+  
   def get: T = this match
     case Unfailing(t) => t
     case MaybeFailing(t, _) => t

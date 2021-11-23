@@ -1,4 +1,4 @@
-package sturdy.language.wasm.constant
+package sturdy.language.wasm.simple
 
 import cats.effect.Blocker
 import cats.effect.IO
@@ -34,8 +34,8 @@ import scala.reflect.TypeTest
 class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm constant analysis"
 
-  val uriSimple = classOf[ConstantAnalysisTest].getResource("/sturdy/language/wasm/simple.wast").toURI();
-  val uriFact = classOf[ConstantAnalysisTest].getResource("/sturdy/language/wasm/fact.wast").toURI();
+  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI();
+  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI();
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
@@ -142,7 +142,7 @@ class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
 
 
 def runConstantAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
-  val module = wasm.parse(path)
+  val module = wasm.Parsing.fromText(path)
 
   val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(ctx = CallSites(3)))
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)

@@ -1,19 +1,28 @@
-package sturdy.language.wasm
+package sturdy.language.wasm.testscript
 
-import cats.effect.{Blocker, IO}
+import cats.effect.Blocker
+import cats.effect.IO
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.AFallible
-import sturdy.language.wasm.generic.{ExternalValue, FrameData, ModuleInstance, UnboundGlobal}
+import sturdy.language.wasm.generic.ExternalValue
+import sturdy.language.wasm.generic.FrameData
+import sturdy.language.wasm.generic.ModuleInstance
+import sturdy.language.wasm.generic.UnboundGlobal
 import sturdy.language.wasm.generic.ExternalValue.Global
-import ConcreteInterpreter.Value
 
-import java.nio.file.{Files, Path, Paths}
+import java.nio.file.Files
+import java.nio.file.Path
+import java.nio.file.Paths
 import scala.io.Source
 import scala.jdk.StreamConverters.*
 import swam.syntax.Module
 import swam.text.*
 import org.scalatest.Assertions.*
+import org.scalatest.compatible
+import sturdy.language.wasm.ConcreteInterpreter
+import sturdy.language.wasm.ConcreteInterpreter.Value
+import sturdy.language.wasm.Parsing
 import sturdy.values.relational.EqOps
 import swam.ModuleLoader
 import swam.binary.ModuleParser
@@ -25,7 +34,24 @@ import swam.validation.Validator
 import scala.collection.mutable
 
 
-class TestScriptInterpreter(spectest: Option[Module] = None):
+class ConcreteTestScript extends AnyFlatSpec, Matchers:
+  behavior of "TestScript interpreter"
+
+  val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI())
+  val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI();
+
+  val spectest = Parsing.fromText(pathSpectest)
+
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wast")).sorted.foreach { p =>
+    it must s"execute ${p.getFileName}" in {
+      println(s"Executing TestScript interpreter on ${p.getFileName}")
+      val script = Parsing.testscript(p)
+      val interp = ConcreteTestScriptInterpreter(Some(spectest))
+      interp.run(script)
+    }
+  }
+
+class ConcreteTestScriptInterpreter(spectest: Option[Module] = None):
   val interp = new ConcreteInterpreter.Instance(FrameData.empty, Iterable.empty)
   val modules: mutable.Map[String, ModuleInstance] = mutable.Map()
   var current: ModuleInstance = null
@@ -58,7 +84,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
   def eval(c: Command): Unit = c match
       case ValidModule(m) =>
         // validate and compile module
-        val mod = readModule(m)
+        val mod = Parsing.fromUnresolved(m)
         val id = m.id match
           case SomeId(name) => Some(name)
           case _ => None
@@ -66,7 +92,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
       case Register(s, id) =>
         imports += s -> getModule(id)
       case BinaryModule(id, bytes) =>
-        val mod = readBinaryModule(bytes)
+        val mod = Parsing.fromBytes(bytes)
         loadModule(id, mod)
       case QuotedModule(id, text) =>
         ???
@@ -104,7 +130,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
   def instantiate(t: TestModule): AFallible[ModuleInstance] =
     t match
       case ValidModule(m) =>
-        val mod = readModule(m)
+        val mod = Parsing.fromUnresolved(m)
         interp.failure.fallible {
           interp.initializeModule(mod, imports)
         }
@@ -134,7 +160,7 @@ class TestScriptInterpreter(spectest: Option[Module] = None):
       case ext =>
         throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")
 
-  def checkNaN(res: Result, clue: String) =
+  def checkNaN(res: Result, clue: String): compatible.Assertion =
     assert(!res.isFailing)
     val resClean: List[Value] = res.get
     assert(resClean.size == 1, clue)
@@ -152,27 +178,6 @@ def constExprToVal(inst: unresolved.Inst): Value =
     case unresolved.f32.Const(f) => Value.Float32(f)
     case unresolved.f64.Const(d) => Value.Float64(d)
     case _ => throw IllegalArgumentException(s"Expected constant instruction but got $inst")
-
-
-def readModule(mod: unresolved.Module): Module =
-  implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
-  Blocker[IO].use { blocker =>
-    for {
-      compiler <- Compiler[IO](blocker)
-      mod <- compiler.compile(mod)
-    } yield mod
-  }.unsafeRunSync()
-
-def readBinaryModule(bytes: Array[Byte]): Module =
-  implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
-  Blocker[IO].use { blocker =>
-    for {
-      validator <- Validator[IO](blocker)
-      loader = new ModuleLoader[IO]()
-      binaryParser = new ModuleParser[IO](validator)
-      mod <- binaryParser.parse(loader.sections(bytes))
-    } yield mod
-  }.unsafeRunSync()
 
 def isNaN(value: Value): Boolean =
   value match
