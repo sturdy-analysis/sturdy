@@ -10,7 +10,7 @@ import java.io.InputStream
 import java.nio.file.Path
 
 
-def readBinaryModule(stream: InputStream): Module =
+def Parsing.fromBinary(stream: InputStream): Module =
   implicit val cs = IO.contextShift(scala.concurrent.ExecutionContext.global)
   Blocker[IO].use { blocker =>
     for {

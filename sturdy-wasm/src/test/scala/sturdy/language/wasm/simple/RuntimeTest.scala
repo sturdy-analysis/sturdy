@@ -1,18 +1,20 @@
-package sturdy.language.wasm
+package sturdy.language.wasm.simple
 
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
 import sturdy.effect.failure.AFallible
+import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.generic.ProcExit
 import sturdy.values.Topped
 
-import java.nio.file.{Path, Paths}
+import java.nio.file.Path
+import java.nio.file.Paths
 
 class RuntimeTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm runtime"
 
-  val uri = classOf[RuntimeTest].getResource("/sturdy/language/wasm/runtime.wast").toURI();
+  val uri = this.getClass.getResource("/sturdy/language/wasm/runtime.wast").toURI();
   val path = Paths.get(uri)
 
   testExitCodeConcrete(path, "_start_orig", List.empty, 42)
@@ -39,7 +41,7 @@ class RuntimeTest extends AnyFlatSpec, Matchers:
 
   def testExitCodeConstant(path: Path, funcName: String, args: List[ConstantAnalysis.Value], exitCode: Topped[Int]) =
     it must s"execute $funcName with constant analysis returning exit code $exitCode" in {
-      val res = constant.runConstantAnalysis(path, funcName, args)
+      val res = runConstantAnalysis(path, funcName, args)
       //println(res)
       res match
         case AFallible.Unfailing(vals) => assert(false, s"Expected $ProcExit but execution succeeded: $vals")

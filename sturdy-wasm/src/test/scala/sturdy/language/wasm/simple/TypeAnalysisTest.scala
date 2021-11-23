@@ -1,4 +1,4 @@
-package sturdy.language.wasm.constant
+package sturdy.language.wasm.simple
 
 import cats.effect.Blocker
 import cats.effect.IO
@@ -35,8 +35,8 @@ import scala.reflect.TypeTest
 class TypeAnalysisTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm type analysis"
 
-  val uriSimple = classOf[TypeAnalysisTest].getResource("/sturdy/language/wasm/simple.wast").toURI();
-  val uriFact = classOf[TypeAnalysisTest].getResource("/sturdy/language/wasm/fact.wast").toURI();
+  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI();
+  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI();
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
@@ -85,7 +85,7 @@ class TypeAnalysisTest extends AnyFlatSpec, Matchers:
 
 
 def runTypeAnalysis(path: Path, funName: String, args: List[Value]): AFallible[List[Value]] =
-  val module = wasm.parse(path)
+  val module = wasm.Parsing.fromText(path)
 
   val interp = new TypeAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig())
   val cfg = TypeAnalysis.controlFlow(CfgConfig.AllNodes(true), interp)

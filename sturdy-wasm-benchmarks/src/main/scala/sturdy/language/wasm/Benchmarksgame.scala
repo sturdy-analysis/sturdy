@@ -23,7 +23,7 @@
 //  def setup(analysis: ConstantAnalysisState): Unit =
 //    val base = "/sturdy/language/wasm/benchmarksgame/src"
 //    val resource = classOf[Benchmarksgame].getResourceAsStream(base ++ "/binarytrees.wasm")
-//    val module = readBinaryModule(resource)
+//    val module = Parsing.fromBinary(resource)
 //    modInst = analysis.interp.initializeModule(module)
 //
 //

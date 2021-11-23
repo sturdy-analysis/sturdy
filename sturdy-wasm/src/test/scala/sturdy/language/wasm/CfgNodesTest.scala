@@ -14,14 +14,14 @@ import java.nio.file.{Path, Paths}
 class CfgNodesTest extends AnyFlatSpec, Matchers:
   behavior of "cfg nodes generation"
 
-  val uri = classOf[CfgNodesTest].getResource("/sturdy/language/wasm/cfg_test.wast").toURI();
+  val uri = this.getClass.getResource("/sturdy/language/wasm/cfg_test.wast").toURI();
   val path = Paths.get(uri)
 
   testCfgNodes(path, "fac-rec", List(ConstantAnalysis.Value.Int64(Topped.Actual(3))))
 
 
 def testCfgNodes(path: Path, funName: String, args: List[ConstantAnalysis.Value]) =
-  val module = parse(path)
+  val module = Parsing.fromText(path)
   val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig.default)
   val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(sensitive = false), interp)
   val modInst = interp.initializeModule(module)

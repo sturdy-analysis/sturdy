@@ -412,10 +412,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
           callFrame.withNew(FrameData(0, modInst), Iterable.empty) {
             eval(Call(funcIx), InstLoc.InvokeExported(modInst, funcName))
           }
-          val res = stack.popNOrFail(rtLength)
-          if (stack.size != 0)
-            throw new IllegalStateException()
-          res
+          stack.popNOrFail(rtLength)
         case _ => throw new Error(s"Function with name $funcName was not found in module's exports.")
     }
   }
