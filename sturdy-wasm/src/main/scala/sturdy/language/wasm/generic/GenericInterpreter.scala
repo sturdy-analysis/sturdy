@@ -123,15 +123,13 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   val funTable: SymbolTable[TableAddr, FuncIx, FunV, J]
   val callFrame: DecidableMutableCallFrame[FrameData, Int, V]
   val except: Except[WasmException[V], ExcV, J]
+  val failure: Failure
 
   import except.*
 
   // effect stack
-  val effectStack: EffectStack = new EffectStack(List(stack, memory, globals, funTable, callFrame, except))
+  val effectStack: EffectStack = new EffectStack(List(stack, memory, globals, funTable, callFrame, except, failure))
   given EffectStack = effectStack
-
-  final val failure: AFailureCollect = new AFailureCollect
-  given Failure = failure
 
   // analysis state
   type State = (stack.OperandFrame, memory.State, globals.State, callFrame.Locals)
@@ -149,6 +147,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     override def setAllState(in: State): Unit = setInState(in)
   }
 
+  private given Failure = failure
   lazy val num = new GenericInterpreterNumerics[V, J](stack, wasmOps)
 
   private val labelStack = new LabelStack

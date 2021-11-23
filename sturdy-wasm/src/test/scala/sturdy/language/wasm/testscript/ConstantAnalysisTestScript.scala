@@ -4,6 +4,7 @@ import cats.effect.{IO, Blocker}
 import org.scalatest.Assertions.*
 import org.scalatest.flatspec.AnyFlatSpec
 import org.scalatest.matchers.should.Matchers
+import sturdy.effect.failure.CFallible
 import sturdy.effect.failure.{AFallible, given}
 import sturdy.language.wasm.ConcreteInterpreter
 import sturdy.language.wasm.Parsing
@@ -83,7 +84,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, use
     aImports += "spectest" -> amodInst
   }
 
-  type CResult = AFallible[List[CValue]]
+  type CResult = CFallible[List[CValue]]
   type AResult = AFallible[List[AValue]]
 
   def eqVals(vs1: List[CValue], vs2: List[CValue]): Boolean =
@@ -177,7 +178,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, use
     // check for soundness of the interpreter states after initialization
     assertResult(IsSound.Sound, s"after initializing module $mod")(Soundness.isSound(cInterp, aInterp))
 
-  def instantiate(t: TestModule): AFallible[ModuleInstance] =
+  def instantiate(t: TestModule): CFallible[ModuleInstance] =
     t match
       case ValidModule(m) =>
         val mod = Parsing.fromUnresolved(m)
@@ -227,7 +228,7 @@ class ConstantAnalysisTestScriptInterpreter(spectest: Option[Module] = None, use
       case Global(addr) =>
         val globalIdx = modInst.globalAddrs.lift(addr).getOrElse(throw new Error(s"Unbound global $addr"))
         val value = cInterp.getGlobalValue(globalIdx)
-        AFallible.Unfailing(List(value))
+        CFallible.Unfailing(List(value))
       case ext =>
         throw new IllegalArgumentException(s"Can only get globals, but $name was $ext")
 

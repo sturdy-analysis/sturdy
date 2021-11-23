@@ -74,13 +74,15 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
     override def jvFunV: WithJoin[FunV] = implicitly
     override def widenState: Widen[State] = implicitly
 
-    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
-
     val stack: JoinedDecidableOperandStack[Value] = new JoinedDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory
     val globals: JoinedSymbolTable[Unit, GlobalAddr, Value] = new JoinedSymbolTable
     val funTable: UpperBoundSymbolTable[TableAddr, FuncIx, FunV] = new UpperBoundSymbolTable(Powerset())
     val callFrame: JoinedDecidableCallFrame[FrameData, Int, Value] = new JoinedDecidableCallFrame(rootFrameData, rootFrameValues.view.zipWithIndex.map(_.swap))
     val except: JoinedExcept[WasmException[Value], Powerset[WasmException[Value]]] = new JoinedExcept
+    val failure: AFailureCollect = new AFailureCollect
+    given Failure = failure
+
+    override val wasmOps: WasmOps[Value, Addr, Bytes, Size, ExcV, FuncIx, FunV, WithJoin] = implicitly
 
     override def toString: String = s"type $conf"
