@@ -43,7 +43,6 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
     it must s"execute constant analysis on benchmark ${p.getFileName}" in {
       run(p, binary = true)
     }
-
   }
 
   def run(p: Path, binary: Boolean = false) =
@@ -57,10 +56,8 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
     val constants = ConstantAnalysis.constantInstructions(interp)
 
     val modInst = interp.initializeModule(module)
-    assert(
-      interp.failure.fallible(
-        interp.invokeExported(modInst, funcName, List.empty)
-      ).isSucceeding
+    val res = interp.failure.fallible(
+      interp.invokeExported(modInst, funcName, List.empty)
     )
 
     val allNodes = ControlFlow.allCfgNodes(List(modInst))

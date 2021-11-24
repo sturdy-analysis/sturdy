@@ -58,12 +58,10 @@ class BenchmarksgameTaintTest extends AnyFlatSpec, Matchers:
     val memory = ConstantTaintAnalysis.taintedMemoryAccessLogger(interp)
 
     val modInst = interp.initializeModule(module)
-    assert(
-      interp.failure.fallible(
-        interp.invokeExported(modInst, funcName, List.empty)
-      ).isSucceeding
+    interp.failure.fallible(
+      interp.invokeExported(modInst, funcName, List.empty)
     )
-
+    
     val allNodes = ControlFlow.allCfgNodes(List(modInst))
     val allInstructions = allNodes.filter(_.isInstruction)
     val deadInstructions = ControlFlow.deadInstruction(cfg, List(modInst))

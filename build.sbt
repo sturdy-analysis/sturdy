@@ -53,18 +53,6 @@ lazy val sturdy_scheme = (project in file("sturdy-scheme"))
     )
   )
 
-
-lazy val sturdy_minijava = (project in file("sturdy-minijava"))
-  .dependsOn(sturdy_core % "compile->compile;test->test")
-  .settings(
-    name := "sturdy-minijava",
-    libraryDependencies ++= Seq(
-      "org.typelevel" %% "cats-parse" % "0.3.4",
-      // test
-      "org.scalatest" %% "scalatest" % "3.2.9" % "test"
-    )
-  )
-
 val swamCommit = "39999a1751076c6dbfe2a92c874f17683730d14e"
 val swam = uri(s"https://gitlab.rlp.net/plmz/external/swam.git#$swamCommit")
 
