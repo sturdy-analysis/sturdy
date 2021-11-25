@@ -4,7 +4,7 @@
 
 Sturdy is a modular static analysis platform based on big-step abstract interpretation, implemented in Scala. While a concrete interpreter runs a program to produce its result, an abstract interpreter "simulates" the execution of the program to produce _all possible results_. Such abstract interpreters can be used to find bugs, validate security and other properties, or to enable compiler optimizations. In Sturdy, we use big-step abstract interpretation, which means interpreters are standard recursive functions. Sturdy is agnostic to the analyzed language, currently we provide analyses for the following languages:
 
-- [WebAssembly](webassembly.github.io/), a binary instruction format for a stack-based virtual machine.
+- [WebAssembly](https://webassembly.org/), a binary instruction format for a stack-based virtual machine.
 - [Tip](https://cs.au.dk/~amoeller/spa/), a tiny imperative language used to explain static analyses.
 - The previous [Haskell implementation of Sturdy](https://gitlab.rlp.net/plmz/sturdy) also supported Scheme, Stratego, and LambdaJS.
 
@@ -27,7 +27,7 @@ A static analysis is sound if it predicts all possible results of a program. Onl
 
 - **Concrete interpreter**: The soundness of an analysis is relative to the actual program behavior. Analysis developers can obtain a concrete interpreter for the analyzed language with little effort by instantiating the generic interpreter with value and effect components that implement the canonical concrete semantics. The concrete interpreter can also be tested against a reference semantics of the analyzed language to ensure the generic interpreter is correct (as we have done for WebAssembly).
 - **Modular soundness propositions**: We must define what it means for an analysis to be sound. In Sturdy, these soundness propositions are defined separately for each value and effect component. Value components implement an abstraction function that lifts the canonical concrete value representation into the abstract domain. Effect components implement a soundness proposition that relates the internal state of the canonical effect implementation to their own internal state. An analysis then simply composes the soundness propositions of its components.
-- **Soundness testing**: With these ingredients we can test the soundness of analyses against the concrete interpreter. Specifically, for each test program, we run the analysis and the concrete and compare them using the composed soundness proposition of the analysis. Importantly, this not only validates that the program's resulting value (e.g., the result of the `main` function) is soundly approximated, but also validates that the program's effects (e.g., values stored in the heap) are soundly approximated.
+- **Soundness testing**: With these ingredients we can test the soundness of analyses against the concrete interpreter. Specifically, for each test program, we run the analysis and the concrete interpreter and compare them using the composed soundness proposition of the analysis. Importantly, this not only validates that the program's resulting value (e.g., the result of the `main` function) is soundly approximated, but also validates that the program's effects (e.g., values stored in the heap) are soundly approximated.
 
 
 
