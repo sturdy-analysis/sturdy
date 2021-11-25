@@ -27,7 +27,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip interval analysis"
 
-  val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip").toURI();
+  val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".tip")).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName}" in {
@@ -64,7 +64,7 @@ class IntervalAnalysisTest extends AnyFlatSpec, Matchers:
     }
 
 object RunIntervalAnalysis extends App {
-  val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip/cfgloop.tip").toURI();
+  val uri = classOf[IntervalAnalysisTest].getResource("/sturdy/language/tip/cfgloop.tip").toURI;
   val (res, analysis, cfg) = new IntervalAnalysisTest().runIntervalAnalysis(Paths.get(uri), 10)
   println(res)
   println(analysis.callFrame.getState)

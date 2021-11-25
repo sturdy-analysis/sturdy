@@ -16,7 +16,7 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip concrete interpreter"
 
-  val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tip").toURI();
+  val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".tip")).sorted.foreach { p =>
     it must s"execute ${p.getFileName}" in {
@@ -49,7 +49,7 @@ object RunConcreteInterpreter extends App:
     val interp = ConcreteInterpreter(Map(), Map(), () => ConcreteInterpreter.Value.IntValue(0))
     (interp.failure.fallible(interp.execute(program)), interp)
 
-  val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tip/interpreter_test.tip").toURI();
+  val uri = classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tip/interpreter_test.tip").toURI;
   val (res, interp) = runFile(Paths.get(uri))
   println(res)
   println(interp.callFrame.getState)

@@ -14,7 +14,7 @@ import java.nio.file.{Path, Paths}
 class CfgNodesTest extends AnyFlatSpec, Matchers:
   behavior of "cfg nodes generation"
 
-  val uri = this.getClass.getResource("/sturdy/language/wasm/cfg_test.wast").toURI();
+  val uri = this.getClass.getResource("/sturdy/language/wasm/cfg_test.wast").toURI;
   val path = Paths.get(uri)
 
   testCfgNodes(path, "fac-rec", List(ConstantAnalysis.Value.Int64(Topped.Actual(3))))

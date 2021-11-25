@@ -30,9 +30,9 @@ import scala.reflect.{TypeTest, ClassTag}
 class ConstantTaintAnalysisTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm constant taint analysis"
 
-  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI();
-  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI();
-  val uriTaintTest = this.getClass.getResource("/sturdy/language/wasm/taint_test.wast").toURI();
+  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
+  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
+  val uriTaintTest = this.getClass.getResource("/sturdy/language/wasm/taint_test.wast").toURI;
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
   val taintTest = Paths.get(uriTaintTest)

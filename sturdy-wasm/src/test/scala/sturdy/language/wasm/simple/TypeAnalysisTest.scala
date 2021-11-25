@@ -35,8 +35,8 @@ import scala.reflect.TypeTest
 class TypeAnalysisTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm type analysis"
 
-  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI();
-  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI();
+  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
+  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 

@@ -13,20 +13,26 @@ import scala.util.Failure
 import scala.util.Success
 import scala.util.Try
 
-case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
-class FrameEntry[In](var inState: In, val correcurrentFrame: Int, var count: Int)
-
-/** This class implements the central data structure for computing fixpoints.
+/** This class implements the central Stack data structure for computing fixpoints in Sturdy.
+ *  The function to be fixed has purified type `f: (Dom, In) => (Codom, Out)`.
+ *  The stack is intended to be used by iteration strategies, which push and pop calls to the stack and
+ *  invoke `repeatUntilStable` to compute fixpoints.
  *
  *  Terminology:
- *   - Call: a (recursive) call of the abstract interpreter identified by the input value and state `(Dom, In)`.
- *   - Context: an abstraction of calls that ensures the stack has finite height at all times.
- *   - Recurrent and co-recurrent calls: When a call (identified by its context) is pushed while it is already on
- *       the stack, the newly pushed call is recurrent while the previously pushed call is co-recurrent.
+ *   - Call: a call of function `f(dom,in)` identified by its input value `Dom` and input state `In`. Type `Dom` must be finite.
+ *   - Context: a finite abstraction of input states, denoted `Ctx`.
+ *   - Frame: a Call whose input state is abstracted to a context yielding `(Dom,Ctx)`, which is finite.
+ *   - FrameInfo: information associated with a frame, including its input state
  *
- *  Contexts must be assigned to calls in a way that the stack is guaranteed to be finite.
- *  This can be achieved by making sure that each call chain repeats a previous context after
- *  finitely many calls. This property holds in particular if the set of contexts is finite.
+ *   Big-step fixpoint algorithms must identify and prevent recurrent calls to interrupt unbounded recursion.
+ *   Recurrent calls occur when pushing to the stack:
+ *   - Recurrent calls: A call `f(dom,in)` is recurrent if `fr = Frame(dom,context(in))` already exists on the stack and
+ *     `fr.in >= in`, that is, we have seen a call with the same `dom`, same context, and a larger `fr.in` before.
+ *   - Co-recurrent calls: When `f(dom,in)` is a recurrent call due to frame `fr = Frame(dom,context(in))` on the stack,
+ *     then `f(dom,fr.in)` is the co-recurrent call belonging to `f(from,in)`.
+ *   - Semi-recurrent calls: A call `f(dom,in)` is semi-recurrent if `fr = Frame(dom,context(in))` is on the stack but
+ *     `fr.in < in`, that is, the current input `in` is larger than the previous `fr.in`.
+ *
  */
 final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, All], contextual: Contextual[Ctx, Dom, Codom])
   (using widenCodom: Widen[Codom], widenIn: Widen[In], widenOut: Widen[Out], effectStack: EffectStack)
@@ -35,7 +41,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
   /** Set of active calls identified by their context and their stack position.
    * Each call can only be active once since a second invocation triggers a recurrent call.
    */
-  private var stack: Map[Frame[Dom, Ctx], FrameEntry[In]] = Map()
+  private var stack: Map[Frame[Dom, Ctx], FrameInfo[In]] = Map()
   private var stackHeight = 0
 
   /** Cache of the inputs of previously executed stack frames.
@@ -108,14 +114,14 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
     throw new IllegalStateException()
   }
 
-  inline private def dropFrame(frame: Frame[Dom, Ctx]): Map[Frame[Dom, Ctx], FrameEntry[In]] =
+  inline private def dropFrame(frame: Frame[Dom, Ctx]): Map[Frame[Dom, Ctx], FrameInfo[In]] =
     stack.get(frame) match
       case None => throw new MatchError(stack)
-      case Some(entry) =>
-        if (entry.count <= 0)
+      case Some(info) =>
+        if (info.count <= 0)
           stack - frame
         else
-          entry.count -= 1
+          info.count -= 1
           stack
 
   /** Pushes a frame on top of the stack and detects if the frame is recurrent.
@@ -129,7 +135,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
     stack.get(frame) match
       case None => // call is not recurrent
         // push call to stack
-        stack += frame -> new FrameEntry(in, stackHeight, 0)
+        stack += frame -> new FrameInfo(in, stackHeight, 0)
         stackHeight += 1
         if (corecurrentCalls.contains(frame)) {
           // load input state based on previous calls with the same context
@@ -138,13 +144,13 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
         if (Fixpoint.DEBUG)
           println(s"${stackHeightIndent}PUSH $frame")
         None
-      case Some(entry) =>
-        val widenedIn = widenIn(entry.inState, in)
+      case Some(info) =>
+        val widenedIn = widenIn(info.inState, in)
         widenedIn match {
           case MaybeChanged.Changed(newIn) =>
             // call is semi-recurrent: the frame occurs on the stack but with a different state
-            entry.inState = newIn
-            entry.count += 1
+            info.inState = newIn
+            info.count += 1
             stackHeight += 1
             state.setInState(newIn)
             if (Fixpoint.DEBUG)
@@ -152,9 +158,10 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
             None
           case MaybeChanged.Unchanged(_) =>
             // call is recurrent
-            recurrentCalls += entry.correcurrentFrame
+            recurrentCalls += info.correcurrentFrame
             // store the input state so the co-recurrent call considers it
-            storeRecurrentInput(frame, entry.inState)
+            val oldIn = inCache(frame)
+            storeRecurrentInput(frame, info.inState)
             // load any previous output or throw RecurrentCall exception
             Some(loadRecurrentOutput(frame))
       }
@@ -166,7 +173,6 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
   def pop(dom: Dom, in: In, result: TrySturdy[Codom]): (TrySturdy[Codom], Boolean) =
     val ctx = contextual.getCurrentContext
     val frame = Frame(dom, ctx)
-    val entry = stack(frame)
     val newStackHeight = stackHeight - 1
     val updatedResult = if (recurrentCalls.remove(newStackHeight)) {
       corecurrentCalls += frame
@@ -245,3 +251,7 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
       if (Fixpoint.DEBUG)
         println(s"${stackHeightIndent}POP  $frame <- $newResult")
       newResult.get
+
+case class Frame[Dom, Ctx](dom: Dom, ctx: Ctx)
+class FrameInfo[In](var inState: In, val correcurrentFrame: Int, var count: Int)
+
