@@ -27,7 +27,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
 
   behavior of "Tip sign analysis"
 
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI();
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".tip")).sorted.foreach { p =>
     it must s"soundly analyze ${p.getFileName}" in {
@@ -64,7 +64,7 @@ class SignAnalysisTest extends AnyFlatSpec, Matchers:
     }
 
 object RunSignAnalysis extends App {
-  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/record3.tip").toURI();
+  val uri = classOf[SignAnalysisTest].getResource("/sturdy/language/tip/record3.tip").toURI;
   val (res, analysis, cfg) = new SignAnalysisTest().runSignAnalysis(Paths.get(uri), 10)
   println(res)
   println(analysis.callFrame.getState)

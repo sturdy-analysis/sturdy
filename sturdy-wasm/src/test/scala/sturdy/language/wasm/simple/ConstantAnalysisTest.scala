@@ -34,8 +34,8 @@ import scala.reflect.TypeTest
 class ConstantAnalysisTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm constant analysis"
 
-  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI();
-  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI();
+  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
+  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 

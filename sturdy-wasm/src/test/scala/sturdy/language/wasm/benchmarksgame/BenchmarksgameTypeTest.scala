@@ -32,7 +32,7 @@ class BenchmarksgameTypeTest extends AnyFlatSpec, Matchers:
   behavior of "Benchmarksgame (recompiled) type analysis"
 
   val funcName = "_start"
-  val uri = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI();
+  val uri = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.headOption.foreach { p =>
     it must s"warm-up type analysis on benchmark ${p.getFileName}" in {
