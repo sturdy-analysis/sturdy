@@ -18,7 +18,7 @@ trait Stateless extends Effectful:
   type State = Unit
   def getState: State = {}
   def setState(s: State): Unit = {}
-  
+
 
 object Effectful:
   case class StarvedJoin(ex1: SturdyThrowable, ex2: SturdyThrowable) extends Exception(s"Starved Join with $ex1 and $ex2") with SturdyThrowable

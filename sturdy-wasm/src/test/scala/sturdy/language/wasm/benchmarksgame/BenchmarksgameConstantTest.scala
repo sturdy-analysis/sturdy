@@ -14,6 +14,7 @@ import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.language.wasm.analyses.ConstantAnalysis
 import sturdy.language.wasm.analyses.CallSites
+import sturdy.language.wasm.analyses.FixpointConfig
 import sturdy.language.wasm.analyses.WasmConfig
 import sturdy.language.wasm.generic.FrameData
 import sturdy.values.Topped
@@ -31,27 +32,27 @@ class BenchmarksgameConstantTest extends AnyFlatSpec, Matchers:
   behavior of "Benchmarksgame (recompiled) constant analysis"
 
   val funcName = "_start"
-  val uri = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI();
+  val uri = this.getClass.getResource("/sturdy/language/wasm/benchmarksgame/src").toURI;
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.headOption.foreach { p =>
+  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith("-norm.wasm")).sorted.headOption.foreach { p =>
     it must s"warm-up constant analysis on benchmark ${p.getFileName}" in {
       run(p, binary = true)
     }
   }
 
-  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
-    it must s"execute constant analysis on benchmark ${p.getFileName}" in {
-      run(p, binary = true)
-    }
-  }
+//  Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".wasm")).sorted.foreach { p =>
+//    it must s"execute constant analysis on benchmark ${p.getFileName}" in {
+//      run(p, binary = true)
+//    }
+//  }
 
   def run(p: Path, binary: Boolean = false) =
-    Fixpoint.DEBUG = false
+//    Fixpoint.DEBUG = false
     
     val name = p.getFileName
     val module = if (binary) Parsing.fromBinary(p) else wasm.Parsing.fromText(p)
 
-    val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(ctx = CallSites(3)))
+    val interp = new ConstantAnalysis.Instance(FrameData.empty, Iterable.empty, WasmConfig(fix = FixpointConfig(iter = sturdy.fix.iter.Config.Topmost)))
     val cfg = ConstantAnalysis.controlFlow(CfgConfig.AllNodes(false), interp)
     val constants = ConstantAnalysis.constantInstructions(interp)
 

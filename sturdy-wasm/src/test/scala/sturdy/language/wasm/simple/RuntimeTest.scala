@@ -15,7 +15,7 @@ import java.nio.file.Paths
 class RuntimeTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm runtime"
 
-  val uri = this.getClass.getResource("/sturdy/language/wasm/runtime.wast").toURI();
+  val uri = this.getClass.getResource("/sturdy/language/wasm/runtime.wast").toURI;
   val path = Paths.get(uri)
 
   testExitCodeConcrete(path, "_start_orig", List.empty, 42)

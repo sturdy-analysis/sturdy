@@ -38,8 +38,8 @@ import scala.collection.mutable
 class ConcreteTestScript extends AnyFlatSpec, Matchers:
   behavior of "TestScript interpreter"
 
-  val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI())
-  val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI();
+  val pathSpectest = Paths.get(this.getClass.getResource("/sturdy/language/wasm/spectest.wast").toURI)
+  val uri = this.getClass.getResource("/sturdy/language/wasm/scripts").toURI;
 
   val spectest = Parsing.fromText(pathSpectest)
 

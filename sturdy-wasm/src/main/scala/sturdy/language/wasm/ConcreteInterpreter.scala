@@ -71,7 +71,12 @@ object ConcreteInterpreter extends Interpreter:
       HostFunction.proc_exit -> { args =>
         val exitCode = args.head
         f.fail(ProcExit(exitCode), s"Exiting program with exit code $exitCode")
-      }
+      },
+      HostFunction.fd_close -> { args => f.fail(FileError, s"Mock implementation of fd_close") },
+      HostFunction.fd_read -> { args => f.fail(FileError, s"Mock implementation of fd_read") },
+      HostFunction.fd_seek -> { args => f.fail(FileError, s"Mock implementation of fd_seek") },
+      HostFunction.fd_write -> { args => f.fail(FileError, s"Mock implementation of fd_write") },
+      HostFunction.fd_fdstat_get -> { args => f.fail(FileError, s"Mock implementation of fd_fdstat_get") }
     )
 
     override def invokeHostFunction(hostFunc: HostFunction, args: List[Value]): List[Value] =

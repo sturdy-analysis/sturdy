@@ -25,8 +25,8 @@ import swam.text.*
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   behavior of "Wasm concrete interpreter"
 
-  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI();
-  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI();
+  val uriSimple = this.getClass.getResource("/sturdy/language/wasm/simple.wast").toURI;
+  val uriFact = this.getClass.getResource("/sturdy/language/wasm/fact.wast").toURI;
   val simple = Paths.get(uriSimple)
   val fact = Paths.get(uriFact)
 
