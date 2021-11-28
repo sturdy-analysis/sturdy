@@ -160,7 +160,6 @@ final class Stack[Dom, Codom, In, Out, All, Ctx](state: AnalysisState[In, Out, A
             // call is recurrent
             recurrentCalls += info.correcurrentFrame
             // store the input state so the co-recurrent call considers it
-            val oldIn = inCache(frame)
             storeRecurrentInput(frame, info.inState)
             // load any previous output or throw RecurrentCall exception
             Some(loadRecurrentOutput(frame))
