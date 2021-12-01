@@ -1,10 +1,9 @@
 package sturdy.language.tutorial
 
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure, TrySturdy}
-import sturdy.values.{Changed, Combine, Join, MayMust, MaybeChanged, Unchanged, Widening}
-import sturdy.data.{JOption, JOptionA, JOptionC, MakeJoined, WithJoin, joinComputations, MayJoin}
-import sturdy.effect.failure.FailureKind
-import sturdy.values.CombineMayMust
+import sturdy.values.{Changed, Combine, CombineMayMust, Join, MayMust, MaybeChanged, Powerset, Unchanged, Widening}
+import sturdy.data.{JOption, JOptionA, JOptionC, MakeJoined, MayJoin, WithJoin, joinComputations}
+import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.data.CombineUnit
 import sturdy.data.JOptionA
 
@@ -138,6 +137,18 @@ class AFailure extends Failure:
   override def fail(kind: FailureKind, msg: String): Nothing =
     failures += kind -> msg
     throw AFailureCollectException
+
+  def fallible[A](f: => A): AFallible[A] =
+    try {
+      val res = f
+      if (failures.isEmpty)
+        AFallible.Unfailing(res)
+      else
+        AFallible.MaybeFailing(res, Powerset(failures.toSet))
+    } catch {
+      case AFailureCollectException => AFallible.Failing(Powerset(failures.toSet))
+      case ex => throw ex
+    }
 
   override type State = List[(FailureKind,String)]
   override def getState: List[(FailureKind,String)] = failures.toList

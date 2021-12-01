@@ -8,9 +8,9 @@ import sturdy.data.CombineUnit
 import scala.collection.mutable.ListBuffer
 
 class SignInterpreter extends GenericInterpreterFirstShot[Sign, WithJoin]:
-  override val numericOps: NumericOps[Sign] = new SignNumericOps
-  override val branching: Branching[Sign, Unit] = new SignBranching[Unit]
-  override val store: Store[Sign, WithJoin] = new SignStore
-  override val failure: Failure = new AFailure
+  override val numericOps: SignNumericOps = new SignNumericOps
+  override val branching: SignBranching[Unit] = new SignBranching[Unit]
+  override val store: SignStore = new SignStore
+  override val failure: AFailure = new AFailure
 
   override val jv: WithJoin[Sign] = MayJoin.WithJoin(CombineSign[Widening.No], effectStack)

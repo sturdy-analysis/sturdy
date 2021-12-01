@@ -22,16 +22,17 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   testFile(fac, 5)
 
   def testFile(p: Path, arg: Int): Unit =
-    it must s"correctly execute ${p.getFileName} with argument $arg"
-    val file = Source.fromURI(p.toUri)
-    val sourceCode = file.getLines().mkString("\n")
-    file.close()
-    val program = Parser.parse(sourceCode)
-    val refInterp = new ReferenceInterpreter
-    val concInterp = new ConcreteInterpreter
-    val resRef = fallible(refInterp.runProg(arg, program))
-    val resConc = fallible(concInterp.runProg(arg, program))
-    assertResult(resRef)(resConc)
+    it must s"correctly execute ${p.getFileName} with argument $arg" in {
+      val file = Source.fromURI(p.toUri)
+      val sourceCode = file.getLines().mkString("\n")
+      file.close()
+      val program = Parser.parse(sourceCode)
+      val refInterp = new ReferenceInterpreter
+      val concInterp = new ConcreteInterpreter
+      val resRef = fallible(refInterp.runProg(arg, program))
+      val resConc = fallible(concInterp.runProg(arg, program))
+      assertResult(resRef)(resConc)
+    }
 
   def fallible[A](f: => A): CFallible[A] =
     try {
