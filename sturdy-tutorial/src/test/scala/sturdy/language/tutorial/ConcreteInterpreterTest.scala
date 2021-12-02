@@ -14,8 +14,8 @@ import scala.io.Source
 class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
   behavior of "Concrete while interpreter"
 
-  val add1 = Paths.get(classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tutorial/add1.while").toURI())
-  val fac = Paths.get(classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tutorial/fac.while").toURI())
+  val add1: Path = Paths.get(classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tutorial/add1.while").toURI)
+  val fac: Path = Paths.get(classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tutorial/fac.while").toURI)
 
   testFile(add1, 1)
   testFile(add1, 5)
