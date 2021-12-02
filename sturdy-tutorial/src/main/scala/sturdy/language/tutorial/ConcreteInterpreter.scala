@@ -16,9 +16,9 @@ import GenericInterpreter.*
  * be skipped when reusing existing components from the Sturdy library.
  */
 class ConcreteInterpreter extends GenericInterpreter[Int, NoJoin] with Concrete[FixIn, FixOut[Int]]:
-  override val numericOps: NumericOps[Int] = new CNumericOps()
-  override val branching: Branching[Int, Unit] = new CBranching[Unit]()
-  override val store: Store[Int, NoJoin] = new CStore()
-  override val failure: Failure = new CFailure()
+  override val numericOps: CNumericOps = new CNumericOps()
+  override val branching: CBranching[Unit] = new CBranching[Unit]()
+  override val store: CStore = new CStore()
+  override val failure: CFailure = new CFailure()
 
   override val jv: NoJoin[Int] = noJoin
