@@ -1,13 +1,15 @@
 package sturdy.language.tutorial
 
-import sturdy.values.{Changed, Combine, Join, MayMust, MaybeChanged, Unchanged, Widening, Finite}
+import sturdy.values.{Changed, Combine, Finite, Join, MayMust, MaybeChanged, Unchanged, Widening}
 import sturdy.data.{MayJoin, WithJoin}
 import sturdy.values.{CombineMayMust, finitely}
 import sturdy.data.{CombineUnit, finiteUnit}
 import sturdy.data.WidenFiniteKeyMap
-import sturdy.fix
+import sturdy.{IsSound, fix}
 import sturdy.fix.{Combinator, ContextInsensitive, Contextual}
 import sturdy.fix.context.{Sensitivity, none}
+import sturdy.Soundness
+
 import scala.collection.mutable.ListBuffer
 import GenericInterpreter.*
 
@@ -35,6 +37,10 @@ class SignInterpreter extends GenericInterpreter[Sign, WithJoin] with ContextIns
     case FixIn.Run(Stm.While(_,_)) => true
     case _ => false
 
-  // For simplicity we define Strings (used as keys into our store) as finite, because a program can only finitely
+  // For simplicity we define Strings (used as keys into our store) as finite, because a program can only have finitely
   // many different variables.
   given Finite[String] with {}
+
+// We define what is means for a sign interpreter to be sound with respect to a concrete interpreter
+given Soundness[ConcreteInterpreter, SignInterpreter] with
+  def isSound(c: ConcreteInterpreter, a: SignInterpreter): IsSound = a.store.storeIsSound(c.store)

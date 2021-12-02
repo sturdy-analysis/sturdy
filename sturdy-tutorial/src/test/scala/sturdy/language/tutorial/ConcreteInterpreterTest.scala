@@ -34,11 +34,11 @@ class ConcreteInterpreterTest extends AnyFlatSpec, Matchers:
       assertResult(resRef)(resConc)
     }
 
-  def fallible[A](f: => A): CFallible[A] =
-    try {
-      val res = f
-      CFallible.Unfailing(res)
-    } catch {
-      case CFailureException(kind, msg) => CFallible.Failing(kind, msg)
-      case ex => throw ex
-    }
+def fallible[A](f: => A): CFallible[A] =
+  try {
+    val res = f
+    CFallible.Unfailing(res)
+  } catch {
+    case CFailureException(kind, msg) => CFallible.Failing(kind, msg)
+    case ex => throw ex
+  }

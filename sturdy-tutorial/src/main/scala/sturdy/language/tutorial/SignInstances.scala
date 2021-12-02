@@ -1,7 +1,8 @@
 package sturdy.language.tutorial
 
+import sturdy.{AbstractlySound, IsSound, Soundness}
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure, TrySturdy}
-import sturdy.values.{Changed, Combine, CombineMayMust, Finite, Join, MayMust, MaybeChanged, Powerset, Unchanged, Widening}
+import sturdy.values.{Abstractly, Changed, Combine, CombineMayMust, Finite, Join, MayMust, MaybeChanged, PartialOrder, Powerset, Structural, Unchanged, Widening, given}
 import sturdy.data.{JOption, JOptionA, JOptionC, MakeJoined, MayJoin, WithJoin, joinComputations}
 import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.data.CombineUnit
@@ -20,6 +21,12 @@ enum Sign:
 import Sign.*
 
 given finiteSign: Finite[Sign] with {}
+given structuralSign: Structural[Sign] with {}
+given signPO: PartialOrder[Sign] with
+  override def lteq(x: Sign, y: Sign): Boolean = (x,y) match
+    case (_,Top) => true
+    case (x, y) if (x == y) => true
+    case _ => false
 
 /* Joining and widening on sign values */
 given CombineSign[W <: Widening]: Combine[Sign,W] with
@@ -28,6 +35,10 @@ given CombineSign[W <: Widening]: Combine[Sign,W] with
     else (v1,v2) match
       case (_,Top) => Unchanged(Top)
       case _ => Changed(Top)
+
+given valuesAbstractly: Abstractly[Int, Sign] with
+  override def abstractly(c: Int): Sign =
+    if (c < 0) then Neg else if (c == 0) then Zero else Pos
 
 /*
  * The numeric operations of the language on Sign values. Since divisions fail in case of a division by zero and we
@@ -135,7 +146,45 @@ class SignStore(using j: Join[MayMust[Sign]]) extends Store[Sign, WithJoin]:
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
       for ((name,v) <- fStore)
         weekUpdate(name,v)
+
   }
+
+  def storeIsSound(cs: CStore): IsSound =
+    val cMap = cs.getState
+    // all keys in concrete store must be present in abstract store
+    if (!cMap.keySet.subsetOf(store.keySet)) {
+      val missing = cMap.flatMap { (k,v) =>
+        if (store.contains(k))
+          None
+        else
+          Some(k)
+      }
+      IsSound.NotSound(s"${classOf[SignStore].getName}: Expected all concrete keys to be contained, but $missing are missing in $store.")
+    }
+    // all concrete entries must be approximated by the corresponding abstract entries
+    cMap.foreachEntry { (k,v) =>
+      val subSound = Soundness.isSound(v, store(k))
+      if (subSound.isNotSound)
+        return subSound
+    }
+    // all "must" entries in the abstract store must be present in the concrete store
+    val musts = store.filter {
+      case (_,Must(_)) => true
+      case _ => false
+    }
+    if (!musts.keySet.subsetOf(cMap.keySet)) {
+      val missing = musts.flatMap { (k,v) =>
+        if (cMap.contains(k))
+          None
+        else
+          Some(k)
+      }
+      IsSound.NotSound(s"${classOf[SignStore].getName}: Expected all must entries to be contained in concrete store, but $missing are missing.")
+    }
+    IsSound.Sound
+
+  given mustAbstractly[A,B](using a: Abstractly[A,B]): Abstractly[A, MayMust[B]] with
+    override def abstractly(c: A): MayMust[B] = Must(a.abstractly(c))
 
 /*
  * Abstract failures. We simply collect all possible failures in a list.
