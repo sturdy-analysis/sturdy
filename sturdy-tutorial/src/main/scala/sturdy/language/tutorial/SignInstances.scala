@@ -1,7 +1,7 @@
 package sturdy.language.tutorial
 
 import sturdy.effect.{ComputationJoiner, EffectStack, SturdyFailure, TrySturdy}
-import sturdy.values.{Changed, Combine, CombineMayMust, Join, MayMust, MaybeChanged, Powerset, Unchanged, Widening}
+import sturdy.values.{Changed, Combine, CombineMayMust, Finite, Join, MayMust, MaybeChanged, Powerset, Unchanged, Widening}
 import sturdy.data.{JOption, JOptionA, JOptionC, MakeJoined, MayJoin, WithJoin, joinComputations}
 import sturdy.effect.failure.{AFallible, FailureKind}
 import sturdy.data.CombineUnit
@@ -18,6 +18,8 @@ enum Sign:
   case Zero
   case Pos
 import Sign.*
+
+given finiteSign: Finite[Sign] with {}
 
 /* Joining and widening on sign values */
 given CombineSign[W <: Widening]: Combine[Sign,W] with
@@ -90,6 +92,10 @@ class SignBranching[R](using EffectStack, Join[R]) extends Branching[Sign, R]:
     else if (v == Pos || v == Neg) then thn
     else joinComputations(thn)(els)
 
+/*
+ * An abstract store storing sign values. We treat strings a finite here, because in our toy language they encode
+ * program variables, from which there may only be finitely many.
+ */
 class SignStore(using j: Join[MayMust[Sign]]) extends Store[Sign, WithJoin]:
   import MayMust.*
   protected var store: Map[String, MayMust[Sign]] = Map()
@@ -131,6 +137,9 @@ class SignStore(using j: Join[MayMust[Sign]]) extends Store[Sign, WithJoin]:
         weekUpdate(name,v)
   }
 
+/*
+ * Abstract failures. We simply collect all possible failures in a list.
+ */
 case object AFailureCollectException extends SturdyFailure
 class AFailure extends Failure:
   protected val failures: ListBuffer[(FailureKind,String)] = ListBuffer()

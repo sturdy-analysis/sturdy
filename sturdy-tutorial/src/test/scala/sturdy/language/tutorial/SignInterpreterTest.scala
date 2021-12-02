@@ -10,12 +10,12 @@ import sturdy.effect.failure.AFallible
 class SignInterpreterTest extends AnyFlatSpec, Matchers:
   behavior of "Sign Interpreter"
 
-  val add1 = Paths.get(classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tutorial/add1.while").toURI())
-  val fac = Paths.get(classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tutorial/fac.while").toURI())
+  val add1: Path = Paths.get(classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tutorial/add1.while").toURI)
+  val fac: Path = Paths.get(classOf[ConcreteInterpreterTest].getResource("/sturdy/language/tutorial/fac.while").toURI)
 
   testFile(add1, Sign.Zero, Sign.Pos)
   testFile(add1, Sign.Neg, Sign.Top)
-  //testFile(fac, Sign.Zero, Sign.Top) does not terminate without proper fixpoint algorithm
+  testFile(fac, Sign.Zero, Sign.Pos)
 
   def testFile(p: Path, arg: Sign, expected: Sign): Unit =
     it must s"execute ${p.getFileName} with argument $arg returning $expected" in {

@@ -6,16 +6,17 @@ import org.scalatest.matchers.should.Matchers
 import java.nio.file.{Files, Paths}
 import scala.io.Source
 import scala.jdk.StreamConverters.*
-
 import sturdy.language.tutorial.Stm.*
 import sturdy.language.tutorial.Exp.*
 import sturdy.language.tutorial.ReferenceInterpreter
 import sturdy.language.tutorial.Parser.parse
 
+import java.net.URI
+
 class ParserTest extends AnyFlatSpec, Matchers:
   behavior of "While parser"
 
-  val uri = classOf[ParserTest].getResource("/sturdy/language/tutorial").toURI()
+  val uri: URI = classOf[ParserTest].getResource("/sturdy/language/tutorial").toURI
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".while")).sorted.foreach { p =>
     it must s"parse ${p.getFileName}" in {
@@ -23,6 +24,5 @@ class ParserTest extends AnyFlatSpec, Matchers:
       val sourceCode = file.getLines().mkString("\n")
       file.close()
       val tree = parse(sourceCode)
-      //println(tree)
     }
   }

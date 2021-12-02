@@ -10,8 +10,8 @@ import sturdy.language.tutorial.Parser
 class ReferenceInterpreterTest extends AnyFlatSpec, Matchers:
   behavior of "While reference interpreter"
 
-  val add1 = Paths.get(classOf[ReferenceInterpreterTest].getResource("/sturdy/language/tutorial/add1.while").toURI())
-  val fac = Paths.get(classOf[ReferenceInterpreterTest].getResource("/sturdy/language/tutorial/fac.while").toURI())
+  val add1: Path = Paths.get(classOf[ReferenceInterpreterTest].getResource("/sturdy/language/tutorial/add1.while").toURI)
+  val fac: Path = Paths.get(classOf[ReferenceInterpreterTest].getResource("/sturdy/language/tutorial/fac.while").toURI)
 
   it must s"execute ${add1.getFileName}" in {
     assertResult(2)(runFile(add1,1))
