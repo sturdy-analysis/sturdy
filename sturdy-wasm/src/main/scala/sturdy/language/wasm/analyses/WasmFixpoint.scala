@@ -25,6 +25,8 @@ trait WasmFixpoint[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]
   override type Ctx = config.ctx.Ctx
 
   implicit def widenState: Widen[State]
+  implicit def widenInState: Widen[InState]
+  implicit def widenOutState: Widen[OutState]
 
   val (contextPreparation, sensitivity) = config.ctx.make[V]
   import config.ctx.finiteCtx
@@ -46,7 +48,7 @@ case class FixpointConfig(iter: fix.iter.Config = fix.iter.Config.Innermost, loo
       s"$iter-unwindLoop($loopUnwinding)"
 
   def get[V, In, Out, All, Ctx]
-    (using AnalysisState[In, Out, All], EffectStack)
+    (using AnalysisState[FixIn, In, Out, All], EffectStack)
     (using Widen[FixOut[V]], Widen[In], Widen[Out])
     (using Finite[Ctx])
     : Contextual[Ctx, FixIn, FixOut[V]] ?=> Combinator[FixIn, FixOut[V]] =

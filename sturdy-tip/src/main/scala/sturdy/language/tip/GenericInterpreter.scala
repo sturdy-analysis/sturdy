@@ -98,15 +98,15 @@ trait GenericInterpreter[V, Addr, J[_] <: MayJoin[_]]
   // analysis state
   type InState = store.State
   type OutState = (store.State, print.State)
-  implicit def analysisState: AnalysisState[InState, OutState, OutState] = new AnalysisState[InState, OutState, OutState] {
-    override def getInState: InState = store.getState
+  implicit def analysisState: AnalysisState[FixIn, InState, OutState, OutState] = new AnalysisState {
+    override def getInState(dom: FixIn): InState = store.getState
     override def setInState(in: InState): Unit = store.setState(in)
-    override def getOutState: OutState = (store.getState, print.getState)
+    override def getOutState(dom: FixIn): OutState = (store.getState, print.getState)
     override def setOutState(out: OutState): Unit =
       val (st, pr) = out
       store.setState(st)
       print.setState(pr)
-    override def getAllState: OutState = getOutState
+    override def getAllState: OutState = (store.getState, print.getState)
     override def setAllState(out: OutState): Unit = setOutState(out)
   }
 

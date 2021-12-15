@@ -20,7 +20,7 @@ enum Config:
     case Topmost => "topmost"
   
   def get[Dom, Codom, In, Out, All, Ctx]
-  (using state: AnalysisState[In, Out, All])
+  (using state: AnalysisState[Dom, In, Out, All])
   (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   : Contextual[Ctx, Dom, Codom] ?=> Combinator[Dom, Codom] = this match
