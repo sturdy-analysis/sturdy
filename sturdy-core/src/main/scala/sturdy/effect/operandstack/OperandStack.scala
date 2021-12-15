@@ -18,8 +18,8 @@ trait OperandStack[V, J[_] <: MayJoin[_]] extends OperandStack.Effectful:
   /** Computes `f` in a new operand frame, discarding all remaining operands. */
   def withNewStack[A](f: => A): A
 
-  /** Computes `f` in a new operand frame, but all remaining operands are moved to the surrounding frame upon exit of `f`. */
-  def withNewFrame[A](f: => A): A
+  /** Computes `f` in a new operand frame, but `movedOps` operands are moved to the new frame and all operands remaining after `f` are moved back to the surrounding frame. */
+  def withNewFrame[A](movedOps: Int)(f: => A): A
 
   def clearCurrentOperandFrame(): Unit
   
@@ -66,6 +66,7 @@ trait OperandStack[V, J[_] <: MayJoin[_]] extends OperandStack.Effectful:
 
 trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
   def size: Int
+  def frameSize: Int
   
   
 object OperandStack:

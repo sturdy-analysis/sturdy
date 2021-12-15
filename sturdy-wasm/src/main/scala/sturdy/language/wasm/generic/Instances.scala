@@ -1,6 +1,7 @@
 package sturdy.language.wasm.generic
 
 import scodec.bits.ByteVector
+import sturdy.language.wasm.abstractions.CfgNode
 import sturdy.language.wasm.abstractions.ControlFlow
 import sturdy.{Soundness, AbstractlySound, seqIsSound, IsSound}
 import swam.*
@@ -29,10 +30,10 @@ class BlockId(val b: FuncId | Block | Loop | (If, Boolean) | Global | Data | Ele
   override def equals(obj: Any): Boolean = obj match
     case that: BlockId => this.b match
       case _: FuncId => this.b == that.b
-      case _: Block | _: Loop | _: Global | _: Data | _: Elem => this.b eq that.b
       case (ifInst1: If, bool1) => that.b match
         case (ifInst2, bool2) => (ifInst1 eq ifInst2) && bool1 == bool2
         case _ => false
+      case _ => this.b eq that.b
     case _ => false
   override def hashCode(): Int = b.hashCode
 
@@ -60,7 +61,7 @@ class ModuleInstance:
   /** For each block, where does each contained instruction start. */
   var blockInstLocs: Map[(BlockId, Int), InstLoc] = Map.empty
 
-  lazy val cfgNodes = ControlFlow.allCfgNodes(this)
+  lazy val cfgNodes: Set[CfgNode] = ControlFlow.allCfgNodes(this)
   
   def registerBlockSizes(block: BlockId, loc: InstLoc, insts: Iterable[Inst]): InstLoc =
     var current = loc

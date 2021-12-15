@@ -19,7 +19,10 @@ import sturdy.effect.operandstack.DecidableOperandStack
 import sturdy.effect.symboltable.DecidableSymbolTable
 import sturdy.effect.symboltable.SymbolTable
 import sturdy.effect.symboltable.JoinedSymbolTable
+import sturdy.values.Combine
 import sturdy.values.Finite
+import sturdy.values.MaybeChanged
+import sturdy.values.Widening
 import sturdy.values.booleans.BooleanBranching
 import sturdy.values.exceptions.Exceptional
 import sturdy.values.convert.*
@@ -102,7 +105,6 @@ enum FixOut[V]:
 given finiteFixIn: Finite[FixIn] with {}
 
 
-
 trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJoin[_]]
   extends fix.Fixpoint[FixIn, FixOut[V]]:
 
@@ -132,19 +134,81 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   given EffectStack = effectStack
 
   // analysis state
+  enum InState:
+    case EnterFunState(vars: callFrame.Locals, mem: memory.State, globs: globals.State)
+    case InstructionState(ops: stack.OperandFrame, vars: callFrame.Locals, mem: memory.State, globs: globals.State)
+  enum OutState:
+    case ExitFunState(ops: stack.OperandFrame, mem: memory.State, globs: globals.State)
+    case InstructionState(ops: stack.OperandFrame, vars: callFrame.Locals, mem: memory.State, globs: globals.State)
+
+  given CombineInState[W <: Widening]
+    (using cOps: Combine[stack.OperandFrame, W], cVars: Combine[callFrame.Locals, W], cMem: Combine[memory.State, W], cGlobs: Combine[globals.State, W]):
+    Combine[InState, W] with
+    override def apply(v1: InState, v2: InState): MaybeChanged[InState] = (v1, v2) match
+      case (s1: InState.EnterFunState, s2: InState.EnterFunState) =>
+        val vars = cVars(s1.vars, s2.vars)
+        val mem = cMem(s1.mem, s2.mem)
+        val globs = cGlobs(s1.globs, s2.globs)
+        MaybeChanged(InState.EnterFunState(vars.get, mem.get, globs.get), vars.hasChanged || mem.hasChanged || globs.hasChanged)
+      case (s1: InState.InstructionState, s2: InState.InstructionState) =>
+        val ops = cOps(s1.ops, s2.ops)
+        val vars = cVars(s1.vars, s2.vars)
+        val mem = cMem(s1.mem, s2.mem)
+        val globs = cGlobs(s1.globs, s2.globs)
+        MaybeChanged(InState.InstructionState(ops.get, vars.get, mem.get, globs.get), ops.hasChanged || vars.hasChanged || mem.hasChanged || globs.hasChanged)
+      case _ => throw new IllegalArgumentException(s"Combine($v1, $v2)")
+  
+  given CombineOutState[W <: Widening]
+    (using cOps: Combine[stack.OperandFrame, W], cVars: Combine[callFrame.Locals, W], cMem: Combine[memory.State, W], cGlobs: Combine[globals.State, W]):
+    Combine[OutState, W] with
+    override def apply(v1: OutState, v2: OutState): MaybeChanged[OutState] = (v1, v2) match
+      case (s1: OutState.ExitFunState, s2: OutState.ExitFunState) =>
+        val ops = cOps(s1.ops, s2.ops)
+        val mem = cMem(s1.mem, s2.mem)
+        val globs = cGlobs(s1.globs, s2.globs)
+        MaybeChanged(OutState.ExitFunState(ops.get, mem.get, globs.get), ops.hasChanged || mem.hasChanged || globs.hasChanged)
+      case (s1: OutState.InstructionState, s2: OutState.InstructionState) =>
+        val ops = cOps(s1.ops, s2.ops)
+        val vars = cVars(s1.vars, s2.vars)
+        val mem = cMem(s1.mem, s2.mem)
+        val globs = cGlobs(s1.globs, s2.globs)
+        MaybeChanged(OutState.InstructionState(ops.get, vars.get, mem.get, globs.get), ops.hasChanged || vars.hasChanged || mem.hasChanged || globs.hasChanged)
+      case _ => throw new IllegalArgumentException(s"Combine($v1, $v2)")
+  
   type State = (stack.OperandFrame, memory.State, globals.State, callFrame.Locals)
-  implicit def analysisState: AnalysisState[State, State, State] = new AnalysisState {
-    override def getInState: State = (stack.getOperandFrame, memory.getState, globals.getState, callFrame.getLocals)
-    override def setInState(in: State): Unit =
-      val (frame, memState, globState, locals) = in
-      stack.setOperandFrame(frame)
-      memory.setState(memState)
-      globals.setState(globState)
-      callFrame.setLocals(locals)
-    override def getOutState: State = getInState
-    override def setOutState(out: State): Unit = setInState(out)
-    override def getAllState: State = getInState
-    override def setAllState(in: State): Unit = setInState(in)
+  implicit def analysisState: AnalysisState[FixIn, InState, OutState, State] = new AnalysisState {
+    override def getInState(dom: FixIn): InState = dom match
+      case _: FixIn.EnterWasmFunction => InState.EnterFunState(callFrame.getLocals, memory.getState, globals.getState)
+      case _: FixIn.Eval => InState.InstructionState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState)
+    override def setInState(in: InState): Unit = in match
+      case InState.EnterFunState(vars, mem, globs) =>
+        callFrame.setLocals(vars)
+        memory.setState(mem)
+        globals.setState(globs)
+      case InState.InstructionState(ops, vars, mem, globs) =>
+        stack.setOperandFrame(ops)
+        callFrame.setLocals(vars)
+        memory.setState(mem)
+        globals.setState(globs)
+    override def getOutState(dom: FixIn): OutState = dom match
+      case _: FixIn.EnterWasmFunction => OutState.ExitFunState(stack.getOperandFrame, memory.getState, globals.getState)
+      case _: FixIn.Eval => OutState.InstructionState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState)
+    override def setOutState(out: OutState): Unit = out match
+      case OutState.ExitFunState(ops, mem, globs) =>
+        stack.setOperandFrame(ops)
+        memory.setState(mem)
+        globals.setState(globs)
+      case OutState.InstructionState(ops, vars, mem, globs) =>
+        stack.setOperandFrame(ops)
+        callFrame.setLocals(vars)
+        memory.setState(mem)
+        globals.setState(globs)
+    override def getAllState: State = (stack.getOperandFrame, memory.getState, globals.getState, callFrame.getLocals)
+    override def setAllState(in: State): Unit =
+      stack.setOperandFrame(in._1)
+      memory.setState(in._2)
+      globals.setState(in._3)
+      callFrame.setLocals(in._4)
   }
 
   private given Failure = failure
@@ -268,18 +332,17 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     case Nop => // nothing
     case Unreachable => fail(UnreachableInstruction, inst.toString)
     case b@Block(bt, insts) =>
-      label(BlockId(b), returnArity(bt), insts, None)
+      label(BlockId(b), labelArities(bt, isLoop = false), insts, None)
     case l@Loop(bt, insts) =>
-      val pt = paramsArity(bt)
-      label(BlockId(l), pt, insts, Some((l, loc)))
+      label(BlockId(l), labelArities(bt, isLoop = true), insts, Some((l, loc)))
     case ifInst@If(bt, thnInsts, elsInsts) =>
       val isZero = num.evalNumeric(i32.Eqz)
-      val rt = returnArity(bt)
+      val ars = labelArities(bt, isLoop = false)
       branchOpsUnit.boolBranch(isZero) {
         // v == 0: else branch
-        label(BlockId(ifInst -> false), rt, elsInsts, None)
+        label(BlockId(ifInst -> false), ars, elsInsts, None)
       } {
-        label(BlockId(ifInst -> true), rt, thnInsts, None)
+        label(BlockId(ifInst -> true), ars, thnInsts, None)
       }
     case Br(labelIndex) =>
       branch(labelIndex)
@@ -312,16 +375,24 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
     val operands = stack.popNOrFail(returnArity)
     throws(WasmException.Jump(labelIndex, operands))
 
-  def label(block: BlockId, returnArity: Int, insts: Iterable[Inst], branchTarget: Option[(Inst, InstLoc)])(using Fixed): Unit =
-    stack.withNewFrame {
+  /** Arities used by a label. Results equals jumpOperands if branchTarget is None. */
+  case class LabelArities(params: Int, results: Int, jumpOperands: Int)
+
+  private inline def assertFrameSize(size: Int): Unit =
+    if (Debug.DEBUG_GENERIC_WASM_STACK && stack.frameSize != size)
+      throw new AssertionError(s"Expected stack frame of size $size, but current stack frame has size ${stack.frameSize}")
+
+  def label(block: BlockId, arities: LabelArities, insts: Iterable[Inst], branchTarget: Option[(Inst, InstLoc)])(using Fixed): Unit =
+    stack.withNewFrame(arities.params) {
       tryCatch {
-        labelStack.pushLabel(returnArity)
+        labelStack.pushLabel(arities.jumpOperands)
         try {
           val modInst = module
           for ((inst, ix) <- insts.zipWithIndex) {
             val loc = modInst.blockInstLocs((block, ix))
             eval(inst, loc)
           }
+          assertFrameSize(arities.results)
         } finally labelStack.popLabel()
       } { ex =>
         stack.clearCurrentOperandFrame()
@@ -329,12 +400,16 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
           case WasmException.Jump(labelIndex, operands) =>
             if (labelIndex == 0) {
               stack.pushN(operands)
+              assertFrameSize(arities.jumpOperands)
               for ((i,loc) <- branchTarget)
                 eval(i, loc)
+              assertFrameSize(arities.results)
             } else {
+              assertFrameSize(0)
               throws(WasmException.Jump(labelIndex - 1, operands))
             }
           case _: WasmException.Return[V] =>
+            assertFrameSize(0)
             throws(ex)
         }
       }
@@ -346,7 +421,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         val args = stack.popNOrFail(funcType.params.size)
         val frameData = FrameData(funcType.t.size, mod)
         val vars = args.view ++ func.locals.map(num.defaultValue)
-        labelStack.withNew(stack.withNewFrame(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap)) {
+        labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap)) {
           enterFunction(FuncId(mod, ix), func, funcType)
         }))
       case FunctionInstance.Host(hostFunc) =>
@@ -361,7 +436,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   def enterFunction_open(id: FuncId, func: Func, funcType: FuncType)(using Fixed): List[V] =
     val returnN = funcType.t.size
     tryCatch {
-      label(BlockId(id), returnN, func.body, None)
+      label(BlockId(id), LabelArities(0, returnN, returnN), func.body, None)
     } { ex =>
       stack.clearCurrentOperandFrame()
       ex match {
@@ -417,19 +492,17 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   }
 
 
-  private def returnArity(bt: BlockType): Int =
-    val returnArity = bt.arity(module.functionTypes)
-    if (returnArity < 0)
-      fail(UnboundFunctionType, bt.toString)
-    else
-      returnArity
-
-  private def paramsArity(bt: BlockType): Int =
-    bt.params(module.functionTypes) match
-      case Some(params) => params.size
-      case None => fail(UnboundFunctionType, bt.toString)
-
-
+  private def labelArities(bt: BlockType, isLoop: Boolean): LabelArities = bt match
+    case swam.BlockType.NoType => LabelArities(0, 0, 0)
+    case _: swam.BlockType.ValueType => LabelArities(0, 1, 0)
+    case swam.BlockType.FunctionType(tpe) =>
+      val ft = module.functionTypes(tpe)
+      val params = ft.params.size
+      val results = ft.t.size
+      if (isLoop)
+        LabelArities(params, results, params)
+      else
+        LabelArities(params, results, results)
 
 
 //  // placeholder for the (not yet present in swam) memory.init instruction
@@ -647,7 +720,7 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
           case FunctionInstance.Wasm(mod, ix, func, funcType) =>
             val frameData = FrameData(funcType.t.size, mod)
             val vars = func.locals.map(num.defaultValue)
-            labelStack.withNew(stack.withNewFrame(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap)) {
+            labelStack.withNew(stack.withNewFrame(0)(callFrame.withNew(frameData, vars.view.zipWithIndex.map(_.swap)) {
               enterFunction(FuncId(mod, ix), func, funcType)
             }))
           case _: FunctionInstance.Host => ??? // TODO: is it allowed to use host functions as start function?

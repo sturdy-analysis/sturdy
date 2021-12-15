@@ -8,7 +8,7 @@ import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.callframe.JoinedDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.operandstack.JoinedDecidableOperandStack
+import sturdy.effect.operandstack.{JoinedDecidableOperandStack, given}
 import sturdy.effect.symboltable.{JoinedSymbolTable, UpperBoundSymbolTable}
 import sturdy.fix
 import sturdy.fix.Combinator
@@ -73,6 +73,8 @@ object TypeAnalysis extends Interpreter, TypeValues, ControlFlow:
     override def jvV: WithJoin[Value] = implicitly
     override def jvFunV: WithJoin[FunV] = implicitly
     override def widenState: Widen[State] = implicitly
+    override def widenInState: Widen[InState] = implicitly
+    override def widenOutState: Widen[OutState] = implicitly
 
     val stack: JoinedDecidableOperandStack[Value] = new JoinedDecidableOperandStack
     val memory: TopMemory[MemoryAddr, Addr, Bytes, Size] = new TopMemory

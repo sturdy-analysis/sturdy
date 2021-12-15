@@ -9,7 +9,7 @@ import sturdy.effect.callframe.ConcreteCallFrame
 import sturdy.effect.callframe.JoinedDecidableCallFrame
 import sturdy.effect.except.JoinedExcept
 import sturdy.effect.failure.{*, given}
-import sturdy.effect.operandstack.JoinedDecidableOperandStack
+import sturdy.effect.operandstack.{JoinedDecidableOperandStack, given}
 import sturdy.effect.symboltable.{JoinedSymbolTable, ConstantSymbolTable}
 import sturdy.effect.symboltable.ConstantSymbolTable.CombineTable
 import sturdy.fix

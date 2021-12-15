@@ -3,6 +3,7 @@ package sturdy.effect.operandstack
 import sturdy.data.{CombineEquiList, NoJoin, JOptionC}
 import sturdy.values.*
 import sturdy.data.unit
+import ConcreteOperandStack.*
 
 class ConcreteOperandStack[V] extends DecidableOperandStack[V]:
   protected var stack: List[V] = Nil
@@ -32,6 +33,7 @@ class ConcreteOperandStack[V] extends DecidableOperandStack[V]:
       JOptionC.some(stack.take(n))
 
   override def size: Int = stack.size
+  override def frameSize: Int = stack.size - framePointer
   
   def withNewStack[A](f: => A): A =
     val snapshot = stack
@@ -43,25 +45,29 @@ class ConcreteOperandStack[V] extends DecidableOperandStack[V]:
       framePointer = snapshotFramePointer
     }
 
-  override def withNewFrame[A](f: => A): A =
+  override def withNewFrame[A](movedOps: Int)(f: => A): A =
     val snapshotframePointer = framePointer
-    framePointer = stack.size
+    framePointer = stack.size - movedOps
     try f finally
       framePointer = snapshotframePointer
 
   override def clearCurrentOperandFrame(): Unit =
     stack = stack.drop(stack.size - framePointer)
 
-  override type State = (List[V], Int)
-  override def getState: (List[V], Int) = (stack, framePointer)
-  override def setState(s: (List[V], Int)): Unit =
-    stack = s._1
-    framePointer = s._2
+  override type State = StackState[V]
+  override def getState: StackState[V] = StackState(stack, framePointer)
+  override def setState(s: StackState[V]): Unit =
+    stack = s.stack
+    framePointer = s.framePointer
 
-  override type OperandFrame = List[V]
-  override def getOperandFrame: List[V] =
-    val f = stack.take(stack.size - framePointer)
-    f
-  override def setOperandFrame(s: List[V]): Unit =
-    this.stack = s ++ stack.drop(stack.size - framePointer)
+  override type OperandFrame = StackFrameState[V]
+  override def getOperandFrame: StackFrameState[V] =
+    val vs = stack.take(stack.size - framePointer)
+    StackFrameState(vs)
+  override def setOperandFrame(s: StackFrameState[V]): Unit =
+    clearCurrentOperandFrame()
+    this.stack = s.frame ++ this.stack
 
+object ConcreteOperandStack:
+  case class StackState[V](stack: List[V], framePointer: Int)
+  case class StackFrameState[V](frame: List[V])

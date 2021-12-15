@@ -15,13 +15,13 @@ import scala.util.Try
 
 def innermost[Dom, Codom, In, Out, All, Ctx]
   (using context: Contextual[Ctx, Dom, Codom])
-  (using state: AnalysisState[In, Out, All])
+  (using state: AnalysisState[Dom, In, Out, All])
   (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   : Innermost[Dom, Codom, In, Out, All, Ctx] = new Innermost(state, context)
 
 final class Innermost[Dom, Codom, In, Out, All, Ctx]
-  (state: AnalysisState[In, Out, All], context: Contextual[Ctx, Dom, Codom])
+  (state: AnalysisState[Dom, In, Out, All], context: Contextual[Ctx, Dom, Codom])
   (using Widen[Codom], Widen[In], Widen[Out], EffectStack)
   (using Finite[Dom], Finite[Ctx])
   extends Combinator[Dom, Codom]:
@@ -31,7 +31,7 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
   /** Runs `f` until a fixed point is reached. */
   override def apply(f: Dom => Codom): Dom => Codom =
     def apply_(dom: Dom): Codom =
-      stack.repeatUntilStable(() => step(f, dom)).getOrThrow
+      stack.repeatUntilStable(dom)(() => step(f, dom)).getOrThrow
     apply_
 
   /** Runs `f` by pushing and popping a frame to the stack and handling recurrent behavior.
@@ -39,7 +39,7 @@ final class Innermost[Dom, Codom, In, Out, All, Ctx]
    *  @return the result of running `f` and a flag that indicates if `f` is looping and needs iterating.
    */
   private def step(f: Dom => Codom, dom: Dom): (TrySturdy[Codom], Boolean) =
-    val inState = state.getInState
+    val inState = state.getInState(dom)
     stack.push(dom, inState) match
       case Some(result) =>
         (result, false)

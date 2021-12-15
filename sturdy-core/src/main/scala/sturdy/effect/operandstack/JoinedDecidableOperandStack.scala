@@ -4,7 +4,10 @@ import sturdy.seqIsSound
 import sturdy.effect.ComputationJoiner
 import sturdy.effect.TrySturdy
 import sturdy.{Soundness, IsSound}
-import sturdy.values.Join
+import sturdy.values.{Combine, Join}
+import sturdy.values.Widening
+import ConcreteOperandStack.*
+import sturdy.values.MaybeChanged
 
 /** Stacks of different execution branches are joined. */
 class JoinedDecidableOperandStack[V](using Join[V]) extends ConcreteOperandStack[V]:
@@ -20,35 +23,37 @@ class JoinedDecidableOperandStack[V](using Join[V]) extends ConcreteOperandStack
 
     override def retainNone(): Unit =
       stack = snapshot
+      // clearCurrentOperandFrame()
 
     override def retainFirst(fRes: TrySturdy[A]): Unit =
       if (fRes.isSuccess)
         stack = fStack
       else
-        stack = snapshot
+        retainNone()
 
     override def retainSecond(gRes: TrySturdy[A]): Unit =
       if (!gRes.isSuccess)
-        stack = snapshot
+        retainNone()
 
     override def retainBoth(fRes: TrySturdy[A], gRes: TrySturdy[A]): Unit =
-      if (gRes.isSuccess) {
-        if (fRes.isSuccess)
-          stack = joinWith(fStack)
-        // else nothing
-      } else if (fRes.isSuccess) {
+      if (fRes.isSuccess && gRes.isSuccess)
+        stack = joinWith(fStack)
+      else if (fRes.isSuccess)
         stack = fStack
-      } else {
-        stack = snapshot
-      }
+      else if (gRes.isSuccess) {
+        // nothing
+      } else
+        retainNone()
   }
 
   private def joinWith(other: List[V]): List[V] =
-    if (stack.size != other.size)
-      throw new IllegalStateException()
     val (frame, rest) = stack.splitAt(stack.size - framePointer)
     val otherFrame = other.take(stack.size - framePointer)
-    val joinedFrame = frame.zip(otherFrame).map(Join[V](_, _).get)
+    val joinedFrame = frame.zipAll[V,V](otherFrame, null.asInstanceOf[V], null.asInstanceOf[V]).map {
+      case (v1, null) => v1
+      case (null, v2) => v2
+      case (v1, v2) => Join(v1, v2).get
+    }
     joinedFrame ++ rest
 
 
@@ -60,5 +65,17 @@ class JoinedDecidableOperandStack[V](using Join[V]) extends ConcreteOperandStack
     else
       IsSound.Sound
 
-object JoinedDecidableOperandStack:
-  type Operands[V] = List[V]
+given CombineStackFrameState[V, W <: Widening](using Combine[V, W]): Combine[StackFrameState[V], W] with
+  override def apply(ops1: StackFrameState[V], ops2: StackFrameState[V]): MaybeChanged[StackFrameState[V]] =
+    var hasChanged = false
+    val joinedFrame = ops1.frame.zipAll[V,V](ops2.frame, null.asInstanceOf[V], null.asInstanceOf[V]).map {
+      case (v1, null) => v1
+      case (null, v2) => v2
+      case (v1, v2) =>
+        val v = Combine(v1, v2)
+        hasChanged |= v.hasChanged
+        v.get
+    }
+    MaybeChanged(StackFrameState(joinedFrame), hasChanged)
+
+

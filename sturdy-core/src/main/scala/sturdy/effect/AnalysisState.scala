@@ -2,11 +2,11 @@ package sturdy.effect
 
 import sturdy.fix.Fixpoint
 
-trait AnalysisState[In, Out, All]:
-  def getInState: In
+trait AnalysisState[Dom, In, Out, All]:
+  def getInState(dom: Dom): In
   def setInState(in: In): Unit
 
-  def getOutState: Out
+  def getOutState(dom: Dom): Out
   def setOutState(out: Out): Unit
 
   def getAllState: All
