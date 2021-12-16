@@ -181,12 +181,12 @@ trait GenericInterpreter[V, J[_] <: MayJoin[_]]
   // analysis state (required by fixpoint algorithms)
   // the store is the only effect component with state relevant to the fixpoint algorithm (failures are just collected)
   type State = store.State
-  implicit def analyisState: AnalysisState[State,State,State] = new AnalysisState[State, State, State] {
-    override def getInState: State = store.getState
+  implicit def analyisState: AnalysisState[FixIn, State,State,State] = new AnalysisState {
+    override def getInState(dom: FixIn): State = store.getState
     override def setInState(in: State): Unit = store.setState(in)
-    override def getOutState: State = getInState
+    override def getOutState(dom: FixIn): State = store.getState
     override def setOutState(out: State): Unit = setInState(out)
-    override def getAllState: State = getInState
+    override def getAllState: State = store.getState
     override def setAllState(all: State): Unit = setInState(all)
   }
   
