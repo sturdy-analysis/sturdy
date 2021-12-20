@@ -136,9 +136,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   // analysis state
   enum InState:
     case EnterFunState(vars: callFrame.Locals, mem: memory.State, globs: globals.State)
+    case EnterLoopState(ops: stack.OperandFrame, vars: callFrame.Locals, mem: memory.State, globs: globals.State)
     case InstructionState(ops: stack.OperandFrame, vars: callFrame.Locals, mem: memory.State, globs: globals.State)
   enum OutState:
     case ExitFunState(ops: stack.OperandFrame, mem: memory.State, globs: globals.State)
+    case ExitLoopState(ops: stack.OperandFrame)
     case InstructionState(ops: stack.OperandFrame, vars: callFrame.Locals, mem: memory.State, globs: globals.State)
 
   given CombineInState[W <: Widening]
@@ -150,6 +152,12 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         val mem = cMem(s1.mem, s2.mem)
         val globs = cGlobs(s1.globs, s2.globs)
         MaybeChanged(InState.EnterFunState(vars.get, mem.get, globs.get), vars.hasChanged || mem.hasChanged || globs.hasChanged)
+      case (s1: InState.EnterLoopState, s2: InState.EnterLoopState) =>
+        val ops = cOps(s1.ops, s2.ops)
+        val vars = cVars(s1.vars, s2.vars)
+        val mem = cMem(s1.mem, s2.mem)
+        val globs = cGlobs(s1.globs, s2.globs)
+        MaybeChanged(InState.EnterLoopState(ops.get, vars.get, mem.get, globs.get), ops.hasChanged || vars.hasChanged || mem.hasChanged || globs.hasChanged)
       case (s1: InState.InstructionState, s2: InState.InstructionState) =>
         val ops = cOps(s1.ops, s2.ops)
         val vars = cVars(s1.vars, s2.vars)
@@ -167,6 +175,9 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         val mem = cMem(s1.mem, s2.mem)
         val globs = cGlobs(s1.globs, s2.globs)
         MaybeChanged(OutState.ExitFunState(ops.get, mem.get, globs.get), ops.hasChanged || mem.hasChanged || globs.hasChanged)
+      case (s1: OutState.ExitLoopState, s2: OutState.ExitLoopState) =>
+        val ops = cOps(s1.ops, s2.ops)
+        MaybeChanged(OutState.ExitLoopState(ops.get), ops.hasChanged)
       case (s1: OutState.InstructionState, s2: OutState.InstructionState) =>
         val ops = cOps(s1.ops, s2.ops)
         val vars = cVars(s1.vars, s2.vars)
@@ -179,9 +190,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
   implicit def analysisState: AnalysisState[FixIn, InState, OutState, State] = new AnalysisState {
     override def getInState(dom: FixIn): InState = dom match
       case _: FixIn.EnterWasmFunction => InState.EnterFunState(callFrame.getLocals, memory.getState, globals.getState)
+      case FixIn.Eval(_: Loop, _) => InState.EnterLoopState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState)
       case _: FixIn.Eval => InState.InstructionState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState)
     override def setInState(in: InState): Unit = in match
       case InState.EnterFunState(vars, mem, globs) =>
+        callFrame.setLocals(vars)
+        memory.setState(mem)
+        globals.setState(globs)
+      case InState.EnterLoopState(ops, vars, mem, globs) =>
+        stack.setOperandFrame(ops)
         callFrame.setLocals(vars)
         memory.setState(mem)
         globals.setState(globs)
@@ -192,12 +209,15 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
         globals.setState(globs)
     override def getOutState(dom: FixIn): OutState = dom match
       case _: FixIn.EnterWasmFunction => OutState.ExitFunState(stack.getOperandFrame, memory.getState, globals.getState)
+      case FixIn.Eval(_: Loop, _) => OutState.ExitLoopState(stack.getOperandFrame)
       case _: FixIn.Eval => OutState.InstructionState(stack.getOperandFrame, callFrame.getLocals, memory.getState, globals.getState)
     override def setOutState(out: OutState): Unit = out match
       case OutState.ExitFunState(ops, mem, globs) =>
         stack.setOperandFrame(ops)
         memory.setState(mem)
         globals.setState(globs)
+      case OutState.ExitLoopState(ops) =>
+        stack.setOperandFrame(ops)
       case OutState.InstructionState(ops, vars, mem, globs) =>
         stack.setOperandFrame(ops)
         callFrame.setLocals(vars)
