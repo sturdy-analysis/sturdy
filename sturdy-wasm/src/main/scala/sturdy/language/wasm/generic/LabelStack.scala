@@ -5,7 +5,6 @@ import swam.LabelIdx
 import scala.collection.mutable.ArrayBuffer
 
 class LabelStack:
-  private var size: Int = 0
   private var labelReturnArities: ArrayBuffer[Int] = ArrayBuffer()
 
   def lookupReturnArity(lableIndex: LabelIdx): Int =
@@ -16,6 +15,8 @@ class LabelStack:
 
   def popLabel(): Int =
     labelReturnArities.remove(labelReturnArities.size - 1)
+
+  def size: Int = labelReturnArities.size
   
   def withNew[A](f: => A): A =
     val snapshot = labelReturnArities
