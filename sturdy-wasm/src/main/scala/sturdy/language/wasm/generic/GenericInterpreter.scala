@@ -514,7 +514,11 @@ trait GenericInterpreter[V, Addr, Bytes, Size, ExcV, FuncIx, FunV, J[_] <: MayJo
 
   private def labelArities(bt: BlockType, isLoop: Boolean): LabelArities = bt match
     case swam.BlockType.NoType => LabelArities(0, 0, 0)
-    case _: swam.BlockType.ValueType => LabelArities(0, 1, 0)
+    case _: swam.BlockType.ValueType =>
+      if (isLoop)
+        LabelArities(0, 1, 0)
+      else
+        LabelArities(0, 1, 1)
     case swam.BlockType.FunctionType(tpe) =>
       val ft = module.functionTypes(tpe)
       val params = ft.params.size
