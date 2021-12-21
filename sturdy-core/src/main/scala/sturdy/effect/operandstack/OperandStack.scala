@@ -64,6 +64,24 @@ trait OperandStack[V, J[_] <: MayJoin[_]] extends OperandStack.Effectful:
   inline def peekNOrFail(n: Int)(using J[List[V]], Failure): List[V] =
     peekN(n).getOrElse(Failure(StackUnderflow, s"peekN($n) on stack with less than $n elements"))
 
+  inline def popOrAbort()(using J[V]): V =
+    pop().getOrElse(throw new IllegalStateException("pop on empty stack"))
+
+  inline def peekOrAbort()(using J[V]): V =
+    peek().getOrElse(throw new IllegalStateException("peek on empty stack"))
+
+  inline def pop2OrAbort()(using J[V]): (V,V) =
+    val v2 = popOrAbort()
+    val v1 = popOrAbort()
+    (v1, v2)
+
+  inline def popNOrAbort(n: Int)(using J[List[V]]): List[V] =
+    popN(n).getOrElse(throw new IllegalStateException(s"popN($n) on stack with less than $n elements"))
+
+  inline def peekNOrAbort(n: Int)(using J[List[V]]): List[V] =
+    peekN(n).getOrElse(throw new IllegalStateException(s"peekN($n) on stack with less than $n elements"))
+
+
 trait DecidableOperandStack[V] extends OperandStack[V, NoJoin]:
   def size: Int
   def frameSize: Int
