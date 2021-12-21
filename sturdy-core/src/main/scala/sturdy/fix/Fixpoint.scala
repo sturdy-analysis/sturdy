@@ -60,4 +60,5 @@ trait Concrete[Dom, Codom] extends ContextInsensitive[Dom, Codom]:
 
 object Fixpoint:
   var DEBUG: Boolean = System.getProperty("STURDY_DEBUG_FIXPOINT", "true").toBoolean
-  val DEBUG_CACHE_CHANGES = System.getProperty("STURDY_DEBUG_CACHE_CHANGES", "false").toBoolean
+  val DEBUG_INVARIANTS = System.getProperty("STURDY_DEBUG_INVARIANTS", "false").toBoolean
+  
