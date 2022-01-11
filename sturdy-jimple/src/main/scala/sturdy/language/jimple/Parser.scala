@@ -203,8 +203,8 @@ object Parser:
     return ret
 
   val constants: P[Constant] =
-    int.backtrack.map(Constant.IntC.apply) |
-      double.backtrack.map(Constant.DoubleC.apply) | //TODO: Int is cast as double if double comes first
+    (int <* P.not(P.char('.').peek)).backtrack.map(Constant.IntC.apply) |
+      double.map(Constant.DoubleC.apply) |
       long.backtrack.map(Constant.LongC.apply) |
       float.backtrack.map(Constant.FloatC.apply) |
       string.map(Constant.StringC.apply) |
@@ -236,7 +236,7 @@ object Parser:
 
   val immediates: P[Immediate] =
     constants.map(Immediate.ConstI.apply) |
-      (identifier | generatedIdentifier).map(s => Immediate.LocalI(Local(s)))
+      (identifier | generatedIdentifier).map(s => Immediate.LocalI(Local(s))).backtrack
 
   val localDeclarations: P[Seq[LocalDec]] =
     ((types ~ (identifier | generatedIdentifier ) ~ ((op(',') *> (identifier | generatedIdentifier )).rep0)) <* semi)
@@ -335,9 +335,9 @@ object Parser:
 
   val rValues: P[RVal] =
     (immediates ~ inBrackets(immediates)).backtrack.map((i1,i2) => RVal.ArrayRefR(i1,i2)) |
-      constants.map(RVal.ConstR.apply) |
+      constants.backtrack.map(RVal.ConstR.apply) |
       expressions.map(e => RVal.ExpressionR(e)) |
-      ((immediates <* op(".")) ~ inBrackets(fieldSignatures)).map((i,f) => RVal.InstanceFieldRefR(i,f)) |
+      ((immediates <* op(".")) ~ inBrackets(fieldSignatures)).backtrack.map((i,f) => RVal.InstanceFieldRefR(i,f)) |
       inDiamonds(fieldSignatures).map(RVal.StaticFieldRefR.apply) |
       identifier.map(i => RVal.LocalR(Local(i)))
 

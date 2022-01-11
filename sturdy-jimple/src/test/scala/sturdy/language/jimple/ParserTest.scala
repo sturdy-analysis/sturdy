@@ -27,8 +27,6 @@ class ParserTest extends AnyFlatSpec, Matchers:
     compareFile.close()
 
     val tree = parse(sourceCode)
-    println(compareAST+"\n")
-    println(tree)
     assert(tree.toString.equals(compareAST))
   }
 
@@ -39,6 +37,7 @@ class ParserTest extends AnyFlatSpec, Matchers:
       val sourceCode = file.getLines().mkString("\n")
       file.close()
       val tree = parse(sourceCode)
+      println(tree)
       assert(tree.isRight)
     }
   }
