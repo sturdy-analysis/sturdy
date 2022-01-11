@@ -105,7 +105,7 @@ enum Exp extends Labeled:
     case CastE(t, i) => s"CastE($t, $i)@${this.label}"
     case InstanceOfE(i, ref) => s"InstanceOfE($i, $ref)@${this.label}"
     case StaticInvokeE(s, l) => s"StaticInvokeE($s, $l)@${this.label}"
-    case InvokeE(t, i, s, l) => s"InvokeE($t, $i, $i, $l)@${this.label}"
+    case InvokeE(t, i, s, l) => s"InvokeE($t, $i, $s, $l)@${this.label}"
     case NewArrayE(t, i) => s"NewArrayE($t, $i)@${this.label}"
     case NewE(t) => s"NewE($t)@${this.label}"
     case NewMultArrE(t, dim, edim) => s"NewMultArrayE($t, $dim, $edim)@${this.label}"
@@ -163,7 +163,7 @@ enum CondOp:
 enum UnOp:
   case Length(i: Immediate)
   case Neg(i: Immediate)
-  
+
   override def toString: String = this match
     case Length(i) => s"Length($i)"
     case Neg(i) => s"Neg($i)"
@@ -172,7 +172,7 @@ enum InvokeType:
   case InterfaceI
   case SpecialI
   case VirtualI
-  
+
   override def toString: String = this match
     case InterfaceI => s"InterfaceI"
     case SpecialI => s"SpecialI"
@@ -185,7 +185,7 @@ enum Constant:
   case LongC(v: Long)
   case StringC(v: String)
   case NullC()
-  
+
   override def toString: String = this match
     case DoubleC(v) => s"DoubleC($v)"
     case FloatC(v) => s"FloatC($v)"
@@ -199,7 +199,7 @@ enum IdentityVal:
   case CaughtExcRef()
   case ParamRef(c: Constant.IntC, t: Type)
   case ThisRef(t: Type)
-  
+
   override def toString: String = this match
     case CaughtExcRef() => s"CaughtExcRef()"
     case ParamRef(c, t) => s"ParamRef($c, $t)"
@@ -213,13 +213,13 @@ enum Type:
   case RefT(s: String)
   //case StmtAddressT()
   case VoidT()
-  
+
   override def toString: String = this match
     case IntT() => s"IntT()"
     case LongT() => s"LongT()"
     case FloatT() => s"FloatT()"
     case DoubleT() => s"DoubleT()"
-    case RefT(s) => s"IntT($s)"
+    case RefT(s) => s"RefT($s)"
    // case StmtAddressT() => s"StmtAddressT()"
     case VoidT() => s"VoidT()"
 
@@ -230,6 +230,8 @@ case class LocalDec(t: Type, name: Identifier)
 case class Case(i: Constant.IntC, l: Label)
 
 case class MethodSignature(id: Identifier, params: Seq[Type], ret: Type, classOrigin: String)
+//  override def toString: String = this match
+//    case MethodSignature(id, params, ret, classOrigin) => s"MethodSignature($id, $params, $ret, $classOrigin)"
 
 case class FieldSignature(id: Identifier, t: Type, classOrigin: String)
 
@@ -238,6 +240,8 @@ case class ExceptionRange(ref: Type.RefT, start: Label, end: Label, catchBlock: 
 case class Method(header: MethodHeader, locals: Seq[LocalDec], idStmts: Seq[Stmt.IdentityS], stmts: Seq[Stmt], excRanges: Seq[ExceptionRange])
 
 case class MethodHeader(isPublic: Boolean, isPrivate: Boolean, isStatic: Boolean, ret: Type, id: Identifier, params: Seq[Type])
+
+
 case class Class(id: Identifier, extend: Option[Type.RefT], implement: Seq[Type.RefT], methods: Seq[Method])//, globals: ???)
 
 case class Program(funs: Seq[String]):

@@ -57,8 +57,8 @@ object Parser:
     val KCLASS = "class"
     val KEXTENDS = "extends"
     val KIMPLEMENTS = "implements"
-//    val KPUBLIC = "public"
-//    val KPRIVATE = "private"
+    val KPUBLIC = "public"
+    val KPRIVATE = "private"
     val KSTATIC = "static"
   }
 
@@ -108,8 +108,8 @@ object Parser:
     KCLASS,
     KEXTENDS,
     KIMPLEMENTS,
-//    KPUBLIC,
-//    KPRIVATE,
+    KPUBLIC,
+    KPRIVATE,
     KSTATIC
   )
 
@@ -170,9 +170,9 @@ object Parser:
     spaced(P.string("\"") *> P.charsWhile0(c => c!= '\"') <* P.string("\""))
 
   val className: P[String] =
-    (spaced(P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).rep ~
+    (P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).rep ~
       (P.char('.') ~ P.charIn(('a' to 'z') ++ ('A' to 'Z') ++ ('0' to '9')).rep)
-        .rep0)).string.backtrack
+        .rep0).string.backtrack
 
   val semi: P[Unit] =
     op(';').void
@@ -216,7 +216,7 @@ object Parser:
       keyword(KFLOAT).map(_ => Type.FloatT()) |
       keyword(KDOUBLE).map(_ => Type.DoubleT()) |
       keyword(KVOID).map(_ => Type.VoidT()) |
-      (className ~ op("[]").?).map{
+      (spaced(className) ~ op("[]").?).map{
         case (s, None) => Type.RefT(s)
         case (s, Some(x)) => Type.RefT(s+x)
       }
@@ -374,11 +374,11 @@ object Parser:
       (id <* op(':')).map((l) => Stmt.LabelS(l))
 
   val methodheaders: P[MethodHeader] =
-    ((op("public") | op("private") ) ~ keyword(KSTATIC).? //TODO: No public or private!
+    (((op("public") | op("private") | P.anyChar.peek) ~ keyword(KSTATIC).?).with1
       ~ types ~ (identifier | inDiamonds(identifier)) ~ inParens(types.rep0))
       .map{
-        //case ((((isP: Unit, None), ret), id), params) => MethodHeader(false, false, false, ret, id, params)
-        //case ((((isP: Unit, Some(x)), ret), id), params) => MethodHeader(false, false, true, ret, id, params)
+        case ((((isP: Unit, None), ret), id), params) => MethodHeader(false, false, false, ret, id, params)
+        case ((((isP: Unit, Some(x)), ret), id), params) => MethodHeader(false, false, true, ret, id, params)
         case ((((isP: String, None), ret), id), params) => MethodHeader(isPublic(isP), !isPublic(isP), false, ret, id, params)
         case ((((isP: String, Some(x)), ret), id), params) => MethodHeader(isPublic(isP), !isPublic(isP), true, ret, id, params)
         case _ => throw new IllegalArgumentException
