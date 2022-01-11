@@ -15,15 +15,30 @@ import scala.jdk.StreamConverters.*
 class ParserTest extends AnyFlatSpec, Matchers:
   behavior of "Jimple parser"
 
-  val uri = classOf[ParserTest].getResource("/sturdy/language/jimple").toURI();
+  val uri = classOf[ParserTest].getResource("/sturdy/language/jimple").toURI;
+
+  it must s"Test.jimple must parse into Test.ast.txt" in{
+    val file = Source.fromURI(classOf[ParserTest].getResource("/sturdy/language/jimple/Test.jimple").toURI)
+    val sourceCode = file.getLines().mkString("\n")
+    file.close()
+
+    val compareFile = Source.fromURI(classOf[ParserTest].getResource("/sturdy/language/jimple/Test.ast.txt").toURI)
+    val compareAST = compareFile.getLines().mkString("\n")
+    compareFile.close()
+
+    val tree = parse(sourceCode)
+    println(compareAST+"\n")
+    println(tree)
+    assert(tree.toString.equals(compareAST))
+  }
 
   Files.list(Paths.get(uri)).toScala(List).filter(p => p.toString.endsWith(".jimple")).sorted.foreach { p =>
+
     it must s"execute ${p.getFileName}" in {
       val file = Source.fromURI(p.toUri)
       val sourceCode = file.getLines().mkString("\n")
       file.close()
       val tree = parse(sourceCode)
-      println(tree)
       assert(tree.isRight)
     }
   }
