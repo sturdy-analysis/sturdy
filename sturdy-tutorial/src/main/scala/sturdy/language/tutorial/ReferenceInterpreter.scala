@@ -54,9 +54,10 @@ class ReferenceInterpreter:
         els.map(evalStm).getOrElse(())
     case w@While(cond,body) =>
       val condVal = evalExp(cond)
-      if (condVal != 0)
+      if (condVal != 0) {
         evalStm(body)
         evalStm(w)
+      }
     case Block(body) => body.foreach(evalStm)
 
   /** 
